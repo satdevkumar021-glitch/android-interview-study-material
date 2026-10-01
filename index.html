@@ -3,1133 +3,1022 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Android Interview Prep — Complete Study Guide</title>
+<title>Android Interview Prep — Senior Developer Study Hub</title>
 <meta name="description" content="Complete Android Senior Developer Interview Preparation — 90 topics, Kotlin, Coroutines, Compose, Architecture, Testing, System Design"/>
-<meta name="theme-color" content="#0f1117"/>
+<meta name="theme-color" content="#0a0c13"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <style>
-/* ══════════════════════════════════════════════════
-   DESIGN TOKENS
-══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Study-optimised dark theme
+   Research-backed: dark bg reduces eye strain for long sessions,
+   high-contrast accents aid information hierarchy,
+   generous whitespace supports working memory retention
+═══════════════════════════════════════════════════════════ */
 :root {
-  --bg:       #0a0c13;
-  --bg2:      #0f1117;
-  --surface:  #151821;
-  --surface2: #1a1d2a;
-  --border:   #252840;
-  --accent:   #7c6af7;
-  --accent-g: linear-gradient(135deg,#7c6af7,#a78bfa);
-  --teal:     #38d9b4;
-  --orange:   #f0a04b;
-  --red:      #f06b6b;
-  --text:     #e4e6f1;
-  --muted:    #7a7e9a;
-  --tier1:    #f06b6b;
-  --tier2:    #38d9b4;
-  --tier3:    #f0a04b;
-  --sidebar-w: 300px;
-  --header-h: 60px;
-  --radius:   12px;
-  --shadow:   0 4px 24px rgba(0,0,0,.45);
+  /* Colors */
+  --bg:        #070910;
+  --bg2:       #0c0e16;
+  --bg3:       #0f1117;
+  --surface:   #13161f;
+  --surface2:  #191c28;
+  --surface3:  #1f2232;
+  --border:    #252840;
+  --border2:   #2e3250;
+
+  /* Text */
+  --text:      #eaecf4;
+  --text2:     #c4c8de;
+  --muted:     #7880a0;
+  --muted2:    #525870;
+
+  /* Brand */
+  --accent:    #7c6af7;
+  --accent2:   #a78bfa;
+  --accent-d:  #5a4ad4;
+
+  /* Status */
+  --green:     #3ecf8e;
+  --green-d:   #2a9e6c;
+  --orange:    #f59e0b;
+  --red:       #f87171;
+  --blue:      #60a5fa;
+
+  /* Tier */
+  --t1: #f87171;
+  --t2: #3ecf8e;
+  --t3: #f59e0b;
+
+  /* Gradients */
+  --grad-accent: linear-gradient(135deg, #7c6af7 0%, #a78bfa 100%);
+  --grad-green:  linear-gradient(135deg, #3ecf8e 0%, #06b6d4 100%);
+  --grad-warm:   linear-gradient(135deg, #f59e0b 0%, #f87171 100%);
+  --grad-card:   linear-gradient(145deg, #13161f 0%, #191c28 100%);
+
+  /* Spacing */
+  --sidebar: 280px;
+  --topbar:  58px;
+  --radius:  14px;
+  --radius-sm: 8px;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 8px rgba(0,0,0,.3);
+  --shadow:     0 4px 24px rgba(0,0,0,.5);
+  --shadow-lg:  0 12px 48px rgba(0,0,0,.7);
+
+  /* Typography */
+  --font: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Cascadia Code', monospace;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; font-size: 15px; }
 body {
+  font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   overflow-x: hidden;
 }
 a { color: inherit; text-decoration: none; }
-button { cursor: pointer; font-family: inherit; }
+button { font-family: var(--font); cursor: pointer; }
+img { max-width: 100%; }
 
-/* ══════════════════════════════════════════════════
-   SCROLLBAR
-══════════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 6px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* ══════════════════════════════════════════════════
-   TOP HEADER
-══════════════════════════════════════════════════ */
-#header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  height: var(--header-h);
-  background: rgba(10,12,19,.92);
-  backdrop-filter: blur(16px);
+/* Selection */
+::selection { background: rgba(124,106,247,.3); color: var(--text); }
+
+/* ─── TOP HEADER ──────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar);
+  background: rgba(7,9,16,.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 16px;
-  padding: 0 20px;
+  display: flex; align-items: center; gap: 0;
+  z-index: 500;
+  box-shadow: 0 1px 0 rgba(124,106,247,.08);
 }
-#menu-toggle {
-  background: none; border: none;
-  color: var(--muted); font-size: 22px;
-  padding: 6px; border-radius: 8px;
-  transition: color .2s;
-  display: none;
-}
-#menu-toggle:hover { color: var(--accent); }
-.header-brand {
+.tb-brand {
   display: flex; align-items: center; gap: 10px;
-  font-weight: 700; font-size: 16px;
-  background: var(--accent-g);
+  padding: 0 20px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.tb-brand .logo { font-size: 22px; }
+.tb-brand .name {
+  font-size: 15px; font-weight: 800; letter-spacing: -.3px;
+  background: var(--grad-accent);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  white-space: nowrap;
 }
-.header-brand .icon { font-size: 22px; -webkit-text-fill-color: initial; }
-#search-wrap {
-  flex: 1; max-width: 400px; position: relative;
+.tb-search-wrap {
+  flex: 1; max-width: 420px; position: relative; margin: 0 16px;
 }
-#search-input {
-  width: 100%; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 24px;
-  padding: 8px 16px 8px 40px;
-  color: var(--text); font-size: 14px;
-  outline: none; transition: border-color .2s;
+.tb-search {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 9px 16px 9px 40px;
+  font-size: 13px; font-family: var(--font);
+  color: var(--text); outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-#search-input:focus { border-color: var(--accent); }
-#search-input::placeholder { color: var(--muted); }
-.search-icon {
+.tb-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,106,247,.15);
+}
+.tb-search::placeholder { color: var(--muted); }
+.search-icon-wrap {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: var(--muted); font-size: 15px; pointer-events: none;
+  color: var(--muted); font-size: 14px; pointer-events: none;
 }
-#search-results {
+.search-dropdown {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow);
-  max-height: 360px; overflow-y: auto; display: none; z-index: 200;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  max-height: 380px; overflow-y: auto; display: none; z-index: 600;
 }
-#search-results.show { display: block; }
-.search-item {
-  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-  cursor: pointer; transition: background .15s; border-bottom: 1px solid var(--border);
+.search-dropdown.open { display: block; }
+.sd-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
 }
-.search-item:last-child { border-bottom: none; }
-.search-item:hover { background: rgba(124,106,247,.12); }
-.search-item .s-id {
-  font-size: 11px; font-weight: 700; color: var(--accent);
-  background: rgba(124,106,247,.15); border-radius: 6px;
-  padding: 2px 7px; flex-shrink: 0;
+.sd-item:last-child { border-bottom: none; }
+.sd-item:hover { background: rgba(124,106,247,.1); }
+.sd-id {
+  font-size: 10px; font-weight: 800; padding: 2px 7px;
+  border-radius: 5px; background: rgba(124,106,247,.15);
+  color: var(--accent); flex-shrink: 0;
+  font-family: var(--mono);
 }
-.search-item .s-name { font-size: 13px; }
-.search-item .s-tags { font-size: 11px; color: var(--muted); }
-.header-stats {
-  display: flex; align-items: center; gap: 12px; margin-left: auto;
+.sd-name { font-size: 13px; font-weight: 500; }
+.sd-tags { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.tb-right {
+  margin-left: auto; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
 }
-.stat-pill {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 4px 12px;
-  font-size: 12px; font-weight: 600;
-  display: flex; align-items: center; gap: 5px;
+.tb-stat {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; font-weight: 600; color: var(--text2);
   white-space: nowrap;
 }
-.stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
-.dot-green { background: var(--teal); }
-.dot-accent { background: var(--accent); }
+.tb-stat .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-purple { background: var(--accent); }
+#tb-pct-bar {
+  width: 60px; height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden;
+}
+#tb-pct-fill { height: 100%; background: var(--grad-accent); border-radius: 2px; transition: width .5s; }
 
-/* ══════════════════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════════════════ */
-#layout {
+/* ─── LAYOUT ──────────────────────────────────────────────── */
+.layout {
   display: flex;
-  padding-top: var(--header-h);
+  padding-top: var(--topbar);
   min-height: 100vh;
 }
 
-/* ══════════════════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════════════════ */
-#sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
+/* ─── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar);
+  flex-shrink: 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  position: fixed; top: var(--header-h); bottom: 0; left: 0;
+  position: sticky; top: var(--topbar);
+  height: calc(100vh - var(--topbar));
   overflow-y: auto; overflow-x: hidden;
-  z-index: 50;
-  transition: transform .3s ease;
 }
-.sidebar-top {
-  padding: 16px 16px 8px;
+.sb-header {
+  padding: 16px 16px 10px;
   border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--surface); z-index: 10;
 }
-.sidebar-filter {
-  display: flex; gap: 6px; flex-wrap: wrap;
+.sb-progress {
+  height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin-bottom: 8px;
 }
-.filter-btn {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 16px; padding: 4px 10px;
-  font-size: 11px; font-weight: 600;
-  color: var(--muted); transition: all .2s;
+.sb-progress-fill {
+  height: 100%; background: var(--grad-accent); border-radius: 3px; transition: width .5s;
 }
-.filter-btn:hover, .filter-btn.active {
-  background: rgba(124,106,247,.15);
-  border-color: var(--accent); color: var(--accent);
-}
-.filter-btn.t1.active { background: rgba(240,107,107,.15); border-color: var(--tier1); color: var(--tier1); }
-.filter-btn.t2.active { background: rgba(56,217,180,.12); border-color: var(--tier2); color: var(--tier2); }
-.filter-btn.t3.active { background: rgba(240,160,75,.12); border-color: var(--tier3); color: var(--tier3); }
-.sidebar-progress-bar {
-  margin-top: 10px;
-  height: 4px; background: var(--bg2);
-  border-radius: 2px; overflow: hidden;
-}
-.sidebar-progress-fill {
-  height: 100%; background: var(--accent-g);
-  border-radius: 2px; transition: width .5s ease;
-}
-.sidebar-progress-label {
-  font-size: 11px; color: var(--muted); margin-top: 4px;
+.sb-progress-meta {
   display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 10px;
 }
+.sb-filters {
+  display: flex; gap: 5px;
+}
+.sb-filter {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 5px 0; font-size: 11px; font-weight: 700;
+  color: var(--muted); transition: all .15s; text-align: center;
+}
+.sb-filter:hover { color: var(--text); }
+.sb-filter.on { background: rgba(124,106,247,.15); border-color: var(--accent); color: var(--accent); }
+.sb-filter.t1.on { background: rgba(248,113,113,.12); border-color: var(--t1); color: var(--t1); }
+.sb-filter.t2.on { background: rgba(62,207,142,.1); border-color: var(--t2); color: var(--t2); }
+.sb-filter.t3.on { background: rgba(245,158,11,.1); border-color: var(--t3); color: var(--t3); }
 
 /* Section group */
-.section-group { margin: 4px 0; }
-.section-header {
-  padding: 10px 16px 6px;
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .1em;
-  color: var(--muted);
+.sb-group { border-bottom: 1px solid var(--border); }
+.sb-group-header {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 14px; cursor: pointer;
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); user-select: none; transition: color .15s;
+}
+.sb-group-header:hover { color: var(--text2); }
+.sb-group-label { flex: 1; }
+.sb-group-count {
+  background: var(--surface3); border-radius: 8px;
+  padding: 1px 6px; font-size: 10px; color: var(--muted2);
+}
+.sb-chevron { font-size: 9px; transition: transform .2s; }
+.sb-group.collapsed .sb-chevron { transform: rotate(-90deg); }
+.sb-group.collapsed .sb-topics { display: none; }
+
+/* Topic row */
+.sb-topic {
   display: flex; align-items: center; gap: 8px;
-  cursor: pointer; user-select: none;
-}
-.section-header .sec-badge {
-  font-size: 10px; border-radius: 4px;
-  padding: 1px 6px; font-weight: 700;
-}
-.section-header .sec-count {
-  margin-left: auto; font-size: 10px;
-  background: var(--surface2); border-radius: 8px;
-  padding: 1px 6px; color: var(--muted);
-}
-.section-chevron { margin-left: 2px; font-size: 10px; transition: transform .2s; }
-.section-group.collapsed .section-chevron { transform: rotate(-90deg); }
-.section-topics { overflow: hidden; }
-.section-group.collapsed .section-topics { display: none; }
-
-/* Topic item */
-.topic-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px 16px 7px 20px;
+  padding: 6px 14px 6px 22px;
+  cursor: pointer; transition: all .12s;
   border-left: 3px solid transparent;
-  cursor: pointer; transition: all .15s;
-  border-radius: 0 8px 8px 0;
-  margin-right: 8px;
+  position: relative;
 }
-.topic-item:hover {
-  background: rgba(124,106,247,.08);
-  border-left-color: rgba(124,106,247,.4);
+.sb-topic:hover { background: rgba(124,106,247,.06); border-left-color: rgba(124,106,247,.3); }
+.sb-topic.active { background: rgba(124,106,247,.12); border-left-color: var(--accent); }
+.sb-topic .t-id {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent);
+  min-width: 24px; flex-shrink: 0;
 }
-.topic-item.active {
-  background: rgba(124,106,247,.15);
-  border-left-color: var(--accent);
-}
-.topic-item .t-id {
-  font-size: 10px; font-weight: 700;
-  color: var(--accent); min-width: 28px;
-}
-.topic-item .t-name { font-size: 13px; flex: 1; }
-.topic-item .t-status {
-  width: 18px; height: 18px; border-radius: 50%;
-  border: 2px solid var(--border);
+.sb-topic .t-name { font-size: 12px; font-weight: 500; flex: 1; color: var(--text2); line-height: 1.3; }
+.sb-topic.active .t-name { color: var(--text); }
+/* Status icon */
+.sb-topic .t-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 9px; flex-shrink: 0; transition: all .2s;
+  font-size: 8px; transition: all .2s;
 }
-.t-status.done { background: var(--teal); border-color: var(--teal); color: #000; }
-.t-status.in-progress { background: var(--orange); border-color: var(--orange); color: #000; }
+.sb-topic.done .t-check { background: var(--green); border-color: var(--green); color: #000; }
+.sb-topic.in-progress .t-check { border-color: var(--orange); }
 
-/* ══════════════════════════════════════════════════
-   MAIN CONTENT
-══════════════════════════════════════════════════ */
-#main {
-  margin-left: var(--sidebar-w);
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column;
-}
+/* ─── MAIN ────────────────────────────────────────────────── */
+.main { flex: 1; min-width: 0; }
 
-/* ══════════════════════════════════════════════════
-   HOME PAGE (dashboard)
-══════════════════════════════════════════════════ */
-#home-page {
-  padding: 40px 48px;
-  max-width: 1000px;
+/* ─── DASHBOARD ───────────────────────────────────────────── */
+.dash { padding: 40px 48px; max-width: 1100px; }
+
+/* Hero */
+.hero {
+  display: grid; grid-template-columns: 1fr auto; gap: 32px;
+  align-items: center; margin-bottom: 40px;
+  padding: 36px 40px;
+  background: var(--grad-card);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  position: relative; overflow: hidden;
 }
-.home-hero {
-  text-align: center; margin-bottom: 48px;
+.hero::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,106,247,.18) 0%, transparent 70%);
+  pointer-events: none;
 }
-.home-hero h1 {
-  font-size: 42px; font-weight: 800; line-height: 1.2;
-  background: var(--accent-g);
+.hero-title {
+  font-size: 32px; font-weight: 900; letter-spacing: -.5px;
+  line-height: 1.2; margin-bottom: 10px;
+}
+.hero-title .gradient {
+  background: var(--grad-accent);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 12px;
 }
-.home-hero p {
-  font-size: 17px; color: var(--muted); max-width: 560px; margin: 0 auto 28px;
-}
-.hero-badges {
-  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-}
+.hero-sub { font-size: 15px; color: var(--muted); max-width: 500px; margin-bottom: 20px; }
+.hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .hero-badge {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 14px;
-  font-size: 13px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 10px; border: 1px solid;
 }
-.hero-badge.t1 { border-color: var(--tier1); color: var(--tier1); }
-.hero-badge.t2 { border-color: var(--tier2); color: var(--tier2); }
-.hero-badge.t3 { border-color: var(--tier3); color: var(--tier3); }
+.hb-t1 { border-color: rgba(248,113,113,.4); color: var(--t1); background: rgba(248,113,113,.1); }
+.hb-t2 { border-color: rgba(62,207,142,.35); color: var(--t2); background: rgba(62,207,142,.08); }
+.hb-t3 { border-color: rgba(245,158,11,.35); color: var(--t3); background: rgba(245,158,11,.08); }
+.hb-diff { border-color: rgba(124,106,247,.4); color: var(--accent); background: rgba(124,106,247,.1); }
 
-/* Stats grid */
-.stats-grid {
-  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px;
-  margin-bottom: 40px;
+.hero-ring {
+  width: 110px; height: 110px; position: relative; flex-shrink: 0;
+}
+.hero-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.hero-ring .ring-bg { fill: none; stroke: var(--border2); stroke-width: 8; }
+.hero-ring .ring-fill { fill: none; stroke: url(#ring-grad); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+.hero-ring .ring-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.ring-pct { font-size: 22px; font-weight: 900; background: var(--grad-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.ring-label { font-size: 10px; color: var(--muted); font-weight: 600; }
+
+/* Stats row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 36px;
 }
 .stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px;
-  text-align: center; position: relative; overflow: hidden;
+  background: var(--grad-card); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 20px 18px;
+  position: relative; overflow: hidden; transition: transform .2s, border-color .2s;
 }
-.stat-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--accent-g);
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(124,106,247,.35); }
+.stat-card::after {
+  content: attr(data-icon);
+  position: absolute; right: 12px; bottom: 8px;
+  font-size: 32px; opacity: .12;
 }
-.stat-card .s-number {
-  font-size: 36px; font-weight: 800;
-  background: var(--accent-g);
+.sc-val {
+  font-size: 34px; font-weight: 900; letter-spacing: -1px; margin-bottom: 3px;
+  background: var(--grad-accent);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.stat-card .s-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.sc-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.sc-sub { font-size: 11px; color: var(--muted2); margin-top: 4px; }
 
-/* Section cards grid */
-.sections-heading {
-  font-size: 20px; font-weight: 700; margin-bottom: 20px;
-  display: flex; align-items: center; gap: 10px;
+/* Section heading */
+.section-heading {
+  font-size: 18px; font-weight: 800; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px; letter-spacing: -.2px;
 }
-.sections-heading::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.sections-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
+.section-heading::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Topic section cards */
+.section-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 40px; }
 .section-card {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--grad-card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 20px;
-  cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
-}
-.section-card::before {
-  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
 }
 .section-card:hover {
-  transform: translateY(-2px); box-shadow: var(--shadow);
-  border-color: rgba(124,106,247,.4);
+  transform: translateY(-3px); box-shadow: var(--shadow);
+  border-color: rgba(124,106,247,.35);
 }
-.section-card .sc-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+.sc-accent-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
-.section-card .sc-icon {
-  width: 36px; height: 36px; border-radius: 10px;
+.sc-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.sc-icon {
+  width: 40px; height: 40px; border-radius: 11px; background: var(--surface3);
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; background: var(--surface2);
+  font-size: 19px; flex-shrink: 0;
 }
-.section-card .sc-title { font-weight: 700; font-size: 15px; }
-.section-card .sc-tier {
-  font-size: 10px; font-weight: 700; border-radius: 8px;
-  padding: 2px 7px; margin-left: auto;
+.sc-meta { flex: 1; }
+.sc-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.sc-info { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.sc-tier-badge {
+  font-size: 9px; font-weight: 800; padding: 2px 6px;
+  border-radius: 5px; text-transform: uppercase; letter-spacing: .05em;
 }
-.section-card .sc-topics {
-  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px;
-}
+.sc-topic-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
 .sc-tag {
-  background: var(--surface2); border-radius: 6px;
-  padding: 2px 8px; font-size: 11px; color: var(--muted);
+  font-size: 10px; font-weight: 500; padding: 2px 7px;
+  background: var(--surface3); border-radius: 5px; color: var(--muted);
+  font-family: var(--mono);
 }
-.section-card .sc-progress {
-  height: 4px; background: var(--bg2); border-radius: 2px; overflow: hidden;
-}
-.sc-progress-fill {
-  height: 100%; border-radius: 2px; transition: width .5s;
-}
-.section-card .sc-footer {
-  display: flex; justify-content: space-between; margin-top: 8px;
-  font-size: 11px; color: var(--muted);
-}
+.sc-prog-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.sc-prog-nums { font-size: 11px; color: var(--muted); font-weight: 600; }
+.sc-prog-pct { font-size: 11px; font-weight: 700; color: var(--accent); }
+.sc-prog-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.sc-prog-fill { height: 100%; border-radius: 2px; transition: width .5s; }
 
-/* ══════════════════════════════════════════════════
-   TOPIC VIEWER
-══════════════════════════════════════════════════ */
-#topic-page { display: none; flex-direction: column; flex: 1; }
-#topic-page.show { display: flex; }
-
-.topic-toolbar {
-  position: sticky; top: var(--header-h); z-index: 40;
-  background: rgba(15,17,23,.95); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
-.topic-toolbar .back-btn {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 6px 12px;
-  font-size: 13px; color: var(--muted);
-  display: flex; align-items: center; gap: 6px;
-  transition: all .2s;
-}
-.topic-toolbar .back-btn:hover { border-color: var(--accent); color: var(--accent); }
-.topic-title-bar {
-  font-weight: 700; font-size: 16px;
+/* Topic chips (compact view) */
+.topic-chips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 32px; }
+.topic-chip {
   display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); cursor: pointer; transition: all .12s;
 }
-.topic-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
-.action-btn {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 6px 14px;
-  font-size: 13px; color: var(--text);
-  display: flex; align-items: center; gap: 6px;
-  transition: all .2s;
+.topic-chip:hover { border-color: rgba(124,106,247,.4); background: rgba(124,106,247,.05); }
+.tc-id { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); min-width: 28px; }
+.tc-name { font-size: 12px; font-weight: 500; flex: 1; }
+.tc-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 8px;
 }
-.action-btn:hover { border-color: var(--accent); color: var(--accent); }
-.action-btn.primary {
-  background: var(--accent); border-color: var(--accent);
-  color: #fff;
+.topic-chip.done .tc-check { background: var(--green); border-color: var(--green); color: #000; }
+.topic-chip.in-progress .tc-check { border-color: var(--orange); background: rgba(245,158,11,.12); }
+.tc-tier-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .sidebar { display: none; }
+  .sidebar.open { display: block; position: fixed; top: var(--topbar); left: 0; bottom: 0; z-index: 400; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .dash { padding: 24px 20px; }
+  .hero { grid-template-columns: 1fr; }
+  .hero-ring { display: none; }
 }
-.action-btn.primary:hover { opacity: .9; }
-.action-btn.done-btn {
-  background: rgba(56,217,180,.12); border-color: var(--teal); color: var(--teal);
+@media (max-width: 640px) {
+  .tb-search-wrap { max-width: 200px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .section-cards { grid-template-columns: 1fr; }
+  .hero-title { font-size: 24px; }
+}
+@media (max-width: 420px) {
+  .tb-stat:not(:first-child) { display: none; }
+  .tb-search-wrap { max-width: 140px; }
 }
 
-/* Topic navigation breadcrumb */
-.topic-nav-pills {
-  display: flex; gap: 6px; padding: 12px 24px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto; background: var(--bg2);
-  scrollbar-width: none;
-}
-.topic-nav-pills::-webkit-scrollbar { display: none; }
-.nav-pill {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; padding: 4px 12px;
-  font-size: 12px; white-space: nowrap;
-  cursor: pointer; transition: all .15s;
-  display: flex; align-items: center; gap: 5px;
-}
-.nav-pill:hover { border-color: var(--accent); color: var(--accent); }
-.nav-pill.active {
-  background: rgba(124,106,247,.15); border-color: var(--accent); color: var(--accent);
-  font-weight: 600;
-}
-.nav-pill .pill-status {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--border);
-}
-.nav-pill.done .pill-status { background: var(--teal); }
+/* ─── ANIMATIONS ─────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fadeUp .3s ease forwards; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
 
-/* iframe viewer */
-#topic-iframe-wrap {
-  flex: 1; position: relative;
+/* ─── MOBILE MENU BTN ───────────────────────────────────── */
+.mob-menu {
+  display: none; background: none; border: none; color: var(--muted);
+  font-size: 20px; padding: 8px 14px; border-right: 1px solid var(--border); height: 100%;
 }
-#topic-iframe {
-  width: 100%; height: calc(100vh - var(--header-h) - 110px);
-  border: none;
+@media (max-width: 960px) { .mob-menu { display: block; } }
+.mob-overlay {
+  display: none; position: fixed; inset: 0; z-index: 399;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
 }
+.mob-overlay.open { display: block; }
 
-/* ══════════════════════════════════════════════════
-   QUIZ SCORE MODAL
-══════════════════════════════════════════════════ */
-#quiz-modal {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
-  display: none; align-items: center; justify-content: center;
-}
-#quiz-modal.show { display: flex; }
-.quiz-modal-box {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 40px;
-  max-width: 440px; width: 90%; text-align: center;
-  box-shadow: var(--shadow);
-}
-.quiz-modal-box h2 {
-  font-size: 22px; font-weight: 700; margin-bottom: 8px;
-  background: var(--accent-g);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.quiz-modal-box p { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
-.score-options {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
-}
-.score-opt {
-  background: var(--surface2); border: 2px solid var(--border);
-  border-radius: 10px; padding: 14px 10px;
-  cursor: pointer; transition: all .2s;
-  font-weight: 700; font-size: 14px;
-}
-.score-opt:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.03); }
-.score-opt.s-poor:hover { border-color: var(--red); color: var(--red); }
-.score-opt.s-fair:hover { border-color: var(--orange); color: var(--orange); }
-.score-opt.s-good:hover { border-color: var(--teal); color: var(--teal); }
-.score-opt.s-great:hover { border-color: var(--accent); color: var(--accent); }
-.score-opt .so-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
-.score-opt .so-pct { font-size: 13px; color: var(--muted); }
-.skip-link { font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; }
-
-/* ══════════════════════════════════════════════════
-   PDF DOWNLOAD OVERLAY
-══════════════════════════════════════════════════ */
-#pdf-toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 12px 24px;
-  font-size: 14px; font-weight: 600;
-  box-shadow: var(--shadow); z-index: 500;
+/* ─── STREAK / GAMIFICATION ─────────────────────────────── */
+.streak-bar {
   display: flex; align-items: center; gap: 10px;
-  transition: transform .3s ease;
+  background: linear-gradient(135deg,rgba(245,158,11,.1),rgba(248,113,113,.08));
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 12px; padding: 12px 18px; margin-bottom: 28px;
+  font-size: 13px;
 }
-#pdf-toast.show { transform: translateX(-50%) translateY(0); }
-#pdf-toast .t-icon { font-size: 18px; }
-
-/* ══════════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  :root { --sidebar-w: 280px; }
-  #menu-toggle { display: block; }
-  #sidebar {
-    transform: translateX(-100%);
-    box-shadow: var(--shadow);
-  }
-  #sidebar.open { transform: translateX(0); }
-  #main { margin-left: 0; }
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-  #home-page { padding: 24px 20px; }
-  .home-hero h1 { font-size: 28px; }
-  .header-stats .stat-pill:not(:first-child) { display: none; }
+.streak-icon { font-size: 22px; }
+.streak-text { flex: 1; }
+.streak-title { font-weight: 700; color: var(--orange); }
+.streak-sub { font-size: 11px; color: var(--muted); }
+.next-btn {
+  background: var(--grad-accent); border: none; border-radius: 10px;
+  padding: 8px 16px; font-size: 12px; font-weight: 700; color: #fff;
+  cursor: pointer; transition: opacity .2s; white-space: nowrap;
 }
-@media (max-width: 600px) {
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .sections-grid { grid-template-columns: 1fr; }
-  #search-wrap { max-width: 160px; }
-  .topic-toolbar { padding: 8px 12px; }
-  .topic-actions .action-btn span { display: none; }
+.next-btn:hover { opacity: .85; }
+
+/* Tier section labels */
+.tier-label {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 8px; margin-bottom: 12px;
 }
-
-/* ══════════════════════════════════════════════════
-   TIER BADGE COLORS
-══════════════════════════════════════════════════ */
-.tier-1 { color: var(--tier1); }
-.tier-2 { color: var(--tier2); }
-.tier-3 { color: var(--tier3); }
-.bg-tier-1 { background: rgba(240,107,107,.15); }
-.bg-tier-2 { background: rgba(56,217,180,.12); }
-.bg-tier-3 { background: rgba(240,160,75,.12); }
-
-/* ══════════════════════════════════════════════════
-   ANIMATION
-══════════════════════════════════════════════════ */
-@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-.fade-in { animation: fadeIn .25s ease forwards; }
-
-/* ══════════════════════════════════════════════════
-   SIDEBAR OVERLAY (mobile)
-══════════════════════════════════════════════════ */
-#sidebar-overlay {
-  display: none; position: fixed; inset: 0; z-index: 49;
-  background: rgba(0,0,0,.5);
-}
-#sidebar-overlay.show { display: block; }
-
-/* ══════════════════════════════════════════════════
-   EMPTY / NO-RESULTS
-══════════════════════════════════════════════════ */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--muted);
-}
-.empty-state .e-icon { font-size: 48px; margin-bottom: 12px; }
-.empty-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--text); }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════ HEADER ═══════════════════════ -->
-<header id="header">
-  <button id="menu-toggle" aria-label="Menu">☰</button>
-  <div class="header-brand">
-    <span class="icon">🤖</span>
-    Android Interview Prep
+<!-- ═══════ TOP BAR ═══════ -->
+<header class="topbar">
+  <button class="mob-menu" id="mob-menu">☰</button>
+  <a class="tb-brand" href="index.html">
+    <span class="logo">🤖</span>
+    <span class="name">Android Prep</span>
+  </a>
+  <div class="tb-search-wrap">
+    <span class="search-icon-wrap">🔍</span>
+    <input class="tb-search" id="tb-search" type="text" placeholder="Search topics, tags… (Press /)"/>
+    <div class="search-dropdown" id="search-dd"></div>
   </div>
-  <div id="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input id="search-input" type="text" placeholder="Search topics, tags…" autocomplete="off"/>
-    <div id="search-results"></div>
-  </div>
-  <div class="header-stats">
-    <div class="stat-pill" id="pill-completed">
+  <div class="tb-right">
+    <div class="tb-stat" id="tb-stat-done">
       <span class="dot dot-green"></span>
-      <span id="pill-completed-text">0 done</span>
+      <span id="stat-done-txt">0 done</span>
     </div>
-    <div class="stat-pill" id="pill-total">
-      <span class="dot dot-accent"></span>
-      <span>90 topics</span>
+    <div class="tb-stat">
+      <div id="tb-pct-bar"><div id="tb-pct-fill" style="width:0%"></div></div>
+      <span id="stat-pct-txt">0%</span>
     </div>
   </div>
 </header>
 
-<!-- ═══════════════════════ LAYOUT ═══════════════════════ -->
-<div id="layout">
+<div class="mob-overlay" id="mob-overlay"></div>
 
-  <!-- SIDEBAR OVERLAY -->
-  <div id="sidebar-overlay"></div>
+<!-- ═══════ LAYOUT ═══════ -->
+<div class="layout">
 
-  <!-- ═══════ SIDEBAR ═══════ -->
-  <nav id="sidebar" aria-label="Topics navigation">
-    <div class="sidebar-top">
-      <div class="sidebar-filter" id="tier-filter">
-        <button class="filter-btn active" data-tier="all">All</button>
-        <button class="filter-btn t1" data-tier="1">Tier 1</button>
-        <button class="filter-btn t2" data-tier="2">Tier 2</button>
-        <button class="filter-btn t3" data-tier="3">Tier 3</button>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-progress-meta">
+        <span id="sb-label">0 of 90 completed</span>
+        <span id="sb-pct">0%</span>
       </div>
-      <div class="sidebar-progress-bar">
-        <div class="sidebar-progress-fill" id="sidebar-progress-fill" style="width:0%"></div>
+      <div class="sb-progress">
+        <div class="sb-progress-fill" id="sb-fill" style="width:0%"></div>
       </div>
-      <div class="sidebar-progress-label">
-        <span id="sidebar-progress-label">0 of 90 completed</span>
-        <span id="sidebar-pct">0%</span>
-      </div>
-    </div>
-    <div id="sidebar-list"></div>
-  </nav>
-
-  <!-- ═══════ MAIN ═══════ -->
-  <main id="main">
-
-    <!-- HOME PAGE -->
-    <div id="home-page" class="fade-in">
-      <div class="home-hero">
-        <h1>Android Senior Interview<br/>Complete Study Guide</h1>
-        <p>90 topics covering everything from Kotlin internals to system design — built for Senior Android developers targeting top-tier roles.</p>
-        <div class="hero-badges">
-          <span class="hero-badge t1">⚡ Tier 1 — Core</span>
-          <span class="hero-badge t2">📘 Tier 2 — Important</span>
-          <span class="hero-badge t3">📗 Tier 3 — Supporting</span>
-          <span class="hero-badge" style="border-color:var(--accent);color:var(--accent)">🎯 Senior Differentiators</span>
-        </div>
-      </div>
-
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card">
-          <div class="s-number" id="stat-total">90</div>
-          <div class="s-label">Total Topics</div>
-        </div>
-        <div class="stat-card">
-          <div class="s-number" id="stat-completed">0</div>
-          <div class="s-label">Completed</div>
-        </div>
-        <div class="stat-card">
-          <div class="s-number" id="stat-score">—</div>
-          <div class="s-label">Avg Quiz Score</div>
-        </div>
-        <div class="stat-card">
-          <div class="s-number" id="stat-pct">0%</div>
-          <div class="s-label">Progress</div>
-        </div>
-      </div>
-
-      <div class="sections-heading">📚 All Sections</div>
-      <div class="sections-grid" id="sections-grid"></div>
-    </div>
-
-    <!-- TOPIC PAGE -->
-    <div id="topic-page">
-      <div class="topic-toolbar">
-        <button class="back-btn" id="back-btn">← Back</button>
-        <div class="topic-title-bar">
-          <span id="topic-title-badge" class="stat-pill"></span>
-          <span id="topic-title-text"></span>
-        </div>
-        <div class="topic-actions">
-          <button class="action-btn" id="prev-btn">‹ Prev</button>
-          <button class="action-btn" id="next-btn">Next ›</button>
-          <button class="action-btn" id="pdf-btn">⬇ PDF</button>
-          <button class="action-btn done-btn" id="mark-done-btn">✓ Mark Done</button>
-          <button class="action-btn primary" id="quiz-btn">🎯 Quiz Score</button>
-        </div>
-      </div>
-      <div class="topic-nav-pills" id="topic-nav-pills"></div>
-      <div id="topic-iframe-wrap">
-        <iframe id="topic-iframe" title="Topic Content" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      <div class="sb-filters" id="sb-filters">
+        <button class="sb-filter on" data-tier="all">All</button>
+        <button class="sb-filter t1" data-tier="1">T1</button>
+        <button class="sb-filter t2" data-tier="2">T2</button>
+        <button class="sb-filter t3" data-tier="3">T3</button>
       </div>
     </div>
+    <div id="sb-list"></div>
+  </aside>
 
+  <!-- MAIN DASHBOARD -->
+  <main class="main">
+    <div class="dash fade-up">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div>
+          <div class="hero-title">
+            Android Senior Interview<br/>
+            <span class="gradient">Complete Study Hub</span>
+          </div>
+          <div class="hero-sub">
+            90 production-depth topics — from Kotlin internals to system design.
+            Built for Senior Android roles at top companies.
+          </div>
+          <div class="hero-badges">
+            <span class="hero-badge hb-t1">⚡ Tier 1 — Core Priority</span>
+            <span class="hero-badge hb-t2">📘 Tier 2 — Important</span>
+            <span class="hero-badge hb-t3">📗 Tier 3 — Supporting</span>
+            <span class="hero-badge hb-diff">🎯 Senior Differentiators</span>
+          </div>
+        </div>
+        <div class="hero-ring">
+          <svg viewBox="0 0 110 110">
+            <defs>
+              <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7c6af7"/>
+                <stop offset="100%" stop-color="#3ecf8e"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="55" cy="55" r="46"/>
+            <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="46"
+              stroke-dasharray="289" stroke-dashoffset="289"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-label">done</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card" data-icon="📚">
+          <div class="sc-val">90</div>
+          <div class="sc-label">Total Topics</div>
+          <div class="sc-sub">Across 35 sections</div>
+        </div>
+        <div class="stat-card" data-icon="✅">
+          <div class="sc-val" id="sc-completed">0</div>
+          <div class="sc-label">Completed</div>
+          <div class="sc-sub" id="sc-completed-sub">0 in progress</div>
+        </div>
+        <div class="stat-card" data-icon="🎯">
+          <div class="sc-val" id="sc-score">—</div>
+          <div class="sc-label">Avg Score</div>
+          <div class="sc-sub" id="sc-score-sub">Quiz yourself first</div>
+        </div>
+        <div class="stat-card" data-icon="🚀">
+          <div class="sc-val" id="sc-pct">0%</div>
+          <div class="sc-label">Progress</div>
+          <div class="sc-sub" id="sc-next-sub">Start with Kotlin →</div>
+        </div>
+      </div>
+
+      <!-- Next up streak bar -->
+      <div class="streak-bar" id="streak-bar">
+        <div class="streak-icon">🎯</div>
+        <div class="streak-text">
+          <div class="streak-title" id="streak-title">Start your preparation</div>
+          <div class="streak-sub" id="streak-sub">Begin with 1A — Kotlin Basics & Null Safety</div>
+        </div>
+        <button class="next-btn" id="next-topic-btn">Continue →</button>
+      </div>
+
+      <!-- All sections grid -->
+      <div class="section-heading">📚 All Sections</div>
+      <div class="section-cards" id="section-cards"></div>
+
+      <!-- All topics compact list -->
+      <div class="section-heading">🗂 All 90 Topics</div>
+      <div class="topic-chips-grid" id="topic-chips"></div>
+
+    </div>
   </main>
 </div>
 
-<!-- ═══════════════════════ QUIZ MODAL ═══════════════════════ -->
-<div id="quiz-modal" role="dialog" aria-modal="true">
-  <div class="quiz-modal-box">
-    <h2>Rate Your Understanding</h2>
-    <p>After reviewing this topic, how well do you understand it?</p>
-    <div class="score-options">
-      <div class="score-opt s-poor" data-score="25">
-        <span class="so-emoji">😕</span>
-        Needs Review
-        <div class="so-pct">0–25%</div>
-      </div>
-      <div class="score-opt s-fair" data-score="50">
-        <span class="so-emoji">🤔</span>
-        Getting There
-        <div class="so-pct">26–50%</div>
-      </div>
-      <div class="score-opt s-good" data-score="75">
-        <span class="so-emoji">😊</span>
-        Good Grasp
-        <div class="so-pct">51–75%</div>
-      </div>
-      <div class="score-opt s-great" data-score="100">
-        <span class="so-emoji">🚀</span>
-        Interview Ready
-        <div class="so-pct">76–100%</div>
-      </div>
-    </div>
-    <div class="skip-link" id="quiz-skip">Skip for now</div>
-  </div>
-</div>
-
-<!-- ═══════════════════════ PDF TOAST ═══════════════════════ -->
-<div id="pdf-toast">
-  <span class="t-icon">📄</span>
-  <span id="pdf-toast-text">Preparing PDF…</span>
-</div>
-
-<script src="app.js"></script>
 <script>
-/* ══════════════════════════════════════════════════
-   ANDROID INTERVIEW PREP — MAIN APP
-══════════════════════════════════════════════════ */
-const { SYLLABUS, getTopicProgress, setTopicProgress, getOverallStats, loadProgress } = window.APP;
+/* ═══════════════════════════════════════════════════
+   ANDROID INTERVIEW PREP — Dashboard JS
+═══════════════════════════════════════════════════ */
 
-// ─── State ────────────────────────────────────────
-let currentTopicIdx = -1;  // flat index across all topics
-let currentTierFilter = "all";
-let allTopics = [];         // flat list of all topics
+// ── Syllabus ─────────────────────────────────────
+const SECTIONS = [
+  { id:'s1', icon:'⚡', title:'Kotlin', tier:1,
+    topics:[
+      {id:'1A',name:'Basics & Null Safety',file:'android_interview_pdfs/1A_Kotlin_Basics_Null_Safety.html',tags:['val/var','nullable','Elvis','lateinit','lazy']},
+      {id:'1B',name:'Functions',file:'android_interview_pdfs/1B_Kotlin_Functions.html',tags:['extension','lambda','HOF','SAM']},
+      {id:'1C',name:'Scope Functions',file:'android_interview_pdfs/1C_Scope_Functions.html',tags:['let','run','apply','also','with']},
+      {id:'1D',name:'OOP',file:'android_interview_pdfs/1D_Kotlin_OOP.html',tags:['class','inheritance','interface','abstract']},
+      {id:'1E',name:'Special Classes',file:'android_interview_pdfs/1E_Special_Classes.html',tags:['data','sealed','enum','object','companion']},
+      {id:'1F',name:'Generics & Variance',file:'android_interview_pdfs/1F_Generics_Variance.html',tags:['generics','in','out','covariance']},
+      {id:'1G',name:'Delegation & Operators',file:'android_interview_pdfs/1G_Delegation_Operators.html',tags:['delegation','lazy','operator','destructuring']},
+      {id:'1H',name:'Collections',file:'android_interview_pdfs/1H_Collections.html',tags:['List','Map','filter','fold','Sequence']},
+      {id:'1I',name:'Inline & Recursion',file:'android_interview_pdfs/1I_Inline_Recursion.html',tags:['inline','reified','crossinline','tailrec']},
+      {id:'1J',name:'Equality, Interop & Errors',file:'android_interview_pdfs/1J_Equality_Interop_Errors.html',tags:['==','===','Result','exceptions']},
+    ]},
+  { id:'s2', icon:'📱', title:'Android Fundamentals', tier:2,
+    topics:[
+      {id:'2A',name:'Components Overview',file:'android_interview_pdfs/2A_Components_Overview.html',tags:['Activity','Fragment','Service','Context']},
+      {id:'2B',name:'Activity Lifecycle & State',file:'android_interview_pdfs/2B_Activity_Lifecycle_State.html',tags:['onCreate','rotation','SavedStateHandle']},
+      {id:'2C',name:'Launch Modes & Back Stack',file:'android_interview_pdfs/2C_Launch_Modes_Back_Stack.html',tags:['singleTop','singleTask','back stack']},
+      {id:'2D',name:'Fragments',file:'android_interview_pdfs/2D_Fragments.html',tags:['viewLifecycleOwner','ViewBinding','activityViewModels']},
+      {id:'2E',name:'Intents',file:'android_interview_pdfs/2E_Intents.html',tags:['explicit','implicit','PendingIntent','App Link']},
+    ]},
+  { id:'s3', icon:'🔧', title:'Framework Internals', tier:1,
+    topics:[
+      {id:'3A',name:'App Startup',file:'android_interview_pdfs/3A_App_Startup.html',tags:['Zygote','AMS','ActivityThread','cold start']},
+      {id:'3B',name:'Main Thread Internals',file:'android_interview_pdfs/3B_Main_Thread_Internals.html',tags:['Looper','MessageQueue','Handler']},
+      {id:'3C',name:'Binder & IPC',file:'android_interview_pdfs/3C_Binder_IPC.html',tags:['Binder','IPC','AIDL','IBinder']},
+      {id:'3D',name:'Process Model',file:'android_interview_pdfs/3D_Process_Model.html',tags:['process priority','UID','ANR','OOM']},
+    ]},
+  { id:'s4', icon:'🏗️', title:'Jetpack Components', tier:1,
+    topics:[
+      {id:'4A',name:'ViewModel',file:'android_interview_pdfs/4A_ViewModel.html',tags:['ViewModelStore','viewModelScope','SavedStateHandle']},
+      {id:'4B',name:'LiveData',file:'android_interview_pdfs/4B_LiveData.html',tags:['lifecycle-aware','setValue','MediatorLiveData']},
+      {id:'4C',name:'Lifecycle',file:'android_interview_pdfs/4C_Lifecycle.html',tags:['LifecycleOwner','repeatOnLifecycle','lifecycleScope']},
+    ]},
+  { id:'s5', icon:'⚙️', title:'Kotlin Coroutines', tier:1,
+    topics:[
+      {id:'5A',name:'Fundamentals',file:'android_interview_pdfs/5A_Coroutines_Fundamentals.html',tags:['coroutine','CoroutineScope','Job','Dispatcher']},
+      {id:'5B',name:'Builders & Dispatchers',file:'android_interview_pdfs/5B_Builders_Dispatchers.html',tags:['launch','async','withContext','Dispatchers.IO']},
+      {id:'5C',name:'Structured Concurrency',file:'android_interview_pdfs/5C_Structured_Concurrency.html',tags:['coroutineScope','supervisorScope','Job','SupervisorJob']},
+      {id:'5D',name:'Cancellation & Exceptions',file:'android_interview_pdfs/5D_Cancellation_Exceptions.html',tags:['cancellation','CancellationException','CoroutineExceptionHandler']},
+      {id:'5E',name:'Scopes, Concurrency & Testing',file:'android_interview_pdfs/5E_Scopes_Concurrency_Testing.html',tags:['viewModelScope','Mutex','runTest','TestDispatcher']},
+    ]},
+  { id:'s6', icon:'🌊', title:'Kotlin Flow', tier:1,
+    topics:[
+      {id:'6A',name:'Flow Core',file:'android_interview_pdfs/6A_Flow_Core.html',tags:['cold flow','StateFlow','SharedFlow','hot flow']},
+      {id:'6B',name:'Flow Operators',file:'android_interview_pdfs/6B_Flow_Operators.html',tags:['map','flatMapLatest','combine','debounce','catch']},
+      {id:'6C',name:'Builders & Channels',file:'android_interview_pdfs/6C_Builders_Channels.html',tags:['callbackFlow','channelFlow','Channel','backpressure']},
+      {id:'6D',name:'Sharing',file:'android_interview_pdfs/6D_Sharing.html',tags:['stateIn','shareIn','SharingStarted','WhileSubscribed']},
+    ]},
+  { id:'s7', icon:'🎨', title:'Jetpack Compose', tier:1,
+    topics:[
+      {id:'7A',name:'Fundamentals',file:'android_interview_pdfs/7A_Compose_Fundamentals.html',tags:['@Composable','recomposition','composition','State']},
+      {id:'7B',name:'State Management',file:'android_interview_pdfs/7B_State_Management.html',tags:['remember','rememberSaveable','state hoisting','UDF']},
+      {id:'7C',name:'Side Effects',file:'android_interview_pdfs/7C_Side_Effects.html',tags:['LaunchedEffect','DisposableEffect','SideEffect','snapshotFlow']},
+      {id:'7D',name:'Performance',file:'android_interview_pdfs/7D_Compose_Performance.html',tags:['@Stable','@Immutable','skippable','LazyColumn keys']},
+      {id:'7E',name:'Compose UI',file:'android_interview_pdfs/7E_Compose_UI.html',tags:['Row','Column','Box','LazyColumn','Scaffold','Modifier']},
+      {id:'7F',name:'Navigation',file:'android_interview_pdfs/7F_Compose_Navigation.html',tags:['NavController','NavHost','type-safe routes','deep links']},
+    ]},
+  { id:'s8', icon:'📐', title:'Architecture', tier:1,
+    topics:[
+      {id:'8A',name:'Architecture Patterns',file:'android_interview_pdfs/8A_Architecture_Patterns.html',tags:['MVC','MVP','MVVM','MVI','UDF']},
+      {id:'8B',name:'Clean Architecture',file:'android_interview_pdfs/8B_Clean_Architecture.html',tags:['Presentation','Domain','Data','UseCase','Repository']},
+    ]},
+  { id:'s9', icon:'🧱', title:'SOLID Principles', tier:1,
+    topics:[{id:'9A',name:'SOLID',file:'android_interview_pdfs/9A_SOLID_Principles.html',tags:['SRP','OCP','LSP','ISP','DIP']}]},
+  { id:'s10', icon:'🔮', title:'Design Patterns', tier:2,
+    topics:[
+      {id:'10A',name:'Creational',file:'android_interview_pdfs/10A_Creational_Patterns.html',tags:['Singleton','Factory','Builder']},
+      {id:'10B',name:'Structural',file:'android_interview_pdfs/10B_Structural_Patterns.html',tags:['Adapter','Decorator','Facade','Proxy']},
+      {id:'10C',name:'Behavioral',file:'android_interview_pdfs/10C_Behavioral_Patterns.html',tags:['Observer','Strategy','Command','State']},
+    ]},
+  { id:'s11', icon:'💉', title:'Dependency Injection', tier:1,
+    topics:[
+      {id:'11A',name:'DI & Hilt Basics',file:'android_interview_pdfs/11A_DI_Hilt_Basics.html',tags:['@Inject','@Provides','@Binds','@Singleton']},
+      {id:'11B',name:'Hilt Components',file:'android_interview_pdfs/11B_Hilt_Components.html',tags:['SingletonComponent','ViewModelComponent','Dagger codegen']},
+    ]},
+  { id:'s12', icon:'🌐', title:'Networking', tier:1,
+    topics:[
+      {id:'12A',name:'REST & HTTP',file:'android_interview_pdfs/12A_REST_HTTP.html',tags:['HTTP verbs','status codes','caching','pagination']},
+      {id:'12B',name:'Retrofit & OkHttp',file:'android_interview_pdfs/12B_Retrofit_OkHttp.html',tags:['Retrofit','OkHttp','interceptors','Moshi']},
+      {id:'12C',name:'Advanced Networking',file:'android_interview_pdfs/12C_Advanced_Networking.html',tags:['cert pinning','token refresh','Mutex','offline-first']},
+    ]},
+  { id:'s13', icon:'💾', title:'Room & Storage', tier:1,
+    topics:[
+      {id:'13A',name:'Room',file:'android_interview_pdfs/13A_Room.html',tags:['@Entity','@Dao','@Database','migration','Flow']},
+      {id:'13B',name:'Room vs SQLite',file:'android_interview_pdfs/13B_Room_vs_SQLite.html',tags:['compile-time query','@RawQuery']},
+      {id:'13C',name:'Other Storage',file:'android_interview_pdfs/13C_Other_Storage.html',tags:['DataStore','Proto DataStore','Keystore','EncryptedSharedPreferences']},
+    ]},
+  { id:'s14', icon:'⏳', title:'Background Processing', tier:2,
+    topics:[
+      {id:'14A',name:'WorkManager',file:'android_interview_pdfs/14A_WorkManager.html',tags:['CoroutineWorker','constraints','chaining','UniqueWork']},
+      {id:'14B',name:'Choosing the Right Tool',file:'android_interview_pdfs/14B_Choosing_Right_Tool.html',tags:['WorkManager','AlarmManager','Doze','foreground service']},
+    ]},
+  { id:'s15', icon:'🔄', title:'Services', tier:2,
+    topics:[{id:'15A',name:'Services',file:'android_interview_pdfs/15A_Services.html',tags:['started','bound','foreground service','LifecycleService']}]},
+  { id:'s16', icon:'📡', title:'BroadcastReceiver', tier:3,
+    topics:[{id:'16A',name:'BroadcastReceiver',file:'android_interview_pdfs/16A_BroadcastReceiver.html',tags:['static','dynamic','ordered broadcast','goAsync']}]},
+  { id:'s17', icon:'📋', title:'ContentProvider', tier:3,
+    topics:[{id:'17A',name:'ContentProvider',file:'android_interview_pdfs/17A_ContentProvider.html',tags:['ContentResolver','URI','Cursor','FileProvider']}]},
+  { id:'s18', icon:'🗺️', title:'Navigation', tier:2,
+    topics:[{id:'18A',name:'Navigation & Deep Linking',file:'android_interview_pdfs/18A_Navigation.html',tags:['NavGraph','Safe Args','App Links','popUpTo']}]},
+  { id:'s19', icon:'🔒', title:'Security', tier:2,
+    topics:[
+      {id:'19A',name:'Data & Network Security',file:'android_interview_pdfs/19A_Data_Network_Security.html',tags:['Keystore','EncryptedSharedPreferences','cert pinning']},
+      {id:'19B',name:'App Hardening & Auth',file:'android_interview_pdfs/19B_App_Hardening.html',tags:['BiometricPrompt','Play Integrity','R8','OWASP']},
+    ]},
+  { id:'s20', icon:'🧪', title:'Testing', tier:2,
+    topics:[
+      {id:'20A',name:'Unit Testing',file:'android_interview_pdfs/20A_Unit_Testing.html',tags:['JUnit','MockK','Fake vs Mock','testing pyramid']},
+      {id:'20B',name:'Coroutines & Flow Testing',file:'android_interview_pdfs/20B_Coroutines_Flow_Testing.html',tags:['runTest','TestDispatcher','Turbine']},
+      {id:'20C',name:'UI & Network Testing',file:'android_interview_pdfs/20C_UI_Network_Testing.html',tags:['Espresso','Compose UI','MockWebServer']},
+    ]},
+  { id:'s21', icon:'📊', title:'Performance', tier:2,
+    topics:[{id:'21A',name:'Performance',file:'android_interview_pdfs/21A_Performance.html',tags:['ANR','cold start','Baseline Profiles','Macrobenchmark','jank']}]},
+  { id:'s22', icon:'🧠', title:'Memory Management', tier:2,
+    topics:[{id:'22A',name:'Memory Management',file:'android_interview_pdfs/22A_Memory_Management.html',tags:['heap','GC','WeakReference','memory leak','LeakCanary']}]},
+  { id:'s23', icon:'⚒️', title:'Gradle', tier:3,
+    topics:[{id:'23A',name:'Gradle / Build System',file:'android_interview_pdfs/23A_Gradle.html',tags:['AGP','build variants','KSP','Version Catalog']}]},
+  { id:'s24', icon:'🔀', title:'Modularization', tier:2,
+    topics:[{id:'24A',name:'Modularization',file:'android_interview_pdfs/24A_Modularization.html',tags:['feature modules','api vs impl','Dynamic Feature Modules']}]},
+  { id:'s25', icon:'🚀', title:'CI/CD', tier:2,
+    topics:[{id:'25A',name:'CI/CD',file:'android_interview_pdfs/25A_CICD.html',tags:['GitHub Actions','Fastlane','Play Store','AAB signing']}]},
+  { id:'s26', icon:'✅', title:'Code Quality', tier:2,
+    topics:[{id:'26A',name:'Code Quality',file:'android_interview_pdfs/26A_Code_Quality.html',tags:['Android Lint','Detekt','Ktlint','SonarQube']}]},
+  { id:'s27', icon:'🛡️', title:'Permissions', tier:3,
+    topics:[{id:'27A',name:'Permissions',file:'android_interview_pdfs/27A_Permissions.html',tags:['runtime permissions','POST_NOTIFICATIONS','background location']}]},
+  { id:'s28', icon:'📜', title:'RecyclerView & UI', tier:3,
+    topics:[
+      {id:'28A',name:'RecyclerView',file:'android_interview_pdfs/28A_RecyclerView.html',tags:['ListAdapter','DiffUtil','ViewHolder','LayoutManager']},
+      {id:'28B',name:'Legacy UI',file:'android_interview_pdfs/28B_Legacy_UI.html',tags:['ViewBinding','DataBinding','ConstraintLayout','custom views']},
+    ]},
+  { id:'s29', icon:'📄', title:'Paging 3', tier:3,
+    topics:[{id:'29A',name:'Paging 3',file:'android_interview_pdfs/29A_Paging3.html',tags:['PagingSource','RemoteMediator','LazyPagingItems']}]},
+  { id:'s30', icon:'🎯', title:'System Design', tier:1,
+    topics:[
+      {id:'30A',name:'Offline-first Catalog',file:'android_interview_pdfs/30A_System_Design_Offline_Catalog.html',tags:['Room SSOT','RemoteMediator','stale-while-revalidate']},
+      {id:'30B',name:'Login / Auth System',file:'android_interview_pdfs/30B_System_Design_Login_Auth.html',tags:['JWT','token refresh','biometric','Keystore']},
+      {id:'30C',name:'Shopping Cart',file:'android_interview_pdfs/30C_System_Design_Shopping_Cart.html',tags:['optimistic updates','conflict resolution']},
+      {id:'30D',name:'Chat Application',file:'android_interview_pdfs/30D_System_Design_Chat.html',tags:['WebSocket','offline queue','message states']},
+      {id:'30E',name:'Push Notification System',file:'android_interview_pdfs/30E_System_Design_Push_Notifications.html',tags:['FCM','token lifecycle','deep links']},
+      {id:'30F',name:'Image-heavy Feed',file:'android_interview_pdfs/30F_System_Design_Image_Feed.html',tags:['Coil','three-level cache','cursor pagination']},
+      {id:'30G',name:'Large-scale Modular App',file:'android_interview_pdfs/30G_System_Design_Large_Scale_App.html',tags:['millions of users','feature flags','BFF']},
+    ]},
+  { id:'s31', icon:'🔥', title:'Firebase', tier:3,
+    topics:[{id:'31A',name:'Firebase',file:'android_interview_pdfs/31A_Firebase.html',tags:['Firestore','FCM','Crashlytics','Remote Config']}]},
+  { id:'s32', icon:'📦', title:'App Release', tier:3,
+    topics:[{id:'32A',name:'App Release',file:'android_interview_pdfs/32A_App_Release.html',tags:['APK vs AAB','R8','ProGuard','keystore','Play Console']}]},
+  { id:'s33', icon:'💡', title:'Scenario Questions', tier:1,
+    topics:[
+      {id:'33A',name:'Debugging Scenarios',file:'android_interview_pdfs/33A_Debugging_Scenarios.html',tags:['API called twice','Compose recompose','prod crash']},
+      {id:'33B',name:'Data & Concurrency Scenarios',file:'android_interview_pdfs/33B_Data_Concurrency_Scenarios.html',tags:['parallel APIs','token refresh Mutex','stale cache']},
+      {id:'33C',name:'Platform & Scale Scenarios',file:'android_interview_pdfs/33C_Platform_Scale_Scenarios.html',tags:['Android 15/16','millions of users']},
+    ]},
+  { id:'s34', icon:'💻', title:'Coding Questions', tier:1,
+    topics:[
+      {id:'34A',name:'Strings',file:'android_interview_pdfs/34A_Strings_Coding.html',tags:['palindrome','anagram','reverse','character frequency']},
+      {id:'34B',name:'Arrays & Collections',file:'android_interview_pdfs/34B_Arrays_Collections_Coding.html',tags:['Two Sum','remove duplicates','groupBy','Kadane']},
+      {id:'34C',name:'Math & Recursion',file:'android_interview_pdfs/34C_Math_Recursion_Coding.html',tags:['Fibonacci','factorial','prime','tailrec']},
+      {id:'34D',name:'Data Structures & Search',file:'android_interview_pdfs/34D_Data_Structures_Search.html',tags:['Stack','Queue','LinkedList','binary search']},
+      {id:'34E',name:'Android Coding',file:'android_interview_pdfs/34E_Android_Coding.html',tags:['parallel coroutines','Flow search','LRU cache','token refresh']},
+    ]},
+  { id:'s35', icon:'🤝', title:'Behavioral & Leadership', tier:1,
+    topics:[{id:'35A',name:'Behavioral & Senior Leadership',file:'android_interview_pdfs/35A_Behavioral_Senior_Leadership.html',tags:['STAR','production bug','architecture decision','mentoring']}]},
+];
 
-// Build flat topic list
-SYLLABUS.forEach(section => {
-  section.topics.forEach(topic => {
-    allTopics.push({ ...topic, section: section.section, tier: section.tier, sectionColor: section.color });
-  });
-});
+// Flat topic list
+const ALL_TOPICS = SECTIONS.flatMap(s => s.topics.map(t => ({...t, sectionTitle: s.title, tier: s.tier, sectionColor: s.tier===1?'#f87171':s.tier===2?'#3ecf8e':'#f59e0b'})));
 
-// ─── DOM refs ─────────────────────────────────────
-const $ = id => document.getElementById(id);
-const homePage     = $('home-page');
-const topicPage    = $('topic-page');
-const sidebarList  = $('sidebar-list');
-const searchInput  = $('search-input');
-const searchRes    = $('search-results');
-const topicIframe  = $('topic-iframe');
-const topicTitle   = $('topic-title-text');
-const topicBadge   = $('topic-title-badge');
-const topicNavPills = $('topic-nav-pills');
-const quizModal    = $('quiz-modal');
-const pdfToast     = $('pdf-toast');
-const sidebar      = $('sidebar');
-const sidebarOverlay = $('sidebar-overlay');
-
-// ─── RENDER SIDEBAR ────────────────────────────────
-function renderSidebar(tierFilter = "all") {
-  sidebarList.innerHTML = "";
-  const progress = loadProgress();
-
-  SYLLABUS.forEach((section, si) => {
-    if (tierFilter !== "all" && section.tier !== parseInt(tierFilter)) return;
-
-    const completedInSection = section.topics.filter(t => {
-      const p = progress[t.id];
-      return p && p.status === "completed";
-    }).length;
-
-    const group = document.createElement('div');
-    group.className = 'section-group';
-    group.dataset.section = si;
-
-    const tierColorMap = { 1: "var(--tier1)", 2: "var(--tier2)", 3: "var(--tier3)" };
-    const tierLabelMap = { 1: "T1", 2: "T2", 3: "T3" };
-    const tierBgMap = { 1: "rgba(240,107,107,.15)", 2: "rgba(56,217,180,.12)", 3: "rgba(240,160,75,.12)" };
-
-    group.innerHTML = `
-      <div class="section-header" onclick="this.closest('.section-group').classList.toggle('collapsed')">
-        <span class="sec-badge" style="color:${tierColorMap[section.tier]};background:${tierBgMap[section.tier]}">${tierLabelMap[section.tier]}</span>
-        <span>${section.section}</span>
-        <span class="sec-count">${completedInSection}/${section.topics.length}</span>
-        <span class="section-chevron">▼</span>
-      </div>
-      <div class="section-topics"></div>
-    `;
-
-    const topicsWrap = group.querySelector('.section-topics');
-    section.topics.forEach(topic => {
-      const flatIdx = allTopics.findIndex(t => t.id === topic.id);
-      const tp = getTopicProgress(topic.id);
-      const statusClass = tp.status === 'completed' ? 'done' : tp.status === 'in_progress' ? 'in-progress' : '';
-      const statusIcon = tp.status === 'completed' ? '✓' : tp.status === 'in_progress' ? '…' : '';
-      const isActive = flatIdx === currentTopicIdx;
-
-      const item = document.createElement('div');
-      item.className = `topic-item${isActive ? ' active' : ''}`;
-      item.dataset.idx = flatIdx;
-      item.innerHTML = `
-        <span class="t-id">${topic.id}</span>
-        <span class="t-name">${topic.name}</span>
-        <span class="t-status ${statusClass}">${statusIcon}</span>
-      `;
-      item.addEventListener('click', () => openTopic(flatIdx));
-      topicsWrap.appendChild(item);
-    });
-
-    sidebarList.appendChild(group);
-  });
+// ── Progress helpers ───────────────────────────────
+const PK = 'aip_v2_progress';
+function loadProg() { try { return JSON.parse(localStorage.getItem(PK)||'{}'); } catch { return {}; } }
+function getTP(id) { return loadProg()[id] || { status:'not_started', score:null }; }
+function getOverall() {
+  const p = loadProg();
+  const total = ALL_TOPICS.length;
+  const done = ALL_TOPICS.filter(t => p[t.id] && p[t.id].status === 'completed').length;
+  const inProg = ALL_TOPICS.filter(t => p[t.id] && p[t.id].status === 'in_progress').length;
+  const scores = ALL_TOPICS.map(t => p[t.id] && p[t.id].score).filter(Boolean);
+  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+  return { total, done, inProg, avg, pct: Math.round((done/total)*100) };
 }
 
-// ─── RENDER HOME SECTIONS GRID ─────────────────────
-function renderHomeGrid() {
-  const grid = $('sections-grid');
-  grid.innerHTML = "";
-  const progress = loadProgress();
-  const icons = ["⚡","📱","🔧","🏗️","⚙️","🌊","🎨","📐","🧱","🔮","💉","🌐","💾","⏳","🔄","📡","📋","🗺️","🔒","🛡️","🧪","📊","🧠","🏗","🔀","🚀","📈","✅","📜","📄","⚙️","🔥","📦","🎯","🔍","🧮","📊","🗂️","🤝"];
-  const secIcons = {
-    "1 · Kotlin": "⚡",
-    "2 · Android Fundamentals": "📱",
-    "3 · Framework Internals": "🔧",
-    "4 · Jetpack Components": "🏗️",
-    "5 · Kotlin Coroutines": "⚙️",
-    "6 · Kotlin Flow": "🌊",
-    "7 · Jetpack Compose": "🎨",
-    "8 · Architecture": "📐",
-    "9 · SOLID": "🧱",
-    "10 · Design Patterns": "🔮",
-    "11 · Dependency Injection": "💉",
-    "12 · Networking": "🌐",
-    "13 · Room & Storage": "💾",
-    "14 · Background Processing": "⏳",
-    "15 · Services": "🔄",
-    "16 · BroadcastReceiver": "📡",
-    "17 · ContentProvider": "📋",
-    "18 · Navigation": "🗺️",
-    "19 · Security": "🔒",
-    "20 · Testing": "🧪",
-    "21 · Performance": "📊",
-    "22 · Memory Management": "🧠",
-    "23 · Gradle": "⚒️",
-    "24 · Modularization": "🔀",
-    "25 · CI/CD": "🚀",
-    "26 · Code Quality": "✅",
-    "27 · Permissions": "🛡️",
-    "28 · RecyclerView & UI": "📜",
-    "29 · Paging": "📄",
-    "30 · System Design": "🎯",
-    "31 · Firebase": "🔥",
-    "32 · App Release": "📦",
-    "33 · Scenario Questions": "💡",
-    "34 · Coding Questions": "💻",
-    "35 · Behavioral": "🤝",
-  };
-  const tierColorMap = { 1: "var(--tier1)", 2: "var(--tier2)", 3: "var(--tier3)" };
-  const tierLabelMap = { 1: "Tier 1 — Core", 2: "Tier 2 — Important", 3: "Tier 3 — Supporting" };
-  const tierBgMap = { 1: "rgba(240,107,107,.15)", 2: "rgba(56,217,180,.12)", 3: "rgba(240,160,75,.12)" };
+// ── Render helpers ─────────────────────────────────
+const T_COLORS = { 1:'#f87171', 2:'#3ecf8e', 3:'#f59e0b' };
+const T_LABELS = { 1:'Tier 1', 2:'Tier 2', 3:'Tier 3' };
 
-  SYLLABUS.forEach(section => {
-    const completed = section.topics.filter(t => {
-      const p = progress[t.id];
-      return p && p.status === "completed";
-    }).length;
-    const pct = Math.round((completed / section.topics.length) * 100);
-    const firstTopicIdx = allTopics.findIndex(t => t.id === section.topics[0].id);
-    const icon = secIcons[section.section] || "📘";
-
-    const card = document.createElement('div');
-    card.className = 'section-card fade-in';
-    card.style.setProperty('--card-color', section.color);
-    card.querySelector && null;
-    card.innerHTML = `
-      <div style="position:absolute;top:0;left:0;bottom:0;width:4px;background:${section.color};border-radius:var(--radius) 0 0 var(--radius)"></div>
-      <div class="sc-header">
-        <div class="sc-icon">${icon}</div>
-        <div>
-          <div class="sc-title">${section.section}</div>
-          <div style="font-size:11px;color:var(--muted)">${section.topics.length} topic${section.topics.length>1?'s':''}</div>
-        </div>
-        <div class="sc-tier" style="color:${tierColorMap[section.tier]};background:${tierBgMap[section.tier]}">${tierLabelMap[section.tier]}</div>
-      </div>
-      <div class="sc-topics">
-        ${section.topics.slice(0,4).map(t => `<span class="sc-tag">${t.id}</span>`).join('')}
-        ${section.topics.length > 4 ? `<span class="sc-tag">+${section.topics.length-4}</span>` : ''}
-      </div>
-      <div class="sc-progress">
-        <div class="sc-progress-fill" style="width:${pct}%;background:${section.color}"></div>
-      </div>
-      <div class="sc-footer">
-        <span>${completed}/${section.topics.length} completed</span>
-        <span>${pct}%</span>
-      </div>
-    `;
-    card.addEventListener('click', () => openTopic(firstTopicIdx));
-    grid.appendChild(card);
-  });
-}
-
-// ─── OPEN TOPIC ────────────────────────────────────
-function openTopic(idx) {
-  if (idx < 0 || idx >= allTopics.length) return;
-  currentTopicIdx = idx;
-  const topic = allTopics[idx];
-
-  // Update UI
-  homePage.style.display = 'none';
-  topicPage.classList.add('show');
-
-  topicTitle.textContent = `${topic.id} — ${topic.name}`;
-  topicBadge.textContent = `Tier ${topic.tier}`;
-  topicBadge.style.borderColor = topic.sectionColor;
-  topicBadge.style.color = topic.sectionColor;
-
-  // Load iframe
-  topicIframe.src = `android_interview_pdfs/${topic.file}`;
-
-  // Mark as in-progress if not done
-  const tp = getTopicProgress(topic.id);
-  if (tp.status === 'not_started') {
-    setTopicProgress(topic.id, { status: 'in_progress', lastVisited: new Date().toISOString() });
-  }
-
-  // Render nav pills (sibling topics in same section)
-  renderTopicNavPills(topic);
-
-  // Update sidebar active
-  renderSidebar(currentTierFilter);
-  updateStats();
-
-  // Prev/Next buttons
-  $('prev-btn').disabled = idx === 0;
-  $('next-btn').disabled = idx === allTopics.length - 1;
-  $('prev-btn').style.opacity = idx === 0 ? '0.4' : '1';
-  $('next-btn').style.opacity = idx === allTopics.length - 1 ? '0.4' : '1';
-
-  // Mark done button state
-  const isDone = tp.status === 'completed';
-  const doneBtn = $('mark-done-btn');
-  doneBtn.textContent = isDone ? '✓ Completed' : '✓ Mark Done';
-  doneBtn.style.opacity = isDone ? '0.6' : '1';
-
-  // Close sidebar on mobile
-  if (window.innerWidth <= 900) closeSidebar();
-
-  // Scroll top
-  window.scrollTo(0, 0);
-}
-
-function renderTopicNavPills(currentTopic) {
-  topicNavPills.innerHTML = '';
-  // Find same section topics
-  const sectionTopics = allTopics.filter(t => t.section === currentTopic.section);
-  sectionTopics.forEach(t => {
-    const flatIdx = allTopics.findIndex(ft => ft.id === t.id);
-    const tp = getTopicProgress(t.id);
-    const pill = document.createElement('div');
-    pill.className = `nav-pill${t.id === currentTopic.id ? ' active' : ''}${tp.status === 'completed' ? ' done' : ''}`;
-    pill.innerHTML = `<span class="pill-status"></span>${t.id}`;
-    pill.addEventListener('click', () => openTopic(flatIdx));
-    topicNavPills.appendChild(pill);
-  });
-}
-
-// ─── BACK TO HOME ─────────────────────────────────
-function goHome() {
-  topicPage.classList.remove('show');
-  homePage.style.display = 'block';
-  homePage.classList.add('fade-in');
-  topicIframe.src = '';
-  currentTopicIdx = -1;
-  renderSidebar(currentTierFilter);
-  renderHomeGrid();
-  updateStats();
-}
-
-// ─── STATS UPDATE ──────────────────────────────────
 function updateStats() {
-  const stats = getOverallStats();
-  const pct = Math.round((stats.completed / stats.total) * 100);
-
-  $('stat-completed').textContent = stats.completed;
-  $('stat-pct').textContent = pct + '%';
-  $('stat-score').textContent = stats.avgScore ? stats.avgScore + '%' : '—';
-
-  $('sidebar-progress-fill').style.width = pct + '%';
-  $('sidebar-progress-label').textContent = `${stats.completed} of ${stats.total} completed`;
-  $('sidebar-pct').textContent = pct + '%';
-  $('pill-completed-text').textContent = stats.completed + ' done';
-}
-
-// ─── MARK DONE ─────────────────────────────────────
-function markDone() {
-  if (currentTopicIdx < 0) return;
-  const topic = allTopics[currentTopicIdx];
-  const tp = getTopicProgress(topic.id);
-  if (tp.status !== 'completed') {
-    setTopicProgress(topic.id, { status: 'completed' });
-    $('mark-done-btn').textContent = '✓ Completed';
-    $('mark-done-btn').style.opacity = '0.6';
-    // Show quiz prompt
-    setTimeout(() => quizModal.classList.add('show'), 400);
-  }
-  renderSidebar(currentTierFilter);
-  updateStats();
-}
-
-// ─── QUIZ MODAL ────────────────────────────────────
-function saveQuizScore(score) {
-  if (currentTopicIdx < 0) return;
-  const topic = allTopics[currentTopicIdx];
-  setTopicProgress(topic.id, { quizScore: score });
-  quizModal.classList.remove('show');
-  updateStats();
-  showPdfToast(`Score saved: ${score}% — ${score >= 75 ? 'Great work! 🚀' : score >= 50 ? 'Keep practicing 📖' : 'Review this topic again 🔄'}`);
-}
-
-document.querySelectorAll('.score-opt').forEach(btn => {
-  btn.addEventListener('click', () => saveQuizScore(parseInt(btn.dataset.score)));
-});
-$('quiz-skip').addEventListener('click', () => quizModal.classList.remove('show'));
-quizModal.addEventListener('click', e => { if (e.target === quizModal) quizModal.classList.remove('show'); });
-
-// ─── PDF DOWNLOAD ───────────────────────────────────
-function downloadPDF() {
-  if (currentTopicIdx < 0) return;
-  const topic = allTopics[currentTopicIdx];
-  showPdfToast(`Opening print dialog for ${topic.id}…`);
-
-  // Open in new window and trigger print (browser saves as PDF)
-  const win = window.open(`android_interview_pdfs/${topic.file}`, '_blank');
-  if (win) {
-    win.addEventListener('load', () => {
-      setTimeout(() => win.print(), 600);
-    });
+  const s = getOverall();
+  // Topbar
+  document.getElementById('stat-done-txt').textContent = s.done + ' done';
+  document.getElementById('stat-pct-txt').textContent = s.pct + '%';
+  document.getElementById('tb-pct-fill').style.width = s.pct + '%';
+  // Hero ring
+  const circ = 2 * Math.PI * 46;
+  const ring = document.getElementById('ring-fill');
+  if (ring) { ring.style.strokeDashoffset = circ - (circ * s.pct / 100); }
+  document.getElementById('ring-pct').textContent = s.pct + '%';
+  // Stat cards
+  document.getElementById('sc-completed').textContent = s.done;
+  document.getElementById('sc-completed-sub').textContent = s.inProg + ' in progress';
+  document.getElementById('sc-score').textContent = s.avg ? s.avg + '%' : '—';
+  document.getElementById('sc-score-sub').textContent = s.avg ? (s.avg >= 75 ? '🚀 Interview Ready' : s.avg >= 50 ? '📖 Keep going' : '🔄 More practice') : 'Take quizzes first';
+  document.getElementById('sc-pct').textContent = s.pct + '%';
+  // Sidebar
+  document.getElementById('sb-label').textContent = s.done + ' of ' + s.total + ' completed';
+  document.getElementById('sb-pct').textContent = s.pct + '%';
+  document.getElementById('sb-fill').style.width = s.pct + '%';
+  // Streak bar
+  const nextTopic = ALL_TOPICS.find(t => getTP(t.id).status !== 'completed');
+  if (nextTopic) {
+    document.getElementById('streak-title').textContent = s.done > 0 ? `Keep going! ${s.done}/${s.total} done 🔥` : 'Start your preparation';
+    document.getElementById('streak-sub').textContent = 'Next: ' + nextTopic.id + ' — ' + nextTopic.name;
+    document.getElementById('next-topic-btn').onclick = () => window.location.href = nextTopic.file;
   }
 }
 
-function showPdfToast(msg) {
-  $('pdf-toast-text').textContent = msg;
-  pdfToast.classList.add('show');
-  setTimeout(() => pdfToast.classList.remove('show'), 3500);
+function renderSidebar(filter = 'all') {
+  const list = document.getElementById('sb-list');
+  list.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    if (filter !== 'all' && sec.tier !== parseInt(filter)) return;
+    const completedInSec = sec.topics.filter(t => getTP(t.id).status === 'completed').length;
+    const group = document.createElement('div');
+    group.className = 'sb-group';
+    const col = T_COLORS[sec.tier];
+    group.innerHTML = `
+      <div class="sb-group-header" onclick="this.closest('.sb-group').classList.toggle('collapsed')">
+        <span style="color:${col};font-size:12px">${sec.icon}</span>
+        <span class="sb-group-label">${sec.title}</span>
+        <span class="sb-group-count">${completedInSec}/${sec.topics.length}</span>
+        <span class="sb-chevron">▼</span>
+      </div>
+      <div class="sb-topics">
+        ${sec.topics.map(t => {
+          const tp = getTP(t.id);
+          const cls = tp.status === 'completed' ? 'done' : tp.status === 'in_progress' ? 'in-progress' : '';
+          const check = tp.status === 'completed' ? '✓' : tp.status === 'in_progress' ? '·' : '';
+          return `<div class="sb-topic ${cls}" onclick="window.location.href='${t.file}'">
+            <span class="t-id">${t.id}</span>
+            <span class="t-name">${t.name}</span>
+            <span class="t-check">${check}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    list.appendChild(group);
+  });
 }
 
-// ─── SEARCH ────────────────────────────────────────
+function renderSectionCards() {
+  const container = document.getElementById('section-cards');
+  container.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    const completed = sec.topics.filter(t => getTP(t.id).status === 'completed').length;
+    const pct = Math.round((completed / sec.topics.length) * 100);
+    const col = T_COLORS[sec.tier];
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="sc-accent-bar" style="background:linear-gradient(90deg,${col},transparent)"></div>
+      <div class="sc-head">
+        <div class="sc-icon" style="background:${col}18">${sec.icon}</div>
+        <div class="sc-meta">
+          <div class="sc-title">${sec.title}</div>
+          <div class="sc-info">
+            <span class="sc-tier-badge" style="color:${col};background:${col}18;border:1px solid ${col}33">${T_LABELS[sec.tier]}</span>
+            <span>${sec.topics.length} topic${sec.topics.length>1?'s':''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc-topic-tags">
+        ${sec.topics.slice(0,4).map(t=>`<span class="sc-tag">${t.id}</span>`).join('')}
+        ${sec.topics.length>4?`<span class="sc-tag">+${sec.topics.length-4}</span>`:''}
+      </div>
+      <div class="sc-prog-row">
+        <span class="sc-prog-nums">${completed}/${sec.topics.length}</span>
+        <span class="sc-prog-pct">${pct}%</span>
+      </div>
+      <div class="sc-prog-bar">
+        <div class="sc-prog-fill" style="width:${pct}%;background:${col}"></div>
+      </div>`;
+    card.addEventListener('click', () => window.location.href = sec.topics[0].file);
+    container.appendChild(card);
+  });
+}
+
+function renderTopicChips() {
+  const container = document.getElementById('topic-chips');
+  container.innerHTML = '';
+  ALL_TOPICS.forEach(t => {
+    const tp = getTP(t.id);
+    const cls = tp.status === 'completed' ? 'done' : tp.status === 'in_progress' ? 'in-progress' : '';
+    const col = T_COLORS[t.tier];
+    const check = tp.status === 'completed' ? '✓' : tp.status === 'in_progress' ? '·' : '';
+    const chip = document.createElement('div');
+    chip.className = `topic-chip ${cls}`;
+    chip.innerHTML = `
+      <span class="tc-tier-dot" style="background:${col}"></span>
+      <span class="tc-id">${t.id}</span>
+      <span class="tc-name">${t.name}</span>
+      <span class="tc-check" style="${tp.status==='completed'?'background:var(--green);border-color:var(--green);color:#000':''}">${check}</span>`;
+    chip.addEventListener('click', () => window.location.href = t.file);
+    container.appendChild(chip);
+  });
+}
+
+// ── Search ─────────────────────────────────────────
 function doSearch(q) {
-  if (!q.trim()) { searchRes.classList.remove('show'); return; }
-  const query = q.toLowerCase();
-  const results = allTopics.filter(t =>
-    t.id.toLowerCase().includes(query) ||
-    t.name.toLowerCase().includes(query) ||
-    (t.tags || []).some(tag => tag.toLowerCase().includes(query)) ||
-    t.section.toLowerCase().includes(query)
-  ).slice(0, 12);
+  const dd = document.getElementById('search-dd');
+  if (!q.trim()) { dd.classList.remove('open'); return; }
+  const lq = q.toLowerCase();
+  const results = ALL_TOPICS.filter(t =>
+    t.id.toLowerCase().includes(lq) ||
+    t.name.toLowerCase().includes(lq) ||
+    (t.tags||[]).some(tag => tag.toLowerCase().includes(lq)) ||
+    t.sectionTitle.toLowerCase().includes(lq)
+  ).slice(0,12);
 
   if (!results.length) {
-    searchRes.innerHTML = `<div class="empty-state" style="padding:20px"><div class="e-icon">🔍</div><div>No results for "${q}"</div></div>`;
+    dd.innerHTML = `<div style="padding:16px;text-align:center;color:#7880a0;font-size:13px">No results for "${q}"</div>`;
   } else {
-    searchRes.innerHTML = results.map(t => {
-      const flatIdx = allTopics.findIndex(ft => ft.id === t.id);
-      const matchedTags = (t.tags || []).filter(tag => tag.toLowerCase().includes(query));
-      return `<div class="search-item" data-idx="${flatIdx}">
-        <span class="s-id">${t.id}</span>
+    dd.innerHTML = results.map(t => {
+      const tp = getTP(t.id);
+      const matchTags = (t.tags||[]).filter(tag => tag.toLowerCase().includes(lq));
+      return `<div class="sd-item" onclick="window.location.href='${t.file}'">
+        <span class="sd-id">${t.id}</span>
         <div>
-          <div class="s-name">${t.name}</div>
-          ${matchedTags.length ? `<div class="s-tags">${matchedTags.slice(0,3).join(' · ')}</div>` : ''}
+          <div class="sd-name">${t.name}</div>
+          ${matchTags.length ? `<div class="sd-tags">${matchTags.slice(0,3).join(' · ')}</div>` : ''}
         </div>
+        ${tp.status==='completed' ? '<span style="color:#3ecf8e;font-size:12px">✓</span>' : ''}
       </div>`;
     }).join('');
-    searchRes.querySelectorAll('.search-item').forEach(item => {
-      item.addEventListener('click', () => {
-        openTopic(parseInt(item.dataset.idx));
-        searchRes.classList.remove('show');
-        searchInput.value = '';
-      });
-    });
   }
-  searchRes.classList.add('show');
+  dd.classList.add('open');
 }
 
-searchInput.addEventListener('input', e => doSearch(e.target.value));
-searchInput.addEventListener('focus', e => { if (e.target.value) doSearch(e.target.value); });
+document.getElementById('tb-search').addEventListener('input', e => doSearch(e.target.value));
+document.getElementById('tb-search').addEventListener('focus', e => { if (e.target.value) doSearch(e.target.value); });
 document.addEventListener('click', e => {
-  if (!e.target.closest('#search-wrap')) searchRes.classList.remove('show');
+  if (!e.target.closest('.tb-search-wrap')) document.getElementById('search-dd').classList.remove('open');
 });
 
-// ─── TIER FILTER ────────────────────────────────────
-$('tier-filter').addEventListener('click', e => {
-  const btn = e.target.closest('.filter-btn');
+// ── Sidebar filter ─────────────────────────────────
+document.getElementById('sb-filters').addEventListener('click', e => {
+  const btn = e.target.closest('.sb-filter');
   if (!btn) return;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTierFilter = btn.dataset.tier;
-  renderSidebar(currentTierFilter);
+  document.querySelectorAll('.sb-filter').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderSidebar(btn.dataset.tier);
 });
 
-// ─── NAVIGATION BUTTONS ─────────────────────────────
-$('prev-btn').addEventListener('click', () => { if (currentTopicIdx > 0) openTopic(currentTopicIdx - 1); });
-$('next-btn').addEventListener('click', () => { if (currentTopicIdx < allTopics.length-1) openTopic(currentTopicIdx + 1); });
-$('back-btn').addEventListener('click', goHome);
-$('mark-done-btn').addEventListener('click', markDone);
-$('quiz-btn').addEventListener('click', () => quizModal.classList.add('show'));
-$('pdf-btn').addEventListener('click', downloadPDF);
-
-// ─── MOBILE SIDEBAR ─────────────────────────────────
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  sidebarOverlay.classList.remove('show');
-}
-$('menu-toggle').addEventListener('click', () => {
+// ── Mobile sidebar ─────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('mob-overlay');
+document.getElementById('mob-menu').addEventListener('click', () => {
   sidebar.classList.toggle('open');
-  sidebarOverlay.classList.toggle('show');
+  overlay.classList.toggle('open');
 });
-sidebarOverlay.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+});
 
-// ─── KEYBOARD SHORTCUTS ─────────────────────────────
+// ── Keyboard shortcut: / ──────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowRight' && currentTopicIdx >= 0) openTopic(currentTopicIdx + 1);
-  if (e.key === 'ArrowLeft' && currentTopicIdx >= 0) openTopic(currentTopicIdx - 1);
-  if (e.key === 'Escape') { quizModal.classList.remove('show'); searchRes.classList.remove('show'); }
-  if (e.key === '/' || e.key === 'k') { e.preventDefault(); searchInput.focus(); }
+  if ((e.key === '/' || (e.ctrlKey && e.key === 'k')) && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('tb-search').focus();
+  }
 });
 
-// ─── URL HASH NAVIGATION ────────────────────────────
-function handleHash() {
-  const hash = window.location.hash.replace('#', '').toUpperCase();
-  if (hash) {
-    const idx = allTopics.findIndex(t => t.id === hash);
-    if (idx >= 0) { openTopic(idx); return; }
-  }
-  goHome();
-}
-
-window.addEventListener('hashchange', handleHash);
-
-// ─── INIT ────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────
 function init() {
-  renderSidebar('all');
-  renderHomeGrid();
   updateStats();
-  handleHash();
+  renderSidebar('all');
+  renderSectionCards();
+  renderTopicChips();
 }
 
 init();
+
+// Refresh on focus (returning from a topic page)
+window.addEventListener('focus', () => {
+  updateStats();
+  renderSidebar('all');
+  renderSectionCards();
+  renderTopicChips();
+});
 </script>
 </body>
 </html>
