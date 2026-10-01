@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>7F – Compose Navigation</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;} .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  p{margin-bottom:12px;} ul,ol{margin:8px 0 12px 20px;} li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>7F · Nav Compose</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>7F — Compose Navigation</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1</span>
+    <span>NavController · NavHost · Arguments · Nested Navigation · Deep Links · Back Stack</span>
+  </div>
+</div>
+
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>Navigation Compose is the Jetpack Navigation library adapted for Compose. It manages a back stack of Composable destinations, enabling type-safe navigation, argument passing, deep links, and nested navigation graphs — all without Activity or Fragment boilerplate.</p>
+  <div class="box info">
+    <strong>Core components:</strong>
+    <ul style="margin-top:8px;">
+      <li><code>NavController</code> — manages navigation state and back stack</li>
+      <li><code>NavHost</code> — the Composable that renders the current destination</li>
+      <li><code>NavGraph</code> — the set of destinations and connections, defined in code</li>
+    </ul>
+  </div>
+</section>
+
+<section id="how">
+  <h2>2 · How It Works</h2>
+  <h3>Basic Setup</h3>
+  <div class="ascii">MainActivity (single Activity)
+  └── NavHost
+       ├── composable("home") → HomeScreen()
+       ├── composable("product/{id}") → ProductDetailScreen()
+       ├── composable("cart") → CartScreen()
+       └── navigation("auth") → nested AuthGraph
+            ├── composable("login") → LoginScreen()
+            └── composable("register") → RegisterScreen()</div>
+
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AppNavHost</span>(navController: <span class="type">NavHostController</span> = <span class="fn">rememberNavController</span>()) {
+    <span class="type">NavHost</span>(
+        navController = navController,
+        startDestination = <span class="str">"home"</span>
+    ) {
+        <span class="fn">composable</span>(<span class="str">"home"</span>) {
+            <span class="type">HomeScreen</span>(onNavigateToProduct = { id ->
+                navController.<span class="fn">navigate</span>(<span class="str">"product/$id"</span>)
+            })
+        }
+        <span class="fn">composable</span>(
+            route = <span class="str">"product/{productId}"</span>,
+            arguments = <span class="fn">listOf</span>(<span class="fn">navArgument</span>(<span class="str">"productId"</span>) { type = <span class="type">NavType</span>.<span class="type">StringType</span> })
+        ) { backStackEntry ->
+            <span class="kw">val</span> productId = backStackEntry.arguments?.<span class="fn">getString</span>(<span class="str">"productId"</span>)
+            <span class="type">ProductDetailScreen</span>(productId = productId!!)
+        }
+    }
+}</code></pre>
+
+  <h3>Type-Safe Navigation (Navigation 2.8+ with Kotlin Serialization)</h3>
+  <pre><code><span class="cm">// Define routes as sealed class or @Serializable objects (Navigation 2.8+)</span>
+<span class="ann">@Serializable</span> <span class="kw">object</span> <span class="type">HomeRoute</span>
+<span class="ann">@Serializable</span> <span class="kw">data class</span> <span class="type">ProductRoute</span>(<span class="kw">val</span> productId: <span class="type">String</span>)
+<span class="ann">@Serializable</span> <span class="kw">object</span> <span class="type">CartRoute</span>
+
+<span class="type">NavHost</span>(navController, startDestination = <span class="type">HomeRoute</span>) {
+    <span class="fn">composable</span>&lt;<span class="type">HomeRoute</span>&gt; { <span class="type">HomeScreen</span>(...) }
+    <span class="fn">composable</span>&lt;<span class="type">ProductRoute</span>&gt; { backStackEntry ->
+        <span class="kw">val</span> route: <span class="type">ProductRoute</span> = backStackEntry.<span class="fn">toRoute</span>()
+        <span class="type">ProductDetailScreen</span>(productId = route.productId)
+    }
+}
+
+<span class="cm">// Navigate with type safety</span>
+navController.<span class="fn">navigate</span>(<span class="type">ProductRoute</span>(productId = <span class="str">"abc123"</span>))</code></pre>
+
+  <h3>Back Stack Management</h3>
+  <pre><code><span class="cm">// Navigate and clear login from back stack (logout flow)</span>
+navController.<span class="fn">navigate</span>(<span class="type">HomeRoute</span>) {
+    <span class="fn">popUpTo</span>(<span class="type">LoginRoute</span>::<span class="kw">class</span>) { inclusive = <span class="kw">true</span> }  <span class="cm">// remove Login from stack</span>
+}
+
+<span class="cm">// launchSingleTop — don't stack duplicates</span>
+navController.<span class="fn">navigate</span>(<span class="type">HomeRoute</span>) {
+    <span class="fn">popUpTo</span>(<span class="type">HomeRoute</span>::<span class="kw">class</span>) { inclusive = <span class="kw">true</span> }
+    launchSingleTop = <span class="kw">true</span>
+}
+
+<span class="cm">// Navigate up (Back)</span>
+navController.<span class="fn">navigateUp</span>()    <span class="cm">// preferred over popBackStack()</span></code></pre>
+
+  <h3>Nested Navigation Graphs</h3>
+  <pre><code><span class="type">NavHost</span>(navController, startDestination = <span class="str">"main"</span>) {
+    <span class="cm">// Nested auth graph — separate back stack scope</span>
+    <span class="fn">navigation</span>(startDestination = <span class="str">"login"</span>, route = <span class="str">"auth"</span>) {
+        <span class="fn">composable</span>(<span class="str">"login"</span>) { <span class="type">LoginScreen</span>(...) }
+        <span class="fn">composable</span>(<span class="str">"register"</span>) { <span class="type">RegisterScreen</span>(...) }
+    }
+    <span class="fn">navigation</span>(startDestination = <span class="str">"home"</span>, route = <span class="str">"main"</span>) {
+        <span class="fn">composable</span>(<span class="str">"home"</span>) { <span class="type">HomeScreen</span>(...) }
+        <span class="fn">composable</span>(<span class="str">"cart"</span>) { <span class="type">CartScreen</span>(...) }
+    }
+}
+
+<span class="cm">// Scoped ViewModel to nested graph — shared between screens in that graph</span>
+<span class="kw">val</span> authViewModel: <span class="type">AuthViewModel</span> = <span class="fn">viewModel</span>(
+    viewModelStoreOwner = <span class="fn">remember</span>(navController) {
+        navController.<span class="fn">getBackStackEntry</span>(<span class="str">"auth"</span>)
+    }
+)</code></pre>
+
+  <h3>Deep Links</h3>
+  <pre><code><span class="fn">composable</span>(
+    route = <span class="str">"order/{orderId}"</span>,
+    deepLinks = <span class="fn">listOf</span>(<span class="fn">navDeepLink</span> {
+        uriPattern = <span class="str">"https://mybank.com/orders/{orderId}"</span>
+    })
+) { backStackEntry ->
+    <span class="kw">val</span> orderId = backStackEntry.arguments?.<span class="fn">getString</span>(<span class="str">"orderId"</span>)
+    <span class="type">OrderDetailScreen</span>(orderId!!)
+}</code></pre>
+</section>
+
+<section id="when">
+  <h2>3 · When to Use</h2>
+  <table>
+    <tr><th>Scenario</th><th>Approach</th></tr>
+    <tr><td>Single-activity Compose app</td><td>NavHost at the top of the composition tree, all screens as composable destinations</td></tr>
+    <tr><td>Scoped ViewModel for a flow (e.g. checkout)</td><td>Nested navigation graph — scope ViewModel to the graph's back stack entry</td></tr>
+    <tr><td>Bottom navigation tabs</td><td>Each tab is a nested graph; NavController navigates between them with launchSingleTop=true, saveState=true, restoreState=true</td></tr>
+    <tr><td>Deep link from notification</td><td>navDeepLink{} in composable, handled automatically by Navigation</td></tr>
+    <tr><td>Pass complex objects</td><td>Pass only ID, load in ViewModel — don't serialize full objects into nav args (size limit, no type safety for complex objects pre-2.8)</td></tr>
+  </table>
+</section>
+
+<section id="prod">
+  <h2>4 · Production Example — Banking App with Tabs + Auth Flow</h2>
+  <pre><code><span class="cm">// Sealed route hierarchy</span>
+<span class="ann">@Serializable</span> <span class="kw">sealed class</span> <span class="type">Route</span> {
+    <span class="ann">@Serializable</span> <span class="kw">object</span> <span class="type">Login</span> : <span class="type">Route</span>()
+    <span class="ann">@Serializable</span> <span class="kw">object</span> <span class="type">Home</span> : <span class="type">Route</span>()
+    <span class="ann">@Serializable</span> <span class="kw">data class</span> <span class="type">TransactionDetail</span>(<span class="kw">val</span> txId: <span class="type">String</span>) : <span class="type">Route</span>()
+    <span class="ann">@Serializable</span> <span class="kw">object</span> <span class="type">Transfer</span> : <span class="type">Route</span>()
+}
+
+<span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AppNavHost</span>() {
+    <span class="kw">val</span> navController = <span class="fn">rememberNavController</span>()
+    <span class="kw">val</span> authState <span class="kw">by</span> authViewModel.authState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="cm">// Navigate to login when auth state changes to logged out</span>
+    <span class="type">LaunchedEffect</span>(authState) {
+        <span class="kw">if</span> (authState <span class="kw">is</span> <span class="type">AuthState</span>.<span class="type">LoggedOut</span>) {
+            navController.<span class="fn">navigate</span>(<span class="type">Route</span>.<span class="type">Login</span>) {
+                <span class="fn">popUpTo</span>(<span class="num">0</span>) { inclusive = <span class="kw">true</span> }   <span class="cm">// clear entire back stack</span>
+            }
+        }
+    }
+
+    <span class="type">NavHost</span>(
+        navController = navController,
+        startDestination = <span class="kw">if</span> (authState <span class="kw">is</span> <span class="type">AuthState</span>.<span class="type">LoggedIn</span>) <span class="type">Route</span>.<span class="type">Home</span> <span class="kw">else</span> <span class="type">Route</span>.<span class="type">Login</span>
+    ) {
+        <span class="fn">composable</span>&lt;<span class="type">Route</span>.<span class="type">Login</span>&gt; {
+            <span class="type">LoginScreen</span>(onLoginSuccess = {
+                navController.<span class="fn">navigate</span>(<span class="type">Route</span>.<span class="type">Home</span>) {
+                    <span class="fn">popUpTo</span>(<span class="type">Route</span>.<span class="type">Login</span>::<span class="kw">class</span>) { inclusive = <span class="kw">true</span> }
+                }
+            })
+        }
+        <span class="fn">composable</span>&lt;<span class="type">Route</span>.<span class="type">Home</span>&gt; {
+            <span class="type">HomeScreen</span>(onTransactionClick = { txId ->
+                navController.<span class="fn">navigate</span>(<span class="type">Route</span>.<span class="type">TransactionDetail</span>(txId))
+            })
+        }
+        <span class="fn">composable</span>&lt;<span class="type">Route</span>.<span class="type">TransactionDetail</span>&gt; { entry ->
+            <span class="kw">val</span> route: <span class="type">Route</span>.<span class="type">TransactionDetail</span> = entry.<span class="fn">toRoute</span>()
+            <span class="type">TransactionDetailScreen</span>(txId = route.txId, onBack = navController::<span class="fn">navigateUp</span>)
+        }
+    }
+}</code></pre>
+
+  <h3>Bottom Navigation with State Preservation</h3>
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">MainScreen</span>() {
+    <span class="kw">val</span> navController = <span class="fn">rememberNavController</span>()
+    <span class="type">Scaffold</span>(
+        bottomBar = {
+            <span class="type">NavigationBar</span> {
+                <span class="kw">val</span> currentDest <span class="kw">by</span> navController.currentBackStackEntryAsState()
+                tabs.<span class="fn">forEach</span> { tab ->
+                    <span class="type">NavigationBarItem</span>(
+                        selected = currentDest?.destination?.hierarchy?.<span class="fn">any</span> { it.route == tab.route } == <span class="kw">true</span>,
+                        onClick = {
+                            navController.<span class="fn">navigate</span>(tab.route) {
+                                <span class="fn">popUpTo</span>(navController.graph.<span class="fn">findStartDestination</span>().id) { saveState = <span class="kw">true</span> }
+                                launchSingleTop = <span class="kw">true</span>
+                                restoreState = <span class="kw">true</span>   <span class="cm">// restore tab state on re-select</span>
+                            }
+                        },
+                        icon = { <span class="type">Icon</span>(tab.icon, tab.label) },
+                        label = { <span class="type">Text</span>(tab.label) }
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        <span class="type">NavHost</span>(navController, <span class="str">"home"</span>, <span class="type">Modifier</span>.<span class="fn">padding</span>(padding)) {
+            <span class="fn">navigation</span>(startDestination = <span class="str">"accounts"</span>, route = <span class="str">"home"</span>) { <span class="cm">/* ... */</span> }
+            <span class="fn">navigation</span>(startDestination = <span class="str">"transactions"</span>, route = <span class="str">"history"</span>) { <span class="cm">/* ... */</span> }
+            <span class="fn">navigation</span>(startDestination = <span class="str">"profile"</span>, route = <span class="str">"settings"</span>) { <span class="cm">/* ... */</span> }
+        }
+    }
+}</code></pre>
+</section>
+
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When</th></tr>
+    <tr><td>Navigation Compose (string routes)</td><td>Widely used, simple strings</td><td>Not type-safe; typos cause runtime crashes</td><td>Pre-2.8 apps</td></tr>
+    <tr><td>Navigation Compose (typed routes, 2.8+)</td><td>Type-safe, @Serializable, compile-time errors</td><td>Requires Navigation 2.8+ + KSP</td><td>All new projects</td></tr>
+    <tr><td>Fragment + Navigation Component</td><td>Mature, Safe Args, well-tested</td><td>Fragment lifecycle complexity</td><td>Existing XML apps</td></tr>
+    <tr><td>Custom navigation (state-based)</td><td>Full control, no library dependency</td><td>Re-implementing back stack, deep links, etc.</td><td>Very simple apps only; not recommended</td></tr>
+    <tr><td>Voyager / Decompose</td><td>Third-party alternatives with different trade-offs</td><td>Less ecosystem support, more risk</td><td>Specific needs not met by official library</td></tr>
+  </table>
+</section>
+
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+  <ul>
+    <li><strong>NavController not at composition top</strong>: Create NavController with <code>rememberNavController()</code> at the top of the composition tree and pass it down. Don't create it inside individual screens.</li>
+    <li><strong>Passing complex objects as nav args</strong>: Nav args are strings (Bundle-backed). Serialize only IDs; load full data in the destination ViewModel. Navigation 2.8 typed routes support basic types only via kotlinx.serialization.</li>
+    <li><strong>Missing saveState/restoreState in tab navigation</strong>: Without <code>saveState = true</code> / <code>restoreState = true</code>, switching tabs recreates the entire tab screen. This loses scroll position and state.</li>
+    <li><strong>Navigating in LaunchedEffect without correct keys</strong>: Always use a stable key (e.g., event or state value) in LaunchedEffect to avoid re-triggering navigation on recomposition.</li>
+    <li><strong>Back stack growth from bottom nav</strong>: Without <code>popUpTo(startDestination)</code>, repeatedly tapping tab icons stacks destinations. Always use the bottom nav pattern with popUpTo + launchSingleTop.</li>
+    <li><strong>ViewModel scope in nested graphs</strong>: Use <code>navController.getBackStackEntry("graphRoute")</code> as the ViewModelStoreOwner to scope a ViewModel to a graph, not to individual destinations.</li>
+  </ul>
+</section>
+
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "Navigation Compose uses NavController to manage a back stack of composable destinations declared in a NavHost. Each destination is a composable{} block with a route string or @Serializable type-safe route. Arguments are typed with navArgument, deep links with navDeepLink. Nested navigation graphs scope back stacks and ViewModels. For bottom tabs, popUpTo + launchSingleTop + saveState/restoreState are the canonical pattern to avoid back stack growth and preserve tab state."
+  </div>
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>Core components:</strong> NavController (back stack state), NavHost (renders current destination), NavGraph (set of destinations defined in code).<br/><br/>
+    <strong>Arguments:</strong> Typed via navArgument() — NavType.StringType, IntType, BoolType. Navigation 2.8+ supports @Serializable data class routes for full type safety with toRoute().<br/><br/>
+    <strong>Back stack:</strong> popUpTo() removes destinations; inclusive=true removes the target itself. For logout: popUpTo(0) { inclusive=true } clears the entire graph. For tab nav: popUpTo(startDestination) { saveState=true } + launchSingleTop=true + restoreState=true.<br/><br/>
+    <strong>Nested graphs:</strong> navigation{} blocks create sub-graphs with their own start destination. Useful for auth flow (scope AuthViewModel to the auth graph) and feature modules. ViewModel scoped to graph: viewModel(viewModelStoreOwner = navController.getBackStackEntry("graphRoute")).
+  </div>
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>NavController + NavHost + NavGraph are the three core components.</li>
+    <li>Type-safe navigation with @Serializable routes (Navigation 2.8+).</li>
+    <li>popUpTo + inclusive for clearing back stack (logout, auth flows).</li>
+    <li>Bottom navigation: popUpTo + launchSingleTop + saveState + restoreState.</li>
+    <li>Nested navigation graphs for scoped ViewModels and feature isolation.</li>
+    <li>Deep links via navDeepLink{} in composable declaration.</li>
+    <li>Never pass complex objects — pass IDs only.</li>
+  </ol>
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>How do you share a ViewModel between screens in a flow?</td><td>Scope the ViewModel to the nested navigation graph: viewModel(viewModelStoreOwner = navController.getBackStackEntry("checkoutGraph")). Both screens in the graph share the same instance; it's cleared when the graph is popped.</td></tr>
+    <tr><td>How do you handle back navigation from a composable?</td><td>Use navController.navigateUp() (preferred — respects up navigation stack) or navController.popBackStack() (pops regardless). Pass the callback down as a lambda: onBack: () -> Unit = navController::navigateUp.</td></tr>
+    <tr><td>What's the difference between popBackStack and navigateUp?</td><td>popBackStack() always pops the current destination. navigateUp() pops if there's a previous destination; otherwise delegates to the Activity's up navigation (useful for single-Activity with deep links).</td></tr>
+    <tr><td>How do deep links work in Navigation Compose?</td><td>Declare navDeepLink { uriPattern = "https://..." } in composable(). Declare the intent-filter in AndroidManifest for the Activity. Navigation automatically routes the incoming Intent to the correct composable and extracts path parameters.</td></tr>
+  </table>
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The key advantage of Navigation Compose over Fragment Navigation is that there's no separate Fragment lifecycle — the composable back stack IS the navigation stack. There's no onCreateView/onDestroyView duality. State inside NavBackStackEntry persists across navigation (remember survives going back), and ViewModel scoping to a graph is cleaner than the Fragment activityViewModels() approach. The main trade-off is that Navigation Compose is less mature for very complex multi-module graphs — but Navigation 2.8's type-safe routes significantly close the gap, and I'd choose it for all new projects."
+  </div>
+</section>
+
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+  <table>
+    <tr><th>Concept</th><th>API</th><th>Notes</th></tr>
+    <tr><td>Create NavController</td><td>rememberNavController()</td><td>At composition top, pass down</td></tr>
+    <tr><td>Navigate forward</td><td>navController.navigate(route)</td><td>Pushes to back stack</td></tr>
+    <tr><td>Navigate back</td><td>navController.navigateUp()</td><td>Preferred over popBackStack</td></tr>
+    <tr><td>Clear back stack</td><td>popUpTo(0) { inclusive=true }</td><td>Logout, auth complete</td></tr>
+    <tr><td>Single top</td><td>launchSingleTop = true</td><td>No duplicate destinations</td></tr>
+    <tr><td>Tab navigation</td><td>popUpTo(start) { saveState=true } + restoreState=true</td><td>Preserves tab state</td></tr>
+    <tr><td>Typed routes (2.8+)</td><td>@Serializable data class + toRoute()</td><td>Compile-time safe</td></tr>
+    <tr><td>Arguments</td><td>navArgument("key") { type = NavType.StringType }</td><td>Pass IDs only, not objects</td></tr>
+    <tr><td>Deep links</td><td>navDeepLink { uriPattern = "..." }</td><td>+ intent-filter in manifest</td></tr>
+    <tr><td>Graph-scoped ViewModel</td><td>viewModel(navController.getBackStackEntry("graph"))</td><td>Shared across graph destinations</td></tr>
+  </table>
+</section>
+
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What are the three core components of Navigation Compose?</summary>
+    <div class="ans">NavController (manages back stack state and provides navigate/popBackStack API), NavHost (Composable that renders the current destination from the back stack), NavGraph (the set of composable destinations and their routes, defined within the NavHost builder lambda).</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> How do you pass an argument to a composable destination?</summary>
+    <div class="ans">Declare the route with a placeholder: composable("product/{productId}", arguments = listOf(navArgument("productId") { type = NavType.StringType })) { backStackEntry -> val id = backStackEntry.arguments?.getString("productId") }. Navigate with: navController.navigate("product/abc123"). With Navigation 2.8+ typed routes: @Serializable data class ProductRoute(val productId: String), then navigate with navController.navigate(ProductRoute("abc123")) and val route: ProductRoute = backStackEntry.toRoute().</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> How do you implement a logout flow that prevents the user from pressing Back to the home screen?</summary>
+    <div class="ans"><pre><code>navController.navigate(Route.Login) {
+    popUpTo(0) { inclusive = true }  // clears entire back stack
+}</code></pre>popUpTo(0) removes all destinations back to the root (id=0). inclusive=true removes the start destination too. The user is left with only the Login screen and pressing Back exits the app.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Explain the bottom navigation tab pattern with saveState and restoreState.</summary>
+    <div class="ans">Without saveState/restoreState, switching tabs recreates the entire destination from scratch, losing scroll position and state. The pattern:<pre><code>navController.navigate(tab.route) {
+    popUpTo(navController.graph.findStartDestination().id) {
+        saveState = true  // save the current tab's back stack
+    }
+    launchSingleTop = true  // don't stack duplicate
+    restoreState = true     // restore previously saved state
+}</code></pre>This preserves each tab's individual state (scroll position, ViewModel state persists in memory) when switching between tabs.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How do you scope a ViewModel to a nested navigation graph?</summary>
+    <div class="ans"><pre><code>// Define nested graph with a route
+navigation(startDestination = "checkout_details", route = "checkout") {
+    composable("checkout_details") { ... }
+    composable("checkout_review") { ... }
+    composable("checkout_payment") { ... }
+}
+
+// In any composable inside "checkout" graph:
+val checkoutViewModel: CheckoutViewModel = viewModel(
+    viewModelStoreOwner = remember(navController) {
+        navController.getBackStackEntry("checkout")
+    }
+)
+</code></pre>The ViewModel is created once and shared across all screens in the "checkout" graph. It's cleared when the entire graph is popped from the back stack.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the difference between navigateUp() and popBackStack()?</summary>
+    <div class="ans">popBackStack() always attempts to pop the current destination from the back stack, regardless of context. navigateUp() first tries to navigate up within the NavController's graph; if the back stack is empty, it delegates to the Activity's onSupportNavigateUp(), which handles system Up navigation (e.g., when the app was opened from a deep link and needs to go to a parent Activity). For in-app Back navigation, use navigateUp(). For programmatic navigation within flows, popBackStack() gives more control.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How do you handle navigation events from a ViewModel safely?</summary>
+    <div class="ans">Use a SharedFlow (or Channel as a Flow) to emit one-shot navigation events. Collect in the Composable with LaunchedEffect to ensure it only fires once even on recomposition:<pre><code>// ViewModel
+val navEvents = Channel&lt;NavEvent&gt;(Channel.BUFFERED)
+
+// Composable
+LaunchedEffect(Unit) {
+    viewModel.navEvents.receiveAsFlow().collect { event ->
+        when (event) {
+            NavEvent.LoggedOut -> navController.navigate(Route.Login) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+}</code></pre>Using StateFlow for navigation events is a common mistake — it replays the last value on re-subscription, causing the navigation to fire again on recomposition.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] After rotating the device mid-checkout (3 screens deep), the user is navigated back to the home screen. What went wrong?</summary>
+    <div class="ans">The navigation event (e.g., navigate to home on auth state change) is being collected in a LaunchedEffect or from a StateFlow without lifecycle awareness, and fires again after rotation (because the state/event is still set). Specifically: if using StateFlow for a navigation event (instead of a one-shot Channel/SharedFlow), the last emitted value re-triggers on recomposition after rotation, causing an unintended navigation.<br/><br/>Fix: Use a Channel or SharedFlow(replay=0) for one-shot navigation events, not StateFlow. Alternatively, use ConsumedEvent wrappers or the official UiEvent pattern from Google's architecture samples. LaunchedEffect with a correct stable key (e.g., the event itself) ensures it only fires once per distinct event value.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Implement a multi-module navigation setup where each feature module contributes its own NavGraph.</summary>
+    <div class="ans"><pre><code>// :core:navigation module
+object AppRoutes {
+    const val HOME_GRAPH = "home_graph"
+    const val AUTH_GRAPH = "auth_graph"
+}
+
+// :feature:home module — extension function adds its destinations
+fun NavGraphBuilder.homeGraph(navController: NavHostController) {
+    navigation(startDestination = "home", route = AppRoutes.HOME_GRAPH) {
+        composable("home") { HomeScreen(navController) }
+        composable("product/{id}") { backStackEntry ->
+            ProductScreen(backStackEntry.arguments?.getString("id")!!)
+        }
+    }
+}
+
+// :feature:auth module
+fun NavGraphBuilder.authGraph(navController: NavHostController) {
+    navigation(startDestination = "login", route = AppRoutes.AUTH_GRAPH) {
+        composable("login") { LoginScreen(navController) }
+        composable("register") { RegisterScreen(navController) }
+    }
+}
+
+// :app module — assembles all graphs
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = AppRoutes.HOME_GRAPH) {
+        homeGraph(navController)
+        authGraph(navController)
+    }
+}</code></pre>Each feature module defines a NavGraphBuilder extension function. The :app module assembles them. No feature module depends on another feature module — they only depend on :core:navigation.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] Deep links from FCM notifications open the app but land on the wrong screen. What are the possible causes?</summary>
+    <div class="ans">Common causes:<br/>1. <strong>Wrong intent handling</strong>: The intent from the FCM PendingIntent is not being passed to the NavController. In a single-Activity setup, the NavController processes incoming Intents from handleDeepLink(intent) — this happens automatically if you use NavHost, but the Activity must call navController.handleDeepLink(intent) in onNewIntent().<br/>2. <strong>Route mismatch</strong>: The URI pattern in navDeepLink{} doesn't match the URI in the notification exactly (trailing slash, query params, case sensitivity).<br/>3. <strong>Missing intent-filter</strong>: The deep link intent-filter in AndroidManifest.xml doesn't match the URI scheme/host/path.<br/>4. <strong>Auth state not ready</strong>: The NavHost starts with the unauthenticated start destination and navigates to login before the deep link is processed.<br/>Fix: Add logging to navController.addOnDestinationChangedListener{} to trace every navigation. Verify URI patterns with adb: adb shell am start -W -a android.intent.action.VIEW -d "https://myapp.com/orders/123".</div>
+  </details>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

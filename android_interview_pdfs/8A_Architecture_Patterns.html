@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>8A — Architecture Patterns | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .arch-diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:16px 0;font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:2;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">8A · Architecture Patterns</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> MVC, MVP, MVVM</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> MVI</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Clean Architecture Layers</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>8A</span> — Architecture Patterns</h1>
+    <p class="hero-desc">MVC, MVP, MVVM, MVI — what each solves and its trade-offs. Full layered architecture: UI → ViewModel → UseCase → Repository → Data Sources. When to use each pattern.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 8A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Why architecture patterns matter</h3>
+    <p>Architecture patterns solve the same fundamental problem: <strong>separation of concerns</strong>. In Android, without architecture, Activities and Fragments become God objects — containing business logic, UI code, data fetching, and state management all tangled together. The result: untestable, fragile, impossible-to-maintain code.</p>
+    <h3>The evolution</h3>
+    <ul>
+      <li><strong>MVC</strong> — classic pattern; Controller = Activity; View = XML; Model = data; Controller too big</li>
+      <li><strong>MVP</strong> — Presenter separates logic; testable; but Presenter leaks View references; boilerplate</li>
+      <li><strong>MVVM</strong> — ViewModel + LiveData/StateFlow; lifecycle-aware; two-way binding optional; Android recommended</li>
+      <li><strong>MVI</strong> — strict UDF; immutable state; sealed Intents; single state object; most predictable</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      In interviews, say: "We use MVVM with Clean Architecture layers — UI → ViewModel → UseCase → Repository → Remote/Local data sources. UseCases encapsulate single business rules, making them independently testable. Repository provides a single data access abstraction, hiding whether data comes from network or cache. We could layer MVI on top of MVVM if we need stricter state management."
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: MVC, MVP, MVVM →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. MVC, MVP, MVVM</div>
+
+    <h3>MVC — Model-View-Controller</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Layer</th><th>Android mapping</th><th>Responsibility</th></tr>
+      <tr><td>Model</td><td>Data classes, DB, API</td><td>Business data and logic</td></tr>
+      <tr><td>View</td><td>XML layouts</td><td>Display only</td></tr>
+      <tr><td>Controller</td><td>Activity / Fragment</td><td>Glue — handles events, updates View, calls Model</td></tr>
+    </table>
+    </div>
+    <p><strong>Problem</strong>: In Android, Activity is both Controller AND part of the lifecycle. Business logic in Activity = untestable. God Activity anti-pattern.</p>
+
+    <h3>MVP — Model-View-Presenter</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Layer</th><th>Android mapping</th><th>Responsibility</th></tr>
+      <tr><td>Model</td><td>Repository, data layer</td><td>Data and business logic</td></tr>
+      <tr><td>View</td><td>Activity/Fragment (behind interface)</td><td>UI only, delegates all logic</td></tr>
+      <tr><td>Presenter</td><td>Plain Kotlin class</td><td>Business logic, mediates between View and Model</td></tr>
+    </table>
+    </div>
+    <p><strong>Improvement</strong>: Presenter is testable (no Android deps). <strong>Problem</strong>: Presenter holds a View reference → memory leaks on rotation. Weak references or detach pattern needed. 1:1 Presenter-View coupling is boilerplate-heavy.</p>
+
+    <h3>MVVM — Model-View-ViewModel</h3>
+    <pre><code><span class="cm">// View observes ViewModel state — no direct reference from VM to View</span>
+<span class="kw">class</span> <span class="cl">OrderViewModel</span>(
+    <span class="kw">private val</span> placeOrder: <span class="cl">PlaceOrderUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="cm">// ViewModel never holds a reference to View/Activity</span>
+    <span class="kw">private val</span> _state = <span class="cl">MutableStateFlow</span>(<span class="cl">OrderState</span>())
+    <span class="kw">val</span> state: <span class="cl">StateFlow</span>&lt;<span class="cl">OrderState</span>&gt; = _state.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">submitOrder</span>(order: <span class="cl">Order</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(isLoading = <span class="kw">true</span>) }
+            <span class="kw">val</span> result = <span class="fn">placeOrder</span>(order)
+            _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(isLoading = <span class="kw">false</span>, result = result) }
+        }
+    }
+}
+<span class="cm">// View lifecycle: Activity destroyed → ViewModel survives rotation</span>
+<span class="cm">// View lifecycle: navigated away → ViewModel.onCleared() called</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: MVI →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9879;</div>3. MVI — Model-View-Intent</div>
+    <p>MVI takes UDF to its strictest form: a <strong>single immutable state object</strong>, sealed class <strong>Intents</strong> (user actions), and pure <strong>reducers</strong> that produce new state from old state + intent. No side effects in state — everything is explicit.</p>
+    <pre><code><span class="cm">// Intent: sealed class representing all possible user actions</span>
+<span class="kw">sealed class</span> <span class="cl">TransferIntent</span> {
+    <span class="kw">data class</span> <span class="cl">AmountChanged</span>(<span class="kw">val</span> amount: <span class="cl">String</span>) : <span class="cl">TransferIntent</span>()
+    <span class="kw">data class</span> <span class="cl">RecipientSelected</span>(<span class="kw">val</span> id: <span class="cl">String</span>) : <span class="cl">TransferIntent</span>()
+    <span class="kw">object</span> <span class="cl">SubmitTransfer</span> : <span class="cl">TransferIntent</span>()
+}
+
+<span class="cm">// State: single immutable data class</span>
+<span class="kw">data class</span> <span class="cl">TransferState</span>(
+    <span class="kw">val</span> amount: <span class="cl">String</span> = <span class="str">""</span>,
+    <span class="kw">val</span> recipientId: <span class="cl">String</span>? = <span class="kw">null</span>,
+    <span class="kw">val</span> isLoading: <span class="cl">Boolean</span> = <span class="kw">false</span>,
+    <span class="kw">val</span> error: <span class="cl">String</span>? = <span class="kw">null</span>,
+    <span class="kw">val</span> isSuccess: <span class="cl">Boolean</span> = <span class="kw">false</span>
+)
+
+<span class="cm">// ViewModel processes intents → produces new state</span>
+<span class="kw">class</span> <span class="cl">TransferViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">private val</span> _state = <span class="cl">MutableStateFlow</span>(<span class="cl">TransferState</span>())
+    <span class="kw">val</span> state = _state.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">processIntent</span>(intent: <span class="cl">TransferIntent</span>) {
+        <span class="kw">when</span> (intent) {
+            <span class="kw">is</span> <span class="cl">TransferIntent</span>.<span class="cl">AmountChanged</span> ->
+                _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(amount = intent.amount) }
+            <span class="kw">is</span> <span class="cl">TransferIntent</span>.<span class="cl">RecipientSelected</span> ->
+                _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(recipientId = intent.id) }
+            <span class="cl">TransferIntent</span>.<span class="cl">SubmitTransfer</span> -> <span class="fn">submitTransfer</span>()
+        }
+    }
+
+    <span class="kw">private fun</span> <span class="fn">submitTransfer</span>() {
+        viewModelScope.<span class="fn">launch</span> {
+            _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(isLoading = <span class="kw">true</span>) }
+            <span class="cm">// ... call use case</span>
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Clean Architecture →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128202;</div>4. Clean Architecture Layers</div>
+    <div class="arch-diagram">
+      <span style="color:#7c6af7">UI Layer</span> (Compose Screens + ViewModels)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↕ StateFlow / Events<br>
+      <span style="color:#56cfb2">Domain Layer</span> (UseCases / Interactors)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↕ suspend functions / Flow&lt;T&gt;<br>
+      <span style="color:#f5c842">Data Layer</span> (Repositories)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↕ suspend functions / Flow&lt;T&gt;<br>
+      <span style="color:#3ecf8e">Data Sources</span> (Remote API + Room DB + Preferences)
+    </div>
+
+    <h3>Each layer's responsibilities</h3>
+    <pre><code><span class="cm">// UI Layer: display state, forward events</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">TransferScreen</span>(viewModel: <span class="cl">TransferViewModel</span>) {
+    <span class="kw">val</span> state by viewModel.state.<span class="fn">collectAsStateWithLifecycle</span>()
+    <span class="cm">/* render state, send intents to viewModel */</span>
+}
+
+<span class="cm">// Domain Layer: business rules, no Android deps</span>
+<span class="kw">class</span> <span class="cl">ValidateTransferUseCase</span> {
+    <span class="kw">operator fun</span> <span class="fn">invoke</span>(
+        amount: <span class="cl">BigDecimal</span>, balance: <span class="cl">BigDecimal</span>
+    ): <span class="cl">ValidationResult</span> = <span class="kw">when</span> {
+        amount <= <span class="cl">BigDecimal</span>.<span class="cl">ZERO</span> -> <span class="cl">ValidationResult</span>.<span class="cl">InvalidAmount</span>
+        amount > balance -> <span class="cl">ValidationResult</span>.<span class="cl">InsufficientFunds</span>
+        <span class="kw">else</span> -> <span class="cl">ValidationResult</span>.<span class="cl">Valid</span>
+    }
+}
+
+<span class="kw">class</span> <span class="cl">ExecuteTransferUseCase</span>(
+    <span class="kw">private val</span> repository: <span class="cl">TransferRepository</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(
+        from: <span class="cl">Account</span>, to: <span class="cl">Account</span>, amount: <span class="cl">BigDecimal</span>
+    ): <span class="cl">Result</span>&lt;<span class="cl">Transfer</span>&gt; = <span class="kw">runCatching</span> {
+        repository.<span class="fn">executeTransfer</span>(from.id, to.id, amount)
+    }
+}
+
+<span class="cm">// Data Layer: data access abstraction</span>
+<span class="kw">interface</span> <span class="cl">TransferRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">executeTransfer</span>(fromId: <span class="cl">String</span>, toId: <span class="cl">String</span>, amount: <span class="cl">BigDecimal</span>): <span class="cl">Transfer</span>
+}
+
+<span class="kw">class</span> <span class="cl">TransferRepositoryImpl</span>(
+    <span class="kw">private val</span> remoteApi: <span class="cl">TransferApi</span>,    <span class="cm">// Retrofit</span>
+    <span class="kw">private val</span> localDao: <span class="cl">TransferDao</span>     <span class="cm">// Room</span>
+) : <span class="cl">TransferRepository</span> {
+    <span class="kw">override suspend fun</span> <span class="fn">executeTransfer</span>(fromId: <span class="cl">String</span>, toId: <span class="cl">String</span>, amount: <span class="cl">BigDecimal</span>): <span class="cl">Transfer</span> {
+        <span class="kw">val</span> transfer = remoteApi.<span class="fn">postTransfer</span>(<span class="cl">TransferRequest</span>(fromId, toId, amount))
+        localDao.<span class="fn">insert</span>(transfer.<span class="fn">toEntity</span>())
+        <span class="kw">return</span> transfer
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>Banking: full transfer flow with all layers</h3>
+    <pre><code><span class="cm">// ViewModel: MVVM orchestrator</span>
+<span class="kw">class</span> <span class="cl">TransferViewModel</span>(
+    <span class="kw">private val</span> validateTransfer: <span class="cl">ValidateTransferUseCase</span>,
+    <span class="kw">private val</span> executeTransfer: <span class="cl">ExecuteTransferUseCase</span>,
+    <span class="kw">private val</span> getAccount: <span class="cl">GetAccountUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">TransferUiState</span>&gt; =
+        getAccount()
+            .<span class="fn">map</span> { account -> <span class="cl">TransferUiState</span>(balance = account.<span class="fn">formattedBalance</span>()) }
+            .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>), <span class="cl">TransferUiState</span>.<span class="cl">Loading</span>)
+
+    <span class="kw">private val</span> _events = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">TransferEvent</span>&gt;(extraBufferCapacity = <span class="nu">1</span>)
+    <span class="kw">val</span> events = _events.<span class="fn">asSharedFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">submitTransfer</span>(amount: <span class="cl">BigDecimal</span>, recipientId: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            <span class="kw">val</span> account = (uiState.<span class="fn">value</span> <span class="kw">as</span>? <span class="cl">TransferUiState</span>.<span class="cl">Ready</span>)?.account ?: <span class="kw">return</span>@launch
+
+            <span class="kw">val</span> validation = <span class="fn">validateTransfer</span>(amount, account.balance)
+            <span class="kw">if</span> (validation != <span class="cl">ValidationResult</span>.<span class="cl">Valid</span>) {
+                _events.<span class="fn">emit</span>(<span class="cl">TransferEvent</span>.<span class="cl">ValidationError</span>(validation))
+                <span class="kw">return</span>@launch
+            }
+
+            <span class="fn">executeTransfer</span>(account, recipientId, amount)
+                .<span class="fn">onSuccess</span> { _events.<span class="fn">emit</span>(<span class="cl">TransferEvent</span>.<span class="cl">Success</span>(it)) }
+                .<span class="fn">onFailure</span> { _events.<span class="fn">emit</span>(<span class="cl">TransferEvent</span>.<span class="cl">Error</span>(it)) }
+        }
+    }
+}</code></pre>
+
+    <h3>Comparison table — when to choose each</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Pattern</th><th>Testability</th><th>Complexity</th><th>Best for</th></tr>
+      <tr><td>MVC</td><td>Poor (logic in Activity)</td><td>Low</td><td>Prototypes only</td></tr>
+      <tr><td>MVP</td><td>Good (Presenter pure)</td><td>Medium</td><td>Legacy codebases</td></tr>
+      <tr><td>MVVM</td><td>Excellent</td><td>Medium</td><td>Most Android apps — Google recommended</td></tr>
+      <tr><td>MVI</td><td>Excellent + auditable</td><td>High</td><td>Complex flows with many state transitions (checkout, onboarding)</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Fat ViewModel</div>
+      Moving all business logic to the ViewModel without UseCases creates a "Fat ViewModel" anti-pattern — the same problem as Fat Controller in MVC, just moved. UseCases should encapsulate discrete business rules; the ViewModel should only orchestrate them.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — Repository doing too much</div>
+      The Repository should be a clean data access abstraction — not the place for business logic. If a Repository method is called "validateAndSaveIfFundsAvailable", the validate part belongs in a UseCase, not the Repository.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — Domain layer depending on Android</div>
+      UseCases should be pure Kotlin with zero Android dependencies — no Context, no ViewModel, no Room entities. This is what makes them unit-testable with JUnit without Robolectric.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — Repository interface in domain layer</div>
+      Define the Repository interface in the domain layer, implementation in the data layer. This inverts the dependency — data layer depends on domain, not the other way. Enables mocking in UseCase tests without a real DB or network.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "We use MVVM with Clean Architecture. The UI layer has Compose composables and ViewModels. ViewModels expose StateFlow and receive events. The domain layer has UseCases — pure Kotlin, no Android deps, one business rule each. The data layer has Repositories that abstract Remote API and local Room database. Dependencies only flow inward: UI → Domain ← Data."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The architecture evolution: MVC had Activity as the Controller — god class, untestable. MVP extracted a Presenter but it held a View reference, causing memory leaks on rotation. MVVM solved this — ViewModel survives rotation, never holds a View reference, exposes observable state that the View subscribes to. Android Jetpack's ViewModel + LiveData/StateFlow makes MVVM lifecycle-safe.<br><br>On top of MVVM, Clean Architecture adds layers: UI calls UseCases, not Repositories directly. Each UseCase does one thing and is unit-testable without Robolectric. Repository interfaces live in the domain layer — implementations in the data layer — this inverts the dependency, enabling proper mocking in tests.<br><br>MVI adds stricter UDF on top: sealed class Intents describe all actions, a single immutable State describes all UI state, and a reducer maps Intent + State → new State. It's more boilerplate but makes complex checkout-style flows auditable — you can replay every state transition."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>MVVM + Clean Architecture</strong> = the Android standard; ViewModel has no View reference</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>UseCases = pure Kotlin</strong> — no Android deps, one business rule, independently testable</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Repository interface in domain</strong> — dependency inversion; data layer depends on domain</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>MVI = strict UDF</strong> — sealed Intents, single immutable state, for complex flows</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Layer diagram</strong>: UI → ViewModel → UseCase → Repository → API/DB</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "Why use a UseCase between ViewModel and Repository?"</h4>
+    <p>A: Three reasons: (1) Testability — UseCases can be unit-tested with JUnit, injecting a mock Repository. (2) Reuse — multiple ViewModels can use the same UseCase without duplicating logic. (3) Single responsibility — each UseCase encapsulates exactly one business rule. Without UseCases, business logic leaks into ViewModels, making them fat and hard to test.</p>
+    <h4>Q: "When would you choose MVI over MVVM?"</h4>
+    <p>A: For complex, multi-step flows with many possible states and transitions — checkout flows, onboarding, complex forms with multiple validation rules. MVI's single state object and sealed Intents make the state machine explicit and auditable. You can log every Intent and replay the state transitions for debugging. For simpler screens (list + detail), MVVM is less boilerplate and equally appropriate.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking app, we use MVVM for most screens but MVI for the payment flow. The payment screen has 12+ possible states (form idle, amount entered, recipient selected, validating, payment pending, 3DS challenge, success, various error states). MVI's sealed state class makes every state explicit — no boolean flags, no "can this be null here?" guessing. The reducer is a pure function — testable with exhaustive when expressions. This is exactly the kind of complex flow where MVI pays its boilerplate cost.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Pattern comparison</h4>
+        <pre><code>MVC:  Activity = Controller (fat)
+MVP:  Presenter + View interface
+MVVM: ViewModel + StateFlow (standard)
+MVI:  sealed Intent + single State</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Layer diagram</h4>
+        <pre><code>UI: Composable + ViewModel
+     ↕ StateFlow
+Domain: UseCase (pure Kotlin)
+     ↕ interface
+Data: RepositoryImpl
+     ↕
+Remote API + Room DB</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>UseCase pattern</h4>
+        <pre><code>class GetUserUseCase(
+    private val repo: UserRepository // interface
+) {
+    suspend operator fun invoke(id: String) =
+        repo.getUser(id)
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>MVI structure</h4>
+        <pre><code>sealed class Intent { ... }
+data class State( ... )
+// ViewModel:
+fun process(intent: Intent) =
+  _state.update { reduce(it, intent) }</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the main problem with MVC in Android?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">In Android MVC, Activity/Fragment acts as the Controller. This creates a God Class — Activities handle button clicks, network calls, database queries, navigation, lifecycle management, and UI updates all in one place. The Controller is tightly coupled to Android SDK, making it untestable with JUnit. It's also lifecycle-unsafe: the Controller is destroyed on rotation, interrupting ongoing work.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the key difference between MVP and MVVM?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">In MVP, the Presenter holds a direct reference to the View interface and calls methods on it — tight coupling that requires careful lifecycle management (detach on destroy). In MVVM, the ViewModel exposes observable state (LiveData/StateFlow) and never holds a View reference. The View subscribes and unsubscribes independently. This makes MVVM lifecycle-safe automatically — ViewModel survives rotation, View re-subscribes on recreation.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why use UseCases between ViewModel and Repository?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Three reasons: (1) Single Responsibility — each UseCase encapsulates one business rule; (2) Testability — UseCases are pure Kotlin, no Android dependencies, unit-testable with JUnit using mock Repositories; (3) Reuse — multiple ViewModels can use the same UseCase. Without UseCases, business logic accumulates in ViewModels (Fat ViewModel anti-pattern) or Repositories.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is MVI and how does it differ from MVVM?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">MVI (Model-View-Intent) enforces strict UDF with three components: sealed Intent class (all user actions explicit), immutable State data class (all UI state in one object), and a reducer (Intent + State → new State). Unlike MVVM where ViewModels may have multiple state flows and methods, MVI has one state object and one entry point (processIntent). This makes state transitions auditable and the complete state machine visible. Tradeoff: more boilerplate.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Where should the Repository interface be defined — in the domain layer or data layer?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Domain layer. This is the Dependency Inversion Principle — the domain layer should not depend on the data layer. By defining the interface in domain and the implementation in data, the data layer depends on the domain (not the other way). This means UseCases can reference the interface without knowing about Retrofit or Room. In tests, you inject a fake Repository that implements the domain interface — zero Android SDK needed.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What dependencies should a UseCase have?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Only Repository interfaces (defined in domain) and other UseCases or domain services. A UseCase should have zero Android SDK dependencies — no Context, no ViewModel, no Room entities, no Retrofit annotations. This purity makes it unit-testable with plain JUnit5. If you find yourself adding <code>import android.*</code> in a UseCase, that's a code smell — the logic probably belongs in the data layer or a domain-specific service.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you choose MVI over MVVM for a feature?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use MVI when a screen has many possible states and transitions that are hard to track with boolean flags across multiple StateFlows — checkout flows, complex onboarding, multi-step forms, game UIs. MVI's single state object makes every combination of booleans explicit; you can't have an "impossible state" (loading AND error simultaneously) if the State is a sealed class. Use MVVM for simpler screens — list/detail, settings, profile — where the overhead of sealed Intents and reducers isn't justified.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A junior dev put network retry logic in the ViewModel. Is this correct? Where should it go?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Not correct for reusable retry logic. Network retry is a data-layer concern — it applies regardless of which screen triggers the request. Retry logic belongs in: (1) Repository (retryWhen on Flow, or manual retry in suspend function), or (2) a generic data source interceptor (OkHttp Interceptor for HTTP retries). The ViewModel should handle UI state for retries (show retry button, update loading state) but not implement the retry policy itself. If it's a business-level retry (e.g., retry payment only if network error, not if card declined), a UseCase can add retry semantics before calling the repository.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you test a UseCase that executes a bank transfer?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>class ExecuteTransferUseCaseTest { private val fakeRepo = FakeTransferRepository(); private val sut = ExecuteTransferUseCase(fakeRepo); @Test fun `transfer succeeds when funds available`() = runTest { val result = sut(fromAccount, toAccount, 100.toBigDecimal()); assertTrue(result.isSuccess); assertEquals(1, fakeRepo.recordedTransfers.size) }; @Test fun `transfer fails when API throws`() = runTest { fakeRepo.shouldThrow = IOException(); val result = sut(fromAccount, toAccount, 100.toBigDecimal()); assertTrue(result.isFailure) } }</code>. FakeTransferRepository implements the domain interface — no Retrofit, no Room, no Hilt. Tests run on JVM in milliseconds.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design the full architecture for a real-time price tracking screen in a banking app.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">UI: Compose screen collecting StateFlow. ViewModel: exposes PriceScreenState via stateIn(WhileSubscribed(5000)); uses SubscribeToPriceUpdatesUseCase. UseCase: SubscribeToPriceUpdatesUseCase(repo): returns Flow&lt;PriceUpdate&gt; — pure kotlin, composable with Flow operators. Repository interface (in domain): PriceRepository.observePrices(symbols): Flow&lt;PriceUpdate&gt;. Repository impl (in data): bridges WebSocket via callbackFlow; shareIn(appScope, WhileSubscribed(5000)) to share one socket among multiple subscribers. Local fallback: Room observeLatestPrices() on network error. Dependencies: ViewModel depends on UseCase; UseCase depends on Repository interface; RepositoryImpl depends on WebSocket client and Room DAO.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

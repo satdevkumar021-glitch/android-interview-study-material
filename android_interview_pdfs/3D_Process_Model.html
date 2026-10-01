@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>3D – Process Model</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>3D · Process Model</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>3D — Android Process Model & Lifecycle</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Senior Architecture</span>
+    <span>Process Priority · oom_adj / oom_score_adj · LMK · Application Sandbox · UID · ANR Internals</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>In standard desktop operating systems, an application's process lifetime is directly tied to the user opening and closing windows. In Android, <strong>process lifecycle is completely detached from application component lifecycle</strong>. Android keeps processes in memory as long as possible and reclaims them silently when system RAM runs low.</p>
+  <p><strong>The Core Problem Solved:</strong> Mobile devices operate under strict physical RAM constraints without swap space. To maintain high responsiveness, Android assigns a dynamic <strong>OOM adjustment score (oom_score_adj)</strong> to every process based on what the user is currently seeing or interacting with. When RAM thresholds are breached, the <strong>Low Memory Killer daemon (lmkd)</strong> kills processes with the highest score instantly (SIGKILL).</p>
+  <div class="box info">
+    <strong>Key Pillars of Android Process Architecture:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>Linux UID Sandbox:</strong> Every app is assigned a unique Linux User ID (e.g. <code>u0_a142</code>). Files created by this app cannot be accessed by other UIDs without explicit file permissions.</li>
+      <li><strong>OOM Adjustment Hierarchy:</strong> Processes transition dynamically from Foreground (Score 0) to Cached Background (Score 900–1000).</li>
+      <li><strong>Process Death vs State Restoration:</strong> When a background process is killed, Android preserves the back stack record and Bundle state in <code>ActivityTaskManagerService</code>. Upon return, a new process is spawned and the UI is restored from the saved bundle.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <div class="ascii">
+[OOM Score / Priority Hierarchy] (Low Score = High Priority / Safe from Death)
+
+ Score Range    Process Category                Components / Active State
+─────────────────────────────────────────────────────────────────────────────
+ -1000          System Native / Core            init, zygote, SystemServer
+ -900 to -800   Persistent System Apps          Telephony, System UI
+ 0              Foreground App (TOP)            Visible Activity receiving user touches
+ 100            Visible Process                 Activity visible but not focused (e.g., Dialog on top)
+ 200            Perceptible / Foreground Svc    Active Foreground Service with persistent Notification
+ 300            Backup Process                  App currently running backup agent
+ 400            Heavy Weight Process            App marked as heavy (e.g. Chrome tab)
+ 500            Service Process                 Background Service running > 30 mins (A Services)
+ 600–700        Home / Previous Process         Launcher or last active app user just stepped out of
+ 800            Cached / B Services             Background services running &lt; 30 mins
+ 900–1000       Cached Background Apps          No active components; LRU cache list (KILLED FIRST!)
+─────────────────────────────────────────────────────────────────────────────
+                                ▲
+                                │ When RAM is low: lmkd sends SIGKILL to Score 1000 first!
+  </div>
+
+  <h3>How Process Death Occurs (The LMK Pipeline)</h3>
+  <ol>
+    <li><strong>Memory Pressure Event:</strong> Free system RAM falls below predefined kernel watermarks (e.g., <code>low_wmark</code>).</li>
+    <li><strong>LMKD Evaluation:</strong> The user-space <strong>lmkd (Low Memory Killer Daemon)</strong> reads <code>/proc/[pid]/oom_score_adj</code> for all candidate processes.</li>
+    <li><strong>SIGKILL Execution:</strong> <code>lmkd</code> selects the process with the highest <code>oom_score_adj</code> (e.g. 999) that frees the required memory pages, and issues an immediate uncatchable <code>SIGKILL (9)</code>.</li>
+    <li><strong>No Callbacks Run:</strong> Neither <code>Activity.onDestroy()</code> nor <code>Application.onTerminate()</code> is invoked! The process memory space vanishes immediately.</li>
+  </ol>
+
+  <h3>ANR (Application Not Responding) Internals</h3>
+  <p>An ANR dialog is displayed when the application fails to respond to a system event within a hard deadline:</p>
+  <ul>
+    <li><strong>Input Events (Key/Touch):</strong> 5 seconds without finishing the touch dispatch.</li>
+    <li><strong>Foreground BroadcastReceiver:</strong> 10 seconds to return from <code>onReceive()</code>.</li>
+    <li><strong>Background BroadcastReceiver:</strong> 60 seconds.</li>
+    <li><strong>Foreground Service:</strong> 200 seconds without calling <code>startForeground()</code>.</li>
+  </ul>
+  <p>When the timeout expires, ATMS sends <code>SIGQUIT (3)</code> to the process. The ART runtime dumps all thread stack traces into <code>/data/anr/traces.txt</code>.</p>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & PROCESS SEPARATION STRATEGY ═══ -->
+<section id="when">
+  <h2>3 · Multi-Process Architecture: When to Use & Avoid</h2>
+
+  <table>
+    <tr>
+      <th>Architecture</th>
+      <th>Use Case</th>
+      <th>Trade-Offs & Pitfalls</th>
+    </tr>
+    <tr>
+      <td><strong>Single Process (Default)</strong></td>
+      <td>99% of applications (Banking, E-Commerce, Social).</td>
+      <td>Single heap; simple state sharing via ViewModel/Singletons.</td>
+    </tr>
+    <tr>
+      <td><strong>Separate Process (<code>:remote</code> / <code>:sync</code>)</strong></td>
+      <td>Independent heavy tasks (e.g. continuous audio playback, WebView isolation, core IPC daemon).</td>
+      <td>Duplicates <code>Application.onCreate()</code> memory (~20–40MB overhead per process); memory cannot be shared; Singletons do not sync across processes.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: Handling Process Death & SavedStateHandle</h2>
+  <p>Production Banking transfer flow resilient to process death, preserving multi-step transaction drafts with Jetpack <code>SavedStateHandle</code>.</p>
+
+  <pre><code><span class="kw">package</span> com.enterprise.banking.transfer
+
+<span class="kw">import</span> androidx.lifecycle.SavedStateHandle
+<span class="kw">import</span> androidx.lifecycle.ViewModel
+<span class="kw">import</span> androidx.lifecycle.viewModelScope
+<span class="kw">import</span> kotlinx.coroutines.flow.StateFlow
+<span class="kw">import</span> kotlinx.coroutines.launch
+<span class="kw">import</span> java.math.BigDecimal
+
+<span class="cm">/**
+ * Transfer ViewModel resilient to OS Process Death.
+ * SavedStateHandle automatically survives process termination via ATMS Bundle.
+ */</span>
+<span class="kw">class</span> <span class="type">TransferViewModel</span>(
+    <span class="kw">private val</span> savedStateHandle: <span class="type">SavedStateHandle</span>,
+    <span class="kw">private val</span> transferRepository: <span class="type">TransferRepository</span>
+) : <span class="type">ViewModel</span>() {
+
+    <span class="cm">// Automatically restored when process is resurrected!</span>
+    <span class="kw">val</span> targetIban: <span class="type">StateFlow</span>&lt;<span class="type">String</span>&gt; = savedStateHandle.<span class="fn">getStateFlow</span>(KEY_IBAN, <span class="str">""</span>)
+    <span class="kw">val</span> transferAmount: <span class="type">StateFlow</span>&lt;<span class="type">String</span>&gt; = savedStateHandle.<span class="fn">getStateFlow</span>(KEY_AMOUNT, <span class="str">"0.00"</span>)
+
+    <span class="kw">fun</span> <span class="fn">onIbanEntered</span>(iban: <span class="type">String</span>) {
+        savedStateHandle[KEY_IBAN] = iban
+    }
+
+    <span class="kw">fun</span> <span class="fn">onAmountEntered</span>(amount: <span class="type">String</span>) {
+        savedStateHandle[KEY_AMOUNT] = amount
+    }
+
+    <span class="kw">fun</span> <span class="fn">submitTransfer</span>() {
+        <span class="kw">val</span> iban = targetIban.value
+        <span class="kw">val</span> amount = <span class="type">BigDecimal</span>(transferAmount.value)
+
+        viewModelScope.<span class="fn">launch</span> {
+            transferRepository.<span class="fn">executeTransfer</span>(iban, amount)
+            <span class="cm">// Clear saved state on success</span>
+            savedStateHandle.<span class="fn">remove</span>&lt;<span class="type">String</span>&gt;(KEY_IBAN)
+            savedStateHandle.<span class="fn">remove</span>&lt;<span class="type">String</span>&gt;(KEY_AMOUNT)
+        }
+    }
+
+    <span class="kw">companion object</span> {
+        <span class="kw">private const val</span> KEY_IBAN = <span class="str">"key_transfer_target_iban"</span>
+        <span class="kw">private const val</span> KEY_AMOUNT = <span class="str">"key_transfer_amount"</span>
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · Process Death State Restoration Comparison</h2>
+
+  <table>
+    <tr>
+      <th>Persistence Mechanism</th>
+      <th>Survives Configuration Change?</th>
+      <th>Survives Process Death?</th>
+      <th>Survives Explicit App Kill / Swipe?</th>
+      <th>Storage Limit</th>
+    </tr>
+    <tr>
+      <td><strong>ViewModel (In-Memory)</strong></td>
+      <td>✅ Yes</td>
+      <td>❌ No (Wiped with process RAM)</td>
+      <td>❌ No</td>
+      <td>Heap limit</td>
+    </tr>
+    <tr>
+      <td><strong>SavedStateHandle / onSaveInstanceState</strong></td>
+      <td>✅ Yes</td>
+      <td>✅ Yes (Persisted in ATMS Bundle)</td>
+      <td>❌ No (Intentional exit clears state)</td>
+      <td>&lt; 500KB (Binder limit)</td>
+    </tr>
+    <tr>
+      <td><strong>Room Database / DataStore</strong></td>
+      <td>✅ Yes</td>
+      <td>✅ Yes</td>
+      <td>✅ Yes (Permanent on disk)</td>
+      <td>Disk capacity</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & Common Mistakes</h2>
+  <div class="box danger">
+    <strong>1. Relying on Static Singletons for Transient State:</strong> A common architectural mistake is storing authentication tokens or user drafts in global Kotlin <code>object</code> Singletons. When the app is in the background and the OS kills the process, the user returns and the Activity restarts with null Singleton fields, resulting in <code>NullPointerException</code> or silent logout.
+  </div>
+  <div class="box warn">
+    <strong>2. Expecting onDestroy() to Run Before Process Death:</strong> Never write cleanup or database commits inside <code>onDestroy()</code> expecting them to execute during low memory termination. <code>onDestroy()</code> is skipped entirely during LMK SIGKILL. Commit important state in <code>onPause()</code> / <code>onStop()</code> or write to disk.
+  </div>
+  <div class="box info">
+    <strong>3. Multi-Process Application.onCreate() Duplication:</strong> Adding <code>android:process=":remote"</code> to a Service causes the entire <code>Application.onCreate()</code> to run twice (once per process). If you initialize Firebase, Room, or DI graphs globally in <code>Application.onCreate()</code> without checking the current process name, you waste memory and cause database lock conflicts.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"Android decouples process lifecycle from component lifecycle. Every process is assigned an <code>oom_score_adj</code> score from -1000 (system) to 1000 (cached background). When system RAM drops below kernel watermarks, the <code>lmkd</code> daemon issues a <code>SIGKILL</code> to the highest-scoring cached processes without invoking <code>onDestroy()</code>. When the user returns, Android spawns a new process and restores the UI hierarchy from the <code>SavedStateHandle</code> bundle preserved in ATMS."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Linux Sandbox & UID:</strong> Android assigns a unique Linux UID per application package, isolating file access and memory spaces at the kernel level.</li>
+    <li><strong>OOM Adjustment Hierarchy (oom_score_adj):</strong>
+      <ul>
+        <li><strong>Foreground (Score 0):</strong> Active visible Activity with user focus.</li>
+        <li><strong>Perceptible / Foreground Service (Score 200):</strong> Playing audio, active GPS navigation with notification.</li>
+        <li><strong>Service Process (Score 500):</strong> Background services.</li>
+        <li><strong>Cached Background (Score 900–1000):</strong> No active components; killed first by LMK.</li>
+      </ul>
+    </li>
+    <li><strong>Process Death vs State Restoration:</strong>
+      <ul>
+        <li>When killed by LMK, ATMS retains the Activity back-stack metadata and <code>onSaveInstanceState()</code> Bundles.</li>
+        <li>Upon relaunch, ATMS forks a fresh process and passes the saved Bundle into <code>onCreate(savedInstanceState)</code> or Jetpack <code>SavedStateHandle</code>.</li>
+      </ul>
+    </li>
+    <li><strong>ANR Watchdog Architecture:</strong> ATMS tracks a timer for input events (5s) and broadcasts (10s/60s). If unhandled, it sends <code>SIGQUIT</code> to dump thread traces into <code>/data/anr/traces.txt</code>.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li><code>oom_score_adj</code> (OOM adjustment score) and <code>lmkd</code> (Low Memory Killer Daemon).</li>
+    <li>Instant <code>SIGKILL</code> (no <code>onDestroy()</code> or <code>onTerminate()</code> is called).</li>
+    <li>Difference between <strong>Configuration Change</strong> (ViewModel survives) vs <strong>Process Death</strong> (only <code>SavedStateHandle</code> / Disk survives).</li>
+    <li>ANR timeouts: <strong>5s</strong> for input touches, <strong>10s/60s</strong> for BroadcastReceivers, <strong>200s</strong> for Foreground Services.</li>
+    <li>Application Sandbox: Unique Linux <strong>UID</strong> per app.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How can you simulate Process Death in Android Studio?</h4>
+    <p>1. Put the app in the background (Home button).<br/>
+    2. In Android Studio's Logcat / Terminal, run: <code>adb shell am kill com.enterprise.banking</code> or click "Stop Process" in the Device File Explorer.<br/>
+    3. Reopen the app from the Recent Apps screen to verify if it restores correctly from <code>SavedStateHandle</code>.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: Does ViewModel survive process death?</h4>
+    <p>No. ViewModel instances reside entirely in the process's JVM heap. When the process is killed, the heap is destroyed. Only state explicitly saved in <code>SavedStateHandle</code> or persistent storage (Room/DataStore) survives.</p>
+  </div>
+  <div class="card">
+    <h4>Q: What is the purpose of shareUserId in Android manifest?</h4>
+    <p>Historically, <code>android:sharedUserId</code> allowed two apps signed with the same certificate to share the same Linux UID and access each other's data sandbox. It is now <strong>deprecated</strong> due to security risks and migration complexity.</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "Junior engineers test their apps against screen rotation; senior engineers test against <strong>Process Death</strong>. If your app crashes or loses form inputs when the user leaves to take a phone call and returns 10 minutes later, your state architecture is flawed. Always bind critical transient UI state to <code>SavedStateHandle</code>."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>Sandbox:</strong> Linux UID per app; files in <code>/data/data/&lt;package&gt;</code> restricted by OS permissions.</li>
+    <li><strong>oom_score_adj:</strong> -1000 (System) to 1000 (Cached background). High score killed first.</li>
+    <li><strong>LMKD:</strong> User-space daemon sending <code>SIGKILL</code> when RAM is low. No lifecycle callbacks execute.</li>
+    <li><strong>State Survives Death:</strong> <code>SavedStateHandle</code>, <code>onSaveInstanceState</code>, Room/DataStore.</li>
+    <li><strong>ANR Timeouts:</strong> 5s (Input), 10s (Foreground Broadcast), 60s (Background Broadcast), 200s (Foreground Service).</li>
+    <li><strong>Multi-Process (<code>android:process</code>):</strong> Re-runs <code>Application.onCreate()</code>; no shared memory; isolated heaps.</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. What determines which process Android terminates when RAM is low?</summary>
+    <div class="ans">
+      The <strong>Low Memory Killer daemon (lmkd)</strong> uses the process's <code>oom_score_adj</code> value. Processes with higher scores (such as cached background apps with no visible components, score 900–1000) are killed first.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. Does Activity.onDestroy() run when an app is killed due to low memory?</summary>
+    <div class="ans">
+      <strong>No.</strong> When LMK kills a background process, the kernel sends an immediate <code>SIGKILL</code>. The process terminates instantly without executing any cleanup or lifecycle callbacks like <code>onDestroy()</code> or <code>Application.onTerminate()</code>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. What is the ANR timeout for user touch input?</summary>
+    <div class="ans">
+      <strong>5 seconds.</strong> If the Main thread fails to process an input event (such as a tap or keypress) within 5 seconds, an ANR dialog is triggered.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. What is the difference between ViewModel and SavedStateHandle regarding process death?</summary>
+    <div class="ans">
+      <strong>ViewModel</strong> survives configuration changes (like screen rotations) because the <code>ViewModelStore</code> is retained in memory, but it does NOT survive process death. <strong>SavedStateHandle</strong> survives both configuration changes AND process death because its state bundle is transmitted to and retained by the system process (<code>ActivityTaskManagerService</code>).
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. What happens when an app declares android:process=":sync" in its manifest?</summary>
+    <div class="ans">
+      The declared component runs in a new, separate Linux process. Android executes <code>Application.onCreate()</code> again for this new process. Memory, static variables, and Singletons are completely isolated between the two processes.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. How does the Android sandbox isolate apps using Linux UIDs?</summary>
+    <div class="ans">
+      During installation, <code>PackageManagerService</code> assigns a unique Linux User ID (e.g. UID 10142) to the app. Linux kernel file system permissions restrict the app's files (<code>/data/data/pkg</code>) so that other UIDs cannot read or modify them without explicit inter-app sharing permissions.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What are the timeout thresholds for BroadcastReceivers before an ANR occurs?</summary>
+    <div class="ans">
+      Foreground broadcasts have a timeout of <strong>10 seconds</strong>. Background broadcasts have a timeout of <strong>60 seconds</strong>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. Explain how the system restores an app's UI after process death.</summary>
+    <div class="ans">
+      1. Before killing the background process, the system calls <code>onSaveInstanceState(Bundle)</code> and transfers the serialized Bundle to ATMS via Binder.<br/>
+      2. When the user taps the app in Recents, ATMS detects no active process and forks a new process via Zygote.<br/>
+      3. The process runs <code>ActivityThread.main()</code>, initializes <code>Application</code>, and ATMS sends the saved Bundle.<br/>
+      4. The Activity is recreated with <code>onCreate(savedInstanceState)</code>, passing the bundle to View hierarchies and <code>SavedStateHandle</code>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. How do you analyze an ANR trace file generated in /data/anr/traces.txt?</summary>
+    <div class="ans">
+      1. Open the trace file and locate the main thread entry (<code>"main" prio=5 tid=1</code>).<br/>
+      2. Check the thread state: <code>BLOCKED</code> (waiting on a monitor/lock held by another thread), <code>WAITING</code> / <code>TIMED_WAIT</code> (waiting on I/O or sleep), or <code>RUNNABLE</code> (executing an infinite loop or heavy CPU task).<br/>
+      3. Inspect the stack trace to locate the exact class and line number causing the stall.<br/>
+      4. Check other background threads if the main thread is blocked waiting for a synchronized lock.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. Why is android:sharedUserId deprecated in modern Android?</summary>
+    <div class="ans">
+      <code>sharedUserId</code> caused serious security vulnerabilities (a compromised app could access all apps sharing the UID), broke Package Manager signature enforcement, prevented granular permission isolation, and created deadlocks during app updates. Google deprecated it in API 29 and recommends using <strong>ContentProviders</strong> or <strong>AIDL</strong> for secure inter-app data sharing.
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

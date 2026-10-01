@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>6D — Sharing: stateIn &amp; shareIn | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">6D · Sharing: stateIn &amp; shareIn</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> stateIn()</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> shareIn()</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> SharingStarted</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>6D</span> — Sharing: stateIn &amp; shareIn</h1>
+    <p class="hero-desc"><code>stateIn()</code> converts cold Flow to StateFlow. <code>shareIn()</code> to SharedFlow. SharingStarted strategies: Eagerly, Lazily, WhileSubscribed(5000). When to use each.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 6D</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>The problem they solve</h3>
+    <p>Repository functions typically return cold <code>Flow&lt;T&gt;</code>. If two collectors subscribe, the upstream (network/DB) runs twice. If a collector comes and goes, the network call restarts. <code>stateIn</code> and <code>shareIn</code> convert cold flows to hot flows, sharing one upstream execution among all collectors.</p>
+    <h3>stateIn vs shareIn</h3>
+    <ul>
+      <li><strong>stateIn()</strong> — converts to <strong>StateFlow</strong>; requires initial value; always has a current value; deduplicates; use for ViewModel UI state</li>
+      <li><strong>shareIn()</strong> — converts to <strong>SharedFlow</strong>; configurable replay; no required initial value; use for shared event streams</li>
+    </ul>
+    <h3>SharingStarted strategies</h3>
+    <ul>
+      <li><strong>Eagerly</strong> — starts immediately when scope starts; never stops</li>
+      <li><strong>Lazily</strong> — starts when first subscriber appears; never stops after that</li>
+      <li><strong>WhileSubscribed(stopTimeoutMillis)</strong> — starts on first subscriber; stops after the last subscriber leaves (with optional delay)</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <code>WhileSubscribed(5000)</code> is the production-grade default. The 5-second timeout means a configuration change (Activity rotation) won't cancel the upstream — the ViewModel survives rotation, and the new Activity subscribes within milliseconds. But navigating away and the upstream cancels after 5 seconds, saving battery and network resources.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: stateIn →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. stateIn()</div>
+    <h3>Signature</h3>
+    <pre><code><span class="kw">fun</span> &lt;T&gt; <span class="cl">Flow</span>&lt;T&gt;.<span class="fn">stateIn</span>(
+    scope: <span class="cl">CoroutineScope</span>,       <span class="cm">// where the shared coroutine lives</span>
+    started: <span class="cl">SharingStarted</span>,    <span class="cm">// when to start/stop upstream</span>
+    initialValue: T              <span class="cm">// value before first emission</span>
+): <span class="cl">StateFlow</span>&lt;T&gt;</code></pre>
+
+    <h3>Standard ViewModel pattern</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">AccountViewModel</span>(repo: <span class="cl">AccountRepository</span>) : <span class="cl">ViewModel</span>() {
+
+    <span class="cm">// Cold Flow from Room (re-queries on every collect without stateIn)</span>
+    <span class="kw">val</span> accountState: <span class="cl">StateFlow</span>&lt;<span class="cl">AccountUiState</span>&gt; =
+        repo.<span class="fn">getAccountFlow</span>()    <span class="cm">// cold Flow&lt;Account&gt; from Room</span>
+            .<span class="fn">map</span> { <span class="cl">AccountUiState</span>.<span class="cl">Success</span>(it) }
+            .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">AccountUiState</span>.<span class="cl">Error</span>(it)) }
+            .<span class="fn">stateIn</span>(
+                scope = viewModelScope,
+                started = <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>),
+                initialValue = <span class="cl">AccountUiState</span>.<span class="cl">Loading</span>
+            )
+    <span class="cm">// Now: single shared Room subscription</span>
+    <span class="cm">// Stops 5s after last subscriber (background navigation)</span>
+    <span class="cm">// Multiple Compose collectors share one upstream query</span>
+}</code></pre>
+
+    <h3>stateIn with operators</h3>
+    <pre><code><span class="cm">// Complex transformation → stateIn at the end</span>
+<span class="kw">val</span> filteredProducts: <span class="cl">StateFlow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt; =
+    <span class="fn">combine</span>(repo.<span class="fn">allProducts</span>(), searchQuery, activeFilters) { products, q, f ->
+        products.<span class="fn">filter</span> { it.<span class="fn">matches</span>(q, f) }
+    }
+    .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>), <span class="fn">emptyList</span>())</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: shareIn →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128202;</div>3. shareIn()</div>
+    <h3>Signature</h3>
+    <pre><code><span class="kw">fun</span> &lt;T&gt; <span class="cl">Flow</span>&lt;T&gt;.<span class="fn">shareIn</span>(
+    scope: <span class="cl">CoroutineScope</span>,
+    started: <span class="cl">SharingStarted</span>,
+    replay: <span class="cl">Int</span> = <span class="nu">0</span>       <span class="cm">// how many values to replay to new subscribers</span>
+): <span class="cl">SharedFlow</span>&lt;T&gt;</code></pre>
+
+    <h3>Shared event stream</h3>
+    <pre><code><span class="cm">// Share one WebSocket connection among multiple ViewModels</span>
+<span class="kw">class</span> <span class="cl">PriceRepository</span>(private <span class="kw">val</span> socket: <span class="cl">PriceSocket</span>) {
+
+    <span class="cm">// SharedFlow: one socket, multiple subscribers</span>
+    <span class="kw">val</span> priceUpdates: <span class="cl">SharedFlow</span>&lt;<span class="cl">PriceUpdate</span>&gt; =
+        socket.<span class="fn">priceFlow</span>()  <span class="cm">// cold callbackFlow</span>
+            .<span class="fn">shareIn</span>(
+                scope = repositoryScope,
+                started = <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>),
+                replay = <span class="nu">1</span>    <span class="cm">// new subscribers get latest price immediately</span>
+            )
+}
+
+<span class="cm">// ProductViewModel and CartViewModel can both subscribe</span>
+<span class="cm">// without opening separate WebSocket connections</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: SharingStarted →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128337;</div>4. SharingStarted Strategies</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Strategy</th><th>Starts when</th><th>Stops when</th><th>Use case</th></tr>
+      <tr><td>Eagerly</td><td>Scope starts</td><td>Scope is cancelled</td><td>Must-have data, app-level streams</td></tr>
+      <tr><td>Lazily</td><td>First subscriber</td><td>Scope is cancelled (never pauses)</td><td>Data needed once initialized, keep-alive</td></tr>
+      <tr><td>WhileSubscribed(0)</td><td>First subscriber</td><td>Last subscriber leaves (immediately)</td><td>Pure resource efficiency</td></tr>
+      <tr><td>WhileSubscribed(5000)</td><td>First subscriber</td><td>5s after last subscriber leaves</td><td>ViewModel with config-change tolerance</td></tr>
+    </table>
+    </div>
+
+    <h3>WhileSubscribed(5000) — the standard</h3>
+    <pre><code><span class="cm">// Why 5000ms is the magic number:</span>
+<span class="cm">// - Activity rotation: Activity A destroyed → B created in ~200ms</span>
+<span class="cm">// - Process death threshold: system kills after several seconds</span>
+<span class="cm">// - 5000ms safely bridges config changes without killing upstream</span>
+<span class="cm">// - BUT: navigating away cleans up after 5s (saves battery)</span>
+
+<span class="cm">// For critical financial data — may want shorter timeout:</span>
+.<span class="fn">stateIn</span>(scope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">1_000</span>), <span class="cl">Loading</span>)
+
+<span class="cm">// For app-global auth state — use Eagerly:</span>
+.<span class="fn">stateIn</span>(appScope, <span class="cl">SharingStarted</span>.<span class="cl">Eagerly</span>, <span class="cl">AuthState</span>.<span class="cl">Unknown</span>)</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>Banking: shared account data across multiple ViewModels</h3>
+    <pre><code><span class="cm">// Repository exposes cold Flow from Room</span>
+<span class="kw">class</span> <span class="cl">AccountRepository</span>(
+    <span class="kw">private val</span> dao: <span class="cl">AccountDao</span>,
+    <span class="kw">private val</span> api: <span class="cl">AccountApi</span>,
+    <span class="kw">private val</span> scope: <span class="cl">CoroutineScope</span>  <span class="cm">// inject app-level scope</span>
+) {
+    <span class="cm">// Shared: one DB subscription, multiple ViewModels</span>
+    <span class="kw">val</span> accountFlow: <span class="cl">StateFlow</span>&lt;<span class="cl">Account</span>?&gt; =
+        dao.<span class="fn">observeAccount</span>()  <span class="cm">// Room Flow — cold</span>
+            .<span class="fn">stateIn</span>(scope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>), <span class="kw">null</span>)
+}
+
+<span class="cm">// ViewModel transforms the shared flow for its screen</span>
+<span class="kw">class</span> <span class="cl">DashboardViewModel</span>(repo: <span class="cl">AccountRepository</span>) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> dashState: <span class="cl">StateFlow</span>&lt;<span class="cl">DashboardState</span>&gt; =
+        repo.accountFlow
+            .<span class="fn">filterNotNull</span>()
+            .<span class="fn">map</span> { account ->
+                <span class="cl">DashboardState</span>(
+                    balance = account.<span class="fn">formatBalance</span>(),
+                    accountName = account.name
+                )
+            }
+            .<span class="fn">stateIn</span>(
+                viewModelScope,
+                <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>),
+                <span class="cl">DashboardState</span>.<span class="cl">Loading</span>
+            )
+}
+
+<span class="cm">// TransferViewModel also uses the same repo.accountFlow</span>
+<span class="cm">// → No duplicate DB queries, both observe same Room cursor</span>
+<span class="kw">class</span> <span class="cl">TransferViewModel</span>(repo: <span class="cl">AccountRepository</span>) : <span class="cl">ViewModel</span>() {
+    <span class="kw">val</span> senderAccount = repo.accountFlow
+        .<span class="fn">filterNotNull</span>()
+        .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5_000</span>), <span class="kw">null</span>)
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Using Eagerly in ViewModel</div>
+      <code>SharingStarted.Eagerly</code> in a ViewModel starts the upstream immediately and keeps it running forever in viewModelScope. If the ViewModel is created but the screen is never shown, the network/DB query still runs. Use <code>WhileSubscribed(5000)</code> instead — starts when the UI collects and stops when it leaves.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — stateIn without initial value in cold start</div>
+      The initialValue in <code>stateIn</code> is what collectors get before the first upstream emission. If you pass a blank/empty value and the UI renders it, the user sees an empty flash before real data loads. Design your state to include a Loading sentinel: <code>stateIn(scope, WhileSubscribed(5000), UiState.Loading)</code>.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — stateIn in ViewModel, shareIn in Repository</div>
+      Use <code>stateIn</code> in ViewModels (to expose UI state as StateFlow). Use <code>shareIn</code> in Repositories (to share one upstream data source — WebSocket, GPS — among multiple subscribers without creating duplicate connections).
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — WhileSubscribed timeout for config changes</div>
+      The 5000ms timeout in <code>WhileSubscribed(5000)</code> is the standard for ViewModels. It bridges Android configuration changes (rotation, language change) which typically complete in under 1 second. For app-global state (auth, user session), use Eagerly on the application scope.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "stateIn() converts a cold Flow to a StateFlow by starting a shared coroutine that collects the upstream and broadcasts to all subscribers. shareIn() converts to SharedFlow with configurable replay. The SharingStarted strategy WhileSubscribed(5000) is the standard — it starts on first subscriber and stops 5 seconds after the last subscriber leaves, bridging device rotations while saving resources when the screen is gone."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The problem stateIn and shareIn solve is the cold Flow duplication issue. Without them, if a ViewModel exposes a Flow from a Room DAO and three Compose components collect it, you get three separate database subscriptions. stateIn creates one shared collection coroutine that all subscribers observe — one DB connection regardless of subscriber count.<br><br>WhileSubscribed(5000) is carefully designed for Android's lifecycle. Device rotation destroys and recreates the Activity in under a second, so 5 seconds safely bridges the gap without stopping the upstream. But if the user navigates back, the 5-second timeout fires and the upstream stops, freeing the DB connection and stopping network polling.<br><br>Eagerly is for app-global state (authentication, user session) — you want it ready before any screen opens. In ViewModels, always use WhileSubscribed — never Eagerly (which would run the upstream even if the UI never subscribes)."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>stateIn → StateFlow</strong>; shareIn → SharedFlow; both share one upstream</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>WhileSubscribed(5000)</strong> — standard for ViewModels; bridges rotation</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Eagerly = app-scope</strong> for auth/session; never in ViewModel</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>initialValue in stateIn</strong> — what collectors get before first emission</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>stateIn in ViewModel</strong>, <strong>shareIn in Repository</strong> for shared connections</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What is the difference between stateIn and creating a MutableStateFlow manually?"</h4>
+    <p>A: With a manual MutableStateFlow, you write the boilerplate: <code>init { viewModelScope.launch { repo.flow().collect { _state.value = it } } }</code> — a coroutine that forever collects and pushes values. <code>stateIn</code> does exactly this but as a one-liner, also handling the SharingStarted lifecycle policy. It's more readable and less error-prone.</p>
+    <h4>Q: "When would you use shareIn with replay=1?"</h4>
+    <p>A: When new subscribers should immediately get the latest value but you don't want the StateFlow semantics (initial value requirement, deduplication). Example: a shared WebSocket price feed where new subscribers should see the current price immediately, but you don't have a meaningful initial price before the first server message.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking app, put <code>shareIn(appScope, WhileSubscribed(5000))</code> on the account balance Room flow in the Repository. DashboardViewModel, TransactionViewModel, and any widget that shows balance all subscribe to the same shared flow — one Room cursor open, one DB connection, consistent data. Without sharing, each ViewModel would open its own Room subscription, causing unnecessary DB load and potentially showing briefly inconsistent balances.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>stateIn pattern</h4>
+        <pre><code>flow.map { toUiState(it) }
+  .catch { emit(Error(it)) }
+  .stateIn(
+    scope = viewModelScope,
+    started = WhileSubscribed(5_000),
+    initialValue = Loading
+  )</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>shareIn pattern</h4>
+        <pre><code>coldFlow.shareIn(
+  scope = repositoryScope,
+  started = WhileSubscribed(5_000),
+  replay = 1  // 0 for events, 1+ for state
+)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SharingStarted guide</h4>
+        <pre><code>Eagerly          → app-global (auth)
+Lazily           → keep-alive after start
+WhileSubscribed  → ViewModel (default)
+  (5000)         → safe for rotation</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>stateIn vs MutableStateFlow</h4>
+        <pre><code>// Manual (verbose)
+init {
+  launch { repo.flow().collect { _s.value=it }}
+}
+
+// stateIn (clean)
+val s = repo.flow().stateIn(
+  scope, WhileSubscribed(5000), Loading)</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does stateIn() do?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>stateIn()</code> converts a cold Flow into a hot StateFlow. It starts a shared coroutine in the given scope that collects the upstream Flow and broadcasts the latest value to all subscribers. The <code>initialValue</code> is returned to new subscribers before the first upstream emission. Multiple collectors share one upstream execution.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is WhileSubscribed(5000) and why is 5000ms the standard value?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>WhileSubscribed(5000)</code> starts the upstream when the first subscriber joins and stops it 5 seconds after the last subscriber leaves. The 5-second value is chosen to survive Android configuration changes (screen rotation destroys and recreates Activity in ~100–500ms). The upstream doesn't stop during rotation. When the user navigates away permanently, it stops after 5 seconds, freeing resources.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between stateIn and shareIn?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>stateIn</code> produces a StateFlow: requires an initial value, always has a current value, uses equals() deduplication, suitable for UI state. <code>shareIn</code> produces a SharedFlow: no initial value required, configurable replay (0 for events, 1+ for state), no deduplication. Use stateIn in ViewModels for UI state; use shareIn in Repositories for shared connections (WebSocket, GPS).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is SharingStarted.Eagerly dangerous in a ViewModel?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Eagerly starts the upstream immediately when the scope starts (ViewModel init) and never stops until the scope is cancelled. This means network/DB calls start even if no collector ever subscribes — wasteful. It also means the upstream runs even when the app is in the background. Use WhileSubscribed to only run while the UI is active.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A ViewModel has a cold Room Flow. Three Compose composables all collect it. How many DB queries happen and how do you fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Three DB queries — each collector starts an independent Room subscription (cold Flow). Fix: convert to a hot flow with <code>stateIn(viewModelScope, WhileSubscribed(5000), initialValue)</code> in the ViewModel. Now there's one shared Room subscription, and all three Compose composables observe the same StateFlow. Result: one DB query regardless of subscriber count.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How is stateIn different from manually collecting a Flow into a MutableStateFlow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Functionally equivalent, but <code>stateIn</code> is a one-liner that handles: (1) the coroutine launching; (2) the SharingStarted lifecycle policy (WhileSubscribed stops the upstream when no subscribers — impossible to express concisely with manual approach); (3) cancellation and restart logic. Manual approach requires boilerplate in init {} and careful handling of stopping/restarting.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use shareIn in a Repository instead of stateIn?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>shareIn</code> in a Repository when you want to share an expensive upstream (WebSocket connection, Bluetooth GATT, GPS listener) among multiple ViewModels. <code>shareIn</code> with replay=1 means any new subscriber immediately gets the latest value without opening a new connection. Use stateIn in ViewModel for the UI-facing StateFlow (requires initial value, deduplication).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What happens to a stateIn(WhileSubscribed(5000)) flow when the user rotates the device?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The Activity is destroyed (Compose unsubscribes) and recreated (Compose resubscribes), typically within 200–500ms. The 5000ms timeout means the upstream does NOT stop — it keeps running throughout. When the new Activity subscribes, it immediately gets the latest StateFlow value and the ongoing upstream. No data is lost, no network call is restarted. Without the 5000ms timeout (WhileSubscribed(0)), the upstream would stop on destroy and restart on the new Activity, causing a brief loading flash.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design a Repository that shares a WebSocket price feed among multiple ViewModels with appropriate lifecycle management.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>class PriceRepository(socket: PriceSocket, scope: CoroutineScope) { val prices: SharedFlow&lt;Map&lt;String,Price&gt;&gt; = socket.priceFlow().scan(emptyMap()) { acc, update -> acc + (update.symbol to update) }.shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay=1) }</code>. The scan accumulates the latest price per symbol. shareIn(WhileSubscribed(5000)) means the WebSocket connects when the first ViewModel subscribes and disconnects 5s after all ViewModels unsubscribe (navigation away). replay=1 ensures new ViewModels instantly get the latest price map without waiting for the next WebSocket message.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between SharingStarted.Lazily and WhileSubscribed(Long.MAX_VALUE)?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Functionally nearly identical in practice — both start on first subscriber and stop only when the scope is cancelled. The subtle difference: <code>Lazily</code> is a first-class API with clear semantics. <code>WhileSubscribed(Long.MAX_VALUE)</code> technically stops after MAX_VALUE milliseconds (after ~292 million years, so effectively never). In practice, use Lazily when you want "start on first subscriber, keep forever" semantics. Use Eagerly when you want to pre-warm before any subscriber. Use WhileSubscribed(5000) for the standard ViewModel use case.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

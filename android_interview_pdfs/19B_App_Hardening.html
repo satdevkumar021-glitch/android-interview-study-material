@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>19B — App Hardening &amp; Auth | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">19B · App Hardening &amp; Auth</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>19B</span> — App Hardening &amp; Auth</h1>
+    <p class="hero-desc">BiometricPrompt, Play Integrity API, Root/Hook detection limitations, R8 code shrinking and obfuscation, WebView security, Intent hardening, and OWASP MASVS.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 19B</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 (Security Architecture)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Threat Model</div>
+    <p>Application hardening protects Android binaries against reverse engineering, runtime tampering (Frida, Xposed), unauthorized cloning, and compromised OS environments (rooted devices, Magisk/Zygisk).</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">OWASP MASVS (Mobile Application Security Verification Standard)</div>
+      <ul>
+        <li><strong>MASVS-STORAGE:</strong> Protection of sensitive data at rest.</li>
+        <li><strong>MASVS-CRYPTO:</strong> Proper use of cryptography (hardware keys, modern algorithms).</li>
+        <li><strong>MASVS-AUTH:</strong> Robust authentication and session management.</li>
+        <li><strong>MASVS-NETWORK:</strong> Secure TLS communication and certificate validation.</li>
+        <li><strong>MASVS-RESILIENCE:</strong> Obfuscation, anti-tampering, root detection, and device integrity verification.</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works &amp; Play Integrity →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works Under the Hood</div>
+
+    <h3>1. BiometricPrompt API</h3>
+    <p><code>BiometricPrompt</code> provides a uniform system UI for fingerprint, face, and iris authentication. Authenticators are classified by <code>BiometricManager.Authenticators</code>:</p>
+    <ul>
+      <li><code>BIOMETRIC_STRONG</code>: Hardware-backed TEE evaluation with &lt;1% Spoof Acceptance Rate (SAR). Required for <code>CryptoObject</code> cryptographic signing.</li>
+      <li><code>BIOMETRIC_WEAK</code>: Software or low-assurance biometrics. Cannot unlock Keystore CryptoObjects.</li>
+      <li><code>DEVICE_CREDENTIAL</code>: Device PIN, pattern, or password.</li>
+    </ul>
+
+    <h3>2. Play Integrity API (Replaces SafetyNet)</h3>
+    <p>Google Play Integrity verifies that your app binary is unmodified, running on a genuine certified Android device, and licensed from Google Play:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Verdict Field</th><th>Possible Values</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>appLicensingVerdict</code></td><td><code>LICENSED</code> / <code>UNLICENSED</code></td><td>Installed from Google Play</td></tr>
+          <tr><td><code>appRecognitionVerdict</code></td><td><code>PLAY_RECOGNIZED</code></td><td>Binary matches official developer signature</td></tr>
+          <tr><td><code>deviceRecognitionVerdict</code></td><td><code>MEETS_STRONG_INTEGRITY</code></td><td>Hardware-backed verified boot + locked bootloader</td></tr>
+          <tr><td><code>deviceRecognitionVerdict</code></td><td><code>MEETS_DEVICE_INTEGRITY</code></td><td>Certified Android device running Google Play services</td></tr>
+          <tr><td><code>deviceRecognitionVerdict</code></td><td><code>MEETS_BASIC_INTEGRITY</code></td><td>Basic device without known emulators / obvious root</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Code Obfuscation &amp; R8 →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. R8 Obfuscation &amp; Component Hardening</div>
+
+    <h3>1. R8 (Replaced ProGuard)</h3>
+    <p>R8 performs 4 optimizations: <strong>Shrinking</strong> (removes unused code/classes), <strong>Optimization</strong> (inlining, removing dead code branches), <strong>Obfuscation</strong> (renames classes/fields/methods to <code>a.b.c</code>), and <strong>D8 Desugaring</strong>.</p>
+    <pre><code><span class="cm"># proguard-rules.pro</span>
+-keepattributes *Annotation*, Signature, InnerClasses
+-keepclassmembers enum * { *; }
+
+<span class="cm"># Keep data models used by Kotlin Serialization or Retrofit</span>
+-keep class com.example.model.** { *; }
+-dontwarn okio.**</code></pre>
+
+    <h3>2. WebView Security Hardening</h3>
+    <ul>
+      <li>Never enable <code>setAllowFileAccessFromFileURLs(true)</code> or <code>setAllowUniversalAccessFromFileURLs(true)</code>.</li>
+      <li>Only call <code>setJavaScriptEnabled(true)</code> when strictly necessary.</li>
+      <li>Validate all URLs in <code>shouldOverrideUrlLoading()</code> before navigating.</li>
+      <li>Prevent JavaScript interface reflection attacks on older Android versions.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Example (Biometric Auth with CryptoObject)</div>
+
+    <pre><code><span class="kw">class</span> <span class="cl">BiometricAuthenticator</span>(
+    <span class="kw">private val</span> activity: <span class="cl">FragmentActivity</span>,
+    <span class="kw">private val</span> onAuthenticated: (<span class="cl">Cipher</span>) -&gt; <span class="cl">Unit</span>,
+    <span class="kw">private val</span> onError: (<span class="cl">String</span>) -&gt; <span class="cl">Unit</span>
+) {
+    <span class="kw">fun</span> <span class="fn">authenticateWithCrypto</span>(cipher: <span class="cl">Cipher</span>) {
+        <span class="kw">val</span> executor = <span class="cl">ContextCompat</span>.<span class="fn">getMainExecutor</span>(activity)
+        <span class="kw">val</span> prompt = <span class="cl">BiometricPrompt</span>(activity, executor, <span class="kw">object</span> : <span class="cl">BiometricPrompt</span>.<span class="cl">AuthenticationCallback</span>() {
+            <span class="kw">override fun</span> <span class="fn">onAuthenticationSucceeded</span>(result: <span class="cl">BiometricPrompt</span>.<span class="cl">AuthenticationResult</span>) {
+                result.cryptoObject?.cipher?.<span class="fn">let</span>(onAuthenticated)
+                    ?: <span class="fn">onError</span>(<span class="str">"CryptoObject was null"</span>)
+            }
+            <span class="kw">override fun</span> <span class="fn">onAuthenticationError</span>(errorCode: <span class="cl">Int</span>, errString: <span class="cl">CharSequence</span>) {
+                <span class="fn">onError</span>(errString.<span class="fn">toString</span>())
+            }
+        })
+
+        <span class="kw">val</span> promptInfo = <span class="cl">BiometricPrompt</span>.<span class="cl">PromptInfo</span>.<span class="cl">Builder</span>()
+            .<span class="fn">setTitle</span>(<span class="str">"Confirm Payment"</span>)
+            .<span class="fn">setSubtitle</span>(<span class="str">"Authenticate via biometric sensor"</span>)
+            .<span class="fn">setNegativeButtonText</span>(<span class="str">"Cancel"</span>)
+            .<span class="fn">setAllowedAuthenticators</span>(<span class="cl">BiometricManager</span>.<span class="cl">Authenticators</span>.BIOMETRIC_STRONG)
+            .<span class="fn">build</span>()
+
+        prompt.<span class="fn">authenticate</span>(promptInfo, <span class="cl">BiometricPrompt</span>.<span class="cl">CryptoObject</span>(cipher))
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mechanism</th><th>Strengths</th><th>Weaknesses</th><th>Senior Reality</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Client-side Root Check (RootBeer)</strong></td>
+            <td>Instant client-side feedback</td>
+            <td>Trivially bypassed via Frida hook or Magisk hide</td>
+            <td>Defense-in-depth only; never rely on it solely</td>
+          </tr>
+          <tr>
+            <td><strong>Play Integrity API</strong></td>
+            <td>Cryptographically signed token verified on backend</td>
+            <td>Requires network call and server token validation</td>
+            <td><strong>Gold standard for server integrity</strong></td>
+          </tr>
+          <tr>
+            <td><strong>R8 Obfuscation</strong></td>
+            <td>Built-in, zero cost, shrinks APK size</td>
+            <td>Does not encrypt logic or strings; only renames</td>
+            <td>Mandatory baseline for all release builds</td>
+          </tr>
+          <tr>
+            <td><strong>Commercial RASP (DexGuard)</strong></td>
+            <td>String encryption, control flow flattening, active anti-debug</td>
+            <td>Expensive licensing, builds slower</td>
+            <td>Required for top-tier banking &amp; defense apps</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Verifying Play Integrity Tokens on the Client Device</div>
+      <p>Decodes and checks Play Integrity tokens directly inside the Android app can be easily bypassed by attackers hooking the validation method using Frida. The token MUST be sent to your secure backend server and verified using Google's verification API.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Exported Components without android:exported="false"</div>
+      <p>Activities, Services, or Receivers with <code>&lt;intent-filter&gt;</code> are exported by default on older Android versions. Failing to set <code>android:exported="false"</code> allows malicious apps to launch private admin activities or trigger internal services directly.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Assuming Client-Side Anti-Tamper is 100% Unbreakable</div>
+      <p>Any code running on a device owned by an attacker can ultimately be reverse-engineered or hooked. High-value authorization decisions must always be made by the backend server.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "App hardening combines build-time optimizations and runtime integrity checks. R8 handles shrinking, dead code elimination, and symbol obfuscation. For authentication, BiometricPrompt paired with Keystore CryptoObject ensures cryptographic proof of user presence. To detect rooted or tampered devices, we use Google Play Integrity API with server-side token validation following OWASP MASVS standards."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "Client-side hardening is an exercise in defense-in-depth because client-side root checks (like RootBeer or file checks for /system/bin/su) can be bypassed by Magisk/Frida hooks. Therefore, true security relies on the Google Play Integrity API. The client requests an integrity token with a server nonce, and the backend verifies the signed JWT against Google's servers to confirm MEETS_STRONG_INTEGRITY and app licensing.<br><br>
+      For authentication, BiometricPrompt enforces BIOMETRIC_STRONG with a Cipher CryptoObject. On the build side, R8 shrinks and obfuscates bytecode while stripping unused code. For component security, all non-public Android components explicitly declare android:exported='false', WebViews disable local file access, and sensitive activities enforce FLAG_SECURE."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Play Integrity vs SafetyNet:</strong> Deprecated SafetyNet replaced by Play Integrity with server-side validation.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>BiometricPrompt + CryptoObject:</strong> Hardware TEE authorization for sensitive crypto.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>R8 Pipeline:</strong> Shrinking + Optimization + Obfuscation + Desugaring.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Root Detection Limitations:</strong> Why client checks fail and backend validation is mandatory.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>BIOMETRICS</h4>
+        <pre><code>BIOMETRIC_STRONG -> TEE hardware (&lt;1% SAR)
+BIOMETRIC_WEAK   -> 2D Face / Software
+DEVICE_CREDENTIAL-> PIN / Pattern / Password
+CryptoObject     -> Wraps Cipher / Signature</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PLAY INTEGRITY VERDICTS</h4>
+        <pre><code>MEETS_STRONG_INTEGRITY -> Hardware backed boot
+MEETS_DEVICE_INTEGRITY -> Certified Android OS
+MEETS_BASIC_INTEGRITY  -> No known emulators
+PLAY_RECOGNIZED        -> Legitimate app binary</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>R8 / PROGUARD</h4>
+        <pre><code>minifyEnabled true -> Enables R8
+shrinkResources true -> Drops unused assets
+-keep -> Protects reflection / models</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>COMPONENT HARDENING</h4>
+        <pre><code>android:exported="false" -> Protect components
+FLAG_SECURE -> Mask previews in Recents
+WebView -> Disable file access &amp; validate URLs</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the difference between ProGuard and R8?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">ProGuard was a separate standalone Java bytecode optimizer that ran before the Android dex compiler (D8). R8 is Google's all-in-one replacement that combines shrinking, optimization, obfuscation, and DEX compilation into a single, faster step while using the same ProGuard keep rules syntax.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the purpose of BiometricPrompt.CryptoObject?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A <code>CryptoObject</code> wraps a cryptographic <code>Cipher</code>, <code>Signature</code>, or <code>Mac</code> initialized with a hardware-backed Keystore key requiring biometric authentication. Successful authentication unlocks the cipher inside the secure hardware to complete sensitive operations (e.g. authorizing a money transfer).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What does android:exported="false" do?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">It ensures that an Android component (Activity, Service, or BroadcastReceiver) can only be launched by components belonging to the same application or the Android system (UID match), preventing external third-party apps from launching private internal screens or services.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — Why are client-side root detection libraries (like RootBeer) insufficient on their own?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Client-side root detection checks for su binaries, specific packages, or build tags. Attackers using tools like Magisk (Zygisk), Shamiko, or Frida can easily hook and override these check functions to always return <code>false</code>. Client checks serve only as a minor deterrent and must be backed by remote attestation (Play Integrity API).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — What are the 3 device integrity levels in Google Play Integrity API?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. <code>MEETS_BASIC_INTEGRITY</code>: Device passes basic system checks (not a recognized malicious emulator).<br>2. <code>MEETS_DEVICE_INTEGRITY</code>: Device is a certified Android device running Google Play services and passes CTS tests.<br>3. <code>MEETS_STRONG_INTEGRITY</code>: Device has hardware-backed verified boot with a locked bootloader and uncompromised OS key.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What security precautions must be taken when using WebViews?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Disable file access: <code>setAllowFileAccess(false)</code>.<br>2. Disable universal/file access from file URLs.<br>3. Enable JavaScript only when required.<br>4. Validate domains in <code>shouldOverrideUrlLoading()</code>.<br>5. Never expose sensitive Native Java interfaces via <code>addJavascriptInterface</code> to untrusted web content.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — What is OWASP MASVS and why is it important?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The Mobile Application Security Verification Standard (MASVS) by OWASP defines industry-standard security requirements across mobile architecture, data storage, cryptography, authentication, network communication, platform interaction, code quality, and resilience. It serves as the official security compliance baseline for banking and enterprise apps.</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — How do you design an end-to-end anti-tamper architecture for a banking transaction?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Client requests a cryptographic nonce from the backend server.<br>2. Client invokes Play Integrity API passing the nonce to generate a signed integrity token.<br>3. User authorizes transaction via BiometricPrompt with a TEE Keystore CryptoObject, signing transaction details.<br>4. Client transmits the signature, transaction payload, and Play Integrity token to backend.<br>5. Backend decrypts Play Integrity token directly with Google API to verify device and app authenticity, validates the nonce, and verifies the TEE signature before committing funds.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — Why did your app crash with ClassNotFoundException only in the Release build?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">In Release builds, R8 shrinking and obfuscation is active (<code>minifyEnabled true</code>). If a class (e.g., a Retrofit JSON model or dynamically loaded class via reflection) is not explicitly referenced in static bytecode, R8 strips it or renames its fields. Fix: Add appropriate <code>@Keep</code> annotations or configure <code>-keep class com.example.model.** { *; }</code> in <code>proguard-rules.pro</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — How do you prevent Tapjacking / Overlay attacks on sensitive payment buttons?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Set <code>android:filterTouchesWhenObscured="true"</code> on the sensitive <code>Button</code> / View in XML or call <code>view.setFilterTouchesWhenObscured(true)</code>. In Jetpack Compose, inspect touch event flags or set <code>View.setFilterTouchesWhenObscured(true)</code> on the ComposeView. This discards motion events when another window (e.g. a malicious system overlay) obscures the screen.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1I — Inline & Recursion | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1I · Inline & Recursion</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1I</span> — Inline &amp; Recursion</h1>
+    <p class="hero-desc"><code>inline</code>, <code>noinline</code>, <code>crossinline</code>, reified type parameters, and tail recursion — performance and type-safety features that power Kotlin's standard library and Flow operators.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1I</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What it is</h3>
+    <p><strong>inline</strong> functions eliminate the lambda object allocation overhead by copying the function body (and lambda bodies) directly into the call site at compile time. <strong>reified</strong> type parameters (only usable in inline functions) preserve generic type info at runtime, bypassing JVM type erasure. <strong>noinline</strong> and <strong>crossinline</strong> modify how lambdas in inline functions behave. <strong>Tail recursion</strong> (<code>tailrec</code>) optimizes recursive functions into iterative loops, eliminating stack overflow risk.</p>
+    <h3>Why it matters for Android</h3>
+    <ul>
+      <li><code>inline</code> — Flow operators like <code>map</code>, <code>filter</code>, <code>transform</code> are inline; <code>run</code>, <code>let</code>, <code>apply</code> are inline — zero lambda allocation overhead.</li>
+      <li><code>reified</code> — type-safe Intent extras, ViewModelProvider, Gson/Moshi deserialization: <code>inline fun &lt;reified T&gt; intent()</code></li>
+      <li><code>tailrec</code> — deep recursive tree traversal (file systems, JSON parsing, navigation graphs) without StackOverflowError</li>
+      <li>Understanding inline explains why <code>return</code> inside a lambda can exit the outer function (non-local return)</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <code>inline</code> trades binary size for performance. The compiler copy-pastes the function body at every call site. Good for small, frequently-called HOF utilities. Not for large functions called rarely — increases APK size.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>inline — how the compiler transforms it</h3>
+    <pre><code><span class="cm">// Source:</span>
+<span class="kw">inline fun</span> <span class="fn">measure</span>(block: () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> start = <span class="cl">System</span>.<span class="fn">nanoTime</span>()
+    <span class="fn">block</span>()
+    <span class="cl">Timber</span>.<span class="fn">d</span>(<span class="str">"${System.nanoTime() - start}ns"</span>)
+}
+
+<span class="cm">// Call site:</span>
+<span class="fn">measure</span> { <span class="fn">expensiveOp</span>() }
+
+<span class="cm">// Compiled to (conceptually):</span>
+<span class="kw">val</span> start = <span class="cl">System</span>.<span class="fn">nanoTime</span>()
+<span class="fn">expensiveOp</span>()                   <span class="cm">// lambda body inlined here</span>
+<span class="cl">Timber</span>.<span class="fn">d</span>(<span class="str">"${System.nanoTime() - start}ns"</span>)
+<span class="cm">// No lambda object created, no virtual call — just inlined code</span></code></pre>
+
+    <h3>Non-local return — enabled by inline</h3>
+    <pre><code><span class="cm">// Possible ONLY because measure is inline</span>
+<span class="kw">fun</span> <span class="fn">processIfActive</span>(user: <span class="cl">User</span>) {
+    <span class="fn">measure</span> {
+        <span class="kw">if</span> (!user.isActive) <span class="kw">return</span>   <span class="cm">// returns from processIfActive, not just the lambda!</span>
+        <span class="fn">doWork</span>(user)
+    }
+}
+<span class="cm">// This works because the lambda is inlined — the 'return' is in processIfActive's body</span></code></pre>
+
+    <h3>noinline — opt a single lambda out of inlining</h3>
+    <pre><code><span class="cm">// When you need to pass a lambda as an object (store, pass to another function)</span>
+<span class="kw">inline fun</span> <span class="fn">runWithCallback</span>(
+    action: () -> <span class="cl">Unit</span>,            <span class="cm">// inlined — body copied at call site</span>
+    <span class="kw">noinline</span> callback: () -> <span class="cl">Unit</span>   <span class="cm">// noinline — kept as lambda object</span>
+) {
+    <span class="fn">action</span>()
+    handler.<span class="fn">post</span>(callback)  <span class="cm">// callback passed to Handler.post — must be an object</span>
+}</code></pre>
+
+    <h3>crossinline — no non-local return allowed</h3>
+    <pre><code><span class="cm">// crossinline: lambda IS inlined but cannot use non-local return</span>
+<span class="cm">// Used when the lambda is called in a different execution context (another lambda, async)</span>
+<span class="kw">inline fun</span> <span class="fn">withThread</span>(<span class="kw">crossinline</span> block: () -> <span class="cl">Unit</span>) {
+    <span class="cl">Thread</span> {
+        <span class="fn">block</span>()      <span class="cm">// called inside Thread lambda — non-local return not safe here</span>
+    }.<span class="fn">start</span>()
+}
+
+<span class="kw">fun</span> <span class="fn">example</span>() {
+    <span class="fn">withThread</span> {
+        <span class="cm">// return  // ❌ compile error — crossinline prevents non-local return</span>
+        <span class="fn">doWork</span>()
+    }
+}</code></pre>
+
+    <h3>reified — preserve type at runtime</h3>
+    <pre><code><span class="cm">// Without reified — type erased at runtime</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">parse</span>(json: <span class="cl">String</span>): <span class="cl">T</span> = gson.<span class="fn">fromJson</span>(json, <span class="cl">T</span>::<span class="kw">class</span>.java)  <span class="cm">// ❌ won't compile</span>
+
+<span class="cm">// With reified — type available at runtime via inlining</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="fn">parse</span>(json: <span class="cl">String</span>): <span class="cl">T</span> =
+    gson.<span class="fn">fromJson</span>(json, <span class="cl">T</span>::<span class="kw">class</span>.java)  <span class="cm">// ✅ T::class.java available at each call site</span>
+
+<span class="kw">val</span> user: <span class="cl">UserProfile</span> = <span class="fn">parse</span>(jsonString)  <span class="cm">// no explicit class param needed</span>
+
+<span class="cm">// Type-safe Intent creation</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span> : <span class="cl">Activity</span>&gt; <span class="cl">Context</span>.<span class="fn">startActivity</span>(
+    <span class="kw">noinline</span> block: <span class="cl">Intent</span>.() -> <span class="cl">Unit</span> = {}
+) = <span class="fn">startActivity</span>(<span class="cl">Intent</span>(<span class="kw">this</span>, <span class="cl">T</span>::<span class="kw">class</span>.java).<span class="fn">apply</span>(block))
+
+<span class="cm">// Usage:</span>
+<span class="fn">startActivity</span>&lt;<span class="cl">DetailActivity</span>&gt; { <span class="fn">putExtra</span>(<span class="str">"id"</span>, productId) }</code></pre>
+
+    <h3>tailrec — safe deep recursion</h3>
+    <pre><code><span class="cm">// Without tailrec — StackOverflowError for deep trees</span>
+<span class="kw">fun</span> <span class="fn">sumTo</span>(n: <span class="cl">Int</span>): <span class="cl">Int</span> = <span class="kw">if</span> (n == <span class="nu">0</span>) <span class="nu">0</span> <span class="kw">else</span> n + <span class="fn">sumTo</span>(n - <span class="nu">1</span>)
+<span class="cm">// sumTo(100_000) → StackOverflowError</span>
+
+<span class="cm">// With tailrec — compiled to a loop</span>
+<span class="kw">tailrec fun</span> <span class="fn">sumTo</span>(n: <span class="cl">Int</span>, acc: <span class="cl">Int</span> = <span class="nu">0</span>): <span class="cl">Int</span> =
+    <span class="kw">if</span> (n == <span class="nu">0</span>) acc <span class="kw">else</span> <span class="fn">sumTo</span>(n - <span class="nu">1</span>, acc + n)
+<span class="cm">// sumTo(1_000_000) works fine — no stack growth</span>
+
+<span class="cm">// Requirement: recursive call must be the LAST operation (tail position)</span>
+<span class="cm">// n + sumTo(n-1) — NOT tail position (addition happens after the call)</span>
+<span class="cm">// sumTo(n-1, acc+n) — IS tail position (call is the last thing)</span></code></pre>
+
+    <h3>Summary Table</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Keyword</th><th>What it does</th><th>When to use</th></tr>
+      <tr><td><code>inline</code></td><td>Copy function + lambda bodies at call site; enables non-local return; enables reified</td><td>Small HOF utilities called frequently</td></tr>
+      <tr><td><code>noinline</code></td><td>Keep specific lambda as object, not inlined</td><td>When lambda needs to be stored, passed, or returned</td></tr>
+      <tr><td><code>crossinline</code></td><td>Inline but prohibit non-local return</td><td>When lambda is called in a different execution context</td></tr>
+      <tr><td><code>reified T</code></td><td>Preserve generic type at runtime via inlining</td><td>Type-safe generic functions: Intent, JSON parsing, ViewModelProvider</td></tr>
+      <tr><td><code>tailrec</code></td><td>Optimize tail-recursive function to iterative loop</td><td>Deep recursion: tree traversal, large Fibonacci, linear structures</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+    <h3>When to Use inline</h3>
+    <ul>
+      <li><strong>Small higher-order functions called in tight loops</strong> — collection operators, coroutine builders</li>
+      <li><strong>Functions that need reified type parameters</strong> — always requires inline</li>
+      <li><strong>Functions where non-local return is desired</strong> — scope functions (run, let, apply, etc.)</li>
+    </ul>
+    <h3>When NOT to use inline</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Mark large functions as inline — bloats every call site (APK size increase)</li>
+        <li>Mark functions with no lambda parameters as inline — no benefit; warning from compiler</li>
+        <li>Inline a function that's called rarely — overhead not worth the complexity</li>
+        <li>Use tailrec when the recursive call is not in tail position — compiler silently ignores it</li>
+      </ul>
+    </div>
+    <h3>When to Use reified</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Use Case</th><th>Example</th></tr>
+      <tr><td>Type-safe Intent/Activity start</td><td><code>inline fun &lt;reified T: Activity&gt; Context.startActivity()</code></td></tr>
+      <tr><td>JSON deserialization</td><td><code>inline fun &lt;reified T&gt; Gson.fromJson(json): T</code></td></tr>
+      <tr><td>ViewModel retrieval</td><td><code>inline fun &lt;reified T: ViewModel&gt; ComponentActivity.viewModels()</code></td></tr>
+      <tr><td>Type checking without cast</td><td><code>inline fun &lt;reified T&gt; Any.isInstanceOf(): Boolean = this is T</code></td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — inline utility functions, reified type-safe API parsing, tailrec for tree traversal.
+    </div>
+
+    <h3>inline — safeApiCall with non-local return</h3>
+    <pre><code><span class="cm">// data/remote/NetworkUtils.kt</span>
+<span class="kw">inline fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">safeCall</span>(block: () -> <span class="cl">T</span>): <span class="cl">Result</span>&lt;<span class="cl">T</span>&gt; = <span class="kw">try</span> {
+    <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">block</span>())
+} <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+    <span class="kw">throw</span> e
+} <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+    <span class="cl">Result</span>.<span class="fn">failure</span>(e)
+}
+<span class="cm">// ✅ inline: no lambda object allocation per API call</span>
+<span class="cm">// ✅ non-local return from the lambda propagates correctly</span>
+
+<span class="cm">// Usage in Repository:</span>
+<span class="kw">override suspend fun</span> <span class="fn">getTransactions</span>() = <span class="fn">safeCall</span> { api.<span class="fn">getTransactions</span>() }</code></pre>
+
+    <h3>reified — type-safe JSON parser extension</h3>
+    <pre><code><span class="cm">// data/remote/JsonExtensions.kt</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="cl">String</span>.<span class="fn">fromJson</span>(): <span class="cl">T</span> =
+    Gson().<span class="fn">fromJson</span>(<span class="kw">this</span>, <span class="cl">T</span>::<span class="kw">class</span>.java)
+
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="cl">Response</span>&lt;*&gt;.<span class="fn">errorBodyAs</span>(): <span class="cl">T?</span> =
+    errorBody()<span class="kw">?.</span><span class="fn">string</span>()<span class="kw">?.</span><span class="fn">fromJson</span>()
+
+<span class="cm">// Usage — no explicit class needed:</span>
+<span class="kw">val</span> profile: <span class="cl">UserProfile</span> = jsonString.<span class="fn">fromJson</span>()
+<span class="kw">val</span> error: <span class="cl">ApiError?</span> = response.<span class="fn">errorBodyAs</span>()   <span class="cm">// T inferred as ApiError</span></code></pre>
+
+    <h3>reified — type-safe Activity start</h3>
+    <pre><code><span class="cm">// presentation/extensions/ActivityExtensions.kt</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span> : <span class="cl">Activity</span>&gt; <span class="cl">Context</span>.<span class="fn">startActivity</span>(
+    <span class="kw">noinline</span> extras: <span class="cl">Intent</span>.() -> <span class="cl">Unit</span> = {}
+) {
+    <span class="fn">startActivity</span>(<span class="cl">Intent</span>(<span class="kw">this</span>, <span class="cl">T</span>::<span class="kw">class</span>.java).<span class="fn">apply</span>(extras))
+}
+
+<span class="cm">// Usage — clean and type-safe:</span>
+<span class="fn">startActivity</span>&lt;<span class="cl">PaymentActivity</span>&gt; {
+    <span class="fn">putExtra</span>(<span class="str">"orderId"</span>, orderId)
+    <span class="fn">putExtra</span>(<span class="str">"amount"</span>, amount)
+}</code></pre>
+
+    <h3>tailrec — traversing a navigation graph</h3>
+    <pre><code><span class="cm">// domain/util/NavigationUtils.kt</span>
+<span class="kw">data class</span> <span class="cl">NavNode</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> parent: <span class="cl">NavNode?</span>)
+
+<span class="cm">// Find root of navigation graph — tailrec avoids StackOverflow for deep stacks</span>
+<span class="kw">tailrec fun</span> <span class="fn">findRoot</span>(node: <span class="cl">NavNode</span>): <span class="cl">NavNode</span> =
+    <span class="kw">if</span> (node.parent == <span class="kw">null</span>) node
+    <span class="kw">else</span> <span class="fn">findRoot</span>(node.parent)   <span class="cm">// tail position — last operation</span>
+
+<span class="cm">// Find all ancestor IDs (tail-recursive accumulator)</span>
+<span class="kw">tailrec fun</span> <span class="fn">collectAncestors</span>(
+    node: <span class="cl">NavNode</span>?,
+    acc: <span class="cl">List</span>&lt;<span class="cl">String</span>&gt; = <span class="fn">emptyList</span>()
+): <span class="cl">List</span>&lt;<span class="cl">String</span>&gt; =
+    <span class="kw">if</span> (node == <span class="kw">null</span>) acc
+    <span class="kw">else</span> <span class="fn">collectAncestors</span>(node.parent, acc + node.id)</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td><code>inline</code> HOF</td><td>Zero lambda allocation; non-local return; reified</td><td>Increases bytecode size at each call site; public inline = public internal API</td><td>Small frequently-called HOF; reified needed</td></tr>
+      <tr><td>Regular HOF</td><td>Single bytecode location; no size cost</td><td>Lambda object allocated per call; no reified; no non-local return</td><td>Infrequently called; lambda needs to be stored/passed</td></tr>
+      <tr><td><code>tailrec</code></td><td>Stack-safe deep recursion; readable recursive style</td><td>Requires tail position; not all recursion is tail-recursive; may need accumulator</td><td>Deep tree traversal, large N recursion</td></tr>
+      <tr><td>Iterative loop</td><td>Always stack-safe; maximum performance</td><td>More verbose; complex recursion harder to write iteratively</td><td>When tailrec doesn't apply; hot path</td></tr>
+      <tr><td>Passing Class&lt;T&gt; explicitly</td><td>No inline needed</td><td>Verbose call sites; boilerplate</td><td>When reified can't be used (non-inline context)</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Inlining large functions — APK bloat</h3>
+    <pre><code><span class="cm">// ❌ BAD — large function inlined; body copied at every call site</span>
+<span class="kw">inline fun</span> <span class="fn">complexSetup</span>(block: () -> <span class="cl">Unit</span>) {
+    <span class="cm">// 50 lines of setup code...</span>
+    <span class="fn">block</span>()
+    <span class="cm">// 30 lines of teardown...</span>
+}
+<span class="cm">// Called 10 times → 800 lines of bytecode vs 80</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — keep inline functions small (under ~10 lines)</span>
+<span class="kw">inline fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">timed</span>(block: () -> <span class="cl">T</span>): <span class="cl">T</span> {
+    <span class="kw">val</span> t = <span class="cl">System</span>.<span class="fn">nanoTime</span>(); <span class="kw">return</span> <span class="fn">block</span>().<span class="fn">also</span> { <span class="cl">Timber</span>.<span class="fn">d</span>(<span class="str">"${System.nanoTime()-t}ns"</span>) }
+}</code></pre>
+
+    <h3>tailrec warning ignored — no optimization applied</h3>
+    <pre><code><span class="cm">// ❌ BAD — NOT tail position! Compiler silently skips optimization</span>
+<span class="kw">tailrec fun</span> <span class="fn">factorial</span>(n: <span class="cl">Int</span>): <span class="cl">Int</span> =
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="nu">1</span> <span class="kw">else</span> n * <span class="fn">factorial</span>(n - <span class="nu">1</span>)  <span class="cm">// multiplication happens AFTER call</span>
+<span class="cm">// tailrec keyword is silently ignored — no loop generated</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — accumulator pattern puts call in tail position</span>
+<span class="kw">tailrec fun</span> <span class="fn">factorial</span>(n: <span class="cl">Int</span>, acc: <span class="cl">Long</span> = <span class="nu">1</span>): <span class="cl">Long</span> =
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) acc <span class="kw">else</span> <span class="fn">factorial</span>(n - <span class="nu">1</span>, acc * n)  <span class="cm">// call IS the last op</span></code></pre>
+
+    <h3>noinline forgotten — compile error</h3>
+    <pre><code><span class="cm">// ❌ BAD — passing inlined lambda to a function that needs a function object</span>
+<span class="kw">inline fun</span> <span class="fn">withDelay</span>(action: () -> <span class="cl">Unit</span>) {
+    handler.<span class="fn">postDelayed</span>(action, <span class="nu">1000</span>)  <span class="cm">// ❌ Handler.postDelayed needs a Runnable object</span>
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — noinline keeps it as a lambda object</span>
+<span class="kw">inline fun</span> <span class="fn">withDelay</span>(<span class="kw">noinline</span> action: () -> <span class="cl">Unit</span>) {
+    handler.<span class="fn">postDelayed</span>(action, <span class="nu">1000</span>)
+}</code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Use <code>inline</code> only for higher-order functions that are small and called frequently.</li>
+      <li>Use <code>reified</code> to eliminate boilerplate <code>Class&lt;T&gt;</code> parameters from generic functions.</li>
+      <li>Always use an accumulator with <code>tailrec</code> to place the recursive call in tail position.</li>
+      <li>Use <code>noinline</code> when a lambda needs to be passed to another function, stored, or returned.</li>
+      <li>Use <code>crossinline</code> when the lambda is called in a different context (Thread, Handler, async callback).</li>
+      <li>Verify tailrec optimization works — Kotlin compiler warns if it can't apply it (but sometimes silently skips).</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "The <code>inline</code> keyword copies a function's body — and its lambda arguments — directly into the call site at compile time. This eliminates lambda object allocation for higher-order functions and enables two advanced features: <code>reified</code> type parameters, which preserve generic type info at runtime to bypass JVM erasure, and non-local returns from lambdas. <code>noinline</code> and <code>crossinline</code> control lambda behavior within inline functions. Tail recursion with <code>tailrec</code> converts recursive functions to loops, preventing StackOverflowErrors."
+    </div>
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Inline functions solve the overhead of higher-order functions. Normally, every lambda passed to a function creates a new object on the heap — allocation + virtual dispatch. For small utility functions called in loops or on every collection element, this adds up. Marking the function <code>inline</code> tells the compiler to copy the function body and all lambda bodies to the call site — zero allocation, zero virtual call.<br><br>
+      This enables two things. First, non-local return: inside an inline HOF, a <code>return</code> statement returns from the enclosing function. This is why the scope functions (<code>run</code>, <code>let</code>, <code>apply</code>) are inline. Second, reified: normally generic type parameters are erased at runtime. Inside an inline function, the compiler substitutes the actual type at each call site, so <code>T::class.java</code> is valid. I use this for type-safe Intent creation, JSON deserialization, and ViewModelProvider extensions — no explicit Class parameter needed.<br><br>
+      <code>noinline</code> opts a single lambda out of inlining — needed when you must pass the lambda as an object (to Handler.post, store it, etc.). <code>crossinline</code> inlines the lambda but prevents non-local return — needed when the lambda is called inside another lambda or thread.<br><br>
+      Tail recursion: <code>tailrec</code> converts a recursive function to a loop when the recursive call is in tail position — the last operation. I use it for tree traversal in navigation graphs. The trick is using an accumulator pattern to put the call in tail position."
+    </div>
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><code>inline</code> copies function body + lambda bodies to call site — eliminates lambda object allocation</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Non-local return: only possible in lambdas passed to <code>inline</code> functions — <code>return</code> exits the outer function</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>reified T</code> requires <code>inline</code> — preserves generic type at runtime; enables <code>T::class.java</code>, <code>is T</code></div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>noinline</code>: lambda stays as object — needed when passing to functions expecting a function reference</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>crossinline</code>: lambda is inlined but non-local return forbidden — for lambdas called in different execution context</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><code>tailrec</code> requires recursive call in <strong>tail position</strong> (last operation) — use accumulator pattern</div></div>
+    </div>
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>Kotlin compiler IR details of inlining</li>
+      <li>invokedynamic vs anonymous class lambda representations</li>
+      <li>Continuation-passing style and its relation to tail recursion</li>
+    </ul>
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>Why can't reified be used without inline?</td><td>Because inlining is the mechanism that preserves the type. The compiler substitutes the actual type at each call site during inlining. Without inlining there's only one copy of the bytecode, and the JVM erases generic types at runtime.</td></tr>
+      <tr><td>What is a non-local return?</td><td>A <code>return</code> inside a lambda that returns from the enclosing named function, not just the lambda. Only possible in lambdas passed to inline functions, because the lambda body is inlined into the outer function.</td></tr>
+      <tr><td>When would you use crossinline over noinline?</td><td><code>crossinline</code>: lambda IS inlined (no allocation) but non-local return is forbidden — use when the lambda runs in a different context (Thread, runOnUiThread). <code>noinline</code>: lambda NOT inlined — use when you need a lambda object to store, return, or pass elsewhere.</td></tr>
+      <tr><td>What happens if tailrec can't be applied?</td><td>Kotlin will issue a warning (or in some cases silently ignore) — the code still compiles and runs, but as regular recursion. Check by ensuring the recursive call is truly the last expression in every code path.</td></tr>
+    </table>
+    </div>
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "Understanding <code>inline</code> explains a lot of Kotlin's stdlib design. All five scope functions are inline — that's why non-local returns work in <code>run { return }</code>. All Flow operators like <code>transform { }</code> are inline — zero object allocation per item in a flow. When I write a <code>safeApiCall { }</code> wrapper as inline, I get the same benefit: the network call lambda is inlined, no allocation per API call. The trade-off is APK size — I keep inline functions small and focused. If a function has 50 lines, it doesn't belong as inline even if it takes a lambda."
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>INLINE</h4>
+        <pre><code>inline fun f(block: () -> T): T
+// Copies body + lambdas to call site
+// Benefits: no lambda alloc, non-local return, reified
+// Cost: larger bytecode per call site
+// Only for small HOF called frequently</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>NOINLINE / CROSSINLINE</h4>
+        <pre><code>noinline block: () -> T
+// Lambda stays as object
+// Use: pass to another fn, store, return
+
+crossinline block: () -> T
+// Lambda inlined but NO non-local return
+// Use: lambda called in Thread/Handler/async</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>REIFIED</h4>
+        <pre><code>inline fun &lt;reified T&gt; f(): T
+// Type T available at runtime
+// Requires inline (substituted per call site)
+// Use: T::class.java, is T, as T
+// Examples: fromJson&lt;User&gt;(), startActivity&lt;PayAct&gt;()</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>TAILREC</h4>
+        <pre><code>tailrec fun f(n: Int, acc: Int = 0): Int =
+    if (n == 0) acc else f(n-1, acc+n)
+// Recursive call must be LAST operation
+// Compiled to a loop — no stack growth
+// Use accumulator pattern for tail position</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>INLINE STDLIB EXAMPLES</h4>
+        <pre><code>let, run, with, apply, also → inline
+repeat, forEach → inline
+use → inline
+Flow.map, filter, transform → inline
+// That's why non-local return works in
+// scope functions!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY GOTCHAS</h4>
+        <pre><code>reified requires inline
+non-local return requires inline
+tailrec ignored if call not in tail pos
+noinline needed if lambda is stored/passed
+inline large fn → APK size bloat
+crossinline prevents non-local return</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What does the inline keyword do? What problem does it solve?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The <code>inline</code> keyword instructs the compiler to copy the function body — and the bodies of any lambda parameters — directly into the call site. This eliminates the overhead of creating lambda objects on the heap and the virtual method dispatch for every call. It solves the performance cost of higher-order functions: without inlining, every <code>filter { }</code> or <code>let { }</code> call creates a new anonymous class instance.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is a reified type parameter and why does it require inline?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A <code>reified</code> type parameter is one that's available at runtime — you can call <code>T::class.java</code>, use <code>is T</code>, and <code>as T</code> inside the function. Normally, JVM erases generic types at runtime, making this impossible.<br><br>
+      It requires <code>inline</code> because inlining is the mechanism: when the function is inlined, the compiler substitutes the actual type at each call site. So <code>T::class.java</code> is replaced with <code>UserProfile::class.java</code> at one call site and <code>Order::class.java</code> at another. Without inlining there'd be one copy of the bytecode and the type would be erased.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is tail recursion? Why is it useful and what does tailrec require?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Tail recursion is when the recursive call is the last operation in the function — nothing else happens after it returns. This allows the compiler to reuse the current stack frame instead of allocating a new one, converting the recursion to an iterative loop. This prevents StackOverflowError for deep recursion (thousands/millions of steps).<br><br>
+      <code>tailrec</code> requirement: the recursive call must be in <strong>tail position</strong> — the very last thing the function does. <code>n * factorial(n-1)</code> is NOT tail position (multiplication happens after the call). <code>factorial(n-1, acc * n)</code> IS tail position. Use an accumulator parameter to restructure if needed.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — What is the difference between noinline and crossinline?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>noinline</code>: the lambda is NOT inlined — it's kept as a regular lambda object. Use when the lambda needs to be stored in a variable, passed to another function expecting a function type, or returned from the inline function.<br><br>
+      <code>crossinline</code>: the lambda IS inlined (no object allocation) but <strong>non-local returns are forbidden</strong>. Use when the lambda is called inside another lambda or a different execution context (like a Thread or Handler callback). The reason: the lambda body is inlined at the call site, but when it's inside a Thread block, a <code>return</code> couldn't reliably exit the outer function because execution has moved to a different thread.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) Write a reified extension function that safely gets an extra from an Intent.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="cl">Intent</span>.<span class="fn">getExtraOrNull</span>(key: <span class="cl">String</span>): <span class="cl">T?</span> =
+    extras<span class="kw">?.</span><span class="fn">get</span>(key) <span class="kw">as?</span> <span class="cl">T</span>
+
+<span class="cm">// Usage:</span>
+<span class="kw">val</span> orderId: <span class="cl">String?</span> = intent.<span class="fn">getExtraOrNull</span>(<span class="str">"order_id"</span>)
+<span class="kw">val</span> amount: <span class="cl">Double?</span> = intent.<span class="fn">getExtraOrNull</span>(<span class="str">"amount"</span>)
+
+<span class="cm">// Or with a required version:</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="cl">Intent</span>.<span class="fn">requireExtra</span>(key: <span class="cl">String</span>): <span class="cl">T</span> =
+    <span class="fn">getExtraOrNull</span>(key) <span class="kw">?:</span> <span class="kw">throw</span> <span class="cl">IllegalArgumentException</span>(<span class="str">"Missing required extra: $key"</span>)</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — Why does a return inside a let { } block sometimes exit the outer function? How do you prevent it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>let</code> is an <code>inline</code> function. When a function is inline, its lambda body is copied into the call site. A bare <code>return</code> inside an inline lambda is a <em>non-local return</em> — it exits the enclosing named function, not just the lambda.<br><br>
+      Example: if you're inside a function and write <code>user?.let { return }</code>, that <code>return</code> exits the outer function entirely.<br><br>
+      To exit only the lambda, use a labeled return: <code>return@let</code>. This limits the return to the lambda scope only:
+<pre><code>user<span class="kw">?.</span><span class="fn">let</span> {
+    <span class="kw">if</span> (it.isBlocked) <span class="kw">return</span>@let   <span class="cm">// exits let only</span>
+    <span class="fn">processUser</span>(it)
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — (Coding) Why doesn't tailrec optimize this? Fix it.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// ❌ Not tail-recursive — multiplication happens AFTER the recursive call</span>
+<span class="kw">tailrec fun</span> <span class="fn">factorial</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> =
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="nu">1</span> <span class="kw">else</span> n * <span class="fn">factorial</span>(n - <span class="nu">1</span>)
+<span class="cm">// The last operation is multiplication, not the recursive call</span></code></pre>
+<pre><code><span class="cm">// ✅ Fix — accumulator puts recursive call in tail position</span>
+<span class="kw">tailrec fun</span> <span class="fn">factorial</span>(n: <span class="cl">Int</span>, acc: <span class="cl">Long</span> = <span class="nu">1L</span>): <span class="cl">Long</span> =
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) acc
+    <span class="kw">else</span> <span class="fn">factorial</span>(n - <span class="nu">1</span>, acc * n)   <span class="cm">// call is the LAST thing — tail position</span>
+<span class="cm">// Now: tailrec compiles this to a while loop — no stack growth</span></code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — Why are Kotlin's scope functions (let, run, apply, etc.) inline? What benefits does this give them?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">All five scope functions are <code>inline</code>. Benefits:<br><br>
+      1. <strong>Zero lambda allocation</strong>: calling <code>user?.let { }</code> millions of times (e.g., in a hot loop or for every item in a large list) doesn't create a new anonymous class instance each time.<br><br>
+      2. <strong>Non-local return</strong>: you can write <code>return</code> inside a <code>run { }</code> or <code>let { }</code> block to exit the enclosing function — useful for early return patterns without breaking the fluent style.<br><br>
+      3. <strong>Performance transparency</strong>: the compiler inlines them, so there's no extra call stack frame or virtual dispatch overhead. They behave as if you wrote the code inline manually.<br><br>
+      This is intentional design — scope functions are meant to be used pervasively throughout Kotlin code. Making them inline ensures they have zero performance cost at any call frequency.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — (Scenario) You write an inline function that takes two lambdas. One needs to be stored in a list for later execution. What happens and how do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Problem:</strong> When a function is marked inline, ALL lambda parameters are inlined by default. An inlined lambda doesn't exist as an object — it's just code pasted at the call site. If you try to store it in a list (which requires an object reference), the compiler rejects it with an error: "Illegal usage of inline-parameter."<br><br>
+      <strong>Fix:</strong> Mark the lambda that needs to be stored as <code>noinline</code>:
+<pre><code><span class="kw">inline fun</span> <span class="fn">setupWithCallback</span>(
+    action: () -> <span class="cl">Unit</span>,              <span class="cm">// inlined — no object</span>
+    <span class="kw">noinline</span> onComplete: () -> <span class="cl">Unit</span>  <span class="cm">// noinline — kept as object</span>
+) {
+    <span class="fn">action</span>()                          <span class="cm">// inlined at call site</span>
+    callbacks.<span class="fn">add</span>(onComplete)         <span class="cm">// stored as object — works</span>
+}</code></pre>
+      You get the inlining benefit for <code>action</code> (no allocation) while <code>onComplete</code> remains a proper function object that can be stored, called later, and referenced by multiple consumers.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

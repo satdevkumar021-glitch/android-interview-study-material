@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2A – Android Components Overview</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;color:var(--text);}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>2A · Components</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>2A — Android Components Overview</h1>
+  <div class="meta">
+    <span class="badge t2">Tier 2</span>
+    <span>Activity · Fragment · Service · BroadcastReceiver · ContentProvider · Application · Context</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 1 · OVERVIEW -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>Android apps are not traditional programs with a single <code>main()</code> entry point. Instead, the OS selects and instantiates discrete <strong>components</strong> on demand. This allows the system to optimise memory, lifecycle, and inter-app collaboration without the app running as a monolithic process.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Activity</h4>
+      <p>A single, focused screen with a UI. The entry point for user interaction. Managed by the Activity back stack.</p>
+    </div>
+    <div class="card">
+      <h4>Fragment</h4>
+      <p>A reusable UI/logic portion hosted inside an Activity. Has its own lifecycle, view lifecycle, and back stack entry.</p>
+    </div>
+    <div class="card">
+      <h4>Service</h4>
+      <p>Long-running background operation, no UI. Three types: Started, Bound, Foreground.</p>
+    </div>
+    <div class="card">
+      <h4>BroadcastReceiver</h4>
+      <p>Listens for system-wide or app-scoped intents (events). Very short-lived — no UI, minimal work.</p>
+    </div>
+    <div class="card">
+      <h4>ContentProvider</h4>
+      <p>Structured data sharing across apps/processes via a URI-based CRUD API backed by SQLite / file / network.</p>
+    </div>
+    <div class="card">
+      <h4>Application</h4>
+      <p>Singleton that exists for the process lifetime. Global init (DI graph, logging). Extended via <code>Application</code> subclass.</p>
+    </div>
+  </div>
+  <h3>Context</h3>
+  <p><code>Context</code> is the bridge to the Android system: access resources, start components, get system services. Every component is a <code>Context</code> (or wraps one). Two main flavours:</p>
+  <ul>
+    <li><strong>Application Context</strong> — process lifetime, safe for singletons, DI graphs, database instances.</li>
+    <li><strong>Activity/Fragment Context</strong> — tied to UI lifecycle; use only for UI operations (inflate views, show dialogs).</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 2 · HOW IT WORKS -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+  <h3>AndroidManifest.xml — The Registry</h3>
+  <p>Every component must be declared (or exported) in <code>AndroidManifest.xml</code>. The PackageManagerService reads this at install time to build a component registry.</p>
+  <pre><code><span class="cm">&lt;!-- Activity: visible screen --&gt;</span>
+<span class="kw">&lt;activity</span> android:name=".MainActivity"
+           android:exported="true"<span class="kw">&gt;</span>
+    <span class="kw">&lt;intent-filter&gt;</span>
+        <span class="kw">&lt;action</span> android:name="android.intent.action.MAIN" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;category</span> android:name="android.intent.category.LAUNCHER" <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/intent-filter&gt;</span>
+<span class="kw">&lt;/activity&gt;</span>
+
+<span class="cm">&lt;!-- Service: background work --&gt;</span>
+<span class="kw">&lt;service</span> android:name=".sync.SyncService"
+          android:exported="false" <span class="kw">/&gt;</span>
+
+<span class="cm">&lt;!-- BroadcastReceiver: event listener --&gt;</span>
+<span class="kw">&lt;receiver</span> android:name=".receiver.BootReceiver"
+            android:exported="false"<span class="kw">&gt;</span>
+    <span class="kw">&lt;intent-filter&gt;</span>
+        <span class="kw">&lt;action</span> android:name="android.intent.action.BOOT_COMPLETED" <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/intent-filter&gt;</span>
+<span class="kw">&lt;/receiver&gt;</span>
+
+<span class="cm">&lt;!-- ContentProvider: structured data sharing --&gt;</span>
+<span class="kw">&lt;provider</span> android:name=".provider.ContactsProvider"
+            android:authorities="com.example.app.contacts"
+            android:exported="false" <span class="kw">/&gt;</span></code></pre>
+
+  <h3>Component Lifecycle (high-level)</h3>
+  <div class="ascii">Activity:    onCreate → onStart → onResume ←→ onPause → onStop → onDestroy
+Fragment:    onAttach → onCreate → onCreateView → onViewCreated → onStart → onResume
+             ↕ symmetric teardown: onPause → onStop → onDestroyView → onDestroy → onDetach
+Service:     onCreate → onStartCommand / onBind → ... → onDestroy
+BroadcastReceiver: onReceive() — one method, exits immediately
+ContentProvider: onCreate() → query / insert / update / delete / getType</div>
+
+  <h3>Activity Back Stack</h3>
+  <div class="ascii">Task (back stack)
+ ┌─────────────────────────────┐
+ │  [Top]  ProfileActivity     │  ← currently visible
+ │         OrderActivity       │
+ │         HomeActivity        │  ← bottom of stack
+ └─────────────────────────────┘
+  BACK press pops top activity</div>
+
+  <h3>Context Hierarchy</h3>
+  <div class="ascii">Context (abstract)
+ ├── ContextWrapper
+ │    ├── Application          ← process lifetime
+ │    ├── Activity             ← UI lifetime
+ │    └── Service              ← service lifetime
+ └── ContextImpl (system implementation)</div>
+
+  <h3>Key Terms</h3>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><code>Context</code></td><td>Interface to global app info; access resources, start components, get services</td></tr>
+    <tr><td><code>Intent</code></td><td>Messaging object to start components or broadcast events</td></tr>
+    <tr><td><code>AndroidManifest.xml</code></td><td>App declaration: components, permissions, features</td></tr>
+    <tr><td><code>Application</code></td><td>Process-level singleton; created first, destroyed last</td></tr>
+    <tr><td><code>Task</code></td><td>A stack of Activities representing a user flow</td></tr>
+    <tr><td>Component lifecycle</td><td>Callbacks the OS calls to manage component state transitions</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 3 · WHEN TO USE -->
+<section id="when">
+  <h2>3 · Why and When to Use Each</h2>
+  <table>
+    <tr><th>Component</th><th>Use when…</th><th>Do NOT use when…</th></tr>
+    <tr>
+      <td><strong>Activity</strong></td>
+      <td>You need a distinct full-screen user interaction point; app entry points; launcher screens</td>
+      <td>You have a single-activity app (prefer Fragments/Compose for sub-screens)</td>
+    </tr>
+    <tr>
+      <td><strong>Fragment</strong></td>
+      <td>Reusable UI segments; tablet dual-pane; modal bottom sheets; navigation destinations</td>
+      <td>Logic-only modules with no UI (use ViewModel / UseCase instead)</td>
+    </tr>
+    <tr>
+      <td><strong>Service (started)</strong></td>
+      <td>Long-running work decoupled from UI (legacy); background music (foreground service)</td>
+      <td>One-off background tasks — use WorkManager / Coroutine instead</td>
+    </tr>
+    <tr>
+      <td><strong>Service (bound)</strong></td>
+      <td>IPC to another app or process; MediaBrowser; Bluetooth</td>
+      <td>In-process communication — use ViewModel/Repository instead</td>
+    </tr>
+    <tr>
+      <td><strong>BroadcastReceiver</strong></td>
+      <td>React to system events (network change, boot, battery); app-global events between components</td>
+      <td>Ongoing processing — receivers must finish in &lt;10 s; no long work here</td>
+    </tr>
+    <tr>
+      <td><strong>ContentProvider</strong></td>
+      <td>Expose structured data to other apps (Contacts, Media); share data with widgets</td>
+      <td>Internal-only data access — use Room/DataStore directly</td>
+    </tr>
+    <tr>
+      <td><strong>Application</strong></td>
+      <td>Process-level singletons: DI init (Hilt), analytics setup, crash reporting init</td>
+      <td>Storing UI state or large objects — will cause memory leaks</td>
+    </tr>
+    <tr>
+      <td><strong>Application Context</strong></td>
+      <td>Singletons, Room database, Retrofit, DataStore, WorkManager</td>
+      <td>Inflating views, showing dialogs — causes WindowManager leaks</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 4 · PRODUCTION EXAMPLE -->
+<section id="prod">
+  <h2>4 · Production Example (Banking App)</h2>
+  <p>Multi-module banking app: <code>:app</code> → single Activity, Navigation Compose, Hilt, Room, WorkManager. Each component plays its proper role.</p>
+
+  <h3>Application — DI + Crash Init</h3>
+  <pre><code><span class="ann">@HiltAndroidApp</span>
+<span class="kw">class</span> <span class="type">BankingApp</span> : <span class="type">Application</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+        <span class="cm">// Hilt builds the DI graph here — process-scoped singletons created</span>
+        <span class="cm">// Crashlytics, Timber, StrictMode init in debug builds</span>
+        <span class="kw">if</span> (<span class="type">BuildConfig</span>.DEBUG) <span class="type">StrictMode</span>.<span class="fn">enableDefaults</span>()
+    }
+}</code></pre>
+
+  <h3>Single Activity — Navigation Host</h3>
+  <pre><code><span class="ann">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="type">MainActivity</span> : <span class="type">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="type">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="type">BankingTheme</span> {
+                <span class="cm">// NavHost owns back stack; all screens are Composables</span>
+                <span class="type">AppNavHost</span>()
+            }
+        }
+    }
+}</code></pre>
+
+  <h3>BroadcastReceiver — Network Change</h3>
+  <pre><code><span class="cm">// Registered dynamically (API 26+: static receivers restricted for most actions)</span>
+<span class="kw">class</span> <span class="type">NetworkReceiver</span> : <span class="type">BroadcastReceiver</span>() {
+    <span class="kw">override fun</span> <span class="fn">onReceive</span>(context: <span class="type">Context</span>, intent: <span class="type">Intent</span>) {
+        <span class="cm">// Must exit quickly — no coroutines, no blocking IO here</span>
+        <span class="cm">// Use goAsync() + coroutine only if you MUST; prefer WorkManager</span>
+        <span class="kw">val</span> isConnected = <span class="type">NetworkUtils</span>.<span class="fn">isOnline</span>(context)
+        <span class="type">SyncManager</span>.<span class="fn">onNetworkChanged</span>(isConnected)   <span class="cm">// triggers WorkManager enqueue</span>
+    }
+}
+
+<span class="cm">// In Activity.onStart / ViewModel init:</span>
+<span class="kw">private val</span> networkReceiver = <span class="type">NetworkReceiver</span>()
+<span class="fn">registerReceiver</span>(networkReceiver, <span class="type">IntentFilter</span>(<span class="type">ConnectivityManager</span>.CONNECTIVITY_ACTION))</code></pre>
+
+  <h3>Foreground Service — Transaction Sync</h3>
+  <pre><code><span class="kw">class</span> <span class="type">SyncForegroundService</span> : <span class="type">LifecycleService</span>() {
+
+    <span class="ann">@Inject</span> <span class="kw">lateinit var</span> syncUseCase: <span class="type">SyncTransactionsUseCase</span>
+
+    <span class="kw">override fun</span> <span class="fn">onStartCommand</span>(intent: <span class="type">Intent</span>?, flags: <span class="type">Int</span>, startId: <span class="type">Int</span>): <span class="type">Int</span> {
+        <span class="fn">startForeground</span>(NOTIF_ID, <span class="fn">buildNotification</span>())   <span class="cm">// must call within 5 s</span>
+        lifecycleScope.<span class="fn">launch</span> {
+            syncUseCase.<span class="fn">invoke</span>()
+            <span class="fn">stopSelf</span>()                                    <span class="cm">// stop when done</span>
+        }
+        <span class="kw">return</span> <span class="type">START_NOT_STICKY</span>
+    }
+}</code></pre>
+
+  <h3>Context — Safe Usage</h3>
+  <pre><code><span class="cm">// ✅ ApplicationContext for long-lived singletons</span>
+<span class="ann">@Singleton</span>
+<span class="kw">class</span> <span class="type">AppDatabase</span> <span class="ann">@Inject</span> <span class="kw">constructor</span>(
+    <span class="ann">@ApplicationContext</span> context: <span class="type">Context</span>   <span class="cm">// Hilt qualifier — no leaks</span>
+) {
+    <span class="kw">val</span> db = <span class="type">Room</span>.<span class="fn">databaseBuilder</span>(context, <span class="type">BankDatabase</span>::<span class="kw">class</span>.java, <span class="str">"bank.db"</span>).<span class="fn">build</span>()
+}
+
+<span class="cm">// ❌ Never store Activity context in a singleton — causes memory leak</span>
+<span class="kw">object</span> <span class="type">BadSingleton</span> {
+    <span class="kw">var</span> ctx: <span class="type">Context</span>? = <span class="kw">null</span>  <span class="cm">// LEAK if ctx is an Activity</span>
+}</code></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 5 · ALTERNATIVES -->
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+    <tr>
+      <td>Multiple Activities</td>
+      <td>Clean separation, independent back stacks, deep-link targets</td>
+      <td>Cross-activity communication is hard; more boilerplate; harder to share ViewModels</td>
+      <td>Legacy codebases; distinct user flows that rarely share state</td>
+    </tr>
+    <tr>
+      <td>Single Activity + Fragments</td>
+      <td>Shared ViewModel, Navigation Component, easy transitions</td>
+      <td>Fragment lifecycle complexity, FragmentManager bugs in older APIs</td>
+      <td>Standard modern Android pre-Compose</td>
+    </tr>
+    <tr>
+      <td>Single Activity + Compose</td>
+      <td>No Fragment lifecycle; composable back stack; simplest model</td>
+      <td>Requires migration effort; less mature tooling for very large apps</td>
+      <td>New projects / greenfield</td>
+    </tr>
+    <tr>
+      <td>Service for background</td>
+      <td>Always-running, flexible IPC</td>
+      <td>Background execution restrictions (API 26+); battery drain; complex lifecycle</td>
+      <td>Foreground service (audio, location); IPC to other processes</td>
+    </tr>
+    <tr>
+      <td>WorkManager instead of Service</td>
+      <td>Constraint-aware, persisted, battery-efficient, simpler API</td>
+      <td>Not guaranteed immediate execution; not for real-time tasks</td>
+      <td>Deferrable background work (sync, upload, cleanup)</td>
+    </tr>
+    <tr>
+      <td>DataStore instead of ContentProvider</td>
+      <td>Type-safe, coroutine-native, simpler API</td>
+      <td>No cross-app sharing</td>
+      <td>App-internal preferences/proto data</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 6 · PITFALLS -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+
+  <h3>Context Leaks</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad</h4>
+      <pre><code><span class="cm">// Stores Activity context in a long-lived object</span>
+<span class="kw">class</span> <span class="type">ImageLoader</span>(<span class="kw">val</span> ctx: <span class="type">Context</span>)
+
+<span class="cm">// Passed from Fragment — leaks Fragment/Activity</span>
+<span class="type">ImageLoader</span>(requireContext())</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good</h4>
+      <pre><code><span class="cm">// Use applicationContext for singletons</span>
+<span class="kw">class</span> <span class="type">ImageLoader</span>(<span class="kw">val</span> ctx: <span class="type">Context</span>)
+
+<span class="type">ImageLoader</span>(requireContext().<span class="fn">applicationContext</span>)</code></pre>
+    </div>
+  </div>
+
+  <h3>BroadcastReceiver — Long Work</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onReceive</span>(ctx: <span class="type">Context</span>, intent: <span class="type">Intent</span>) {
+    <span class="cm">// Blocking network call — ANR risk</span>
+    apiClient.<span class="fn">syncNow</span>()
+}</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onReceive</span>(ctx: <span class="type">Context</span>, intent: <span class="type">Intent</span>) {
+    <span class="cm">// Enqueue WorkManager — fast, non-blocking</span>
+    <span class="type">WorkManager</span>.<span class="fn">getInstance</span>(ctx).<span class="fn">enqueue</span>(syncRequest)
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>Other Critical Pitfalls</h3>
+  <ul>
+    <li><strong>Static Activity reference</strong>: <code>companion object { var activity: Activity? }</code> — will leak. Never do this.</li>
+    <li><strong>Starting Activity from Application context</strong>: requires <code>FLAG_ACTIVITY_NEW_TASK</code> — avoid unless necessary (notifications, deep links from services).</li>
+    <li><strong>Fragment over-creation</strong>: Not using <code>findFragmentByTag</code> before <code>add</code> leads to duplicate fragments after rotation.</li>
+    <li><strong>Service not stopped</strong>: Started services that never call <code>stopSelf()</code> or <code>stopService()</code> drain battery.</li>
+    <li><strong>Exported components without permission</strong>: <code>android:exported="true"</code> without <code>android:permission</code> exposes your components to any app (security hole).</li>
+    <li><strong>Application class bloat</strong>: Heavy sync init in <code>Application.onCreate()</code> slows cold start. Use <code>App Startup</code> library or lazy init.</li>
+    <li><strong>ContentProvider in multi-process</strong>: Accessing your own ContentProvider from multiple processes leads to unexpected instantiation. Prefer single-process with explicit initialization order.</li>
+  </ul>
+
+  <div class="box warn">
+    <strong>API 26+ Background Restrictions:</strong> Apps in background cannot start Services. Use <code>startForegroundService()</code> + call <code>startForeground()</code> within 5 seconds, or use WorkManager for deferrable tasks.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 7 · INTERVIEW -->
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "Android apps are component-based rather than having a single entry point. The four main components — Activity, Service, BroadcastReceiver, and ContentProvider — each have a distinct lifecycle and purpose. On top of that, Fragment gives you reusable UI inside an Activity, Application provides process-level initialisation, and Context is the bridge to the Android system. In modern apps I typically use a single Activity with Compose or Fragments for navigation, Services only when truly needed for IPC or foreground work, and WorkManager instead of started Services for background tasks."
+  </div>
+
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>What they are:</strong> Android's app model is component-based. PackageManagerService reads AndroidManifest.xml at install time, and ActivityManagerService instantiates components on demand. The four main component types are Activity (UI screen), Service (background work), BroadcastReceiver (system/app events), and ContentProvider (structured data sharing).<br/><br/>
+    <strong>Key distinctions:</strong> Activities are UI-centric and managed in a task back stack. Fragments are hosted by Activities, with their own view lifecycle. Services run without UI; post-API-26, background services are heavily restricted, so foreground services + WorkManager are the production choices. BroadcastReceivers must finish fast — any heavy work goes to WorkManager. ContentProviders are for cross-app data sharing; for internal data I use Room + DataStore directly.<br/><br/>
+    <strong>Context:</strong> Application context is safe for singletons; Activity context is needed only for UI operations — using it in long-lived objects causes memory leaks. With Hilt, I use <code>@ApplicationContext</code> qualifier to inject the right context automatically.<br/><br/>
+    <strong>Modern pattern:</strong> Single Activity + Navigation Compose/Fragments; Hilt for DI bootstrapped in Application; WorkManager for background; foreground service only for ongoing user-aware operations like audio playback or live location.
+  </div>
+
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Four app components declared in AndroidManifest; AMS instantiates them on demand.</li>
+    <li>Activity = UI + back stack; Fragment = reusable UI inside Activity with own view lifecycle.</li>
+    <li>Service types: Started (no UI, fire-and-forget), Bound (IPC), Foreground (ongoing, visible notification).</li>
+    <li>BroadcastReceiver is ephemeral — <code>onReceive()</code> must finish fast; post-API-26 most static receivers are restricted.</li>
+    <li>ContentProvider is for cross-app data sharing; internal apps should use Room / DataStore directly.</li>
+    <li>Application context vs Activity context: lifespan and leak implications.</li>
+    <li>Modern recommendation: Single Activity + Compose + WorkManager + Foreground Service only when necessary.</li>
+    <li>Background execution restrictions since API 26 changed the Service usage pattern fundamentally.</li>
+  </ol>
+
+  <h3>Do Not Go Deeper Unless Asked</h3>
+  <ul>
+    <li>AIDL / Binder internals for IPC (wait for 3C)</li>
+    <li>ContentProvider cursor implementations</li>
+    <li>IntentService (deprecated) — just note it's replaced by WorkManager</li>
+    <li>Specific Fragment backstack transactions</li>
+  </ul>
+
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>What's the difference between Application context and Activity context?</td><td>Lifespan: Application lives for the process; Activity lives until destroyed. Use Activity context only for UI operations to avoid leaks.</td></tr>
+    <tr><td>When would you use a bound Service vs WorkManager?</td><td>Bound Service for IPC / ongoing connection with another process (e.g., MediaBrowser, Bluetooth). WorkManager for deferrable, constraint-aware, persisted background tasks.</td></tr>
+    <tr><td>Why are static BroadcastReceivers restricted in API 26+?</td><td>Background execution restrictions. Apps were abusing implicit broadcasts to wake up in background and drain battery. Google restricted most implicit broadcasts to dynamic registration only.</td></tr>
+    <tr><td>Why single-activity architecture?</td><td>Simplifies back stack, enables shared ViewModels, works natively with Navigation Component / Compose NavHost, reduces Activity transition complexity.</td></tr>
+  </table>
+
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The shift to single-activity architecture isn't just a style preference — it aligns with the process model. Sharing a ViewModel across screens requires a common scope (the Activity's ViewModelStore). Multiple Activities create multiple ViewModelStores, making shared state hard. Compose NavHost takes this further: there's no Fragment back stack at all — the Composable function call stack IS the UI tree, which means no lifecycle edge cases from Fragment transactions. This directly improves testability because screens are just Composable functions with no component lifecycle boilerplate."
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 8 · REVISION SHEET -->
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+  <table>
+    <tr><th>Component</th><th>Entry Point</th><th>Lifecycle Length</th><th>Has UI?</th><th>Modern Alternative</th></tr>
+    <tr><td>Activity</td><td>Intent / Launcher</td><td>Screen lifetime</td><td>✅</td><td>Compose screen (in single-activity)</td></tr>
+    <tr><td>Fragment</td><td>FragmentManager.add/replace</td><td>Activity or back-stack</td><td>✅</td><td>Composable function</td></tr>
+    <tr><td>Service (Started)</td><td>startService / startForegroundService</td><td>Until stopSelf</td><td>❌</td><td>WorkManager / Coroutine</td></tr>
+    <tr><td>Service (Bound)</td><td>bindService</td><td>While bound</td><td>❌</td><td>Bound service still valid for IPC</td></tr>
+    <tr><td>Service (Foreground)</td><td>startForegroundService</td><td>Until stopSelf</td><td>❌ (notification)</td><td>Still required for ongoing user-aware tasks</td></tr>
+    <tr><td>BroadcastReceiver</td><td>Intent broadcast</td><td>onReceive() only</td><td>❌</td><td>Dynamic receiver + WorkManager for work</td></tr>
+    <tr><td>ContentProvider</td><td>ContentResolver</td><td>Process lifetime</td><td>❌</td><td>Room / DataStore (internal); CP for cross-app</td></tr>
+    <tr><td>Application</td><td>Process start</td><td>Process lifetime</td><td>❌</td><td>n/a (required for DI init)</td></tr>
+  </table>
+
+  <h3>Context Golden Rules</h3>
+  <ul>
+    <li>Singleton / long-lived object → <strong>applicationContext</strong> (never Activity context)</li>
+    <li>Inflate view / show dialog → <strong>Activity/Fragment context</strong></li>
+    <li>Hilt DI → use <code>@ApplicationContext</code> qualifier for non-UI injection</li>
+    <li>Never store <code>Activity</code> in <code>static</code> / <code>companion object</code> field</li>
+  </ul>
+
+  <h3>Background Restrictions (API 26+)</h3>
+  <ul>
+    <li>Cannot call <code>startService()</code> from background → use <code>startForegroundService()</code> + <code>startForeground()</code> within 5 s</li>
+    <li>Most implicit broadcasts cannot have static receivers → register dynamically</li>
+    <li>Deferrable work → <strong>WorkManager</strong></li>
+  </ul>
+
+  <h3>Component Security</h3>
+  <ul>
+    <li>Set <code>android:exported="false"</code> unless cross-app access is needed</li>
+    <li>Add <code>android:permission</code> for exported components that should be restricted</li>
+    <li>Required: <code>android:exported</code> must be explicit on API 31+ for components with intent-filters</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 9 · QUIZ -->
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+  <p style="color:var(--muted);font-size:13px;">Try to answer before expanding each card.</p>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What are the four main Android app components?</summary>
+    <div class="ans">Activity, Service, BroadcastReceiver, ContentProvider. All must be declared in AndroidManifest.xml. Each has a distinct lifecycle and purpose managed by the Android system (ActivityManagerService).</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is the difference between Application context and Activity context?</summary>
+    <div class="ans">Application context lives for the process lifetime; Activity context lives until the Activity is destroyed. Use Application context for long-lived singletons (databases, Retrofit, DI). Use Activity context only for UI operations (inflate views, show dialogs, start activities). Storing Activity context in a singleton causes memory leaks because the Activity cannot be GC'd.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What restrictions apply to BroadcastReceivers?</summary>
+    <div class="ans">onReceive() must complete quickly (ideally &lt;10 s). No long-running or async work. Post-API 26, most implicit broadcasts cannot use statically declared receivers in the manifest — use dynamic registration. If work is needed, enqueue a WorkManager task inside onReceive().</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Explain the difference between a started Service, bound Service, and foreground Service.</summary>
+    <div class="ans"><strong>Started:</strong> Launched via startService(); runs until stopSelf() is called; no IPC interface. Mostly obsolete for pure background work.<br/><strong>Bound:</strong> Launched via bindService(); client-server relationship; provides IBinder for IPC; stops when all clients unbind.<br/><strong>Foreground:</strong> Started via startForegroundService(); must show a persistent notification; survives background restrictions; used for ongoing user-aware operations (music, navigation, workout tracking).</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Why is single-activity architecture preferred in modern Android?</summary>
+    <div class="ans">Single Activity means one ViewModelStore, enabling easy state sharing across screens. Navigation Component / Compose NavHost manage the back stack without inter-Activity complexity. Transitions are smoother (within one window). Fragment / Composable lifecycles are simpler than Activity-to-Activity transitions. Deep links are easier to handle in one NavGraph. No need to pass data via Intent extras across Activity boundaries.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> When should you use ContentProvider for internal data access?</summary>
+    <div class="ans">You generally should NOT use ContentProvider for internal-only access. ContentProvider adds overhead (URI resolver, cursor conversion) and was designed for cross-app data sharing. For internal storage use Room (SQL), DataStore (preferences/proto), or files directly. ContentProvider is appropriate when: sharing data with other apps, exposing data to Search/Android Auto/widgets, or implementing SyncAdapter integration.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the correct way to start a Service on API 26+ from the background?</summary>
+    <div class="ans">You cannot call startService() from a background app — it throws IllegalStateException. Use startForegroundService() instead, then call startForeground(notifId, notification) within 5 seconds or the system throws ForegroundServiceDidNotStartInTimeException. For deferrable work, use WorkManager instead of a service entirely.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> You have a foreground service that syncs banking transactions. It must stop if the user logs out, even if it's mid-sync. How do you architect this?</summary>
+    <div class="ans">Use LifecycleService so the service has a lifecycleScope. Expose a cancellation signal — e.g., a SharedFlow in a singleton SyncCoordinator. The sync coroutine collects this flow: if a logout event arrives, cancel the job and call stopSelf(). The ViewModel (or logout UseCase) emits to the SharedFlow. This decouples the logout trigger from the service without needing to call stopService() directly, and the coroutine cooperatively cancels. Also enqueue a WorkManager task post-logout to do any cleanup that must survive process death.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Register and unregister a BroadcastReceiver safely in a Fragment. Write the code.</summary>
+    <div class="ans"><pre><code><span class="kw">class</span> <span class="type">DashboardFragment</span> : <span class="type">Fragment</span>() {
+    <span class="kw">private val</span> networkReceiver = <span class="kw">object</span> : <span class="type">BroadcastReceiver</span>() {
+        <span class="kw">override fun</span> <span class="fn">onReceive</span>(ctx: <span class="type">Context</span>, intent: <span class="type">Intent</span>) {
+            viewModel.<span class="fn">onNetworkChanged</span>(<span class="type">NetworkUtils</span>.<span class="fn">isOnline</span>(ctx))
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStart</span>() {
+        <span class="kw">super</span>.<span class="fn">onStart</span>()
+        <span class="cm">// Register when Fragment is visible</span>
+        requireContext().<span class="fn">registerReceiver</span>(
+            networkReceiver,
+            <span class="type">IntentFilter</span>(<span class="type">ConnectivityManager</span>.CONNECTIVITY_ACTION)
+        )
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStop</span>() {
+        <span class="kw">super</span>.<span class="fn">onStop</span>()
+        <span class="cm">// Unregister symmetric to onStart — prevents leaks</span>
+        requireContext().<span class="fn">unregisterReceiver</span>(networkReceiver)
+    }
+}</code></pre>
+Key: register/unregister in symmetric lifecycle callbacks (onStart/onStop). Never in onCreate/onDestroy for a dynamic receiver — Fragment view may exist longer than needed.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] Your app throws "Context is not an Activity" when inflating a view inside a ViewModel. What happened and how do you fix it?</summary>
+    <div class="ans">The ViewModel was injected with Application context (correct for non-UI work), but the code tried to use it to inflate a View — which requires an Activity context (a ContextThemeWrapper with a window). Fix: Never inflate views in ViewModel. Move inflation to Fragment/Activity. If creating a custom View programmatically for testing, pass Activity context explicitly. Alternatively, if absolutely necessary, wrap applicationContext in a ContextThemeWrapper with the app theme, but this is a code-smell — views belong in the UI layer.</div>
+  </details>
+
+  <hr style="border-color:var(--border);margin:32px 0;"/>
+  <h3 style="color:var(--warn);">Answer Key Summary</h3>
+  <p style="color:var(--muted);font-size:13px;">Expand each card above to see full model answers. Key themes to self-assess:</p>
+  <ul>
+    <li>Can you name all 4 components + Application + Context without hesitation?</li>
+    <li>Can you explain the API 26 background restrictions and their implications?</li>
+    <li>Can you justify single-activity architecture in one sentence?</li>
+    <li>Can you write register/unregister receiver code correctly in a Fragment?</li>
+    <li>Do you know when NOT to use ContentProvider, Service, and static receivers?</li>
+  </ul>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

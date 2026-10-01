@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>28B — Legacy UI | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">28B · Legacy UI</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> ViewBinding &amp; DataBinding</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> ConstraintLayout</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Custom Views</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> XML Layout Techniques</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Migration to Compose</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>28B</span> — Legacy UI</h1>
+    <p class="hero-desc">ViewBinding, DataBinding, ConstraintLayout, Custom Views (onMeasure/onDraw), XML layout techniques (include/merge/ViewStub), and why Jetpack Compose is replacing all of this.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 28B</span>
+      <span class="badge badge-tier3">&#9733; Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>The Legacy UI Toolkit</h3>
+    <p>Android's original UI toolkit uses XML layout files inflated into View objects. Jetpack Compose is the modern replacement, but legacy UI knowledge is essential for maintaining existing apps and understanding the limitations Compose was designed to solve.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Technology</th><th>Purpose</th><th>Status</th></tr>
+      <tr><td>ViewBinding</td><td>Type-safe view access — replaces findViewById</td><td>✅ Recommended when not using Compose</td></tr>
+      <tr><td>DataBinding</td><td>Two-way binding between XML and data</td><td>⚠️ Works but adds complexity — prefer ViewModel + ViewBinding</td></tr>
+      <tr><td>ConstraintLayout</td><td>Flat, flexible layout</td><td>✅ Best XML layout manager</td></tr>
+      <tr><td>Custom Views</td><td>Fully custom rendering via Canvas</td><td>✅ Still needed for complex custom components</td></tr>
+      <tr><td>ViewStub/merge/include</td><td>Layout optimization techniques</td><td>✅ Still used in XML-based apps</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Know legacy UI well enough to maintain and migrate it. In interviews, acknowledge that Compose solves the fundamental problems of XML UI (no type safety, manual state management, complex custom rendering) while still demonstrating mastery of the legacy stack for the millions of existing Android apps.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: ViewBinding →</button></div>
+  </div>
+
+  <!-- S2 ViewBinding & DataBinding -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128279;</div>2. ViewBinding &amp; DataBinding</div>
+    <h3>ViewBinding</h3>
+    <pre><code><span class="cm">// Enable in build.gradle.kts:</span>
+android { buildFeatures { viewBinding = <span class="kw">true</span> } }
+
+<span class="cm">// Fragment — proper lifecycle management</span>
+<span class="kw">class</span> <span class="cl">ProductFragment</span> : <span class="cl">Fragment</span>(<span class="cl">R</span>.layout.fragment_product) {
+
+    <span class="kw">private var</span> _binding: <span class="cl">FragmentProductBinding</span>? = <span class="kw">null</span>
+    <span class="kw">private val</span> binding <span class="kw">get</span>() = _binding!!
+
+    <span class="kw">override fun</span> <span class="fn">onCreateView</span>(inflater: <span class="cl">LayoutInflater</span>, container: <span class="cl">ViewGroup</span>?, savedInstanceState: <span class="cl">Bundle</span>?) =
+        <span class="cl">FragmentProductBinding</span>.<span class="fn">inflate</span>(inflater, container, <span class="kw">false</span>).<span class="fn">also</span> { _binding = it }.root
+
+    <span class="kw">override fun</span> <span class="fn">onDestroyView</span>() {
+        <span class="kw">super</span>.<span class="fn">onDestroyView</span>()
+        _binding = <span class="kw">null</span>  <span class="cm">// IMPORTANT: prevent memory leak</span>
+    }
+}</code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Memory Leak Warning</div>
+      In Fragments, the View can be destroyed while the Fragment instance lives on (e.g., in the back stack). Always null out the binding reference in <code>onDestroyView()</code> to prevent the binding (and all its view references) from leaking.
+    </div>
+
+    <h3>DataBinding</h3>
+    <pre><code><span class="cm">// Enable:</span>
+android { buildFeatures { dataBinding = <span class="kw">true</span> } }
+
+<span class="cm">&lt;!-- XML layout wrapped in &lt;layout&gt; tag --&gt;</span>
+&lt;layout&gt;
+    &lt;data&gt;
+        &lt;variable name="product" type="com.example.Product" /&gt;
+        &lt;variable name="viewModel" type="com.example.ProductViewModel" /&gt;
+    &lt;/data&gt;
+    &lt;TextView
+        android:text="@{product.name}"
+        android:onClick="@{() -> viewModel.onProductClicked(product)}" /&gt;
+    &lt;!-- Two-way binding: --&gt;
+    &lt;EditText android:text="@={viewModel.searchQuery}" /&gt;
+&lt;/layout&gt;</code></pre>
+
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>ViewBinding</th><th>DataBinding</th></tr>
+      <tr><td>Type safety</td><td>✅ Full</td><td>✅ Full</td></tr>
+      <tr><td>Build speed</td><td>Faster (no annotation processing)</td><td>Slower (KSP/KAPT needed)</td></tr>
+      <tr><td>XML expressions</td><td>❌ No</td><td>✅ @{}, @={} expressions</td></tr>
+      <tr><td>Two-way binding</td><td>❌ No</td><td>✅ @={}</td></tr>
+      <tr><td>Kotlin synthetics</td><td colspan="2">Deprecated — removed in Kotlin 1.8</td></tr>
+    </table></div>
+
+    <p><strong>Recommendation</strong>: Use ViewBinding for simple view access. DataBinding for two-way binding — but be aware of hidden complexity (hard-to-debug XML expressions, build time overhead). Prefer ViewModel + ViewBinding + manual observation over DataBinding expressions.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: ConstraintLayout →</button>
+    </div>
+  </div>
+
+  <!-- S3 ConstraintLayout -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128205;</div>3. ConstraintLayout</div>
+    <p>ConstraintLayout produces a <strong>flat view hierarchy</strong> — all views at the same level with positional relationships defined by constraints. This eliminates deeply nested LinearLayouts/RelativeLayouts, reducing measure/layout passes.</p>
+    <h3>Key Concepts</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Concept</th><th>Description</th></tr>
+      <tr><td>Constraints</td><td>Attach view edges to parent, other views, or guidelines</td></tr>
+      <tr><td>Chains</td><td>Linked group of views sharing space — spread, packed, or weighted</td></tr>
+      <tr><td>Barrier</td><td>Virtual guide that tracks the extremity of multiple views</td></tr>
+      <tr><td>Guideline</td><td>Fixed or percentage-based position line for alignment</td></tr>
+      <tr><td>Group</td><td>Control visibility of multiple views together</td></tr>
+      <tr><td>MotionLayout</td><td>Subclass for complex animations between two ConstraintSets</td></tr>
+    </table></div>
+    <pre><code><span class="cm">&lt;!-- Typical ConstraintLayout card --&gt;</span>
+&lt;androidx.constraintlayout.widget.ConstraintLayout&gt;
+
+    &lt;ImageView
+        android:id="@+id/avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" /&gt;
+
+    &lt;TextView
+        android:id="@+id/nameText"
+        app:layout_constraintTop_toTopOf="@id/avatar"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintEnd_toEndOf="parent" /&gt;
+
+    &lt;!-- Barrier — follows the longer of name or subtitle --&gt;
+    &lt;androidx.constraintlayout.widget.Barrier
+        android:id="@+id/textBarrier"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="nameText,subtitleText" /&gt;
+
+&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</code></pre>
+    <h3>ConstraintSet for Programmatic Changes</h3>
+    <pre><code><span class="kw">val</span> constraintSet = <span class="cl">ConstraintSet</span>()
+constraintSet.<span class="fn">clone</span>(constraintLayout)
+constraintSet.<span class="fn">connect</span>(R.id.view, <span class="cl">ConstraintSet</span>.TOP, R.id.anchor, <span class="cl">ConstraintSet</span>.BOTTOM, <span class="nu">16</span>)
+<span class="cm">// Apply with animation:</span>
+<span class="cl">TransitionManager</span>.<span class="fn">beginDelayedTransition</span>(constraintLayout)
+constraintSet.<span class="fn">applyTo</span>(constraintLayout)</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← ViewBinding</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Custom Views →</button>
+    </div>
+  </div>
+
+  <!-- S4 Custom Views -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127912;</div>4. Custom Views</div>
+    <h3>Custom View Lifecycle</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">CircleProgressView</span> <span class="an">@JvmOverloads</span> <span class="kw">constructor</span>(
+    context: <span class="cl">Context</span>,
+    attrs: <span class="cl">AttributeSet</span>? = <span class="kw">null</span>,
+    defStyleAttr: <span class="cl">Int</span> = <span class="nu">0</span>
+) : <span class="cl">View</span>(context, attrs, defStyleAttr) {
+
+    <span class="kw">private val</span> paint = <span class="cl">Paint</span>(<span class="cl">Paint</span>.ANTI_ALIAS_FLAG).<span class="fn">apply</span> {
+        color = <span class="cl">Color</span>.BLUE
+        style = <span class="cl">Paint</span>.<span class="cl">Style</span>.STROKE
+        strokeWidth = <span class="nu">8f</span>
+    }
+    <span class="kw">private val</span> oval = <span class="cl">RectF</span>()
+    <span class="kw">var</span> progress: <span class="cl">Float</span> = <span class="nu">0f</span>
+        <span class="kw">set</span>(value) { field = value.<span class="fn">coerceIn</span>(<span class="nu">0f</span>, <span class="nu">1f</span>); <span class="fn">invalidate</span>() }
+
+    <span class="cm">// onMeasure: define the view's size</span>
+    <span class="kw">override fun</span> <span class="fn">onMeasure</span>(widthMeasureSpec: <span class="cl">Int</span>, heightMeasureSpec: <span class="cl">Int</span>) {
+        <span class="kw">val</span> size = <span class="fn">resolveSize</span>(<span class="nu">200</span>, widthMeasureSpec).<span class="fn">coerceAtLeast</span>(
+            <span class="fn">resolveSize</span>(<span class="nu">200</span>, heightMeasureSpec)
+        )
+        <span class="fn">setMeasuredDimension</span>(size, size)
+    }
+
+    <span class="cm">// onLayout: position children (for ViewGroups only)</span>
+
+    <span class="cm">// onDraw: render to Canvas — called every invalidate()</span>
+    <span class="kw">override fun</span> <span class="fn">onDraw</span>(canvas: <span class="cl">Canvas</span>) {
+        <span class="kw">val</span> padding = paint.strokeWidth / <span class="nu">2</span>
+        oval.<span class="fn">set</span>(padding, padding, width - padding, height - padding)
+        canvas.<span class="fn">drawArc</span>(oval, -<span class="nu">90f</span>, progress * <span class="nu">360f</span>, <span class="kw">false</span>, paint)
+    }
+}</code></pre>
+
+    <h3>Custom XML Attributes</h3>
+    <pre><code><span class="cm">&lt;!-- res/values/attrs.xml --&gt;</span>
+&lt;declare-styleable name="CircleProgressView"&gt;
+    &lt;attr name="progressColor" format="color" /&gt;
+    &lt;attr name="strokeWidth" format="dimension" /&gt;
+&lt;/declare-styleable&gt;
+
+<span class="cm">// Read in constructor:</span>
+<span class="kw">init</span> {
+    context.<span class="fn">obtainStyledAttributes</span>(attrs, R.styleable.CircleProgressView).<span class="fn">use</span> { ta ->
+        paint.color = ta.<span class="fn">getColor</span>(R.styleable.CircleProgressView_progressColor, <span class="cl">Color</span>.BLUE)
+        paint.strokeWidth = ta.<span class="fn">getDimension</span>(R.styleable.CircleProgressView_strokeWidth, <span class="nu">8f</span>)
+    }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Performance Warning</div>
+      Never allocate Paint, RectF, or other objects inside <code>onDraw()</code> — it runs 60+ times per second and triggers GC pressure. Create all objects in the constructor or as class fields.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← ConstraintLayout</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: XML Techniques →</button>
+    </div>
+  </div>
+
+  <!-- S5 XML Layout Techniques -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128196;</div>5. XML Layout Techniques</div>
+    <h3>include — reuse layout files</h3>
+    <pre><code><span class="cm">&lt;!-- Reuse a common toolbar layout --&gt;</span>
+&lt;include
+    layout="@layout/toolbar_main"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" /&gt;</code></pre>
+
+    <h3>merge — eliminate root ViewGroup</h3>
+    <pre><code><span class="cm">&lt;!-- Without merge: include adds toolbar_main's root FrameLayout into parent --&gt;</span>
+<span class="cm">&lt;!-- With merge: children merge directly into include location --&gt;</span>
+&lt;merge xmlns:android="..."&gt;
+    &lt;!-- Children are merged into the parent container directly --&gt;
+    &lt;TextView android:id="@+id/label" ... /&gt;
+    &lt;ImageView android:id="@+id/icon" ... /&gt;
+&lt;/merge&gt;
+<span class="cm">&lt;!-- Use when the included layout's root type matches the parent container --&gt;</span></code></pre>
+
+    <h3>ViewStub — lazy inflation</h3>
+    <pre><code><span class="cm">&lt;!-- ViewStub: 0x0 placeholder — not inflated until needed --&gt;</span>
+&lt;ViewStub
+    android:id="@+id/errorStub"
+    android:layout="@layout/layout_error"
+    android:inflatedId="@+id/errorView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" /&gt;
+
+<span class="cm">// Inflate on demand:</span>
+<span class="kw">val</span> stub = binding.errorStub
+<span class="kw">if</span> (stub.parent != <span class="kw">null</span>) {  <span class="cm">// check not already inflated</span>
+    stub.<span class="fn">inflate</span>()
+}
+<span class="cm">// After inflation, stub is removed from hierarchy and replaced by the layout</span>
+<span class="cm">// Ideal for error states, onboarding screens, rare UI paths</span></code></pre>
+
+    <div class="table-wrap"><table>
+      <tr><th>Technique</th><th>When to use</th><th>Benefit</th></tr>
+      <tr><td>include</td><td>Reusing common layouts (toolbar, footer)</td><td>DRY, maintainability</td></tr>
+      <tr><td>merge</td><td>When included layout root matches parent</td><td>Removes extra nesting level</td></tr>
+      <tr><td>ViewStub</td><td>Layouts used conditionally (error, empty, overlay)</td><td>Reduces initial inflation cost</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Custom Views</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Migration to Compose →</button>
+    </div>
+  </div>
+
+  <!-- S6 Migration to Compose -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128640;</div>6. Migration to Compose</div>
+    <h3>Why Compose Replaces All of This</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Legacy Problem</th><th>Compose Solution</th></tr>
+      <tr><td>Manual state management (setText, setVisibility)</td><td>State-driven UI — recompose on state change automatically</td></tr>
+      <tr><td>No type safety in XML attributes</td><td>Pure Kotlin — compile-time type checking everywhere</td></tr>
+      <tr><td>Complex two-way binding with DataBinding</td><td>rememberSaveable + ViewModel.uiState — simple and explicit</td></tr>
+      <tr><td>onMeasure/onDraw boilerplate for custom rendering</td><td>Canvas in DrawScope, Modifier.drawBehind — Kotlin DSL</td></tr>
+      <tr><td>Nested layouts causing measure overhead</td><td>Intrinsic measurements, single-pass layout</td></tr>
+      <tr><td>ViewStub for conditional inflation</td><td>if/when expressions — lazy evaluation by default</td></tr>
+    </table></div>
+
+    <h3>Incremental Migration Strategy</h3>
+    <pre><code><span class="cm">// Step 1: Add Compose to a Fragment with ComposeView</span>
+<span class="kw">class</span> <span class="cl">ProductFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreateView</span>(...) = <span class="cl">ComposeView</span>(requireContext()).<span class="fn">apply</span> {
+        setViewCompositionStrategy(<span class="cl">ViewCompositionStrategy</span>.<span class="cl">DisposeOnViewTreeLifecycleDestroyed</span>)
+        <span class="fn">setContent</span> {
+            <span class="cl">MyAppTheme</span> { <span class="cl">ProductScreen</span>(viewModel = <span class="fn">hiltViewModel</span>()) }
+        }
+    }
+}
+
+<span class="cm">// Step 2: Embed legacy View in Compose with AndroidView</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="cl">LegacyMapView</span>() {
+    <span class="cl">AndroidView</span>(factory = { context -> <span class="cl">MapView</span>(context).<span class="fn">apply</span> { ... } })
+}
+
+<span class="cm">// Step 3: Full migration — replace Fragment with a NavHost entry</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← XML Techniques</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"For legacy XML-based UI: ViewBinding for type-safe view access (replacing kotlin synthetics which are removed), ConstraintLayout for flat hierarchies, ViewStub for lazy inflation of conditional UI. DataBinding is an option for two-way binding but I prefer ViewModel + ViewBinding due to lower complexity. Custom Views use onMeasure → onDraw with Canvas. Compose replaces all of this with state-driven, type-safe, declarative UI."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"ViewBinding generates a typed binding class from each XML layout — fragment_product.xml becomes FragmentProductBinding. The critical Fragment pattern is nulling out the binding in onDestroyView() to prevent memory leaks since the Fragment lives longer than its View. DataBinding adds @{} XML expressions and @={} two-way binding — it works but adds build overhead and hard-to-debug XML logic; I prefer keeping logic in the ViewModel and using ViewBinding for view access. ConstraintLayout produces flat hierarchies via constraints, barriers, and chains — it's the best XML layout manager. For custom rendering, Custom Views override onMeasure (size) and onDraw (Canvas rendering) — never allocate objects in onDraw or you'll cause GC pressure during animation. ViewStub defers inflation until needed — useful for error/empty states. Compose replaces all of this: state-driven recomposition instead of manual setText/setVisibility, pure Kotlin type safety, and intrinsic measurements instead of multi-pass layout."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>ViewBinding: null _binding in onDestroyView() — Fragment View lifecycle is shorter than Fragment lifecycle</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Kotlin synthetics removed in Kotlin 1.8 — ViewBinding is the replacement</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Custom Views: no object allocation in onDraw — 60fps means Paint/RectF in constructor</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>ViewStub: lazy inflation — 0 cost until inflate() called</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>ComposeView + AndroidView — the bridge for incremental migration</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Understand the View measurement system: measure() → onMeasure() → layout() → onLayout() → draw() → onDraw(). Every parent calls measure on all children before laying them out. Deeply nested layouts cause O(n²) measure passes. ConstraintLayout reduces this to O(n) by solving constraints in one pass. Compose's Intrinsics API provides similar benefits with explicit opt-in.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Migration</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>ViewBinding Fragment</h4>
+        <pre><code>private var _binding: Binding? = null
+val binding get() = _binding!!
+onCreateView → inflate → assign
+onDestroyView → _binding = null</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Custom View Lifecycle</h4>
+        <pre><code>onMeasure  → define size
+onLayout   → position children
+onDraw     → render to Canvas
+invalidate() → triggers onDraw</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>XML Techniques</h4>
+        <pre><code>include  → reuse layout
+merge    → eliminate root VG
+ViewStub → lazy inflation</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Migration Bridge</h4>
+        <pre><code>ComposeView → Compose in Fragment
+AndroidView → View in Compose</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What is ViewBinding and how does it differ from DataBinding?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">ViewBinding generates a typed class for each XML layout file — provides null-safe, type-safe access to views. It replaces findViewByld and Kotlin synthetics. DataBinding also generates typed classes but additionally supports @{} expressions in XML for data binding and @={} for two-way binding. ViewBinding is faster to compile (no annotation processing), simpler to debug (no XML expressions), and preferred for most cases. Use DataBinding only when two-way XML binding is genuinely needed.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. Why must you null the binding reference in Fragment.onDestroyView()?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Fragments have two lifetimes: the Fragment itself (created to destroyed) and the Fragment's View (onCreateView to onDestroyView). When the Fragment is on the back stack, its View is destroyed but the Fragment instance lives on. The binding holds references to all Views in the destroyed layout. If not nulled, this constitutes a memory leak — the Fragment keeps the entire View hierarchy alive. Always: onDestroyView() { super.onDestroyView(); _binding = null }.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What are the key advantages of ConstraintLayout over LinearLayout/RelativeLayout?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Flat hierarchy — all views at one level, no nested containers. This reduces measure/layout passes (nested LinearLayouts require O(n²) measurement). ConstraintLayout can express any layout that would require nested LinearLayouts + RelativeLayouts in a single flat structure. Additional features: chains (spread/pack weight distribution), barriers (dynamic alignment), groups (visibility control), guidelines, and MotionLayout for animations.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. What is ViewStub and when is it useful?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">ViewStub is a zero-size, zero-draw placeholder in the layout hierarchy. It takes up no memory or draw time until inflate() is called. On inflate, the ViewStub is replaced in the view tree by the specified layout. Useful for: error states (only shown when network fails), onboarding overlays (shown once), premium features UI (shown only to paid users), complex UI that's rarely needed. It reduces initial inflation and layout costs for these conditional views.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. What are the lifecycle methods of a Custom View and when does each run?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">onMeasure(widthSpec, heightSpec): called by parent to determine this View's size. Must call setMeasuredDimension(). onLayout(changed, l, t, r, b): called to position children (ViewGroups only). onDraw(canvas): render the view. Called on every invalidate() — runs at 60fps during animations. invalidate(): schedules a redraw (calls onDraw). requestLayout(): schedules re-measure + re-layout + redraw. Call invalidate() for visual changes, requestLayout() when size might change.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. Why shouldn't you allocate objects in onDraw()?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">onDraw() runs 60+ times per second during animations and scrolling. Allocating Paint, RectF, Path, or other objects in onDraw() creates thousands of objects per second. Each allocation eventually triggers garbage collection — GC pauses can cause visible jank (frame drops). Allocate all drawing objects in the constructor or as class-level fields. Reuse and update them (e.g., rect.set() instead of new RectF()). Android Lint has a "DrawAllocation" check that flags this pattern.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How does the merge tag work with include?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Normally, &lt;include&gt; embeds the entire XML including its root ViewGroup. A &lt;FrameLayout&gt; wrapper in the included file becomes an extra nested view. Using &lt;merge&gt; as the root of the included layout tells the inflater to merge the children directly into the parent at the include insertion point — the &lt;merge&gt; tag itself is not a View. This removes one level of nesting. Use merge when the included layout's content type matches the parent container (e.g., including into a LinearLayout when merge contains LinearLayout children).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. How do you incrementally migrate XML-based UI to Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Strategy: start with new screens in Compose, don't rewrite working screens. For existing screens: use ComposeView inside Fragment.onCreateView() — the Fragment container becomes a thin shell hosting Compose UI. Set ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed for correct lifecycle. Use AndroidView for embedding legacy Views that have no Compose equivalent (MapView, WebView). Gradually replace Fragment-by-Fragment, then remove Fragment dependencies as screens become fully Compose. The ViewModel layer remains untouched throughout migration.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. When would you still write a Custom View in a Compose-first project?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Custom Views are still warranted for: third-party SDKs that provide custom View subclasses (Maps, AR, camera preview), extremely complex custom rendering that's better expressed with Canvas API than Compose's DrawScope, and integration with accessibility frameworks that work better with View. In Compose, Canvas {} composable and Modifier.drawBehind cover 95% of custom drawing needs. For the remaining 5%, use AndroidView to embed the custom View in Compose with full lifecycle management.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. What are ConstraintLayout chains and when do you use them?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">A chain is a group of views linked bi-directionally. Chain styles: spread (equal spacing between views), spread_inside (equal spacing but no outer margin), packed (views clustered together with bias). Weighted chains allow LinearLayout-style weight distribution in ConstraintLayout. Use chains when multiple views share horizontal or vertical space and need to distribute it. Example: three buttons sharing the bottom of a form — create a horizontal chain with spread_inside to space them evenly without nested LinearLayout.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1J — Equality, Interop & Errors | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1J · Equality, Interop & Errors</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1J</span> — Equality, Interop &amp; Errors</h1>
+    <p class="hero-desc"><code>==</code> vs <code>===</code>, Kotlin–JVM interoperability, Kotlin compilation basics, exceptions, and the <code>Result</code> type — the final Kotlin unit before moving into Android fundamentals.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1J</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What it covers</h3>
+    <ul>
+      <li><strong>== vs ===</strong>: structural equality vs referential equality — critical for data classes, caches, state comparison</li>
+      <li><strong>Kotlin–JVM interop</strong>: how Kotlin and Java code call each other, platform types, <code>@JvmStatic</code>, <code>@JvmOverloads</code>, <code>@JvmField</code></li>
+      <li><strong>Kotlin compilation</strong>: source → IR → JVM bytecode (or JS/Native); how the compiler outputs .class files; what kotlinc does differently from javac</li>
+      <li><strong>Exceptions</strong>: Kotlin's unchecked exception model, try/catch/finally, <code>runCatching</code>, exception hierarchy</li>
+      <li><strong>Result type</strong>: <code>Result&lt;T&gt;</code>, <code>runCatching</code>, <code>fold</code>, <code>onSuccess</code>/<code>onFailure</code>, when to use vs sealed class</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      In Android, <code>==</code> vs <code>===</code> is critical for StateFlow: <code>MutableStateFlow</code> uses structural equality (<code>==</code>) to decide whether to emit a new value. If your state object doesn't override <code>equals()</code> correctly, state updates get silently dropped. This is the most common source of "my UI isn't updating" bugs.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>== vs ===</h3>
+    <pre><code><span class="cm">// == : structural equality — calls equals()</span>
+<span class="cm">// === : referential equality — same object in memory</span>
+
+<span class="kw">data class</span> <span class="cl">User</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> name: <span class="cl">String</span>)
+
+<span class="kw">val</span> a = <span class="cl">User</span>(<span class="str">"1"</span>, <span class="str">"Alice"</span>)
+<span class="kw">val</span> b = <span class="cl">User</span>(<span class="str">"1"</span>, <span class="str">"Alice"</span>)
+<span class="kw">val</span> c = a
+
+<span class="fn">println</span>(a == b)   <span class="cm">// true  — same content (data class equals)</span>
+<span class="fn">println</span>(a === b)  <span class="cm">// false — different objects in memory</span>
+<span class="fn">println</span>(a === c)  <span class="cm">// true  — same reference</span>
+
+<span class="cm">// For nullable types: a == null calls a?.equals(null) ?: (a === null)</span>
+<span class="kw">val</span> x: <span class="cl">String?</span> = <span class="kw">null</span>
+<span class="fn">println</span>(x == <span class="kw">null</span>)   <span class="cm">// true — safe null check</span>
+<span class="fn">println</span>(x === <span class="kw">null</span>)  <span class="cm">// true — referential null check</span></code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">StateFlow & Equality</div>
+      <code>MutableStateFlow.value = newValue</code> compares <code>newValue == currentValue</code>. If equal, no emission. This is why <code>data class</code> with all <code>val</code> properties is critical for UI state — <code>equals()</code> auto-generated from constructor properties. Regular classes with no <code>equals()</code> override use reference equality — the state object is "new" even if content is identical, always emitting.
+    </div>
+
+    <h3>Kotlin–JVM Interoperability</h3>
+    <pre><code><span class="cm">// Platform types — Java's String (without annotation) becomes String! in Kotlin</span>
+<span class="cm">// String! means "may or may not be null" — Kotlin trusts you</span>
+<span class="kw">val</span> result: <span class="cl">String</span> = javaObject.<span class="fn">getName</span>()  <span class="cm">// could be null if Java doesn't annotate!</span>
+
+<span class="cm">// Fix: annotate Java side with @Nullable / @NotNull</span>
+<span class="cm">// Or handle defensively:</span>
+<span class="kw">val</span> safe = javaObject.<span class="fn">getName</span>() <span class="kw">?:</span> <span class="str">"default"</span></code></pre>
+
+    <pre><code><span class="cm">// @JvmStatic — generate a true Java static method from companion object</span>
+<span class="kw">class</span> <span class="cl">Analytics</span> {
+    <span class="kw">companion object</span> {
+        <span class="an">@JvmStatic</span>
+        <span class="kw">fun</span> <span class="fn">track</span>(event: <span class="cl">String</span>) { }  <span class="cm">// callable as Analytics.track() from Java</span>
+    }
+}
+
+<span class="cm">// @JvmOverloads — generate overloaded Java methods for default args</span>
+<span class="an">@JvmOverloads</span>
+<span class="kw">fun</span> <span class="fn">createRequest</span>(url: <span class="cl">String</span>, timeout: <span class="cl">Int</span> = <span class="nu">30</span>, retries: <span class="cl">Int</span> = <span class="nu">3</span>) { }
+<span class="cm">// Java sees: createRequest(url), createRequest(url, timeout), createRequest(url, timeout, retries)</span>
+
+<span class="cm">// @JvmField — expose Kotlin property as Java field (no getter/setter)</span>
+<span class="kw">class</span> <span class="cl">Config</span> {
+    <span class="an">@JvmField</span> <span class="kw">val</span> MAX_RETRY = <span class="nu">3</span>   <span class="cm">// Java: config.MAX_RETRY (no getMAX_RETRY())</span>
+}
+
+<span class="cm">// @Throws — declare checked exceptions for Java callers</span>
+<span class="an">@Throws</span>(<span class="cl">IOException</span>::<span class="kw">class</span>)
+<span class="kw">fun</span> <span class="fn">readFile</span>(path: <span class="cl">String</span>): <span class="cl">String</span> { ... }</code></pre>
+
+    <h3>Kotlin Compilation Basics</h3>
+    <pre><code><span class="cm">// Kotlin source (.kt) → Kotlin IR → JVM bytecode (.class)</span>
+<span class="cm">// Android build: .kt → .class → D8/R8 → .dex → .apk/.aab</span>
+
+<span class="cm">// Key compiler outputs for interop:</span>
+<span class="cm">// - data class generates: equals, hashCode, toString, copy, componentN</span>
+<span class="cm">// - companion object generates: inner static class + INSTANCE field</span>
+<span class="cm">// - extension functions compile to: static methods (receiver as first param)</span>
+<span class="cm">// - default params compile to: $default synthetic method + bitmask</span>
+<span class="cm">// - inline functions: body copied at each call site</span>
+
+<span class="cm">// KAPT (Kotlin Annotation Processing Tool) — runs before compilation</span>
+<span class="cm">// KSP (Kotlin Symbol Processing) — faster, processes Kotlin symbols directly</span>
+<span class="cm">// Hilt uses KSP; Room uses KSP (or KAPT)</span></code></pre>
+
+    <h3>Exceptions in Kotlin</h3>
+    <pre><code><span class="cm">// ALL Kotlin exceptions are unchecked (unlike Java checked exceptions)</span>
+<span class="cm">// No 'throws' declaration required (unlike Java)</span>
+
+<span class="kw">try</span> {
+    <span class="kw">val</span> result = riskyOperation()
+} <span class="kw">catch</span> (e: <span class="cl">SpecificException</span>) {
+    <span class="fn">handleSpecific</span>(e)
+} <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+    <span class="fn">handleGeneral</span>(e)
+} <span class="kw">finally</span> {
+    <span class="fn">cleanup</span>()   <span class="cm">// always runs</span>
+}
+
+<span class="cm">// try is an expression — returns the last value</span>
+<span class="kw">val</span> parsed = <span class="kw">try</span> { input.<span class="fn">toInt</span>() } <span class="kw">catch</span> (e: <span class="cl">NumberFormatException</span>) { <span class="nu">0</span> }
+
+<span class="cm">// throw is also an expression (type: Nothing)</span>
+<span class="kw">val</span> port = config.port <span class="kw">?:</span> <span class="kw">throw</span> <span class="cl">IllegalStateException</span>(<span class="str">"Port not configured"</span>)</code></pre>
+
+    <h3>Result&lt;T&gt;</h3>
+    <pre><code><span class="cm">// Result&lt;T&gt; = either Success(value: T) or Failure(exception: Throwable)</span>
+<span class="kw">val</span> result: <span class="cl">Result</span>&lt;<span class="cl">User</span>&gt; = <span class="fn">runCatching</span> { api.<span class="fn">getUser</span>(id) }
+
+<span class="cm">// Access:</span>
+result.<span class="fn">getOrNull</span>()                       <span class="cm">// T? — null on failure</span>
+result.<span class="fn">getOrDefault</span>(<span class="cl">User</span>.empty())        <span class="cm">// T — default on failure</span>
+result.<span class="fn">getOrElse</span> { e -> <span class="cl">User</span>.<span class="fn">fromError</span>(e) }
+result.<span class="fn">getOrThrow</span>()                       <span class="cm">// T — rethrows exception</span>
+result.<span class="fn">isSuccess</span>; result.<span class="fn">isFailure</span>
+
+<span class="cm">// Chain transformations:</span>
+result
+    .<span class="fn">map</span> { user -> user.<span class="fn">toDomain</span>() }       <span class="cm">// transform on success</span>
+    .<span class="fn">mapCatching</span> { user -> <span class="fn">enrich</span>(user) }  <span class="cm">// transform, catches exceptions</span>
+    .<span class="fn">onSuccess</span> { user -> <span class="fn">cacheUser</span>(user) } <span class="cm">// side effect on success</span>
+    .<span class="fn">onFailure</span> { e -> <span class="fn">logError</span>(e) }         <span class="cm">// side effect on failure</span>
+    .<span class="fn">fold</span>(
+        onSuccess = { user -> <span class="cl">UiState</span>.<span class="cl">Success</span>(user) },
+        onFailure = { e    -> <span class="cl">UiState</span>.<span class="cl">Error</span>(e.message) }
+    )
+
+<span class="cm">// runCatching — wraps a block in Result</span>
+<span class="kw">val</span> r: <span class="cl">Result</span>&lt;<span class="cl">Int</span>&gt; = <span class="fn">runCatching</span> { <span class="str">"42"</span>.<span class="fn">toInt</span>() }   <span class="cm">// Success(42)</span>
+<span class="kw">val</span> r2: <span class="cl">Result</span>&lt;<span class="cl">Int</span>&gt; = <span class="fn">runCatching</span> { <span class="str">"abc"</span>.<span class="fn">toInt</span>() }  <span class="cm">// Failure(NumberFormatException)</span></code></pre>
+
+    <h3>Key Terms</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td><code>==</code></td><td>Structural equality — calls <code>equals()</code></td></tr>
+      <tr><td><code>===</code></td><td>Referential equality — same object in memory</td></tr>
+      <tr><td>Platform type <code>T!</code></td><td>Java type with unknown nullability — Kotlin trusts the developer</td></tr>
+      <tr><td><code>@JvmStatic</code></td><td>Generate true Java static method from companion object member</td></tr>
+      <tr><td><code>@JvmOverloads</code></td><td>Generate Java-visible overloads for Kotlin default arguments</td></tr>
+      <tr><td><code>runCatching</code></td><td>Execute a block and wrap result/exception in <code>Result&lt;T&gt;</code></td></tr>
+      <tr><td>KSP</td><td>Kotlin Symbol Processing — faster annotation processing, replaces KAPT</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+
+    <h3>== vs === — When it matters in Android</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Use</th><th>Why</th></tr>
+      <tr><td>Compare UI state objects</td><td><code>==</code> (structural)</td><td>StateFlow uses <code>==</code> to detect changes</td></tr>
+      <tr><td>Check if two references point to the same singleton</td><td><code>===</code></td><td>Singletons (object, Hilt @Singleton) should be referentially equal</td></tr>
+      <tr><td>Null check in smart cast</td><td><code>== null</code> or <code>=== null</code></td><td>Both work; <code>== null</code> is idiomatic Kotlin</td></tr>
+      <tr><td>Check enum values</td><td><code>==</code></td><td>Enums are singletons; structural and referential equality are the same</td></tr>
+    </table>
+    </div>
+
+    <h3>Result&lt;T&gt; vs Sealed Class — Decision</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Use Result&lt;T&gt;</th><th>Use Sealed Class</th></tr>
+      <tr><td>Repository / data layer wrapping exceptions</td><td>Presentation layer UiState (Loading, Success, Error)</td></tr>
+      <tr><td>Simple success/failure from a use case</td><td>Multiple distinct error types with different data</td></tr>
+      <tr><td>Wrapping existing exception-throwing code</td><td>One-time UI events (navigation, snackbar)</td></tr>
+      <tr><td>When stdlib operators (map, fold, onSuccess) are sufficient</td><td>When you need exhaustive when + compile-time safety for all states</td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to use Result&lt;T&gt;</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Use <code>Result</code> as a return type in public API — use sealed class for explicit, exhaustive error handling</li>
+        <li>Wrap <code>CancellationException</code> in Result — always rethrow it</li>
+        <li>Use <code>runCatching</code> to swallow exceptions silently without logging</li>
+        <li>Use <code>===</code> for value comparison of data classes — use <code>==</code></li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — repository wraps API calls in Result, ViewModel converts to sealed UiState, Java interop layer uses @JvmStatic and @JvmOverloads.
+    </div>
+
+    <h3>Repository — Result wrapping</h3>
+    <pre><code><span class="cm">// data/repository/AccountRepositoryImpl.kt</span>
+<span class="kw">internal class</span> <span class="cl">AccountRepositoryImpl</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> api: <span class="cl">AccountApi</span>
+) : <span class="cl">AccountRepository</span> {
+
+    <span class="kw">override suspend fun</span> <span class="fn">getBalance</span>(accountId: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">Balance</span>&gt; =
+        <span class="fn">runCatching</span> {
+            api.<span class="fn">getBalance</span>(accountId).<span class="fn">toDomain</span>()
+        }.<span class="fn">onFailure</span> { e ->
+            <span class="kw">if</span> (e <span class="kw">is</span> <span class="cl">CancellationException</span>) <span class="kw">throw</span> e  <span class="cm">// never swallow cancellation</span>
+            <span class="cl">Timber</span>.<span class="fn">e</span>(e, <span class="str">"getBalance failed for $accountId"</span>)
+        }
+}</code></pre>
+
+    <h3>UseCase — Result propagation</h3>
+    <pre><code><span class="cm">// domain/usecase/GetAccountSummaryUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">GetAccountSummaryUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> accountRepo: <span class="cl">AccountRepository</span>,
+    <span class="kw">private val</span> txRepo: <span class="cl">TransactionRepository</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(accountId: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">AccountSummary</span>&gt; =
+        <span class="fn">runCatching</span> {
+            <span class="kw">val</span> balance = accountRepo.<span class="fn">getBalance</span>(accountId).<span class="fn">getOrThrow</span>()
+            <span class="kw">val</span> recentTx = txRepo.<span class="fn">getRecent</span>(accountId, limit = <span class="nu">5</span>).<span class="fn">getOrThrow</span>()
+            <span class="cl">AccountSummary</span>(balance, recentTx)
+        }</code></pre>
+
+    <h3>ViewModel — Result → sealed UiState</h3>
+    <pre><code><span class="cm">// presentation/account/AccountViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">AccountViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getAccountSummary: <span class="cl">GetAccountSummaryUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">AccountUiState</span>&gt;(<span class="cl">AccountUiState</span>.Loading)
+    <span class="kw">val</span> uiState = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">load</span>(accountId: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            _uiState.value = <span class="cl">AccountUiState</span>.Loading
+
+            <span class="kw">val</span> newState = <span class="fn">getAccountSummary</span>(accountId)
+                .<span class="fn">fold</span>(
+                    onSuccess = { <span class="cl">AccountUiState</span>.<span class="cl">Success</span>(it) },
+                    onFailure = { <span class="cl">AccountUiState</span>.<span class="cl">Error</span>(it.message <span class="kw">?:</span> <span class="str">"Unknown error"</span>) }
+                )
+
+            <span class="cm">// StateFlow uses == to detect change — data class AccountUiState needed</span>
+            _uiState.value = newState
+        }
+    }
+}
+
+<span class="kw">sealed interface</span> <span class="cl">AccountUiState</span> {
+    <span class="kw">data object</span> <span class="cl">Loading</span>                                    : <span class="cl">AccountUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Success</span>(<span class="kw">val</span> summary: <span class="cl">AccountSummary</span>)        : <span class="cl">AccountUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>)                  : <span class="cl">AccountUiState</span>
+}</code></pre>
+
+    <h3>Java Interop — Analytics SDK wrapper</h3>
+    <pre><code><span class="cm">// data/analytics/AnalyticsManager.kt (consumed from Java legacy code)</span>
+<span class="kw">class</span> <span class="cl">AnalyticsManager</span> <span class="kw">private constructor</span>() {
+
+    <span class="kw">companion object</span> {
+        <span class="an">@JvmStatic</span>
+        <span class="kw">val</span> instance: <span class="cl">AnalyticsManager</span> <span class="kw">by lazy</span> { <span class="cl">AnalyticsManager</span>() }
+
+        <span class="an">@JvmStatic</span>
+        <span class="an">@JvmOverloads</span>
+        <span class="kw">fun</span> <span class="fn">track</span>(
+            event: <span class="cl">String</span>,
+            properties: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Any</span>&gt; = <span class="fn">emptyMap</span>(),
+            userId: <span class="cl">String?</span> = <span class="kw">null</span>
+        ) { <span class="cm">/* ... */</span> }
+    }
+}
+<span class="cm">// Java: AnalyticsManager.track("login") — works due to @JvmStatic + @JvmOverloads</span></code></pre>
+
+    <h3>Equality in StateFlow — ==  matters</h3>
+    <pre><code><span class="cm">// ❌ If UiState is a regular class (no data), StateFlow may not emit</span>
+<span class="kw">class</span> <span class="cl">UiState</span>(<span class="kw">val</span> count: <span class="cl">Int</span>)  <span class="cm">// no equals() override</span>
+_state.value = <span class="cl">UiState</span>(<span class="nu">5</span>)     <span class="cm">// always emits — new object ≠ old (reference)</span>
+_state.value = <span class="cl">UiState</span>(<span class="nu">5</span>)     <span class="cm">// emits again even with same content! (5 == 5 but different obj)</span>
+
+<span class="cm">// ✅ data class: equals() uses structural comparison</span>
+<span class="kw">data class</span> <span class="cl">UiState</span>(<span class="kw">val</span> count: <span class="cl">Int</span>)
+_state.value = <span class="cl">UiState</span>(<span class="nu">5</span>)     <span class="cm">// emits</span>
+_state.value = <span class="cl">UiState</span>(<span class="nu">5</span>)     <span class="cm">// NOT emitted — same content, == returns true</span>
+_state.value = <span class="cl">UiState</span>(<span class="nu">6</span>)     <span class="cm">// emits — content changed</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td><code>Result&lt;T&gt;</code></td><td>Stdlib, no extra type, good operators (map, fold, onSuccess)</td><td>Only Success/Failure — no Loading, no typed error subtypes</td><td>Data/domain layer simple success/failure</td></tr>
+      <tr><td>Sealed class (UiState)</td><td>Exhaustive when, typed subtypes, Loading state, custom data per error</td><td>More boilerplate; not interoperable with coroutine exceptions directly</td><td>UI layer state — always</td></tr>
+      <tr><td>Try/catch</td><td>Direct, familiar, fine-grained control</td><td>Imperative; easy to forget to handle; no functional chaining</td><td>Low-level code; specific exception type handling</td></tr>
+      <tr><td><code>runCatching</code></td><td>Wraps any block safely; functional operators</td><td>Swallows CancellationException if you're not careful</td><td>Wrapping existing exception-throwing APIs</td></tr>
+      <tr><td>Arrow's Either/Validated</td><td>Typed errors, functional programming style</td><td>External dependency; learning curve</td><td>Advanced FP style; not typical Android production</td></tr>
+    </table>
+    </div>
+    <h3>Equality: == vs ===</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>== behaviour</th><th>=== behaviour</th></tr>
+      <tr><td><code>data class</code></td><td>Structural (auto-generated)</td><td>Referential</td></tr>
+      <tr><td>Regular class (no override)</td><td>Referential (inherited from Any)</td><td>Referential</td></tr>
+      <tr><td><code>String</code></td><td>Structural (value comparison)</td><td>Referential (may differ for string pool)</td></tr>
+      <tr><td>Primitive types (Int, etc.)</td><td>Value comparison</td><td>Value comparison (boxed: referential on JVM)</td></tr>
+      <tr><td>enum</td><td>Referential (singletons) = structural</td><td>Same as ==</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>runCatching swallows CancellationException</h3>
+    <pre><code><span class="cm">// ❌ BAD — CancellationException caught and wrapped, coroutine not cancelled</span>
+<span class="kw">val</span> result = <span class="fn">runCatching</span> { api.<span class="fn">call</span>() }
+<span class="cm">// If coroutine is cancelled during api.call(), CancellationException is swallowed!</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — always rethrow CancellationException</span>
+<span class="kw">val</span> result = <span class="fn">runCatching</span> { api.<span class="fn">call</span>() }
+    .<span class="fn">onFailure</span> { <span class="kw">if</span> (it <span class="kw">is</span> <span class="cl">CancellationException</span>) <span class="kw">throw</span> it }
+
+<span class="cm">// Or use a safeRunCatching wrapper:</span>
+<span class="kw">suspend inline fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">safeRunCatching</span>(block: <span class="kw">suspend</span> () -> <span class="cl">T</span>): <span class="cl">Result</span>&lt;<span class="cl">T</span>&gt; = <span class="kw">try</span> {
+    <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">block</span>())
+} <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) { <span class="kw">throw</span> e }
+  <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="cl">Result</span>.<span class="fn">failure</span>(e) }</code></pre>
+
+    <h3>StateFlow with regular class — no emission</h3>
+    <pre><code><span class="cm">// ❌ BAD — regular class; StateFlow.value = x checks x == current</span>
+<span class="cm">// Regular class inherits equals() from Any → reference comparison</span>
+<span class="kw">class</span> <span class="cl">ProfileState</span>(<span class="kw">val</span> name: <span class="cl">String</span>)
+_state.value = <span class="cl">ProfileState</span>(<span class="str">"Alice"</span>)
+_state.value = <span class="cl">ProfileState</span>(<span class="str">"Alice"</span>)  <span class="cm">// emits again! different object references</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — data class; structural equality prevents duplicate emissions</span>
+<span class="kw">data class</span> <span class="cl">ProfileState</span>(<span class="kw">val</span> name: <span class="cl">String</span>)
+_state.value = <span class="cl">ProfileState</span>(<span class="str">"Alice"</span>)
+_state.value = <span class="cl">ProfileState</span>(<span class="str">"Alice"</span>)  <span class="cm">// NOT emitted — == returns true</span></code></pre>
+
+    <h3>Platform types — silent NPE from Java</h3>
+    <pre><code><span class="cm">// ❌ BAD — Java returns String! (platform type); assigned as non-null</span>
+<span class="kw">val</span> name: <span class="cl">String</span> = javaApi.<span class="fn">getName</span>()  <span class="cm">// crashes if getName() returns null</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — treat Java returns defensively</span>
+<span class="kw">val</span> name: <span class="cl">String</span> = javaApi.<span class="fn">getName</span>() <span class="kw">?:</span> <span class="str">"Unknown"</span>
+<span class="cm">// Or: annotate the Java side with @NotNull / @Nullable</span></code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Use <code>data class</code> for all StateFlow state types — structural equality ensures correct emission/de-dup.</li>
+      <li>Always rethrow <code>CancellationException</code> — wrap all <code>runCatching</code> with a re-throw check.</li>
+      <li>Use <code>Result&lt;T&gt;</code> in data/domain layer, sealed <code>UiState</code> in presentation layer — they serve different purposes.</li>
+      <li>Add <code>@Throws</code> to Kotlin functions called from Java that may throw checked exceptions.</li>
+      <li>Add <code>@JvmStatic</code> to companion object methods used from Java — avoids <code>MyClass.Companion.method()</code> verbosity.</li>
+      <li>Prefer KSP over KAPT for annotation processors in new code — significantly faster build times.</li>
+      <li>Use <code>try</code> as an expression for simple parse operations: <code>val n = try { s.toInt() } catch { 0 }</code>.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "<code>==</code> is structural equality — calls <code>equals()</code>. <code>===</code> is referential equality — same object in memory. This matters critically for StateFlow: it uses <code>==</code> to decide whether to emit. A regular class with no <code>equals()</code> will always emit; a data class correctly de-duplicates identical states. For error handling, <code>Result&lt;T&gt;</code> with <code>runCatching</code> is good for data/domain layer wrapping; sealed UiState is right for the presentation layer. Java interop uses <code>@JvmStatic</code>, <code>@JvmOverloads</code>, and <code>@JvmField</code> to make Kotlin code natural to call from Java. All Kotlin exceptions are unchecked — no forced try/catch."
+    </div>
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Three topics. Equality: <code>==</code> calls <code>equals()</code> — structural. <code>===</code> is the same-object check. The most practically important implication in Android is StateFlow: it internally uses <code>==</code> to compare the new and current value. If they're equal, no emission happens. With a data class, this correctly suppresses duplicate state pushes. With a regular class that hasn't overridden <code>equals()</code>, you get reference comparison — every new object emits, even if content is identical. That can cause unnecessary recomposition or repeated side effects.<br><br>
+      Errors and Result: Kotlin has no checked exceptions — unlike Java, you're never forced to declare or catch. For wrapping exception-throwing code I use <code>runCatching { }</code> which produces a <code>Result&lt;T&gt;</code>. I chain <code>map</code>, <code>onSuccess</code>, <code>onFailure</code>, and <code>fold</code> on it. The one trap: <code>runCatching</code> catches ALL exceptions including <code>CancellationException</code>, which breaks coroutine cancellation. I always add a rethrow for <code>CancellationException</code> inside <code>onFailure</code>, or use a custom <code>safeRunCatching</code>.<br><br>
+      Java interop: Kotlin companion object members aren't static on the JVM — they need <code>@JvmStatic</code> for Java to call without <code>.Companion</code>. Default arguments don't generate Java overloads — use <code>@JvmOverloads</code>. Platform types from Java (<code>T!</code>) have unknown nullability — treat them defensively with <code>?:</code>."
+    </div>
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><code>==</code> = structural (calls <code>equals()</code>); <code>===</code> = referential (same object)</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>StateFlow uses <code>==</code> for emission — <code>data class</code> required for correct de-duplication of state</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>All Kotlin exceptions are unchecked — no forced declarations or catches unlike Java</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>runCatching</code> catches <code>CancellationException</code> — always rethrow it to preserve coroutine cancellation</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>Result&lt;T&gt;</code> = data/domain layer; sealed <code>UiState</code> = presentation layer — different responsibilities</div></div>
+      <div class="must-item"><div class="must-num">6</div><div>Platform types (<code>T!</code>) from Java have unknown nullability — treat defensively with <code>?:</code></div></div>
+      <div class="must-item"><div class="must-num">7</div><div><code>@JvmStatic</code>, <code>@JvmOverloads</code>, <code>@JvmField</code> — Kotlin annotations for clean Java interop</div></div>
+    </div>
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>JVM string interning and how it affects <code>===</code> for String literals</li>
+      <li>Kotlin IR compiler pipeline details</li>
+      <li>Kotlin/Native and Kotlin/JS compilation targets</li>
+    </ul>
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>Does Kotlin have checked exceptions?</td><td>No. All Kotlin exceptions are unchecked. You're never forced to declare or catch them. Use <code>@Throws</code> to expose checked exception contracts to Java callers.</td></tr>
+      <tr><td>What is a platform type?</td><td>A type from Java that has no nullability annotation — Kotlin expresses it as <code>T!</code>. Kotlin trusts you — you can treat it as non-null, but if Java returns null you get a NPE. Annotate the Java side with <code>@Nullable</code>/<code>@NotNull</code> to fix.</td></tr>
+      <tr><td>Difference between KAPT and KSP?</td><td>KAPT (Kotlin Annotation Processing Tool) converts Kotlin to Java stubs first, then runs Java annotation processors — slow. KSP (Kotlin Symbol Processing) reads Kotlin symbols directly — typically 2x faster. KSP is the modern standard; Hilt and Room support it.</td></tr>
+      <tr><td>What does Result.fold do?</td><td>Transforms a <code>Result&lt;T&gt;</code> into a single value by providing two lambdas: <code>onSuccess</code> receives the value, <code>onFailure</code> receives the exception. Always returns a value — no exceptions thrown.</td></tr>
+    </table>
+    </div>
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "The <code>==</code> vs <code>===</code> distinction has a concrete production implication that I always explain in code reviews: StateFlow.value setter calls <code>value.equals(newValue)</code>. If the state is a regular class, the default <code>equals()</code> is reference-based — so <code>_state.value = SomeState()</code> always emits, even if the content is identical. This causes unnecessary recomposition and potential infinite loops if the state emission triggers the same state assignment again. Making state a <code>data class</code> with immutable <code>val</code> fields is the correct fix — structural equality only emits when something actually changed."
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>== vs ===</h4>
+        <pre><code>==   → equals() → structural
+===  → reference → same object
+// StateFlow uses == to detect changes
+// data class: == uses constructor props
+// regular class: == = === (no override)
+// String ==: value comparison ✅</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>RESULT&lt;T&gt;</h4>
+        <pre><code>runCatching { block() } → Result&lt;T&gt;
+.getOrNull()   // T? on failure
+.getOrThrow()  // T, rethrows exception
+.getOrDefault(v)
+.map { }       // transform on success
+.onSuccess { } // side effect
+.onFailure { } // side effect
+.fold(onSuccess = { }, onFailure = { })</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>EXCEPTIONS</h4>
+        <pre><code>All Kotlin exceptions: UNCHECKED
+try { } catch (e: T) { } finally { }
+try is an expression (returns value)
+throw is an expression (type: Nothing)
+@Throws(IOException::class) for Java
+runCatching: always rethrow CancellationException!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>JAVA INTEROP</h4>
+        <pre><code>@JvmStatic    → companion → true static
+@JvmOverloads → default args → overloads
+@JvmField     → property → field (no getter)
+@Throws(E::class) → checked for Java
+Platform type T! → unknown nullability
+KSP > KAPT (faster annotation processing)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>COMPILATION</h4>
+        <pre><code>.kt → IR → .class → D8/R8 → .dex
+data class   → equals/hashCode/copy/componentN
+companion    → inner static class + INSTANCE
+extension fn → static method (receiver=param)
+default args → $default + bitmask
+inline fn    → body copied at call site</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY GOTCHAS</h4>
+        <pre><code>runCatching swallows CancellationException
+StateFlow needs data class for correct ==
+Platform types from Java → defensive ?: use
+@JvmStatic needed for Java companion access
+Result vs sealed: domain vs UI layer
+try {} catch {} is an expression in Kotlin</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the difference between == and === in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>==</code> is structural equality — it calls <code>equals()</code>. <code>===</code> is referential equality — it checks whether two variables point to the exact same object in memory. For a data class, <code>==</code> compares field values (auto-generated <code>equals()</code>). For a regular class with no <code>equals()</code> override, <code>==</code> behaves the same as <code>===</code> (reference comparison, inherited from Any).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — Does Kotlin have checked exceptions? How do you expose checked exceptions to Java callers?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">No — all Kotlin exceptions are unchecked. You are never forced to declare which exceptions a function throws, nor are callers forced to catch them. This is a deliberate design decision that avoids Java's checked exception verbosity.<br><br>
+      To expose a checked exception contract to Java callers, annotate the Kotlin function with <code>@Throws(IOException::class)</code>. This tells the Java compiler to treat it as a checked exception, enabling Java's try/catch requirement.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is runCatching and what does it return?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>runCatching { block }</code> executes a block and wraps the result in a <code>Result&lt;T&gt;</code>. If the block succeeds, it returns <code>Result.success(value)</code>. If it throws any exception, it returns <code>Result.failure(exception)</code>. You can then chain <code>map</code>, <code>onSuccess</code>, <code>onFailure</code>, <code>fold</code>, and <code>getOrNull</code> on the result.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — Why is StateFlow UI state broken if you use a regular class instead of a data class?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>MutableStateFlow.value = newValue</code> checks if <code>newValue == currentValue</code> before emitting. If they're equal, no emission occurs — this is the de-duplication mechanism.<br><br>
+      A regular class inherits <code>equals()</code> from <code>Any</code>, which compares by reference. So every new instance is "different" even if the content is identical — the state always emits. This can cause unnecessary recompositions.<br><br>
+      Conversely, if the same instance is mutated in-place (mutable properties), the reference stays the same — <code>==</code> returns true — and no emission occurs even though the content changed. Either way breaks the reactive contract. Fix: use <code>data class</code> with all <code>val</code> properties.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — What is a platform type in Kotlin? How do you handle it safely?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A platform type (expressed as <code>T!</code> in error messages) is a type from Java code that has no nullability annotation. Kotlin cannot determine if it's nullable or non-null, so it defers to the developer. You can assign it to either <code>T</code> or <code>T?</code> — but if you assign to <code>T</code> and Java returns null, you get a NPE.<br><br>
+      Safe handling: (1) Annotate the Java side with <code>@Nullable</code>/<code>@NotNull</code> — Kotlin then knows the contract. (2) Defensively treat all Java returns as nullable: <code>javaApi.getName() ?: "default"</code>. (3) In modern code, use Kotlin APIs that are already annotated.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — (Coding) What's the critical bug in this code? Fix it.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// ❌ BUG</span>
+<span class="kw">suspend fun</span> <span class="fn">fetchUser</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">User</span>&gt; =
+    <span class="fn">runCatching</span> { api.<span class="fn">getUser</span>(id) }</code></pre>
+      <strong>Bug:</strong> <code>runCatching</code> catches ALL exceptions, including <code>CancellationException</code>. When the coroutine is cancelled (e.g., user navigates away), the cancellation exception is caught and wrapped in a <code>Result.failure</code>. The coroutine thinks it completed normally — it doesn't propagate the cancellation. The scope doesn't cancel properly, causing leaked coroutines.<br><br>
+<pre><code><span class="cm">// ✅ Fixed</span>
+<span class="kw">suspend fun</span> <span class="fn">fetchUser</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">User</span>&gt; =
+    <span class="fn">runCatching</span> { api.<span class="fn">getUser</span>(id) }
+        .<span class="fn">onFailure</span> { <span class="kw">if</span> (it <span class="kw">is</span> <span class="cl">CancellationException</span>) <span class="kw">throw</span> it }</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — What is the difference between KAPT and KSP? Which should you use in new projects?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>KAPT</strong> (Kotlin Annotation Processing Tool): converts Kotlin source to Java stubs, then runs Java annotation processors. Works with all Java annotation processors but adds a full compilation step — significantly slower, especially on incremental builds.<br><br>
+      <strong>KSP</strong> (Kotlin Symbol Processing): processes Kotlin symbols directly without Java stub generation — typically 2x faster than KAPT. Has a Kotlin-first API. Supported by major Android libraries: Hilt (1.0.0+), Room (2.4.0+), Moshi, Glide.<br><br>
+      Use <strong>KSP</strong> in new projects wherever the library supports it. Only fall back to KAPT for processors that haven't migrated to KSP yet.</div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — (Scenario) A developer reports "my UI sometimes doesn't update when the state changes." You look at the ViewModel and see <code>_state.value = ProfileState(name = newName)</code> where ProfileState is a regular class. Diagnose and fix.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Diagnosis:</strong> <code>MutableStateFlow.value = x</code> uses <code>==</code> (structural equality) to decide whether to emit. <code>ProfileState</code> is a regular class — it inherits <code>equals()</code> from <code>Any</code>, which compares by reference. So every <code>ProfileState(name = newName)</code> creates a new object, and <code>===</code>-based comparison makes it always emit (new reference ≠ old reference) — that would actually cause over-emission.<br><br>
+      But the "UI doesn't update" scenario happens if the developer is <em>mutating the existing object</em>: <code>profileState.name = newName</code> (if name is a var). The reference hasn't changed, so <code>==</code> (reference for non-data class) returns true — no emission.<br><br>
+      <strong>Fix:</strong>
+      1. Make <code>ProfileState</code> a <code>data class</code> with <code>val</code> properties — now <code>==</code> compares field values.
+      2. Never mutate state in-place; always create a new object: <code>_state.value = _state.value.copy(name = newName)</code>
+<pre><code><span class="kw">data class</span> <span class="cl">ProfileState</span>(<span class="kw">val</span> name: <span class="cl">String</span>)
+_state.value = _state.value.<span class="fn">copy</span>(name = newName)  <span class="cm">// emits if name changed</span></code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — When would you choose Result&lt;T&gt; over a sealed class for error handling? Give a specific architecture example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Use Result&lt;T&gt;</strong> at the repository and use-case layer — it's the boundary between exception-throwing code (network, database) and your clean domain logic. The repository wraps a Retrofit call with <code>runCatching</code>; the use case propagates or maps the result. No custom state is needed here — it's just success/failure.<br><br>
+      <strong>Use sealed class</strong> at the presentation layer — because UI has states beyond just success/failure: Loading, Empty, Refreshing, etc. Each state may carry different data, and the <code>when</code> expression must be exhaustive.<br><br>
+      The pattern in production:
+<pre><code><span class="cm">// Data layer → Result</span>
+<span class="kw">suspend fun</span> <span class="fn">getUser</span>(): <span class="cl">Result</span>&lt;<span class="cl">User</span>&gt; = <span class="fn">runCatching</span> { api.<span class="fn">getUser</span>() }
+
+<span class="cm">// Presentation layer → sealed UiState</span>
+<span class="fn">getUser</span>().<span class="fn">fold</span>(
+    onSuccess = { <span class="cl">UiState</span>.<span class="cl">Success</span>(it) },
+    onFailure = { <span class="cl">UiState</span>.<span class="cl">Error</span>(it.message) }
+)</code></pre>
+      They complement each other — Result handles the exception boundary; sealed UiState handles the display contract.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — You have a Kotlin library consumed by a Java project. List all the annotations you'd apply and why.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>@JvmStatic</strong> — on companion object members: generates a true Java static method so Java can call <code>MyClass.method()</code> instead of <code>MyClass.Companion.method()</code>.<br><br>
+        <strong>@JvmOverloads</strong> — on functions with default parameters: generates Java-visible overloaded methods so Java callers can omit optional parameters.<br><br>
+        <strong>@JvmField</strong> — on val/var properties you want exposed as Java fields: removes the getter/setter and exposes the field directly. Useful for constants.<br><br>
+        <strong>@Throws(ExceptionType::class)</strong> — on suspend functions or functions that throw: tells Java's compiler to treat them as checked exceptions.<br><br>
+        <strong>@JvmName</strong> — when Kotlin generates a method name that clashes with another JVM method name (e.g., extension functions on the same receiver type).<br><br>
+        <strong>@Nullable / @NotNull</strong> — on all public function parameters and return types: prevents Java from treating them as platform types, giving Java callers proper nullability warnings.<br><br>
+        Also: avoid using Kotlin-specific features in the public API surface (default arguments without @JvmOverloads, companion objects without @JvmStatic, extension functions in interfaces).
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

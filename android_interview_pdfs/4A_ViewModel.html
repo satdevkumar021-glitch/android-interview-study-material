@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>4A – ViewModel</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>4A · ViewModel</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>4A — Jetpack ViewModel Internals</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Architecture Core</span>
+    <span>ViewModel · ViewModelStore · ViewModelProvider · viewModelScope · SavedStateHandle · NonConfigurationInstances</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>The <strong>ViewModel</strong> class is designed to store and manage UI-related state in a lifecycle-conscious way, allowing state to survive configuration changes such as screen rotations and language switches.</p>
+  <p><strong>The Core Problem Solved:</strong> When an Activity undergoes a configuration change (e.g. rotation), the OS destroys and recreates the Activity instance. Prior to Architecture Components, developers had to manually retain state using <code>onRetainNonConfigurationInstance()</code> or serialize large data sets into <code>onSaveInstanceState()</code> (risking <code>TransactionTooLargeException</code>). ViewModel keeps state in memory throughout the Activity's logical lifecycle and only cleans it up when the Activity is finished permanently.</p>
+  <div class="box info">
+    <strong>Key ViewModel Pillars:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>ViewModelStore:</strong> A simple hash map (<code>Map&lt;String, ViewModel&gt;</code>) storing ViewModel instances across rotations.</li>
+      <li><strong>ViewModelStoreOwner:</strong> Interface implemented by <code>ComponentActivity</code> and <code>Fragment</code> providing access to their <code>ViewModelStore</code>.</li>
+      <li><strong>viewModelScope:</strong> Coroutine scope automatically cancelled inside <code>ViewModel.onCleared()</code>.</li>
+      <li><strong>SavedStateHandle:</strong> Key-value map that bridges the gap between memory retention and OS process death survival.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works Under the Hood</h2>
+
+  <div class="ascii">
+[Activity A (Old Instance)]                     [NonConfigurationInstances]
+            │                                                │
+   1. Rotation occurs                                        │
+            │                                                │
+   2. Activity.retainNonConfigurationInstances()             │
+      └── Saves ViewModelStore instance ────────────────────►│ (Retained by ActivityThread)
+            │                                                │
+   3. Activity A is Destroyed (onDestroy)                    │
+                                                             │
+[Activity B (New Instance)]                                  │
+            │                                                │
+   4. Activity B created (onCreate)                          │
+            │                                                │
+   5. Activity.getLastNonConfigurationInstance() ◄───────────┘ (Restores ViewModelStore!)
+            │
+   6. ViewModelProvider(this).get(MyViewModel::class.java)
+      └── Finds existing ViewModel instance in restored ViewModelStore! (No re-allocation)
+  </div>
+
+  <h3>Step-by-Step Rotation Pipeline</h3>
+  <ol>
+    <li>When an Activity is recreated due to configuration changes, <code>ActivityThread</code> calls <code>Activity.retainNonConfigurationInstances()</code>.</li>
+    <li><code>ComponentActivity</code> packs its <code>ViewModelStore</code> into a container object called <code>NonConfigurationInstances</code>.</li>
+    <li>When the new Activity instance is created, <code>getLastNonConfigurationInstance()</code> retrieves this container and restores the exact same <code>ViewModelStore</code> reference.</li>
+    <li>When <code>ViewModelProvider(this).get(...)</code> runs, it checks the store using a composite key (e.g. <code>androidx.lifecycle.ViewModelProvider.DefaultKey:MyViewModel</code>). Finding the retained instance, it returns it without creating a new one.</li>
+  </ol>
+
+  <h3>When Does ViewModel Actually Clear (onCleared)?</h3>
+  <p><code>ViewModelStore.clear()</code> is triggered only when the <code>ViewModelStoreOwner</code> is finished permanently:</p>
+  <ul>
+    <li>For an <strong>Activity:</strong> In <code>onDestroy()</code> when <code>isChangingConfigurations() == false</code> (i.e. user pressed Back or <code>finish()</code> was called).</li>
+    <li>For a <strong>Fragment:</strong> When the Fragment is permanently removed from the FragmentManager (not when view is destroyed).</li>
+    <li>For a <strong>NavBackStackEntry:</strong> When the destination is popped off the navigation back stack.</li>
+  </ul>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & ARCHITECTURAL IMPACT ═══ -->
+<section id="when">
+  <h2>3 · When to Use & State Scope</h2>
+
+  <table>
+    <tr>
+      <th>Scope / Owner</th>
+      <th>Instantiation Method</th>
+      <th>Lifetime / Use Case</th>
+    </tr>
+    <tr>
+      <td><strong>Activity Scope</strong></td>
+      <td><code>by viewModels()</code> (in Activity)</td>
+      <td>Retained for entire Activity duration. Screen-level state.</td>
+    </tr>
+    <tr>
+      <td><strong>Fragment Scope</strong></td>
+      <td><code>by viewModels()</code> (in Fragment)</td>
+      <td>Isolated to that specific Fragment instance.</td>
+    </tr>
+    <tr>
+      <td><strong>Shared ViewModel</strong></td>
+      <td><code>by activityViewModels()</code> (in Fragment)</td>
+      <td>Shared communication bridge across multiple sibling Fragments within the same Activity.</td>
+    </tr>
+    <tr>
+      <td><strong>NavGraph Scope</strong></td>
+      <td><code>hiltViewModel(navBackStackEntry)</code></td>
+      <td>Retained across a multi-step nested flow (e.g., Checkout / Onboarding wizard) until the graph is popped.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: E-Commerce Product Details with SavedStateHandle</h2>
+  <p>Production ViewModel supporting asynchronous state, coroutine cancellation, search queries surviving process death, and clean MVI state emission.</p>
+
+  <pre><code><span class="kw">package</span> com.enterprise.ecommerce.product
+
+<span class="kw">import</span> androidx.lifecycle.SavedStateHandle
+<span class="kw">import</span> androidx.lifecycle.ViewModel
+<span class="kw">import</span> androidx.lifecycle.viewModelScope
+<span class="kw">import</span> kotlinx.coroutines.flow.*
+<span class="kw">import</span> kotlinx.coroutines.launch
+
+<span class="kw">sealed interface</span> <span class="type">ProductUiState</span> {
+    <span class="kw">data object</span> <span class="type">Loading</span> : <span class="type">ProductUiState</span>
+    <span class="kw">data class</span> <span class="type">Success</span>(<span class="kw">val</span> product: <span class="type">Product</span>, <span class="kw">val</span> isFavorite: <span class="type">Boolean</span>) : <span class="type">ProductUiState</span>
+    <span class="kw">data class</span> <span class="type">Error</span>(<span class="kw">val</span> message: <span class="type">String</span>) : <span class="type">ProductUiState</span>
+}
+
+<span class="kw">class</span> <span class="type">ProductDetailViewModel</span>(
+    <span class="kw">private val</span> savedStateHandle: <span class="type">SavedStateHandle</span>,
+    <span class="kw">private val</span> productRepository: <span class="type">ProductRepository</span>
+) : <span class="type">ViewModel</span>() {
+
+    <span class="cm">// Extract productId from Navigation arguments or saved state</span>
+    <span class="kw">private val</span> productId: <span class="type">String</span> = <span class="fn">checkNotNull</span>(savedStateHandle[KEY_PRODUCT_ID]) {
+        <span class="str">"Product ID is required for ProductDetailViewModel"</span>
+    }
+
+    <span class="kw">private val</span> _uiState = <span class="type">MutableStateFlow</span>&lt;<span class="type">ProductUiState</span>&gt;(<span class="type">ProductUiState</span>.<span class="type">Loading</span>)
+    <span class="kw">val</span> uiState: <span class="type">StateFlow</span>&lt;<span class="type">ProductUiState</span>&gt; = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">init</span> {
+        <span class="fn">loadProductDetails</span>()
+    }
+
+    <span class="kw">fun</span> <span class="fn">loadProductDetails</span>() {
+        viewModelScope.<span class="fn">launch</span> {
+            _uiState.value = <span class="type">ProductUiState</span>.<span class="type">Loading</span>
+            <span class="kw">try</span> {
+                <span class="kw">val</span> product = productRepository.<span class="fn">getProductById</span>(productId)
+                _uiState.value = <span class="type">ProductUiState</span>.<span class="type">Success</span>(product, isFavorite = <span class="kw">false</span>)
+            } <span class="kw">catch</span> (e: <span class="type">Exception</span>) {
+                _uiState.value = <span class="type">ProductUiState</span>.<span class="type">Error</span>(e.localizedMessage ?: <span class="str">"Unknown error"</span>)
+            }
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">toggleFavorite</span>() {
+        <span class="kw">val</span> currentState = _uiState.value <span class="kw">as</span>? <span class="type">ProductUiState</span>.<span class="type">Success</span> ?: <span class="kw">return</span>
+        viewModelScope.<span class="fn">launch</span> {
+            <span class="kw">val</span> newFavState = !currentState.isFavorite
+            productRepository.<span class="fn">setFavorite</span>(productId, newFavState)
+            _uiState.value = currentState.<span class="fn">copy</span>(isFavorite = newFavState)
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onCleared</span>() {
+        <span class="kw">super</span>.<span class="fn">onCleared</span>()
+        <span class="cm">// Custom cleanup if necessary (viewModelScope cancels automatically)</span>
+    }
+
+    <span class="kw">companion object</span> {
+        <span class="kw">const val</span> KEY_PRODUCT_ID = <span class="str">"productId"</span>
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives & Comparison</h2>
+
+  <table>
+    <tr>
+      <th>State Storage</th>
+      <th>Survives Rotation?</th>
+      <th>Survives Process Death?</th>
+      <th>Data Types Allowed</th>
+      <th>Best For</th>
+    </tr>
+    <tr>
+      <td><strong>ViewModel</strong></td>
+      <td>✅ Yes</td>
+      <td>❌ No</td>
+      <td>Any Java/Kotlin Object, Streams, Coroutines.</td>
+      <td>UI State, business logic, pagination cursors.</td>
+    </tr>
+    <tr>
+      <td><strong>SavedStateHandle</strong></td>
+      <td>✅ Yes</td>
+      <td>✅ Yes</td>
+      <td>Parcelable, Primitives, Bundles (&lt; 500KB).</td>
+      <td>User input drafts, search queries, screen IDs.</td>
+    </tr>
+    <tr>
+      <td><strong>rememberSaveable (Compose)</strong></td>
+      <td>✅ Yes</td>
+      <td>✅ Yes</td>
+      <td>Primitives, Parcelable, List, Map.</td>
+      <td>Pure UI widget state (Scroll position, expanded accordion).</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & Memory Leak Traps</h2>
+  <div class="box danger">
+    <strong>1. Holding References to Context / Activity / Views:</strong> Never pass an <code>Activity</code>, <code>Fragment</code>, <code>View</code>, or <code>Context</code> (except <code>ApplicationContext</code> via <code>AndroidViewModel</code>) into a ViewModel. When the Activity rotates, the old Activity is destroyed; if the ViewModel retains it, the entire Activity hierarchy leaks in RAM.
+  </div>
+  <div class="box warn">
+    <strong>2. Creating ViewModel Instances with new / constructor directly:</strong> Calling <code>val vm = MyViewModel()</code> directly bypasses the <code>ViewModelProvider</code> and <code>ViewModelStore</code>. The instance will NOT survive rotation and <code>viewModelScope</code> will not be lifecycle-managed.
+  </div>
+  <div class="box info">
+    <strong>3. Storing Massive Lists in SavedStateHandle:</strong> <code>SavedStateHandle</code> writes to the OS <code>onSaveInstanceState</code> bundle. Saving 5MB of cached product JSON into it will trigger a fatal <code>TransactionTooLargeException</code>.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"A Jetpack ViewModel retains UI state across configuration changes by storing instances in a <code>ViewModelStore</code> retained by <code>Activity.retainNonConfigurationInstances()</code>. It encapsulates business logic, exposes state via <code>StateFlow</code>, and scopes coroutines to <code>viewModelScope</code>, which automatically cancels in-flight jobs when the ViewModel is destroyed permanently in <code>onCleared()</code>."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Core Mechanism (How it Survives Rotation):</strong> During rotation, the destroying Activity passes its <code>ViewModelStore</code> (a <code>Map&lt;String, ViewModel&gt;</code>) to <code>ActivityThread</code> via <code>retainNonConfigurationInstances()</code>. The new Activity retrieves it via <code>getLastNonConfigurationInstance()</code>.</li>
+    <li><strong>ViewModelProvider Factory:</strong> <code>ViewModelProvider</code> uses a <code>Factory</code> to instantiate the ViewModel if not present in the store, or returns the cached instance.</li>
+    <li><strong>Lifecycle & viewModelScope:</strong> A ViewModel outlives transient Activity instances. When the Activity is permanently finished (<code>finish()</code> / back press), <code>ViewModelStore.clear()</code> calls <code>ViewModel.onCleared()</code>, cancelling <code>viewModelScope</code> immediately.</li>
+    <li><strong>Process Death vs Rotation:</strong> ViewModel survives rotation, but NOT process death. Jetpack provides <code>SavedStateHandle</code> to serialize essential IDs/drafts into the system Bundle.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li><code>ViewModelStore</code> and <code>ViewModelStoreOwner</code>.</li>
+    <li><code>NonConfigurationInstances</code> / <code>getLastNonConfigurationInstance()</code>.</li>
+    <li><code>viewModelScope</code> and automatic cancellation in <code>onCleared()</code>.</li>
+    <li>Shared ViewModel pattern using <code>activityViewModels()</code> or NavGraph scopes.</li>
+    <li><code>SavedStateHandle</code> integration for process death survival.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How does ViewModel know when an Activity is rotating vs permanently finishing?</h4>
+    <p>In <code>ComponentActivity.onDestroy()</code>, it checks <code>isChangingConfigurations()</code>. If true (rotation), it keeps the <code>ViewModelStore</code>. If false (finish/back press), it invokes <code>viewModelStore.clear()</code> which calls <code>onCleared()</code>.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: What is the difference between AndroidViewModel and ViewModel?</h4>
+    <p><code>AndroidViewModel</code> contains a reference to the <code>Application</code> instance (safe from leaks because Application outlives Activities). Standard <code>ViewModel</code> has no Context references, making it easier to unit test.</p>
+  </div>
+  <div class="card">
+    <h4>Q: How do you share a ViewModel between two Fragments?</h4>
+    <p>By scoping the ViewModel to their host Activity using <code>val vm: SharedViewModel by activityViewModels()</code> or by scoping it to their parent navigation graph using <code>val vm: SharedViewModel = hiltViewModel(navBackStackEntry)</code>.</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "In modern Compose architectures, do not pass ViewModel instances down into reusable composables. Pass plain state (<code>uiState: ProductUiState</code>) and lambda event handlers (<code>onToggleFavorite: () -&gt; Unit</code>). This keeps composables stateless, previewable, and testable without mocking ViewModels."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>ViewModel:</strong> Survives rotation; dies on <code>finish()</code> or process death.</li>
+    <li><strong>ViewModelStore:</strong> Internal map (<code>Map&lt;String, ViewModel&gt;</code>) retained across rotations.</li>
+    <li><strong>viewModelScope:</strong> Built-in <code>CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)</code> cancelled in <code>onCleared()</code>.</li>
+    <li><strong>SavedStateHandle:</strong> Key-value store surviving both rotation AND process death.</li>
+    <li><strong>Leak Rule:</strong> Never store View, Fragment, or Activity references in a ViewModel.</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. Why does ViewModel survive screen rotation while Activity does not?</summary>
+    <div class="ans">
+      Because during configuration change, <code>ComponentActivity</code> retains its <code>ViewModelStore</code> via the platform's <code>retainNonConfigurationInstances()</code> mechanism. The newly created Activity retrieves this retained store and re-attaches the existing ViewModel instances.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. When is ViewModel.onCleared() called?</summary>
+    <div class="ans">
+      It is called when the owning <code>ViewModelStoreOwner</code> (Activity/Fragment) is permanently destroyed (e.g. user presses Back, <code>finish()</code> is called, or Fragment is popped off the back stack) — NOT during configuration changes.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. What dispatcher does viewModelScope use by default?</summary>
+    <div class="ans">
+      It uses <code>Dispatchers.Main.immediate</code> backed by a <code>SupervisorJob()</code>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. What is the difference between ViewModel and SavedStateHandle?</summary>
+    <div class="ans">
+      <strong>ViewModel</strong> survives configuration changes (rotation) in memory, but loses all state when the OS kills the process in the background. <strong>SavedStateHandle</strong> writes its state into the system bundle, allowing state to survive both configuration changes AND OS process death.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. Why should you avoid passing Activity Context into a ViewModel?</summary>
+    <div class="ans">
+      Because the ViewModel outlives the Activity instance across rotations. Holding a strong reference to an Activity Context prevents garbage collection of the destroyed Activity, causing a large memory leak.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. How does by viewModels() delegate instantiate ViewModels with custom constructor arguments?</summary>
+    <div class="ans">
+      It uses a <code>ViewModelProvider.Factory</code>. In modern Jetpack / Hilt, <code>@HiltViewModel</code> automatically generates the factory to inject dependencies into the ViewModel constructor.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What is the lifecycle scope of a ViewModel scoped to a Navigation Graph?</summary>
+    <div class="ans">
+      The ViewModel remains alive as long as the navigation destination or any child destination within that nested graph remains on the navigation back stack. When the entire graph is popped off the stack, the ViewModel's <code>onCleared()</code> is called.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. How does ViewModelStore handle multiple ViewModels of the same class type in a single owner?</summary>
+    <div class="ans">
+      <code>ViewModelProvider</code> generates a default key formatted as <code>"androidx.lifecycle.ViewModelProvider.DefaultKey:" + canonicalName</code>. To store multiple instances of the same class in one owner, pass an explicit custom key: <code>ViewModelProvider(owner).get("custom_key", MyViewModel::class.java)</code>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. What happens to in-flight coroutines in viewModelScope when an Activity rotates vs finishes?</summary>
+    <div class="ans">
+      During <strong>rotation</strong>, <code>onCleared()</code> is NOT called, so coroutines in <code>viewModelScope</code> continue executing without interruption. When the Activity <strong>finishes permanently</strong>, <code>ViewModelStore.clear()</code> invokes <code>onCleared()</code>, which cancels the root <code>Job</code> of <code>viewModelScope</code>, cancelling all running child coroutines automatically.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. Why is passing ViewModel instances into Jetpack Compose composables considered an anti-pattern?</summary>
+    <div class="ans">
+      It tightly couples the UI component to Android framework lifecycles and DI scopes, breaks <code>@Preview</code> rendering in Android Studio, prevents reusing the composable across different screens/features, and makes isolated UI unit testing cumbersome. Best practice is to extract state and lambda events in a top-level route and pass primitives/data classes to child composables.
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

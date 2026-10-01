@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>7B — State Management | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">7B · State Management</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> remember vs rememberSaveable</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> State Hoisting &amp; UDF</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> derivedStateOf</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>7B</span> — State Management</h1>
+    <p class="hero-desc">remember vs rememberSaveable, mutableStateOf, derivedStateOf. State hoisting, UDF (Unidirectional Data Flow). ViewModel as state holder. collectAsStateWithLifecycle. When to use local vs hoisted state.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 7B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>State types in Compose</h3>
+    <ul>
+      <li><strong>remember { mutableStateOf(x) }</strong> — in-composition state; survives recomposition; lost on rotation/process death</li>
+      <li><strong>rememberSaveable { mutableStateOf(x) }</strong> — persists through config changes and process death (via Bundle/SavedState)</li>
+      <li><strong>ViewModel StateFlow → collectAsStateWithLifecycle()</strong> — screen-level business state; survives rotation</li>
+      <li><strong>derivedStateOf { }</strong> — derived computation from other state; avoids over-recomposition</li>
+    </ul>
+    <h3>Unidirectional Data Flow (UDF)</h3>
+    <p><strong>State flows DOWN</strong> — from ViewModel → composable → child composable (as parameters). <strong>Events flow UP</strong> — from child composable → parent → ViewModel (as lambda callbacks). The ViewModel is the single source of truth.</p>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      State hoisting = moving state up to the lowest common ancestor that needs it. The rule: hoist state to the highest level that needs to read or write it. Local toggle state (isExpanded) stays in the composable. Business data (user profile) belongs in ViewModel. Navigation state belongs in NavController / ViewModel.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: remember vs rememberSaveable →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. remember vs rememberSaveable</div>
+    <pre><code><span class="cm">// remember: composition lifetime only</span>
+<span class="kw">var</span> isExpanded by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+<span class="cm">// Survives: recomposition ✅</span>
+<span class="cm">// Survives: configuration change (rotation) ❌ — resets to false</span>
+<span class="cm">// Survives: process death ❌ — resets to false</span>
+
+<span class="cm">// rememberSaveable: survives config changes + process death</span>
+<span class="kw">var</span> searchQuery by <span class="fn">rememberSaveable</span> { <span class="fn">mutableStateOf</span>(<span class="str">""</span>) }
+<span class="cm">// Survives: recomposition ✅</span>
+<span class="cm">// Survives: configuration change (rotation) ✅ — saved to Bundle</span>
+<span class="cm">// Survives: process death ✅ — saved to SavedStateHandle</span>
+
+<span class="cm">// Custom saver for non-primitive types</span>
+<span class="kw">val</span> scrollState = <span class="fn">rememberSaveable</span>(<span class="fn">saver</span> = <span class="cl">ScrollState</span>.<span class="cl">Saver</span>) {
+    <span class="cl">ScrollState</span>(<span class="nu">0</span>)
+}
+
+<span class="cm">// mapSaver for data classes</span>
+<span class="kw">val</span> userSaver = <span class="fn">mapSaver</span>(
+    save = { <span class="fn">mapOf</span>(<span class="str">"id"</span> to it.id, <span class="str">"name"</span> to it.name) },
+    restore = { <span class="cl">User</span>(it[<span class="str">"id"</span>] as <span class="cl">String</span>, it[<span class="str">"name"</span>] as <span class="cl">String</span>) }
+)</code></pre>
+    <div class="table-wrap">
+    <table>
+      <tr><th></th><th>remember</th><th>rememberSaveable</th><th>ViewModel</th></tr>
+      <tr><td>Recomposition</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Config change (rotation)</td><td>❌</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Process death</td><td>❌</td><td>✅ (Bundle limit)</td><td>✅ (SavedStateHandle)</td></tr>
+      <tr><td>Complex data</td><td>✅</td><td>⚠️ Custom Saver needed</td><td>✅ Unlimited</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: State Hoisting →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9878;</div>3. State Hoisting &amp; UDF</div>
+    <h3>Stateful vs Stateless composables</h3>
+    <pre><code><span class="cm">// ❌ Stateful — hard to test, can't be reused with different state</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SearchBar</span>() {
+    <span class="kw">var</span> query by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="str">""</span>) }
+    <span class="cl">TextField</span>(value = query, onValueChange = { query = it })
+}
+
+<span class="cm">// ✅ Stateless — testable, reusable, follows UDF</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SearchBar</span>(
+    query: <span class="cl">String</span>,                   <span class="cm">// state flows DOWN</span>
+    onQueryChange: (<span class="cl">String</span>) -> <span class="cl">Unit</span>   <span class="cm">// event flows UP</span>
+) {
+    <span class="cl">TextField</span>(value = query, onValueChange = onQueryChange)
+}
+
+<span class="cm">// Caller holds the state:</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SearchScreen</span>(viewModel: <span class="cl">SearchViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> query by viewModel.query.<span class="fn">collectAsStateWithLifecycle</span>()
+    <span class="fn">SearchBar</span>(
+        query = query,
+        onQueryChange = viewModel::<span class="fn">onQueryChange</span>
+    )
+}</code></pre>
+
+    <h3>collectAsStateWithLifecycle vs collectAsState</h3>
+    <pre><code><span class="cm">// collectAsState: collects even when app is in background</span>
+<span class="kw">val</span> state by viewModel.state.<span class="fn">collectAsState</span>()  <span class="cm">// ❌ runs in background</span>
+
+<span class="cm">// collectAsStateWithLifecycle: stops collection in background</span>
+<span class="cm">// Uses repeatOnLifecycle(STARTED) semantics</span>
+<span class="kw">val</span> state by viewModel.state.<span class="fn">collectAsStateWithLifecycle</span>()  <span class="cm">// ✅</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: derivedStateOf →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128204;</div>4. derivedStateOf</div>
+    <p><code>derivedStateOf { }</code> creates a State that is derived from other State values. It only recomputes when the dependencies change — and only triggers recomposition when the derived result changes.</p>
+    <pre><code><span class="cm">// WITHOUT derivedStateOf — recomputes filter on every recompose</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductList</span>(products: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;, minPrice: <span class="cl">Float</span>) {
+    <span class="cm">// This filters on EVERY recomposition — expensive</span>
+    <span class="kw">val</span> filtered = products.<span class="fn">filter</span> { it.price >= minPrice }
+    <span class="cl">LazyColumn</span> { items(filtered) { <span class="fn">ProductCard</span>(it) } }
+}
+
+<span class="cm">// WITH derivedStateOf — only recomputes when products or minPrice changes</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductList</span>(products: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;, minPrice: <span class="cl">Float</span>) {
+    <span class="cm">// derivedStateOf: runs only when dependencies change</span>
+    <span class="kw">val</span> filtered by <span class="fn">remember</span>(products, minPrice) {
+        <span class="fn">derivedStateOf</span> { products.<span class="fn">filter</span> { it.price >= minPrice } }
+    }
+    <span class="cl">LazyColumn</span> { items(filtered) { <span class="fn">ProductCard</span>(it) } }
+}
+
+<span class="cm">// Classic use case: scroll position → show/hide FAB</span>
+<span class="kw">val</span> showFab by <span class="fn">remember</span> {
+    <span class="fn">derivedStateOf</span> { scrollState.value > <span class="nu">100</span> }
+}
+<span class="cm">// scrollState changes hundreds of times per scroll</span>
+<span class="cm">// But showFab only changes when crossing the threshold</span>
+<span class="cm">// → FAB composable only recomposes on threshold crossing</span></code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">derivedStateOf vs remember(key)</div>
+      Use <code>derivedStateOf</code> when the derivation is expensive and the source state changes frequently but the derived result changes rarely. Use <code>remember(key) { compute(key) }</code> when the computation should run exactly when key changes (simpler, less overhead for cheap operations).
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>Banking: checkout form with state management</h3>
+    <pre><code><span class="cm">// ViewModel: single source of truth</span>
+<span class="kw">class</span> <span class="cl">CheckoutViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">private val</span> _state = <span class="cl">MutableStateFlow</span>(<span class="cl">CheckoutFormState</span>())
+    <span class="kw">val</span> state = _state.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">onCardNumberChange</span>(number: <span class="cl">String</span>) {
+        _state.<span class="fn">update</span> { it.<span class="fn">copy</span>(cardNumber = number, cardError = <span class="fn">validateCard</span>(number)) }
+    }
+    <span class="kw">fun</span> <span class="fn">onSubmit</span>() { <span class="cm">/* validate + submit */</span> }
+}
+
+<span class="cm">// Screen composable: stateless, events go up</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CheckoutScreen</span>(viewModel: <span class="cl">CheckoutViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> state by viewModel.state.<span class="fn">collectAsStateWithLifecycle</span>()  <span class="cm">// ✅</span>
+
+    <span class="cm">// derivedStateOf: submit enabled only when form is valid</span>
+    <span class="kw">val</span> isSubmitEnabled by <span class="fn">remember</span>(state) {
+        <span class="fn">derivedStateOf</span> {
+            state.cardError == <span class="kw">null</span> &&
+            state.cardNumber.<span class="fn">length</span> == <span class="nu">16</span> &&
+            state.expiryDate.<span class="fn">isNotBlank</span>()
+        }
+    }
+
+    <span class="fn">CheckoutForm</span>(
+        state = state,
+        isSubmitEnabled = isSubmitEnabled,
+        onCardNumberChange = viewModel::<span class="fn">onCardNumberChange</span>,
+        onSubmit = viewModel::<span class="fn">onSubmit</span>
+    )
+}
+
+<span class="cm">// Form composable: fully stateless, testable in isolation</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CheckoutForm</span>(
+    state: <span class="cl">CheckoutFormState</span>,
+    isSubmitEnabled: <span class="cl">Boolean</span>,
+    onCardNumberChange: (<span class="cl">String</span>) -> <span class="cl">Unit</span>,
+    onSubmit: () -> <span class="cl">Unit</span>
+) {
+    <span class="cm">// Local UI state: only this composable needs it</span>
+    <span class="kw">var</span> showCvvHelp by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+
+    <span class="cl">Column</span> {
+        <span class="cl">OutlinedTextField</span>(
+            value = state.cardNumber,
+            onValueChange = onCardNumberChange,
+            isError = state.cardError != <span class="kw">null</span>
+        )
+        <span class="cl">Button</span>(onClick = onSubmit, enabled = isSubmitEnabled) {
+            <span class="cl">Text</span>(<span class="str">"Pay"</span>)
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Using remember for state that must survive rotation</div>
+      Search query, scroll position, form input — these must survive rotation. <code>remember</code> loses them. Use <code>rememberSaveable</code> for small values or <code>ViewModel + SavedStateHandle</code> for complex data. A classic bug: user fills a form, rotates device, all fields reset.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — collectAsState instead of collectAsStateWithLifecycle</div>
+      <code>collectAsState()</code> continues collecting when the app goes to background — processing updates the user can't see, potentially doing network calls or DB queries. Always use <code>collectAsStateWithLifecycle()</code> in production.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — Hoisting too high</div>
+      Moving state to a parent/ancestor that doesn't need it creates unnecessary recompositions in the ancestor. Hoist state to the LOWEST common ancestor that needs it — not all the way to the ViewModel unless the state is business-critical.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — derivedStateOf for expensive filtered lists</div>
+      For any list filtering or sorting that runs during recomposition, wrap in <code>derivedStateOf</code>. Source state can change frequently (scroll, typing); the derived list should only recompute when actual filter parameters change.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "In Compose, state flows down as parameters and events flow up as lambda callbacks — UDF. remember stores state in the slot table across recompositions. rememberSaveable persists through configuration changes. For screen-level business data, the ViewModel holds StateFlow and the UI collects it with collectAsStateWithLifecycle. derivedStateOf creates derived state that only recomputes when its dependencies change."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "State hoisting is the core pattern — separate 'what state' from 'who owns it'. Stateless composables take state as parameters and report events via lambdas. They're testable, reusable, and previewable. Stateful composables own their own state with remember — but that state is local and ephemeral.<br><br>The rule: use remember for pure UI state (isExpanded, hasFocus) that doesn't need to survive navigation. Use rememberSaveable for state that must survive rotation (search query, scroll offset). Use ViewModel for business data that drives screens.<br><br>derivedStateOf is underused but important: in a banking transaction list, scroll position changes hundreds of times per scroll gesture. Without derivedStateOf, filtering the list on every scroll recompose is expensive. With derivedStateOf, Compose only recomputes the filtered list when the filter criteria actually changes."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>UDF: state down, events up</strong> — ViewModel is single source of truth</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>remember vs rememberSaveable</strong> — rotation kills remember; saves rememberSaveable</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>collectAsStateWithLifecycle</strong> — not collectAsState; stops in background</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>derivedStateOf</strong> — for expensive derived computations from rapidly-changing state</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Hoist to lowest common ancestor</strong> — not always to ViewModel</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "How do you decide between remember and rememberSaveable?"</h4>
+    <p>A: Ask: "Would it be confusing to the user if this resets on screen rotation?" If yes (search query, scroll position, form fields, selected tab) — use rememberSaveable. If no (tooltip visibility, animation state, hover state) — use remember. Also: rememberSaveable only works for Bundle-serializable types; for complex data, use ViewModel + SavedStateHandle.</p>
+    <h4>Q: "What is the difference between derivedStateOf and remember(key)?"</h4>
+    <p>A: <code>remember(key) { compute() }</code> recomputes when key changes and always triggers recomposition. <code>derivedStateOf { compute() }</code> also recomputes when dependencies change, but it ONLY triggers recomposition if the computed result is different. For the FAB show/hide example: scroll position changes 60 times/second but the boolean threshold crosses once — derivedStateOf prevents 59 unnecessary FAB recompositions.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In an automotive app dashboard with live sensor readings updating 60fps, every piece of UI that derives a value from sensor state should use <code>derivedStateOf</code>. Speed gauge, warning lights, fuel level — each is derived from raw sensor data. Without derivedStateOf, a 60fps sensor update rate would cause 60fps recomposition of every derived composable. With derivedStateOf, each composable only recomposes when its threshold changes.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>State survival</h4>
+        <pre><code>remember         → recomposition only
+rememberSaveable → + rotation + death
+ViewModel        → + rotation, complex data</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>State hoisting</h4>
+        <pre><code>// Stateless (preferred):
+fun SearchBar(
+  query: String,           // ← down
+  onQueryChange: (String)->Unit // ↑ up
+)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>collectAsState</h4>
+        <pre><code>collectAsState()               // ❌ background
+collectAsStateWithLifecycle()  // ✅ STARTED only</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>derivedStateOf</h4>
+        <pre><code>val showFab by remember {
+  derivedStateOf { 
+    scrollState.value > 100
+  }
+}
+// recomposes only on threshold cross</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between remember and rememberSaveable?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>remember</code> stores values in the composition's slot table — survives recomposition but is lost on configuration changes (rotation, language change) and process death. <code>rememberSaveable</code> additionally saves the value to the Bundle/SavedState system, surviving both configuration changes and process death. For primitive types it works automatically; for complex types you need a custom <code>Saver</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is state hoisting and why is it important?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">State hoisting is moving state from a composable to its caller, making the composable stateless. Instead of the composable owning state internally, it receives the current value as a parameter and reports changes via a lambda callback. Benefits: the composable becomes testable (control state in tests), reusable (caller decides initial state), previewable (pass any state in preview), and follows UDF (single source of truth).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is Unidirectional Data Flow in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">State flows down the composable tree as parameters, events flow up as lambda callbacks. The ViewModel holds and owns the state (single source of truth). It exposes state as StateFlow. The UI consumes state via collectAsStateWithLifecycle() and sends events (user clicks) back to the ViewModel via callbacks. The ViewModel mutates state in response to events, triggering a new UI render.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is derivedStateOf and when should you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>derivedStateOf { }</code> creates a State that is computed from other State values. It only recomputes when its dependencies change, and only triggers recomposition when the computed result is different. Use it when source state changes frequently but derived result changes rarely: scroll position (60fps) → show FAB (boolean, changes rarely); item list → filtered list (filtered count changes occasionally).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why use collectAsStateWithLifecycle instead of collectAsState?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>collectAsState()</code> keeps collecting the Flow even when the app is in the background (Activity paused/stopped). <code>collectAsStateWithLifecycle()</code> uses <code>repeatOnLifecycle(STARTED)</code> semantics — collection pauses when the app goes to background and resumes when it comes to foreground. This prevents unnecessary processing when the UI is invisible, saving battery and avoiding potential issues with background-only updates.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A form composable has 5 fields. Which state should use remember, rememberSaveable, and ViewModel?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The field values (text, selections) that the user typed: <code>rememberSaveable</code> or <code>ViewModel + SavedStateHandle</code> — user would be frustrated if their input reset on rotation. UI-only state like "is this field focused" or "show password": <code>remember</code> — acceptable to reset on rotation. If the form involves business logic (validation, submission state, server errors): ViewModel StateFlow with <code>collectAsStateWithLifecycle()</code>. Rule: data the user entered → survives rotation; pure UI decoration → doesn't need to.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between derivedStateOf and remember(key)?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>remember(key) { compute() }</code>: re-runs compute() when key changes, always triggers recomposition. <code>derivedStateOf { compute() }</code>: re-runs when State dependencies read inside the lambda change. Crucially, it only triggers recomposition if the result changes — an additional optimization. Use derivedStateOf when the computation's input (State) changes more often than the output (e.g., filtering a 1000-item list when only 1 item changes but the filtered result doesn't change).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design the state management for a banking transfer screen with: amount input, recipient selection, real-time validation, and submit-in-progress state.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">ViewModel owns all: <code>data class TransferState(val amount: String = "", val amountError: String? = null, val recipient: Contact? = null, val isSubmitting: Boolean = false)</code> as MutableStateFlow. ViewModel handles events: onAmountChange (validates), onRecipientSelect, onSubmit (sets isSubmitting). Submit button enabled via <code>derivedStateOf { state.amountError == null &amp;&amp; state.recipient != null &amp;&amp; !state.isSubmitting }</code>. Amount + recipient persist across rotation via SavedStateHandle in ViewModel. No rememberSaveable needed — ViewModel handles it. UI is fully stateless composable.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When should you hoist state to the ViewModel vs keep it in rememberSaveable?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use ViewModel when: (1) state is shared across multiple composables; (2) state requires business logic (validation, computation); (3) state needs to survive process death with unlimited size (SavedStateHandle for complex objects); (4) state comes from or must be synced to a data layer. Use rememberSaveable when: (1) state is purely local UI state in one composable; (2) it's a primitive or Bundle-serializable value; (3) no business logic needed; (4) examples: expanded/collapsed, scroll offset for a sub-list. rememberSaveable keeps components self-contained; ViewModel provides testability and data layer access.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A ScrollState-based parallax header is causing 60fps recompositions. How do you fix it using derivedStateOf?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Instead of reading scrollState.value directly in composables that don't need continuous updates: <code>val isHeaderCollapsed by remember { derivedStateOf { scrollState.value > COLLAPSE_THRESHOLD } }</code> and <code>val headerAlpha by remember { derivedStateOf { (1f - scrollState.value / FADE_RANGE).coerceIn(0f, 1f) } }</code>. The scrollState changes 60fps but isHeaderCollapsed changes once (boolean threshold). The alpha changes continuously — for this, accept the 60fps recomposition on the alpha composable specifically, or use the Modifier.graphicsLayer approach which doesn't trigger recomposition at all.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

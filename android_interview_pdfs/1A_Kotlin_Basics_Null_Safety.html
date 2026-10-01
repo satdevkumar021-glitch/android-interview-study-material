@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1A — Kotlin Basics & Null Safety | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">1A · Kotlin Basics & Null Safety</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1A</span> — Kotlin Basics &amp; Null Safety</h1>
+    <p class="hero-desc">Core Kotlin syntax and the type-system mechanism that eliminates NullPointerExceptions at compile time.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1 — Highest Priority</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>What it is</h3>
+    <p>Kotlin's type system distinguishes <strong>nullable</strong> (<code>T?</code>) from <strong>non-null</strong> (<code>T</code>) types at compile time. Combined with <code>val</code>/<code>var</code>, type inference, and safe-access operators, it makes null handling explicit and eliminates entire classes of runtime crashes.</p>
+
+    <h3>Why it exists</h3>
+    <p>Java's <code>null</code> is untyped — any reference can be null, but the compiler never tells you. Kotlin makes nullability part of the type signature, enforced by the compiler. A <code>String</code> <strong>cannot</strong> be null; only a <code>String?</code> can.</p>
+
+    <h3>Problems it solves</h3>
+    <ul>
+      <li><strong>NullPointerException (NPE)</strong> — the "billion-dollar mistake"</li>
+      <li>Verbose, defensive Java null-checks scattered through every layer</li>
+      <li>Unclear API contracts ("does this function return null or not?")</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Nullability is a <strong>compile-time type distinction</strong>, not a runtime wrapper. <code>String</code> and <code>String?</code> are genuinely different types to the Kotlin compiler. This means violations are caught during development, not in production.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works</div>
+
+    <h3>val vs var</h3>
+    <pre><code><span class="kw">val</span> userId: <span class="cl">String</span> = <span class="str">"u_123"</span>   <span class="cm">// immutable reference — prefer this</span>
+<span class="kw">var</span> retryCount: <span class="cl">Int</span> = <span class="nu">0</span>        <span class="cm">// mutable reference — use only when needed</span></code></pre>
+    <p><code>val</code> = assign once (like Java <code>final</code>). Does <strong>not</strong> mean the object itself is immutable.</p>
+
+    <h3>Type Inference</h3>
+    <pre><code><span class="kw">val</span> name = <span class="str">"Alice"</span>          <span class="cm">// inferred: String</span>
+<span class="kw">val</span> scores = <span class="fn">listOf</span>(<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>)  <span class="cm">// inferred: List&lt;Int&gt;</span></code></pre>
+    <p>Explicit types only needed for clarity or when inference fails.</p>
+
+    <h3>Nullable vs Non-null</h3>
+    <pre><code><span class="kw">var</span> email: <span class="cl">String</span>  = <span class="str">"a@b.com"</span>  <span class="cm">// non-null — compiler guarantees never null</span>
+<span class="kw">var</span> phone: <span class="cl">String?</span> = <span class="kw">null</span>        <span class="cm">// nullable — must handle null explicitly</span></code></pre>
+
+    <h3>Safe Call <code>?.</code></h3>
+    <pre><code><span class="kw">val</span> length = phone<span class="kw">?.</span>length  <span class="cm">// returns null instead of throwing NPE</span></code></pre>
+    <p>Short-circuits the entire chain if the receiver is null.</p>
+
+    <h3>Elvis Operator <code>?:</code></h3>
+    <pre><code><span class="kw">val</span> displayPhone = phone <span class="kw">?:</span> <span class="str">"N/A"</span>       <span class="cm">// default if null</span>
+<span class="kw">val</span> len = phone<span class="kw">?.</span>length <span class="kw">?:</span> <span class="nu">0</span>            <span class="cm">// safe call + default</span>
+phone <span class="kw">?:</span> <span class="kw">throw</span> <span class="cl">IllegalStateException</span>(<span class="str">"Phone required"</span>)  <span class="cm">// throw on null</span></code></pre>
+
+    <h3>let with Null Handling</h3>
+    <pre><code>phone<span class="kw">?.</span><span class="fn">let</span> { p ->
+    <span class="cm">// p is non-null String inside this block</span>
+    <span class="fn">sendSms</span>(p)
+}</code></pre>
+    <p>Executes the lambda only when the receiver is non-null. Cleaner than <code>if (x != null)</code> when you need a scoped non-null reference.</p>
+
+    <h3>!! (Not-Null Assertion)</h3>
+    <pre><code><span class="kw">val</span> len = phone<span class="kw">!!</span>.length  <span class="cm">// throws KotlinNullPointerException if null</span></code></pre>
+    <div class="callout callout-red">
+      <div class="callout-label">⚠ Avoid in Production</div>
+      Every <code>!!</code> bypasses compile-time safety. It's a deliberate "crash if wrong" override. Use <code>requireNotNull()</code> with a message instead.
+    </div>
+
+    <h3>lateinit</h3>
+    <pre><code><span class="kw">@Inject lateinit var</span> analytics: <span class="cl">AnalyticsService</span>
+
+<span class="cm">// later, after Hilt injection:</span>
+analytics.<span class="fn">track</span>(<span class="str">"screen_view"</span>)
+
+<span class="cm">// safe check:</span>
+<span class="kw">if</span> (::analytics.<span class="fn">isInitialized</span>) analytics.<span class="fn">track</span>(<span class="str">"event"</span>)</code></pre>
+    <ul>
+      <li><strong>var only</strong>, reference types only (no Int, Boolean)</li>
+      <li>Throws <code>UninitializedPropertyAccessException</code> if accessed before init</li>
+      <li>Used for DI injection, Android lifecycle-bound properties</li>
+    </ul>
+
+    <h3>by lazy</h3>
+    <pre><code><span class="kw">val</span> heavyConfig: <span class="cl">Config</span> <span class="kw">by lazy</span> {
+    <span class="cl">Config</span>.<span class="fn">load</span>()   <span class="cm">// called once, on first access, thread-safe by default</span>
+}</code></pre>
+    <ul>
+      <li><strong>val only</strong>, computed once and cached</li>
+      <li>Default: <code>LazyThreadSafetyMode.SYNCHRONIZED</code></li>
+      <li>Modes: <code>SYNCHRONIZED</code>, <code>PUBLICATION</code>, <code>NONE</code></li>
+    </ul>
+
+    <h3>Null Safety Decision Flow</h3>
+    <div class="ascii-box">Access property on T?
+        |
+   receiver null?
+   /           \
+ YES            NO
+  |              |
+returns null   safe access
+or default     returns value</div>
+
+    <h3>Key Terms Reference</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td><code>val</code></td><td>Immutable reference — assign once</td></tr>
+      <tr><td><code>var</code></td><td>Mutable reference — reassignable</td></tr>
+      <tr><td><code>T?</code></td><td>Nullable type — can hold null</td></tr>
+      <tr><td><code>?.</code></td><td>Safe call — null if receiver is null</td></tr>
+      <tr><td><code>?:</code></td><td>Elvis — default / throw / return when null</td></tr>
+      <tr><td><code>!!</code></td><td>Force-unwrap — throws if null (avoid)</td></tr>
+      <tr><td><code>?.let{}</code></td><td>Execute block only when non-null</td></tr>
+      <tr><td><code>lateinit</code></td><td>Deferred non-null init for <code>var</code></td></tr>
+      <tr><td><code>by lazy</code></td><td>Lazy-computed delegate for <code>val</code></td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. Why and When to Use It</div>
+
+    <h3>Real Android Use Cases</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Tool</th></tr>
+      <tr><td>ViewModel injected by Hilt</td><td><code>lateinit var</code></td></tr>
+      <tr><td>Expensive singleton (e.g., OkHttpClient)</td><td><code>by lazy</code></td></tr>
+      <tr><td>Optional API field (e.g., <code>middleName</code>)</td><td><code>String?</code> + <code>?.</code> / <code>?:</code></td></tr>
+      <tr><td>Fragment arguments from Bundle</td><td><code>?.let { }</code></td></tr>
+      <tr><td>Chained nullable calls</td><td><code>?.</code> chain</td></tr>
+      <tr><td>Providing default for missing config</td><td><code>?:</code></td></tr>
+      <tr><td>Assert non-null with context message</td><td><code>requireNotNull()</code></td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to Use</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Use <code>!!</code> in production — use early-return or <code>requireNotNull()</code></li>
+        <li>Use <code>lateinit</code> for <code>val</code> — use <code>by lazy</code></li>
+        <li>Use <code>var</code> when <code>val</code> works — harder to reason in Compose/Flow</li>
+        <li>Use <code>lazy</code> for values that may need re-initialization</li>
+        <li>Use sentinel values (<code>""</code>, <code>-1</code>) instead of <code>T?</code></li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — user profile screen. Profile fields like middle name are optional from the backend; analytics service is Hilt-injected.
+    </div>
+
+    <h3>Domain Model</h3>
+    <pre><code><span class="cm">// domain/model/UserProfile.kt</span>
+<span class="kw">data class</span> <span class="cl">UserProfile</span>(
+    <span class="kw">val</span> userId: <span class="cl">String</span>,           <span class="cm">// always present</span>
+    <span class="kw">val</span> fullName: <span class="cl">String</span>,
+    <span class="kw">val</span> middleName: <span class="cl">String?</span>,      <span class="cm">// optional — backend may omit</span>
+    <span class="kw">val</span> accountNumber: <span class="cl">String</span>,
+    <span class="kw">val</span> email: <span class="cl">String?</span>            <span class="cm">// optional until verified</span>
+)</code></pre>
+
+    <h3>ProfileViewModel</h3>
+    <pre><code><span class="cm">// presentation/profile/ProfileViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ProfileViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getUserProfileUseCase: <span class="cl">GetUserProfileUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="cm">// lateinit: Hilt injects after constructor; guaranteed non-null post-injection</span>
+    <span class="kw">@Inject lateinit var</span> analytics: <span class="cl">AnalyticsService</span>
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">ProfileUiState</span>&gt;(<span class="cl">ProfileUiState</span>.Loading)
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">ProfileUiState</span>&gt; = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="cm">// lazy: expensive formatter — created once, only if loadProfile is called</span>
+    <span class="kw">private val</span> currencyFormatter: <span class="cl">NumberFormat</span> <span class="kw">by lazy</span> {
+        <span class="cl">NumberFormat</span>.<span class="fn">getCurrencyInstance</span>(<span class="cl">Locale</span>(<span class="str">"en"</span>, <span class="str">"IN"</span>))
+    }
+
+    <span class="kw">fun</span> <span class="fn">loadProfile</span>(userId: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            <span class="kw">val</span> result = <span class="fn">getUserProfileUseCase</span>(userId)
+            result.<span class="fn">fold</span>(
+                onSuccess = { profile ->
+                    <span class="cm">// ?.let + ?: reads as: "include middle name if present, else use fullName"</span>
+                    <span class="kw">val</span> displayName = profile.middleName<span class="kw">?.</span><span class="fn">let</span> { middle ->
+                        <span class="str">"${profile.fullName} ($middle)"</span>
+                    } <span class="kw">?:</span> profile.fullName
+
+                    <span class="cm">// Safe call chain — short-circuits at any null, Elvis provides fallback</span>
+                    <span class="kw">val</span> maskedEmail = profile.email
+                        <span class="kw">?.</span><span class="fn">takeIf</span> { it.<span class="fn">contains</span>(<span class="str">"@"</span>) }
+                        <span class="kw">?.</span><span class="fn">replace</span>(<span class="cl">Regex</span>(<span class="str">"(?&lt;=.).(?=[^@]*@)"</span>), <span class="str">"*"</span>)
+                        <span class="kw">?:</span> <span class="str">"Not provided"</span>
+
+                    _uiState.value = <span class="cl">ProfileUiState</span>.<span class="cl">Success</span>(
+                        displayName = displayName,
+                        maskedEmail = maskedEmail,
+                        formattedBalance = currencyFormatter.<span class="fn">format</span>(<span class="nu">0</span>)
+                    )
+                },
+                onFailure = {
+                    _uiState.value = <span class="cl">ProfileUiState</span>.<span class="cl">Error</span>(it.message <span class="kw">?:</span> <span class="str">"Unknown error"</span>)
+                }
+            )
+        }
+    }
+}</code></pre>
+
+    <h3>Key Lines Explained</h3>
+    <ul>
+      <li><code>@Inject lateinit var analytics</code> — Hilt injects after construction; non-null guaranteed post-injection. No <code>?</code> needed.</li>
+      <li><code>by lazy { ... }</code> — <code>NumberFormat</code> creation is deferred; cost paid only on first <code>loadProfile</code> call.</li>
+      <li><code>?.let { } ?: fullName</code> — idiomatic: "if middle name exists, format it; otherwise default to full name."</li>
+      <li><code>?.takeIf { }?.replace(...)  ?: "Not provided"</code> — chain short-circuits to null at any null point.</li>
+      <li><strong>No <code>!!</code> anywhere</strong> — compiler-enforced contract holds throughout all layers.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr>
+        <td>Kotlin nullable <code>T?</code> + operators</td>
+        <td>Compile-time safety, idiomatic, concise</td>
+        <td>Requires nullable discipline across all layers</td>
+        <td><strong>Always — default choice</strong></td>
+      </tr>
+      <tr>
+        <td><code>!!</code> (force-unwrap)</td>
+        <td>One less null-check</td>
+        <td>Runtime crash if null; bypasses safety entirely</td>
+        <td>Never in prod; tests only when you own the invariant</td>
+      </tr>
+      <tr>
+        <td><code>lateinit var</code></td>
+        <td>Clean DI / lifecycle init, non-null contract</td>
+        <td>Crash if accessed before init; reference types only</td>
+        <td>Non-null var that can't be init'd at declaration</td>
+      </tr>
+      <tr>
+        <td><code>by lazy</code></td>
+        <td>Thread-safe, one-time init, val</td>
+        <td>Can't re-init; slight overhead on first access</td>
+        <td>Expensive val deferred to first use</td>
+      </tr>
+      <tr>
+        <td><code>Optional&lt;T&gt;</code> (Java)</td>
+        <td>Familiar to Java devs</td>
+        <td>Verbose, heap allocation per wrap, not idiomatic Kotlin</td>
+        <td>Never — use <code>T?</code></td>
+      </tr>
+      <tr>
+        <td>Sentinel value (<code>""</code>, <code>-1</code>)</td>
+        <td>No nullability plumbing</td>
+        <td>Implicit contract, error-prone, misleading</td>
+        <td>Never — use <code>T?</code></td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Common Interviewer Comparisons</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Expect These</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong><code>lateinit</code> vs <code>by lazy</code></strong> — mutable/deferred init vs immutable/computed-once</li>
+        <li><strong><code>?.</code> vs <code>!!</code></strong> — safe short-circuit vs force-crash; always prefer safe</li>
+        <li><strong><code>val</code> vs <code>var</code></strong> — immutability preference in reactive/functional code</li>
+        <li><strong>Kotlin nullability vs Java <code>Optional</code></strong> — type-system vs wrapper object</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>!! in Production</h3>
+    <pre><code><span class="cm">// ❌ BAD — crashes if userData is null</span>
+<span class="kw">val</span> name = userData<span class="kw">!!</span>.name</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — explicit contract with early exit</span>
+<span class="kw">val</span> name = userData<span class="kw">?.</span>name <span class="kw">?:</span> <span class="kw">return</span>
+<span class="cm">// or: assert with a meaningful message</span>
+<span class="kw">val</span> name = <span class="fn">requireNotNull</span>(userData) { <span class="str">"userData must not be null here"</span> }.name</code></pre>
+
+    <h3>lateinit for Primitives</h3>
+    <pre><code><span class="cm">// ❌ BAD — won't compile: lateinit not allowed on Int</span>
+<span class="kw">lateinit var</span> count: <span class="cl">Int</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD</span>
+<span class="kw">var</span> count: <span class="cl">Int</span> = <span class="nu">0</span></code></pre>
+
+    <h3>Ignoring isInitialized</h3>
+    <pre><code><span class="cm">// ❌ BAD — throws UninitializedPropertyAccessException</span>
+<span class="kw">fun</span> <span class="fn">track</span>() = analytics.<span class="fn">track</span>(<span class="str">"event"</span>)  <span class="cm">// may not be initialized yet</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD</span>
+<span class="kw">fun</span> <span class="fn">track</span>() {
+    <span class="kw">if</span> (::analytics.<span class="fn">isInitialized</span>) analytics.<span class="fn">track</span>(<span class="str">"event"</span>)
+}</code></pre>
+
+    <h3>Mutable State in Compose / Flow</h3>
+    <pre><code><span class="cm">// ❌ BAD — var breaks unidirectional data flow</span>
+<span class="kw">var</span> userName: <span class="cl">String</span> = <span class="str">""</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — val + StateFlow</span>
+<span class="kw">val</span> userName: <span class="cl">StateFlow</span>&lt;<span class="cl">String</span>&gt; = _userName.<span class="fn">asStateFlow</span>()</code></pre>
+
+    <h3>lazy on a Value That Changes</h3>
+    <pre><code><span class="cm">// ❌ BAD — lazy caches the first value; token updates not reflected</span>
+<span class="kw">val</span> token: <span class="cl">String</span> <span class="kw">by lazy</span> { prefs.<span class="fn">getToken</span>() }</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — use a function or StateFlow for mutable values</span>
+<span class="kw">fun</span> <span class="fn">getToken</span>(): <span class="cl">String</span> = prefs.<span class="fn">getToken</span>()</code></pre>
+
+    <h3>Threading / Lifecycle Traps</h3>
+    <ul>
+      <li><code>lateinit</code> is <strong>not thread-safe</strong> — avoid concurrent access without synchronization.</li>
+      <li><code>by lazy</code> default (<code>SYNCHRONIZED</code>) uses a lock — correct. Choose <code>NONE</code> only in verified single-threaded contexts.</li>
+      <li>Smart casts fail inside lambdas on <code>var</code> fields — capture to a local <code>val</code> first.</li>
+    </ul>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Prefer <code>val</code> over <code>var</code> everywhere possible.</li>
+      <li>Prefer <code>T?</code> with <code>?.</code> / <code>?:</code> over <code>!!</code>.</li>
+      <li>Use <code>requireNotNull()</code> / <code>checkNotNull()</code> to document invariants with a message.</li>
+      <li>Model optional API fields as <code>T?</code> in domain model — never use sentinel values.</li>
+      <li>Use <code>by lazy</code> for expensive one-time inits (parsers, formatters, heavy config).</li>
+      <li>Use <code>lateinit</code> only for DI / lifecycle-bound non-null properties; check <code>isInitialized</code> if any doubt.</li>
+    </ol>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Kotlin's null safety makes nullability part of the type system. A plain <code>String</code> can never be null — only <code>String?</code> can. The compiler forces you to handle the null case via safe calls <code>?.</code>, the Elvis operator <code>?:</code>, or smart casts. This eliminates NPEs at compile time rather than at runtime. For deferred init, <code>lateinit</code> handles DI/lifecycle-bound vars, and <code>by lazy</code> handles expensive val computations that should run once."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "The core idea is that nullability is a compile-time type distinction, not a runtime surprise. <code>String</code> and <code>String?</code> are different types. The compiler refuses to let you call methods on a <code>String?</code> without handling the null case first.<br><br>
+      In practice, I use <code>?.</code> for safe chaining — the whole chain short-circuits to null if any receiver is null. <code>?:</code> provides a default or triggers an early return. <code>let</code> executes a block only when the receiver is non-null, which is cleaner than an <code>if (x != null)</code> block when you need a scoped non-null reference.<br><br>
+      <code>!!</code> exists but I treat it as a code smell. Every <code>!!</code> means 'I'm overriding the compiler — crash if I'm wrong.' In production I replace it with <code>requireNotNull()</code> with a message, or restructure so null is impossible at the call site.<br><br>
+      For property initialization: <code>lateinit var</code> is for Hilt-injected or lifecycle-driven non-null properties that can't be set in the constructor. <code>by lazy</code> is for expensive <code>val</code> computations deferred to first access — thread-safe by default. They're complementary — <code>lazy</code> requires <code>val</code>, <code>lateinit</code> requires <code>var</code>."
+    </div>
+
+    <h3>Must-Mention Points (Show Deep Knowledge)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><code>T</code> vs <code>T?</code> — compile-time type distinction, not a runtime wrapper object</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><code>?.</code> short-circuits the entire call chain to null on the first null receiver</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>?:</code> right side executes lazily — also used for <code>return</code> and <code>throw</code>, not just defaults</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>!!</code> is a deliberate override of compile-time safety — production code should not contain it</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>lateinit</code> — <code>var</code>, reference types only; crashes with <code>UninitializedPropertyAccessException</code> (not NPE)</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><code>by lazy</code> — <code>val</code>, computed once, <code>SYNCHRONIZED</code> by default (thread-safe)</div></div>
+      <div class="must-item"><div class="must-num">7</div><div>Smart casts: after <code>if (x != null)</code>, compiler promotes <code>x</code> to non-null — fails on <code>var</code> fields</div></div>
+      <div class="must-item"><div class="must-num">8</div><div><code>requireNotNull()</code> / <code>checkNotNull()</code> preferred over <code>!!</code> when you must assert non-null</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>JVM bytecode representation of nullable types (platform types, <code>@Nullable</code>/<code>@NotNull</code> annotations)</li>
+      <li><code>LazyThreadSafetyMode.PUBLICATION</code> vs <code>NONE</code> internals</li>
+      <li>Delegation internals for <code>by lazy</code></li>
+    </ul>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr>
+        <td>What is a platform type?</td>
+        <td>A type from Java the compiler can't determine is null or non-null (shown as <code>String!</code>). Annotate Java side with <code>@Nullable</code>/<code>@NotNull</code> to fix.</td>
+      </tr>
+      <tr>
+        <td><code>val</code> vs <code>const val</code>?</td>
+        <td><code>val</code> = runtime immutable reference. <code>const val</code> = compile-time constant (primitives + String only), inlined at usage sites.</td>
+      </tr>
+      <tr>
+        <td>When does smart cast fail?</td>
+        <td>On <code>var</code> properties (another thread could reassign) or mutable class members (getter could return different value each time).</td>
+      </tr>
+      <tr>
+        <td><code>let</code> vs <code>also</code> for null checks?</td>
+        <td><code>let</code> when you need the non-null value used/transformed inside. <code>also</code> for side effects while returning the original receiver.</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "In a multi-module Clean Architecture, nullable types in your domain model act as a formal API contract between modules. If <code>UserProfile.email</code> is <code>String?</code>, every consumer — presentation, domain, data — must handle the missing case explicitly. This is far more robust than a convention or a sentinel value. I enforce a rule: <strong>domain models never use <code>!!</code></strong>, and any conversion from data-layer DTO to domain model must resolve nullability explicitly in the mapper — never with a force-unwrap."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>VAL vs VAR</h4>
+        <pre><code>val  = assign once — PREFER
+var  = mutable — use sparingly</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>NULLABLE TYPES</h4>
+        <pre><code>String   → NEVER null (compiler)
+String?  → can be null (handle it)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SAFE OPERATORS</h4>
+        <pre><code>?.      safe call, short-circuits
+?:      Elvis: default/throw/return
+!!      force-unwrap — AVOID
+?.let{} block only if non-null</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SMART CAST</h4>
+        <pre><code>if (x != null) {
+  x.doSomething()  // non-null
+}
+// Fails on var fields!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PREFER OVER !!</h4>
+        <pre><code>requireNotNull(x) { "msg" }
+checkNotNull(x)   { "msg" }
+x ?: return
+x ?: throw IllegalStateException()</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LATEINIT vs BY LAZY</h4>
+        <pre><code>lateinit var  → var, ref types only
+               UninitializedPropertyAccessException
+               NOT thread-safe
+
+by lazy       → val only
+               computed once, cached
+               SYNCHRONIZED by default</code></pre>
+      </div>
+    </div>
+
+    <h3>Key Gotchas at a Glance</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Gotcha</th><th>Rule</th></tr>
+      <tr><td>Smart cast fails on <code>var</code></td><td>Capture to local <code>val</code> first</td></tr>
+      <tr><td><code>lateinit</code> not thread-safe</td><td>Synchronize access if concurrent</td></tr>
+      <tr><td><code>lazy</code> with <code>NONE</code> not thread-safe</td><td>Only use in single-threaded context</td></tr>
+      <tr><td>Platform types (<code>T!</code>) from Java</td><td>Annotate Java with <code>@Nullable</code>/<code>@NotNull</code></td></tr>
+      <tr><td><code>!!</code> in tests</td><td>Acceptable. In production: code smell</td></tr>
+      <tr><td><code>lazy</code> for mutable values</td><td>Use function or <code>StateFlow</code> instead</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What is the difference between <code>val</code> and <code>var</code> in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>val</code> is an immutable reference — assigned once, cannot be reassigned (like Java <code>final</code>). <code>var</code> is mutable — can be reassigned at any time. Neither controls whether the <em>object</em> itself is mutable — a <code>val</code> list can still have items added if it's a <code>MutableList</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What is the difference between <code>String</code> and <code>String?</code>? How does the compiler enforce it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>String</code> is a non-null type; the compiler guarantees it will never hold null. <code>String?</code> is nullable; the compiler forces you to handle the null case (via <code>?.</code>, <code>?:</code>, or a null check) before calling any method on it. Assigning <code>null</code> to a <code>String</code> is a compile error.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What does the Elvis operator <code>?:</code> do? Give an example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Returns the left-hand expression if non-null, otherwise evaluates and returns the right-hand expression. Example: <code>val name = user?.name ?: "Guest"</code> — if <code>user</code> is null or <code>user.name</code> is null, <code>name</code> becomes <code>"Guest"</code>. The right side can also be a <code>return</code> or <code>throw</code>.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — When would you use <code>lateinit var</code> vs <code>by lazy</code>? What happens if you access <code>lateinit</code> before init?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>lateinit var:</strong> for non-null <code>var</code> properties that can't be initialized at declaration time (DI injection, lifecycle callbacks). Reference types only. Throws <code>UninitializedPropertyAccessException</code> if accessed before init — check with <code>::prop.isInitialized</code>.<br><br>
+        <strong>by lazy:</strong> for non-null <code>val</code> properties with an expensive computation that should run once and be cached. Thread-safe by default. Cannot be re-initialized.<br><br>
+        They're complementary: <code>lazy</code> requires <code>val</code>, <code>lateinit</code> requires <code>var</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — Why avoid <code>!!</code> in production? What are the better alternatives?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>!!</code> bypasses compile-time null safety — if the value is null at runtime, it throws <code>KotlinNullPointerException</code>, defeating the purpose of the type system. Better alternatives:<br>
+        • <code>requireNotNull(x) { "descriptive message" }</code><br>
+        • <code>x ?: return</code> (early exit)<br>
+        • <code>x ?: throw IllegalStateException("...")</code><br>
+        • Restructure so null is impossible at the call site
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — Explain smart casts. When does a smart cast fail?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Smart cast is when the compiler automatically promotes a nullable type to non-null after a null check (or <code>is</code> type check), so you don't need explicit casting.<br><br>
+        Smart cast <strong>fails</strong> when the compiler can't guarantee the value hasn't changed between the check and the use:<br>
+        1. <code>var</code> properties — another thread could reassign them<br>
+        2. Mutable class members — a custom getter could return a different value each time<br><br>
+        Fix: capture to a local <code>val</code> before using.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — Rewrite without any <code>!!</code>: <code>fun getDisplayName(user: User?): String { return user!!.profile!!.displayName!! }</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// Option 1: concise safe-call chain</span>
+<span class="kw">fun</span> <span class="fn">getDisplayName</span>(user: <span class="cl">User</span>?): <span class="cl">String</span> =
+    user<span class="kw">?.</span>profile<span class="kw">?.</span>displayName <span class="kw">?:</span> <span class="str">"Unknown"</span>
+
+<span class="cm">// Option 2: early-return pattern (more explicit)</span>
+<span class="kw">fun</span> <span class="fn">getDisplayName</span>(user: <span class="cl">User</span>?): <span class="cl">String</span> {
+    <span class="kw">val</span> profile = user<span class="kw">?.</span>profile <span class="kw">?:</span> <span class="kw">return</span> <span class="str">"Unknown"</span>
+    <span class="kw">return</span> profile.displayName <span class="kw">?:</span> <span class="str">"Unknown"</span>
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — What's wrong with this ViewModel code? How do you fix it?<br><code>var userSession: UserSession? = null; viewModelScope.launch { userSession = repo.getSession(); dashboard.load(userSession!!.token) }</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Problems:</strong><br>
+        1. <code>userSession</code> is a <code>var</code> — the compiler cannot smart-cast it because another coroutine could reassign it between assignment and <code>userSession!!.token</code><br>
+        2. <code>!!</code> crashes if <code>getSession()</code> returns null<br><br>
+        <strong>Fix:</strong> capture to a local <code>val</code> — the compiler can smart-cast a local <code>val</code>:
+<pre><code><span class="kw">fun</span> <span class="fn">loadDashboard</span>() {
+    viewModelScope.<span class="fn">launch</span> {
+        <span class="kw">val</span> session = repository.<span class="fn">getSession</span>() <span class="kw">?:</span> <span class="kw">run</span> {
+            _uiState.value = <span class="cl">UiState</span>.<span class="cl">Error</span>(<span class="str">"No session"</span>)
+            <span class="kw">return</span>@launch
+        }
+        dashboard.<span class="fn">load</span>(session.token)  <span class="cm">// session is non-null here</span>
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — A junior dev maps <code>email: String?</code> in the DTO to domain with <code>userProfile.email = dto.email!!</code>. What's wrong? How do you enforce the right pattern?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Problem:</strong> The <code>!!</code> asserts the email is never null from the DTO — a contract violation. The DTO declares it nullable for a reason: the backend may omit it. This will crash in production when the backend returns a user without an email.<br><br>
+        <strong>Fix:</strong> The mapper must be honest about nullability:
+<pre><code><span class="kw">fun</span> <span class="cl">UserDto</span>.<span class="fn">toDomain</span>() = <span class="cl">UserProfile</span>(
+    email = email  <span class="cm">// String? maps to String? — honest contract</span>
+)</code></pre>
+        If the domain <em>requires</em> a non-null email, that validation belongs in the UseCase as business logic, not in the mapper.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — <code>by lazy</code> is used to init an OkHttpClient in a Repository. App crashes in prod with <code>ConcurrentModificationException</code> inside the initializer. Why? How do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Why:</strong> <code>by lazy</code> default mode is <code>SYNCHRONIZED</code> — it uses a lock to ensure single initialization. The <code>ConcurrentModificationException</code> is not caused by two threads entering the initializer simultaneously (the lock prevents that). More likely: the initializer lambda itself modifies a collection (e.g., adding interceptors) that is concurrently iterated, or OkHttpClient builder internal state is being mutated by another thread.<br><br>
+        If the developer changed the mode to <code>LazyThreadSafetyMode.NONE</code> for performance, then yes — two threads could enter the initializer simultaneously, causing the exception.<br><br>
+        <strong>Fix:</strong> Revert to <code>SYNCHRONIZED</code> (default) and ensure the initializer lambda is free of concurrent collection mutation. Use Hilt to scope OkHttpClient as a <code>@Singleton</code> instead of using <code>lazy</code> manually.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+</body>
+</html>

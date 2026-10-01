@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>13B – Room vs SQLite | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">13B · Room vs SQLite</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>13B</span> — Room vs SQLite</h1>
+    <p class="hero-desc">Full comparison — compile-time safety, type safety, LiveData/Flow support, migration DSL, <code>@RawQuery</code>, and when raw SQLite still makes sense.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 13B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Room Abstracts SQLite</h3>
+    <p>Room is not a replacement for SQLite — it is an abstraction layer on top of it. Under the hood, Room generates code that calls the Android <code>SQLiteOpenHelper</code> APIs. The generated code is equivalent to what you'd write manually with raw SQLite, but Room adds compile-time verification, type mapping, and reactive integration.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>Room</th><th>Raw SQLite</th></tr>
+      <tr><td>Query verification</td><td>Compile time — SQL errors are build errors</td><td>Runtime — crashes in production</td></tr>
+      <tr><td>Type safety</td><td>Full — data classes, TypeConverters, Flow<T></td><td>Manual — <code>Cursor</code> with string column names</td></tr>
+      <tr><td>Reactive (Flow/LiveData)</td><td>Built-in — <code>Flow&lt;List&lt;T&gt;&gt;</code></td><td>Manual — polling or custom observers</td></tr>
+      <tr><td>Migrations</td><td>Migration DSL with exportSchema</td><td>Manual — <code>onUpgrade()</code> with raw SQL</td></tr>
+      <tr><td>Boilerplate</td><td>Minimal — annotations + code generation</td><td>High — open, cursor, extract, close</td></tr>
+      <tr><td>Performance overhead</td><td>Negligible (compile-time code gen)</td><td>None</td></tr>
+      <tr><td>Complex dynamic queries</td><td>Limited — use @RawQuery</td><td>Full control</td></tr>
+      <tr><td>Multi-process access</td><td>Limited support</td><td>More flexible</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      "Room vs SQLite" is often a false dichotomy. Room IS SQLite — it's compiled into efficient SQLiteOpenHelper calls. The question is really: "Do you need the safety and productivity of Room's abstractions, or do you need the raw control that only direct SQLite access provides?" In 2024, the answer is Room for 95% of cases.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Compile-Time Query Verification Side by Side</h3>
+    <pre><code><span class="cm">// ── Room ─────────────────────────────────────────────────────</span>
+<span class="an">@Query</span>(<span class="str">"SELECT * FROM orders WHERE user_id = :userId AND staus = 'ACTIVE'"</span>)
+<span class="cm">//                                              ^^^^^ typo</span>
+<span class="cm">// BUILD ERROR: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database</span>
+<span class="cm">// (no such column: staus) → caught at COMPILE TIME</span>
+
+<span class="cm">// ── Raw SQLite ───────────────────────────────────────────────</span>
+<span class="kw">val</span> cursor = db.<span class="fn">rawQuery</span>(
+    <span class="str">"SELECT * FROM orders WHERE user_id = ? AND staus = 'ACTIVE'"</span>,
+    <span class="fn">arrayOf</span>(userId)
+)
+<span class="cm">// Cursor is empty at runtime — no exception, just silently wrong results</span>
+<span class="cm">// Typo discovered in production via user bug report 😢</span></code></pre>
+
+    <h3>Type Safety</h3>
+    <pre><code><span class="cm">// ── Room — type-safe, auto-mapped ────────────────────────────</span>
+<span class="an">@Query</span>(<span class="str">"SELECT * FROM orders WHERE id = :orderId"</span>)
+<span class="kw">suspend fun</span> <span class="fn">getOrder</span>(orderId: <span class="cl">String</span>): <span class="cl">OrderEntity</span>?
+<span class="cm">// Room maps columns to OrderEntity fields automatically, with type checking</span>
+
+<span class="cm">// ── Raw SQLite — manual, error-prone ─────────────────────────</span>
+<span class="kw">val</span> cursor = db.<span class="fn">rawQuery</span>(<span class="str">"SELECT * FROM orders WHERE id = ?"</span>, <span class="fn">arrayOf</span>(orderId))
+<span class="kw">return</span> <span class="kw">if</span> (cursor.<span class="fn">moveToFirst</span>()) {
+    <span class="cl">OrderEntity</span>(
+        id = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"id"</span>)),
+        userId = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"user_id"</span>)),
+        totalCents = cursor.<span class="fn">getLong</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"total_cents"</span>)),
+        status = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"status"</span>))
+    ).<span class="fn">also</span> { cursor.<span class="fn">close</span>() }
+} <span class="kw">else</span> {
+    cursor.<span class="fn">close</span>(); <span class="kw">null</span>
+}</code></pre>
+
+    <h3>Migration DSL vs onUpgrade</h3>
+    <pre><code><span class="cm">// ── Room Migration ───────────────────────────────────────────</span>
+<span class="kw">val</span> <span class="cl">MIGRATION_2_3</span> = <span class="kw">object</span> : <span class="cl">Migration</span>(<span class="nu">2</span>, <span class="nu">3</span>) {
+    <span class="kw">override fun</span> <span class="fn">migrate</span>(database: <span class="cl">SupportSQLiteDatabase</span>) {
+        database.<span class="fn">execSQL</span>(<span class="str">"ALTER TABLE orders ADD COLUMN delivery_notes TEXT"</span>)
+    }
+}
+<span class="cm">// Room validates the resulting schema against the @Entity definition</span>
+
+<span class="cm">// ── Raw SQLiteOpenHelper ─────────────────────────────────────</span>
+<span class="kw">override fun</span> <span class="fn">onUpgrade</span>(db: <span class="cl">SQLiteDatabase</span>, oldVersion: <span class="cl">Int</span>, newVersion: <span class="cl">Int</span>) {
+    <span class="kw">if</span> (oldVersion &lt; <span class="nu">3</span>) {
+        db.<span class="fn">execSQL</span>(<span class="str">"ALTER TABLE orders ADD COLUMN delivery_notes TEXT"</span>)
+    }
+    <span class="cm">// No automatic schema validation — must manually verify correctness</span>
+    <span class="cm">// Easy to forget an if-block for a new version jump</span>
+}</code></pre>
+
+    <h3>@RawQuery — Dynamic Queries in Room</h3>
+    <pre><code><span class="cm">// @RawQuery for dynamic query construction (e.g., user-configurable filters)</span>
+<span class="an">@Dao</span>
+<span class="kw">interface</span> <span class="cl">ProductDao</span> {
+    <span class="an">@RawQuery</span>(observedEntities = [<span class="cl">ProductEntity</span>::<span class="kw">class</span>])
+    <span class="kw">fun</span> <span class="fn">getProductsDynamic</span>(query: <span class="cl">SupportSQLiteQuery</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">ProductEntity</span>&gt;&gt;
+}
+
+<span class="cm">// Build the query dynamically</span>
+<span class="kw">fun</span> <span class="fn">buildProductQuery</span>(
+    categoryId: <span class="cl">String</span>?,
+    minPrice: <span class="cl">Long</span>?,
+    sortBy: <span class="cl">String</span>
+): <span class="cl">SupportSQLiteQuery</span> {
+    <span class="kw">val</span> sb = <span class="cl">StringBuilder</span>(<span class="str">"SELECT * FROM products"</span>)
+    <span class="kw">val</span> args = <span class="fn">mutableListOf</span>&lt;<span class="cl">Any</span>&gt;()
+    <span class="kw">val</span> conditions = <span class="fn">mutableListOf</span>&lt;<span class="cl">String</span>&gt;()
+    <span class="kw">if</span> (categoryId != <span class="kw">null</span>) { conditions.<span class="fn">add</span>(<span class="str">"category_id = ?"</span>); args.<span class="fn">add</span>(categoryId) }
+    <span class="kw">if</span> (minPrice != <span class="kw">null</span>) { conditions.<span class="fn">add</span>(<span class="str">"price_cents >= ?"</span>); args.<span class="fn">add</span>(minPrice) }
+    <span class="kw">if</span> (conditions.<span class="fn">isNotEmpty</span>()) sb.<span class="fn">append</span>(<span class="str">" WHERE ${conditions.joinToString(" AND ")}"</span>)
+    sb.<span class="fn">append</span>(<span class="str">" ORDER BY $sortBy"</span>)
+    <span class="kw">return</span> <span class="cl">SimpleSQLiteQuery</span>(sb.<span class="fn">toString</span>(), args.<span class="fn">toTypedArray</span>())
+}</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">@RawQuery and SQL Injection</div>
+      Never concatenate user input directly into a RawQuery string — use positional arguments (<code>?</code>) to prevent SQL injection. The <code>SimpleSQLiteQuery(sql, args)</code> constructor uses parameterised queries safely.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Use Room when:</h3>
+    <ul>
+      <li>Building any new Android feature that needs local data persistence</li>
+      <li>You want compile-time safety, type safety, and reactive queries</li>
+      <li>The schema is known at compile time (covers 95% of use cases)</li>
+      <li>You need coroutine-based APIs and Flow integration</li>
+      <li>The team has mixed experience — Room prevents common SQLite mistakes</li>
+    </ul>
+    <h3>Consider Raw SQLite when:</h3>
+    <ul>
+      <li><strong>Multi-process access</strong>: Room's locking isn't designed for concurrent access from multiple processes (e.g., app + ContentProvider + background service in separate processes). Raw SQLite with WAL mode handles this better.</li>
+      <li><strong>Existing legacy code</strong>: migrating an existing <code>SQLiteOpenHelper</code> that works correctly is only worthwhile if there's a benefit to the migration</li>
+      <li><strong>Complex dynamic SQL</strong> that Room's annotation model can't express — though <code>@RawQuery</code> covers most of these</li>
+      <li><strong>Minimal dependency</strong> requirements in an SDK/library where adding Room's dependencies is undesirable</li>
+    </ul>
+    <div class="callout callout-green">
+      <div class="callout-label">The Answer in Most Interviews</div>
+      "Room in 95% of cases. Raw SQLite only for multi-process access, legacy code with no benefit to migration, or SDK development where dependencies must be minimal."
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>Same Feature: Room vs Raw SQLite</h3>
+    <p>Get all active orders for a user, sorted by date descending:</p>
+    <pre><code><span class="cm">// ── ROOM (10 lines, type-safe, compile-verified, reactive) ────</span>
+<span class="an">@Query</span>(<span class="str">"SELECT * FROM orders WHERE user_id = :userId AND status = 'ACTIVE' ORDER BY created_at DESC"</span>)
+<span class="kw">fun</span> <span class="fn">getActiveOrders</span>(userId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">OrderEntity</span>&gt;&gt;
+
+<span class="cm">// ── RAW SQLITE (30+ lines, manual, error-prone, no reactivity) ─</span>
+<span class="kw">fun</span> <span class="fn">getActiveOrders</span>(userId: <span class="cl">String</span>): <span class="cl">List</span>&lt;<span class="cl">OrderEntity</span>&gt; {
+    <span class="kw">val</span> db = <span class="fn">readableDatabase</span>
+    <span class="kw">val</span> orders = <span class="fn">mutableListOf</span>&lt;<span class="cl">OrderEntity</span>&gt;()
+    <span class="kw">var</span> cursor: <span class="cl">Cursor</span>? = <span class="kw">null</span>
+    <span class="kw">try</span> {
+        cursor = db.<span class="fn">rawQuery</span>(
+            <span class="str">"SELECT * FROM orders WHERE user_id = ? AND status = 'ACTIVE' ORDER BY created_at DESC"</span>,
+            <span class="fn">arrayOf</span>(userId)
+        )
+        <span class="kw">while</span> (cursor.<span class="fn">moveToNext</span>()) {
+            orders.<span class="fn">add</span>(<span class="cl">OrderEntity</span>(
+                id = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"id"</span>)),
+                userId = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"user_id"</span>)),
+                totalCents = cursor.<span class="fn">getLong</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"total_cents"</span>)),
+                status = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"status"</span>)),
+                createdAt = cursor.<span class="fn">getString</span>(cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="str">"created_at"</span>))
+                    .<span class="fn">let</span> { <span class="cl">Instant</span>.<span class="fn">parse</span>(it) }
+            ))
+        }
+    } <span class="kw">finally</span> {
+        cursor?.<span class="fn">close</span>()  <span class="cm">// must not forget this</span>
+    }
+    <span class="kw">return</span> orders
+    <span class="cm">// No reactivity — caller must re-call this manually to get updates</span>
+}</code></pre>
+    <h3>@RawQuery for Advanced Search</h3>
+    <pre><code><span class="cm">// E-commerce app: user selects any combination of category, price, rating filters</span>
+<span class="cm">// Static @Query cannot express this — @RawQuery with SimpleSQLiteQuery is the solution</span>
+<span class="kw">class</span> <span class="cl">ProductSearchRepository</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> dao: <span class="cl">ProductDao</span>
+) {
+    <span class="kw">fun</span> <span class="fn">searchProducts</span>(filters: <span class="cl">ProductFilters</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt; =
+        dao.<span class="fn">getProductsDynamic</span>(<span class="fn">buildProductQuery</span>(filters))
+            .<span class="fn">map</span> { it.<span class="fn">map</span>(ProductEntity::<span class="fn">toDomain</span>) }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Room vs SQLDelight vs Realm vs ObjectBox</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Library</th><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Room (Google)</td><td>ORM on SQLite, annotation-based</td><td>Official, great tooling, Flow/coroutine support</td><td>Android-only (unless KMM)</td></tr>
+      <tr><td>SQLDelight</td><td>SQL-first, generates Kotlin APIs from .sq files</td><td>KMM-compatible, strong type safety, SQL is the source of truth</td><td>Different mental model, less familiar</td></tr>
+      <tr><td>Realm</td><td>Object database (not SQLite)</td><td>Fast writes, live objects, offline sync</td><td>Not SQL, separate runtime, Atlas sync cost</td></tr>
+      <tr><td>ObjectBox</td><td>NoSQL embedded database</td><td>Very fast writes, no SQL knowledge needed</td><td>Not SQL, proprietary, less community support</td></tr>
+    </table></div>
+    <h3>Room Performance vs Raw SQLite</h3>
+    <p>Room's overhead is negligible for normal usage. Since Room generates code at compile time (not reflection at runtime), the generated DAO implementation is nearly identical to hand-written SQLite code. The only overhead is the InvalidationTracker for Flow queries — which adds a small observer registration on writes. For most apps this is unmeasurable.</p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>SQL Injection in @RawQuery</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Never Concatenate User Input into SQL Strings</div>
+      <code>SimpleSQLiteQuery("SELECT * FROM products WHERE name = '$userInput'")</code> is vulnerable to SQL injection. Always use parameterised queries: <code>SimpleSQLiteQuery("SELECT * FROM products WHERE name = ?", arrayOf(userInput))</code>. Room's static <code>@Query</code> methods are automatically safe — Room never concatenates parameters into the SQL string.
+    </div>
+    <h3>Cursor Leaks in Raw SQLite</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Always Close Cursors</div>
+      Unclosed Cursors leak file descriptors. Always close them in a <code>finally</code> block or use Kotlin's <code>use</code> extension: <code>cursor.use { ... }</code>. Room never has this problem — it manages Cursor lifecycle in generated code. This is one of the most common raw SQLite bugs in production apps.
+    </div>
+    <h3>Best Practices for @RawQuery</h3>
+    <ul>
+      <li>Always specify <code>observedEntities</code> on <code>@RawQuery</code> — Room needs to know which tables to watch for Flow invalidation</li>
+      <li>Validate the <code>sortBy</code> column name against a whitelist before passing to <code>SimpleSQLiteQuery</code> — don't let users inject column names directly</li>
+      <li>Test <code>@RawQuery</code> methods with Room's test database using real data — static analysis can't verify dynamic queries</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Room is an abstraction layer on top of SQLite with three key advantages: compile-time query verification — a SQL typo is a build error, not a runtime crash; type safety — no manual Cursor reading; and reactive queries via Flow — the UI auto-updates when the database changes. Raw SQLite gives full control and zero overhead, but you write 3x more code with no compile-time safety. I'd use Room for virtually all production Android work. The only exceptions are multi-process access, existing legacy code that works correctly, or library/SDK development where dependencies must be minimal."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"Room's compile-time verification is worth emphasising: when you write <code>@Query('SELECT * FROM orders WHERE user_id = :userId')</code>, Room's annotation processor verifies the SQL against the schema before the .class files are generated. A typo in a column name, a type mismatch between the return type and the SELECT columns, or referencing a non-existent table — all are build errors. With raw SQLite, these produce silent bugs (wrong data) or runtime crashes. For dynamic queries that Room's static annotation model can't express, <code>@RawQuery</code> with <code>SimpleSQLiteQuery</code> preserves the Flow reactive behaviour while allowing runtime query construction. Always use parameterised queries to prevent SQL injection. Room's migration DSL is also safer than <code>SQLiteOpenHelper.onUpgrade()</code> — Room validates the schema after migration against the <code>@Entity</code> definition."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Room IS SQLite</strong>: generates efficient SQLiteOpenHelper calls — no magic, no performance cost</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Compile-time query verification</strong>: SQL errors are build errors; raw SQLite errors are runtime crashes</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Type safety</strong>: no Cursor column index juggling; Room maps to/from data classes automatically</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>@RawQuery</strong> for dynamic SQL — preserves Flow reactivity; use parameterised queries to prevent injection</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Raw SQLite for</strong>: multi-process, legacy code, SDK/library with minimal deps</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>SQLiteOpenHelper full API (just mention it exists as Room's underlying mechanism)</li>
+      <li>ContentProvider with SQLite (mention if asked about multi-process)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Is Room slower than SQLite?"</td><td>No measurable difference for normal use. Room generates compile-time code (not reflection). The InvalidationTracker for Flow adds trivial overhead on writes. At Google I/O, Room benchmarks show no significant performance gap vs hand-written SQLite.</td></tr>
+      <tr><td>"Can Room and raw SQLite be used in the same app?"</td><td>Yes — Room builds on top of SQLiteOpenHelper. You can get the underlying database via <code>database.openHelper.writableDatabase</code> and run raw queries on it. Useful for complex analytical queries that @RawQuery can't express cleanly.</td></tr>
+      <tr><td>"What is @RawQuery observedEntities for?"</td><td>Tells Room which tables to watch for changes when using a Flow-returning @RawQuery. Without it, Room wouldn't know which table changes should trigger a new emission.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The compile-time verification difference is the decisive argument. In a production banking app, a SQL typo that returns wrong data (wrong column, wrong type) discovered via a user bug report costs 10-100x more to fix than a build failure during development. Room's annotation processing is the only Android database approach that catches these errors automatically before any code ships.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Room Advantages</h4>
+        <pre><code>✓ Compile-time SQL verification
+✓ Type safety (data classes, not Cursor)
+✓ Flow&lt;List&lt;T&gt;&gt; reactive queries
+✓ Migration DSL + schema export
+✓ No cursor leak risk</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Raw SQLite Advantages</h4>
+        <pre><code>✓ Multi-process access
+✓ Zero dependencies
+✓ Full SQL control
+✓ No annotation processing build time
+
+Use for: SDKs, multi-process, legacy migration-not-worth-it</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>@RawQuery Pattern</h4>
+        <pre><code>@RawQuery(observedEntities = [ProductEntity::class])
+fun searchDynamic(q: SupportSQLiteQuery): Flow&lt;List&lt;ProductEntity&gt;&gt;
+
+// Build query — always use parameterised:
+SimpleSQLiteQuery("SELECT * FROM products WHERE name = ?", arrayOf(input))</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Cursor Safety (Raw SQLite)</h4>
+        <pre><code>// Always close cursors!
+val cursor = db.rawQuery(sql, args)
+try {
+    while (cursor.moveToNext()) { ... }
+} finally {
+    cursor.close()
+}
+// OR: cursor.use { while (it.moveToNext()) { ... } }</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the main advantage of Room over raw SQLite?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Compile-time query verification. Room's annotation processor validates your SQL queries against the database schema during compilation. Typos in table/column names, type mismatches between the query result and the return type, and invalid SQL syntax are all build errors — not runtime crashes. Raw SQLite discovers these errors in production via user bug reports or crash logs.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is a Cursor in raw SQLite and why is it error-prone?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A Cursor is the result of a raw SQLite query — a pointer into the result set that you iterate manually with <code>cursor.moveToNext()</code>. Pitfalls: (1) you access columns by string name or integer index — typos compile fine but throw <code>IllegalArgumentException</code> at runtime. (2) Cursors are file descriptor resources that must be explicitly closed — forgetting <code>cursor.close()</code> leaks file descriptors and eventually crashes the app. (3) There's no automatic type mapping — you manually call <code>getString()</code>, <code>getLong()</code>, etc., and must cast correctly. Room eliminates all of these.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is @RawQuery and when would you use it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>@RawQuery</code> lets you execute a dynamically-constructed SQL query through Room's DAO, while still retaining Room's type mapping and Flow reactive capabilities. Use it when the query can't be expressed as a static <code>@Query</code> annotation — e.g., a search screen where users can select any combination of filters (category, price range, rating, sort order). The <code>observedEntities</code> parameter tells Room which tables to watch for Flow invalidation.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Room is built on SQLite, so why doesn't it add performance overhead?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Room uses annotation processing (KSP or kapt) to generate DAO implementations at compile time — not reflection at runtime. The generated code in <code>OrderDao_Impl</code> is essentially the same boilerplate you'd write manually: open database, build the SQL string, create a Cursor, iterate it, close it. There's no reflection, no dynamic dispatch, no serialisation layer. The only runtime overhead is the <code>InvalidationTracker</code> for Flow queries, which registers a lightweight observer on table writes — this overhead is typically under 1ms.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Describe a scenario where you'd choose raw SQLite over Room.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Multi-process access</strong>: If a ContentProvider in one process, the main app in another, and a background service in a third all need database access, Room's locking assumptions may not hold. Raw SQLite with WAL (Write-Ahead Logging) mode handles multi-reader, single-writer access more predictably across processes.<br><br>
+        <strong>SDK/library development</strong>: A library that embeds SQLite doesn't want to force its consumers to add Room as a dependency — especially if they already use Room for their own data and might get version conflicts.<br><br>
+        <strong>Legacy working code</strong>: Migrating a 5-year-old <code>SQLiteOpenHelper</code> that works correctly provides no user-visible benefit and carries migration risk.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How does Room's migration approach differ from SQLiteOpenHelper.onUpgrade()?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>SQLiteOpenHelper.onUpgrade()</strong>: called with old and new version numbers; you write nested <code>if (oldVersion &lt; N)</code> checks. No automatic schema validation — if your migration is incorrect, Room won't tell you (unless you test it). Easy to miss a version jump when adding new migrations over time.<br><br>
+        <strong>Room Migration objects</strong>: each <code>Migration(fromVersion, toVersion)</code> is registered separately via <code>.addMigrations()</code>. Room chains them automatically for large version jumps (e.g., 1→3 runs MIGRATION_1_2 then MIGRATION_2_3). With <code>exportSchema = true</code>, Room saves the schema JSON to disk — you can use <code>MigrationTestHelper</code> to verify that your migration produces the exact expected schema.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you prevent SQL injection with @RawQuery?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Use <code>SimpleSQLiteQuery</code> with positional parameters (<code>?</code>) instead of string concatenation:<br><br>
+        SAFE: <code>SimpleSQLiteQuery("SELECT * FROM products WHERE name = ?", arrayOf(userInput))</code><br>
+        UNSAFE: <code>SimpleSQLiteQuery("SELECT * FROM products WHERE name = '$userInput'")</code><br><br>
+        The parameterised form escapes the user input before embedding it in the query. Additionally, validate any user-controlled column names (e.g., sort order) against a whitelist of allowed column names before including them in the SQL string — column names cannot be parameterised.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A colleague argues "Room is unnecessary overhead — our app should use raw SQLite for performance." How do you respond?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        The performance argument is incorrect: Room generates identical code to hand-written SQLite at compile time — no reflection, no runtime overhead. Benchmark data from Google confirms this.<br><br>
+        The real trade-offs are: (1) <strong>Safety</strong>: Room catches SQL errors at build time; raw SQLite at runtime in production. In a banking app, a wrong column reference that silently returns null instead of throwing means incorrect data displayed to users — far worse than a build failure. (2) <strong>Productivity</strong>: 3 lines of Room vs 30 lines of raw SQLite for a basic query. Over a codebase of 500 queries, that's 13,500 fewer lines of boilerplate. (3) <strong>Maintainability</strong>: when a column is renamed, Room gives a compile error at every affected query. With raw SQLite, you do a global text search and hope you didn't miss anything.<br><br>
+        The only legitimate performance concern: Room's <code>InvalidationTracker</code> for Flow queries adds minimal overhead on writes. If you're doing millions of writes per second (atypical), this might matter. Otherwise, it's a non-issue.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How would you migrate a 50,000-line legacy app from raw SQLiteOpenHelper to Room?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Incremental migration — never big-bang:<br><br>
+        1. <strong>Assess first</strong>: is migration worth it? Identify which tables are most active, have the most bugs, or would benefit most from Flow reactivity.<br>
+        2. <strong>Keep existing SQLiteOpenHelper</strong>: create Room entities and DAOs for one table only. Configure Room to use the same database file as the existing helper: <code>Room.databaseBuilder(...).openHelperFactory(...)</code> or use a separate database for new tables.<br>
+        3. <strong>Write migration scripts</strong>: Room's schema must be compatible with the existing SQLite schema. Set the database version to the current version; add a Migration that does nothing (schema is already correct).<br>
+        4. <strong>Migrate table by table</strong>: replace each SQLiteOpenHelper access with Room DAO calls. Run the full test suite after each table migration.<br>
+        5. <strong>Export schema</strong> from the start: version control the JSON — it becomes the audit trail of schema changes.<br>
+        6. <strong>Remove SQLiteOpenHelper</strong> once all tables are migrated.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How does Room handle multi-threaded writes and reads?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Room configures SQLite in WAL (Write-Ahead Logging) mode by default on Android (API 16+). WAL allows: multiple concurrent readers, one concurrent writer, and readers don't block writers. Room's generated DAO code uses <code>SupportSQLiteDatabase</code>, which handles transaction management. Suspend DAO functions run on Room's Dispatchers.IO dispatcher — they're safe to call from multiple coroutines simultaneously.<br><br>
+        Room uses <code>ThreadLocal</code>-based transaction management for <code>@Transaction</code>-annotated functions, ensuring all operations within a transaction block use the same database connection. For Flow queries, Room's <code>InvalidationTracker</code> uses a background thread to coalesce invalidation events and re-run queries. This is safe for single-process apps. For multi-process access, Room's documentation explicitly states it's not designed for that use case — use raw SQLite with explicit locking.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

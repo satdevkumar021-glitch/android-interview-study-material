@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>9A – SOLID Principles | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .principle-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0;}
+  .principle-card h4{margin-top:0;color:var(--accent2);font-size:15px;}
+  .principle-card .definition{color:var(--text);font-weight:600;font-size:14px;margin-bottom:10px;padding:8px 12px;background:rgba(124,106,247,.08);border-radius:6px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">9A · SOLID Principles</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>9A</span> — SOLID Principles</h1>
+    <p class="hero-desc">Five object-oriented design principles that produce maintainable, scalable Android code. Each principle with definition, Android violation, and correct fix.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 9A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What are the SOLID principles?</h3>
+    <p>SOLID is an acronym coined by Robert C. Martin for five design principles that, when applied together, produce code that is easy to understand, maintain, extend, and test. They are not rules — they are guidelines for managing complexity as a codebase grows.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Letter</th><th>Principle</th><th>One-line definition</th></tr>
+      <tr><td>S</td><td>Single Responsibility</td><td>A class should have one, and only one, reason to change</td></tr>
+      <tr><td>O</td><td>Open/Closed</td><td>Open for extension, closed for modification</td></tr>
+      <tr><td>L</td><td>Liskov Substitution</td><td>Subtypes must be substitutable for their base types</td></tr>
+      <tr><td>I</td><td>Interface Segregation</td><td>Clients should not be forced to depend on interfaces they don't use</td></tr>
+      <tr><td>D</td><td>Dependency Inversion</td><td>Depend on abstractions, not concretions</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      SOLID principles are forces that counter entropy. Every codebase drifts toward tangled dependencies and god classes over time. SOLID provides the vocabulary and patterns to actively push back. In interviews, always connect each principle to a real Android violation and its concrete fix.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <div class="principle-card">
+      <h4>S — Single Responsibility Principle (SRP)</h4>
+      <div class="definition">"A class should have one, and only one, reason to change."</div>
+      <p><strong>Android Violation:</strong> An <code>Activity</code> that makes network calls, accesses SharedPreferences, formats dates, and updates UI — it changes whenever the network layer, database, UI, or business logic changes.</p>
+      <pre><code><span class="cm">// ❌ VIOLATION: Activity doing everything</span>
+<span class="kw">class</span> <span class="cl">OrderActivity</span> : <span class="cl">AppCompatActivity</span>() {
+    <span class="kw">fun</span> <span class="fn">loadOrders</span>() {
+        <span class="cm">// Network call directly in Activity</span>
+        <span class="cl">Retrofit</span>.<span class="fn">create</span>(<span class="cl">OrderApi</span>::<span class="kw">class</span>.java).<span class="fn">getOrders</span>()
+        <span class="cm">// Database access directly</span>
+        <span class="cl">AppDatabase</span>.<span class="fn">getInstance</span>().<span class="fn">orderDao</span>().<span class="fn">getAll</span>()
+        <span class="cm">// Business logic directly</span>
+        <span class="kw">val</span> total = orders.<span class="fn">sumOf</span> { it.price * it.quantity }
+    }
+}</code></pre>
+      <pre><code><span class="cm">// ✅ FIX: Each class has one responsibility</span>
+<span class="kw">class</span> <span class="cl">OrderRepository</span>() { <span class="cm">/* data concern */</span> }
+<span class="kw">class</span> <span class="cl">CalculateOrderTotalUseCase</span>() { <span class="cm">/* business logic */</span> }
+<span class="kw">class</span> <span class="cl">OrderViewModel</span>(<span class="kw">val</span> repo: <span class="cl">OrderRepository</span>, <span class="kw">val</span> calcTotal: <span class="cl">CalculateOrderTotalUseCase</span>) { <span class="cm">/* UI logic */</span> }
+<span class="kw">class</span> <span class="cl">OrderActivity</span> { <span class="cm">/* display only */</span> }</code></pre>
+    </div>
+
+    <div class="principle-card">
+      <h4>O — Open/Closed Principle (OCP)</h4>
+      <div class="definition">"Software entities should be open for extension, but closed for modification."</div>
+      <p><strong>Android Violation:</strong> A method with a growing <code>when</code> statement that must be modified every time a new payment type is added.</p>
+      <pre><code><span class="cm">// ❌ VIOLATION: adding a new payment type requires modifying this class</span>
+<span class="kw">fun</span> <span class="fn">processPayment</span>(type: <span class="cl">String</span>, amount: <span class="cl">BigDecimal</span>) {
+    <span class="kw">when</span> (type) {
+        <span class="str">"credit"</span>  -&gt; <span class="fn">chargeCreditCard</span>(amount)
+        <span class="str">"paypal"</span>  -&gt; <span class="fn">chargePayPal</span>(amount)
+        <span class="cm">// every new type requires modifying this file</span>
+    }
+}</code></pre>
+      <pre><code><span class="cm">// ✅ FIX: Strategy pattern + sealed class — closed for modification</span>
+<span class="kw">sealed class</span> <span class="cl">PaymentMethod</span> {
+    <span class="kw">abstract suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>): <span class="cl">PaymentResult</span>
+
+    <span class="kw">class</span> <span class="cl">CreditCard</span>(<span class="kw">val</span> token: <span class="cl">String</span>) : <span class="cl">PaymentMethod</span>() {
+        <span class="kw">override suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>) = <span class="cm">/* ... */</span>
+    }
+    <span class="kw">class</span> <span class="cl">PayPal</span>(<span class="kw">val</span> email: <span class="cl">String</span>) : <span class="cl">PaymentMethod</span>() {
+        <span class="kw">override suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>) = <span class="cm">/* ... */</span>
+    }
+}
+<span class="cm">// New payment methods extend PaymentMethod — processPayment never changes</span>
+<span class="kw">suspend fun</span> <span class="fn">processPayment</span>(method: <span class="cl">PaymentMethod</span>, amount: <span class="cl">BigDecimal</span>) =
+    method.<span class="fn">charge</span>(amount)</code></pre>
+    </div>
+
+    <div class="principle-card">
+      <h4>L — Liskov Substitution Principle (LSP)</h4>
+      <div class="definition">"Objects of a subtype should be substitutable for objects of their base type without altering program correctness."</div>
+      <p><strong>Android Violation:</strong> A subclass overrides a method to throw an exception or do nothing — code using the base type breaks unexpectedly.</p>
+      <pre><code><span class="cm">// ❌ VIOLATION: ReadOnlyRepository cannot honour the full contract</span>
+<span class="kw">open class</span> <span class="cl">UserRepository</span> {
+    <span class="kw">open fun</span> <span class="fn">save</span>(user: <span class="cl">User</span>) { <span class="cm">/* saves to DB */</span> }
+    <span class="kw">open fun</span> <span class="fn">delete</span>(user: <span class="cl">User</span>) { <span class="cm">/* deletes from DB */</span> }
+}
+<span class="kw">class</span> <span class="cl">ReadOnlyUserRepository</span> : <span class="cl">UserRepository</span>() {
+    <span class="kw">override fun</span> <span class="fn">save</span>(user: <span class="cl">User</span>) { <span class="kw">throw</span> <span class="cl">UnsupportedOperationException</span>() } <span class="cm">// 💥 LSP violated</span>
+}</code></pre>
+      <pre><code><span class="cm">// ✅ FIX: Separate interfaces — ReadableRepository and WritableRepository</span>
+<span class="kw">interface</span> <span class="cl">ReadableUserRepository</span> { <span class="kw">fun</span> <span class="fn">getUser</span>(id: <span class="cl">String</span>): <span class="cl">User</span>? }
+<span class="kw">interface</span> <span class="cl">WritableUserRepository</span> { <span class="kw">fun</span> <span class="fn">save</span>(user: <span class="cl">User</span>); <span class="kw">fun</span> <span class="fn">delete</span>(user: <span class="cl">User</span>) }
+<span class="kw">interface</span> <span class="cl">UserRepository</span> : <span class="cl">ReadableUserRepository</span>, <span class="cl">WritableUserRepository</span></code></pre>
+    </div>
+
+    <div class="principle-card">
+      <h4>I — Interface Segregation Principle (ISP)</h4>
+      <div class="definition">"Clients should not be forced to depend on interfaces they do not use."</div>
+      <p><strong>Android Violation:</strong> A fat <code>Repository</code> interface that every screen must implement, even screens that only need one or two methods.</p>
+      <pre><code><span class="cm">// ❌ VIOLATION: ProductListFragment only needs getProducts() but depends on this fat interface</span>
+<span class="kw">interface</span> <span class="cl">ProductRepository</span> {
+    <span class="kw">fun</span> <span class="fn">getProducts</span>(): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt;
+    <span class="kw">suspend fun</span> <span class="fn">createProduct</span>(p: <span class="cl">Product</span>)
+    <span class="kw">suspend fun</span> <span class="fn">deleteProduct</span>(id: <span class="cl">String</span>)
+    <span class="kw">suspend fun</span> <span class="fn">bulkImport</span>(csv: <span class="cl">String</span>)
+    <span class="kw">suspend fun</span> <span class="fn">exportToCsv</span>(): <span class="cl">String</span>
+}</code></pre>
+      <pre><code><span class="cm">// ✅ FIX: Split into role-specific interfaces</span>
+<span class="kw">interface</span> <span class="cl">ProductReader</span> { <span class="kw">fun</span> <span class="fn">getProducts</span>(): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt; }
+<span class="kw">interface</span> <span class="cl">ProductWriter</span> { <span class="kw">suspend fun</span> <span class="fn">createProduct</span>(p: <span class="cl">Product</span>); <span class="kw">suspend fun</span> <span class="fn">deleteProduct</span>(id: <span class="cl">String</span>) }
+<span class="kw">interface</span> <span class="cl">ProductImportExport</span> { <span class="kw">suspend fun</span> <span class="fn">bulkImport</span>(csv: <span class="cl">String</span>); <span class="kw">suspend fun</span> <span class="fn">exportToCsv</span>(): <span class="cl">String</span> }
+
+<span class="cm">// ProductListViewModel only depends on ProductReader</span>
+<span class="kw">class</span> <span class="cl">ProductListViewModel</span> <span class="kw">@Inject constructor</span>(<span class="kw">val</span> reader: <span class="cl">ProductReader</span>)</code></pre>
+    </div>
+
+    <div class="principle-card">
+      <h4>D — Dependency Inversion Principle (DIP)</h4>
+      <div class="definition">"High-level modules should not depend on low-level modules. Both should depend on abstractions."</div>
+      <p><strong>Android Violation:</strong> ViewModel directly instantiates or imports a concrete repository class.</p>
+      <pre><code><span class="cm">// ❌ VIOLATION: ViewModel is coupled to the concrete Retrofit implementation</span>
+<span class="kw">class</span> <span class="cl">UserViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">private val</span> repo = <span class="cl">UserRepositoryImpl</span>(<span class="cl">RetrofitClient</span>.<span class="fn">create</span>())  <span class="cm">// concrete class</span>
+}</code></pre>
+      <pre><code><span class="cm">// ✅ FIX: ViewModel depends on the interface; Hilt provides the impl</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">UserViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">UserRepository</span>   <span class="cm">// interface — can be mocked in tests</span>
+) : <span class="cl">ViewModel</span>()</code></pre>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>These are default — not optional</h3>
+    <p>SOLID principles aren't situational. They are default design hygiene for any codebase you expect to maintain or hand off to other developers. However, their application is graduated:</p>
+    <ul>
+      <li><strong>SRP</strong>: Apply from day one. God classes create an ever-growing change surface.</li>
+      <li><strong>OCP</strong>: Apply when you identify variation points — places where new types or behaviours will be added. Don't over-engineer stable code.</li>
+      <li><strong>LSP</strong>: Apply when designing inheritance or interface hierarchies. Prefer composition over inheritance to avoid LSP traps.</li>
+      <li><strong>ISP</strong>: Apply when interfaces grow beyond 3–4 methods or when different callers need different subsets.</li>
+      <li><strong>DIP</strong>: Apply to any class that needs to be testable. If you can't inject a mock, you're probably violating DIP.</li>
+    </ul>
+    <div class="callout callout-yellow">
+      <div class="callout-label">The Litmus Test</div>
+      "Can I write a unit test for this class in under 30 seconds — without setting up a Room database, Retrofit, or an Android emulator?" If the answer is no, at least one SOLID principle is being violated.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Checkout Feature Refactor</h3>
+    <p>A realistic before/after showing all five principles applied to a checkout flow:</p>
+    <pre><code><span class="cm">// ❌ BEFORE: CheckoutManager violates SRP, OCP, DIP</span>
+<span class="kw">class</span> <span class="cl">CheckoutManager</span> {
+    <span class="kw">fun</span> <span class="fn">checkout</span>(cart: <span class="cl">Cart</span>, paymentType: <span class="cl">String</span>) {
+        <span class="cm">// Validates cart (SRP violation)</span>
+        <span class="kw">if</span> (cart.items.<span class="fn">isEmpty</span>()) <span class="kw">throw</span> <span class="cl">Exception</span>(<span class="str">"Empty cart"</span>)
+
+        <span class="cm">// Chooses payment (OCP violation — must modify for new types)</span>
+        <span class="kw">when</span> (paymentType) {
+            <span class="str">"card"</span>   -&gt; <span class="cl">StripeClient</span>().<span class="fn">charge</span>(cart.total)   <span class="cm">// DIP violation</span>
+            <span class="str">"paypal"</span> -&gt; <span class="cl">PayPalClient</span>().<span class="fn">charge</span>(cart.total)  <span class="cm">// DIP violation</span>
+        }
+
+        <span class="cm">// Saves order and sends email (SRP violation)</span>
+        <span class="cl">AppDatabase</span>.<span class="fn">getInstance</span>().<span class="fn">orderDao</span>().<span class="fn">insert</span>(cart.<span class="fn">toOrder</span>())
+        <span class="cl">EmailClient</span>().<span class="fn">sendConfirmation</span>(cart.email)
+    }
+}</code></pre>
+    <pre><code><span class="cm">// ✅ AFTER: Each responsibility extracted, depends on abstractions</span>
+
+<span class="cm">// ISP: split interfaces</span>
+<span class="kw">interface</span> <span class="cl">CartValidator</span> { <span class="kw">fun</span> <span class="fn">validate</span>(cart: <span class="cl">Cart</span>): <span class="cl">ValidationResult</span> }
+<span class="kw">interface</span> <span class="cl">PaymentProcessor</span> { <span class="kw">suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>): <span class="cl">PaymentResult</span> }
+<span class="kw">interface</span> <span class="cl">OrderPersistence</span> { <span class="kw">suspend fun</span> <span class="fn">save</span>(order: <span class="cl">Order</span>) }
+<span class="kw">interface</span> <span class="cl">NotificationService</span> { <span class="kw">suspend fun</span> <span class="fn">sendConfirmation</span>(order: <span class="cl">Order</span>) }
+
+<span class="cm">// OCP: new payment methods extend this, CheckoutUseCase never changes</span>
+<span class="kw">sealed class</span> <span class="cl">Payment</span> : <span class="cl">PaymentProcessor</span> {
+    <span class="kw">class</span> <span class="cl">Card</span>(<span class="kw">val</span> token: <span class="cl">String</span>) : <span class="cl">Payment</span>() { <span class="kw">override suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>) = <span class="cm">/* ... */</span> }
+    <span class="kw">class</span> <span class="cl">PayPal</span>(<span class="kw">val</span> email: <span class="cl">String</span>) : <span class="cl">Payment</span>() { <span class="kw">override suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>) = <span class="cm">/* ... */</span> }
+}
+
+<span class="cm">// SRP: one class orchestrates the flow, delegates everything</span>
+<span class="cm">// DIP: depends only on interfaces injected via Hilt</span>
+<span class="kw">class</span> <span class="cl">CheckoutUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> validator: <span class="cl">CartValidator</span>,
+    <span class="kw">private val</span> persistence: <span class="cl">OrderPersistence</span>,
+    <span class="kw">private val</span> notifications: <span class="cl">NotificationService</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(cart: <span class="cl">Cart</span>, payment: <span class="cl">PaymentProcessor</span>): <span class="cl">CheckoutResult</span> {
+        validator.<span class="fn">validate</span>(cart).<span class="fn">onFailure</span> { <span class="kw">return</span> <span class="cl">CheckoutResult</span>.<span class="cl">ValidationFailed</span>(it) }
+        <span class="kw">val</span> paymentResult = payment.<span class="fn">charge</span>(cart.total)
+            .<span class="fn">onFailure</span> { <span class="kw">return</span> <span class="cl">CheckoutResult</span>.<span class="cl">PaymentFailed</span>(it) }
+        <span class="kw">val</span> order = cart.<span class="fn">toOrder</span>(paymentResult)
+        persistence.<span class="fn">save</span>(order)
+        notifications.<span class="fn">sendConfirmation</span>(order)
+        <span class="kw">return</span> <span class="cl">CheckoutResult</span>.<span class="cl">Success</span>(order)
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Over-applying SOLID</h3>
+    <p>SOLID can be over-engineered. A simple settings screen that just toggles a flag doesn't need five interfaces and three UseCases. Premature abstraction creates indirection without benefit.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Principle</th><th>Benefit</th><th>Over-application risk</th></tr>
+      <tr><td>SRP</td><td>Focused, small classes</td><td>Excessive fragmentation — too many tiny classes to trace</td></tr>
+      <tr><td>OCP</td><td>Adding types without breaking existing code</td><td>Premature abstraction of stable code that never changes</td></tr>
+      <tr><td>LSP</td><td>Safe polymorphism</td><td>Forcing inheritance where composition is cleaner</td></tr>
+      <tr><td>ISP</td><td>Lean interfaces</td><td>Interface explosion — too many one-method interfaces</td></tr>
+      <tr><td>DIP</td><td>Testability, swappable implementations</td><td>Interface-for-everything anti-pattern when only one impl exists</td></tr>
+    </table></div>
+    <div class="callout callout-green">
+      <div class="callout-label">Rule of Three</div>
+      Create an abstraction when you see a concept appearing in three or more places, or when you need to mock it in a test. Before that, the "wrong" code is often the simplest code.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>SRP in Android — The Activity God Class</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Most Common Android SOLID Violation</div>
+      Activities/Fragments that contain network calls, business logic, database access, date formatting, and navigation. This is the top anti-pattern in legacy Android code. The fix: ViewModel for UI logic, UseCase for business logic, Repository for data, separate formatters and mappers.
+    </div>
+    <h3>DIP in Tests</h3>
+    <p>The most immediate payoff of DIP is testability. When <code>CheckoutViewModel</code> depends on <code>interface PaymentProcessor</code>, you can inject a <code>FakePaymentProcessor</code> in tests. When it depends on <code>class StripeClient</code>, you can't test it without hitting the network.</p>
+    <h3>LSP and Kotlin Sealed Classes</h3>
+    <p>Sealed classes are naturally LSP-compliant: all subtypes are declared in the same file, so you always know the complete set. A <code>when</code> expression on a sealed class is exhaustive — the compiler forces you to handle all cases, preventing substitution surprises.</p>
+    <h3>ISP and Click Listeners</h3>
+    <pre><code><span class="cm">// ❌ Fat listener — every implementer must implement all methods</span>
+<span class="kw">interface</span> <span class="cl">OnItemInteractionListener</span> {
+    <span class="kw">fun</span> <span class="fn">onItemClick</span>(id: <span class="cl">String</span>)
+    <span class="kw">fun</span> <span class="fn">onItemLongClick</span>(id: <span class="cl">String</span>)
+    <span class="kw">fun</span> <span class="fn">onItemSwipeLeft</span>(id: <span class="cl">String</span>)
+    <span class="kw">fun</span> <span class="fn">onItemSwipeRight</span>(id: <span class="cl">String</span>)
+}
+
+<span class="cm">// ✅ Specific lambdas passed only where needed</span>
+<span class="kw">class</span> <span class="cl">OrderAdapter</span>(
+    <span class="kw">private val</span> onClick: (<span class="cl">String</span>) -&gt; <span class="cl">Unit</span>,
+    <span class="kw">private val</span> onSwipeDelete: ((<span class="cl">String</span>) -&gt; <span class="cl">Unit</span>)? = <span class="kw">null</span>
+)</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"SOLID is five design principles: Single Responsibility — one reason to change; Open/Closed — extend without modifying; Liskov Substitution — subtypes are safely substitutable; Interface Segregation — small, focused interfaces; Dependency Inversion — depend on abstractions. In Android, the most common violation is an Activity doing networking, database access, and UI — SRP says those belong in separate ViewModel, Repository, and UseCase classes."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"Let me give Android-specific examples for each. SRP: an Activity that makes Retrofit calls violates SRP — extract to Repository, UseCase, and ViewModel. OCP: a <code>when(paymentType)</code> switch that grows every sprint violates OCP — replace with a sealed class hierarchy where each subtype implements a <code>charge()</code> interface. LSP: a read-only repository subclassing a read-write repository and throwing UnsupportedOperationException violates LSP — separate the interfaces. ISP: a fat Repository interface where each ViewModel uses only two of its ten methods violates ISP — split into role interfaces. DIP: a ViewModel constructing a concrete Retrofit client violates DIP — inject the interface, let Hilt provide the implementation. The unified benefit: every one of these makes the class unit-testable without Android framework setup."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>SRP</strong>: Activity doing everything = classic violation. Extract ViewModel, Repository, UseCase</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>OCP</strong>: sealed classes + strategy pattern let you add types without modifying existing code</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>LSP</strong>: prefer composition over inheritance; sealed classes are naturally LSP-safe</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>ISP</strong>: split fat Repository interfaces into role interfaces (<code>ProductReader</code>, <code>ProductWriter</code>)</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>DIP</strong>: ViewModel depends on <code>interface Repository</code> injected by Hilt — not on <code>class RepositoryImpl</code></div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Testability link</strong>: every SOLID principle ultimately enables unit testing without Android framework</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Academic definitions and history (Robert Martin, 2000s publications)</li>
+      <li>Contrived examples that don't connect to Android</li>
+      <li>Every possible interpretation of LSP (keep it practical)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Which SOLID principle does Clean Architecture enforce?"</td><td>DIP primarily — Domain defines interfaces, Data implements them. Also SRP via layer separation.</td></tr>
+      <tr><td>"Can you violate SOLID even with Hilt?"</td><td>Yes. Hilt only enforces DIP if you inject interfaces. If you inject concrete classes, DIP is still violated.</td></tr>
+      <tr><td>"How does OCP relate to the open keyword in Kotlin?"</td><td>Kotlin's <code>open</code> keyword is syntactic, not principled. OCP is about design — using polymorphism so callers never change. Not all <code>open</code> classes follow OCP.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The five principles aren't independent — they reinforce each other. SRP limits class scope, which makes ISP natural. DIP requires ISP (you need interfaces to invert). OCP is enabled by DIP. In practice, applying one principle to a violation usually requires applying two or three simultaneously. That's the sign of mature design thinking.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>SRP — One Reason to Change</h4>
+        <pre><code>Activity → just inflate & observe
+ViewModel → UI state logic
+UseCase → business rules
+Repository → data access</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>OCP — Extend, Don't Modify</h4>
+        <pre><code>sealed class Payment {
+    class Card(...) : Payment()
+    class PayPal(...) : Payment()
+    // add Crypto here — no other change
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LSP — Safe Substitution</h4>
+        <pre><code>// Prefer interfaces over open classes
+// Sealed classes = safe exhaustive when
+// Avoid: subclass that throws on override</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ISP + DIP</h4>
+        <pre><code>// ISP: split fat interfaces
+interface ProductReader { getProducts() }
+interface ProductWriter { save(); delete() }
+// DIP: inject the interface
+class VM @Inject constructor(
+    val repo: ProductReader  // not Impl!
+)</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What does SRP mean and give an Android example of a violation?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        SRP: a class should have only one reason to change. Classic Android violation: an <code>Activity</code> that contains Retrofit calls, SharedPreferences access, date formatting, and UI updates. It changes when the API changes, when the database schema changes, when the UI design changes, and when the business logic changes. Fix: extract to ViewModel (UI state), Repository (data), UseCase (business logic), and Formatter (display formatting).
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is DIP and how does Hilt enforce it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        DIP: high-level modules should depend on abstractions, not concretions. In Android, a <code>ViewModel</code> should depend on <code>interface UserRepository</code>, not <code>class UserRepositoryImpl</code>. Hilt enforces this via <code>@Binds</code> in a <code>@Module</code>, which maps the interface to its implementation at compile time. The ViewModel only knows the interface — in tests, you inject a fake; in production, Hilt injects the real impl.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> How does OCP apply to handling different payment methods in an app?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A <code>when(paymentType: String)</code> that keeps growing with new cases violates OCP — every new method modifies existing code. The fix is to define a <code>PaymentProcessor</code> interface with a <code>charge()</code> method, and represent each payment type as a sealed class subtype implementing it. The checkout logic calls <code>processor.charge(amount)</code> and never changes when a new payment type is added — it only extends via a new subclass.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Spot the SOLID violations in this code and suggest fixes.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Scenario: <code>class ProfileViewModel : ViewModel() { val retrofit = Retrofit.Builder().build(); fun loadUser() { retrofit.create(Api::class.java).getUser(); Room.databaseBuilder(...).build().userDao().getAll() } }</code><br><br>
+        <strong>SRP violation</strong>: ViewModel constructs Retrofit and Room directly — data access is not its responsibility.<br>
+        <strong>DIP violation</strong>: Depends on concrete <code>Retrofit</code> and <code>AppDatabase</code> classes, not interfaces.<br>
+        <strong>Fix</strong>: Inject a <code>UserRepository</code> interface via Hilt. The ViewModel calls <code>repository.getUser()</code> and knows nothing about HTTP or SQL.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Explain ISP with a RecyclerView listener example.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A fat <code>OnItemInteractionListener</code> with <code>onClick</code>, <code>onLongClick</code>, <code>onSwipeLeft</code>, <code>onSwipeRight</code> forces every implementer to implement all four methods, even if only one is used. ISP says: give clients only what they need. The fix: accept separate lambdas — <code>onClick: (String) -> Unit</code>, <code>onSwipeDelete: ((String) -> Unit)? = null</code> — so the screen only provides what it actually handles.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do sealed classes relate to LSP and OCP?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>LSP</strong>: sealed class subtypes are all declared in one file with full visibility — you always know every possible subtype. A <code>when</code> on a sealed type is exhaustive, so the compiler enforces that all cases are handled. No subtype can introduce unexpected behaviour because the set is closed.<br><br>
+        <strong>OCP</strong>: a sealed class with a <code>when</code> expression in a single place isn't OCP (adding a subtype requires modifying the <code>when</code>). But using the subtypes polymorphically — e.g., each subtype implements <code>render()</code> — achieves OCP because calling code never changes.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Why can a class that uses Hilt still violate DIP?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Hilt is a DI framework, not a DIP enforcer. If you write <code>@Inject constructor(val repo: UserRepositoryImpl)</code>, you're injecting a concrete class — DIP is still violated. For Hilt to enforce DIP, you must: (1) define an interface <code>UserRepository</code> in the domain layer, (2) implement it as <code>UserRepositoryImpl</code> in the data layer, (3) use <code>@Binds</code> to map the interface to the impl in a Hilt module, (4) inject the interface everywhere. Hilt automates the wiring; you must choose to depend on the interface.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A PR adds a new feature by subclassing a Fragment and overriding <code>onResume()</code> to throw if a condition isn't met. What principle does this violate and what's the correct fix?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        This violates <strong>LSP</strong>. Any code that uses the base <code>Fragment</code> type and calls <code>resume()</code> now has to defensively check whether it might throw — the subtype is not safely substitutable for the base type. The precondition (the condition that must be met) is stronger in the subtype than in the base, which is precisely what LSP forbids.<br><br>
+        <strong>Fix</strong>: represent the precondition check as part of the Fragment's visible state machine. Use a <code>UiState.RequiresCondition</code> sealed class variant and navigate away or show an error screen. Never throw exceptions from lifecycle methods — the calling framework doesn't expect it and won't recover gracefully.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How would you identify SOLID violations in a codebase of 200,000 lines during a technical interview review?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        I'd look for these signals:<br><br>
+        <strong>SRP</strong>: Classes &gt;300 lines, or classes with methods that import 3+ different subsystems (network + db + UI).<br>
+        <strong>OCP</strong>: Files with large <code>when</code> blocks on string/int types, especially in service or handler classes.<br>
+        <strong>LSP</strong>: Overridden methods that throw <code>UnsupportedOperationException</code>, or empty overrides.<br>
+        <strong>ISP</strong>: Interfaces with 8+ methods; implementers that stub half the methods with empty bodies.<br>
+        <strong>DIP</strong>: Classes that construct their own dependencies (<code>val x = ConcreteClass()</code>) inside constructors or <code>init</code> blocks.<br><br>
+        Tooling: Detekt rules enforce class/method line counts. ArchUnit assertions verify layer dependencies. These run in CI so violations are caught automatically.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> SOLID was defined for OOP. How relevant is it for Kotlin with its functional features?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Still very relevant, but Kotlin's features change the implementation idioms:<br><br>
+        <strong>SRP</strong>: Even more relevant — Kotlin's extension functions let you decompose behaviour without subclassing.<br>
+        <strong>OCP</strong>: Sealed classes are Kotlin's native way to express a closed-for-modification set of types with compile-time exhaustiveness.<br>
+        <strong>LSP</strong>: Less of a problem because Kotlin discourages inheritance (<code>open</code> must be explicit) and favours interfaces and composition.<br>
+        <strong>ISP</strong>: Functional interfaces (<code>fun interface</code>) and lambdas are naturally segregated — a lambda is a single-method interface.<br>
+        <strong>DIP</strong>: Extension functions on interfaces allow default behaviour without breaking DIP. The principle remains; the syntax is more concise.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

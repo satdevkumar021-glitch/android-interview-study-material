@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>10C – Behavioral Patterns | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(86,207,178,.12);color:#56cfb2;border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .ascii{font-family:"JetBrains Mono","Fira Code",monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;font-size:12.5px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:14px 0;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">10C · Behavioral Patterns</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>10C</span> — Behavioral Patterns</h1>
+    <p class="hero-desc">Observer, Strategy, Command, and State — the behavioral patterns that govern communication and responsibility assignment in Android apps.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 10C</span>
+      <span class="badge badge-tier2">&#9672; Tier 2</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What are Behavioral Patterns?</h3>
+    <p>Behavioral patterns deal with <strong>communication between objects</strong> — how they interact, share responsibilities, and pass information. They answer: "How do objects collaborate to complete a task?" without coupling them tightly.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Intent</th><th>Android Example</th></tr>
+      <tr><td>Observer</td><td>One-to-many notification when state changes</td><td>LiveData, StateFlow, Flow — UI reacts to data changes</td></tr>
+      <tr><td>Strategy</td><td>Define a family of algorithms, encapsulate each, make them interchangeable</td><td>Sorting strategies, payment method selection, compression algorithms</td></tr>
+      <tr><td>Command</td><td>Encapsulate a request as an object (enables undo/redo, queuing)</td><td>WorkManager tasks, menu actions, undo in text editors</td></tr>
+      <tr><td>State</td><td>Allow an object to alter behaviour when its internal state changes</td><td>Sealed class UI states (Loading/Success/Error), order state machine</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Behavioral patterns are about managing complexity in communication. In modern Android (MVI/MVVM), Observer and State are the foundation — everything flows through StateFlow. Strategy and Command appear in domain logic. Recognising them helps you reason about testability: a Strategy can be swapped in tests; a Command can be replayed or logged.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>1. Observer Pattern</h3>
+    <p>Defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified automatically.</p>
+    <div class="ascii">
+Subject (Observable)        Observers
+                    ┌──────► UI Composable
+StateFlow&lt;UiState&gt; ─┼──────► Analytics collector
+                    └──────► Test assertion
+Observers subscribe/unsubscribe independently.
+Subject doesn't know who is observing.
+    </div>
+    <pre><code><span class="cm">// StateFlow — the modern Android observer</span>
+<span class="kw">class</span> <span class="cl">AccountViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getBalance: <span class="cl">GetAccountBalanceUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> balance: <span class="cl">StateFlow</span>&lt;<span class="cl">BalanceUiState</span>&gt; = <span class="fn">getBalance</span>()
+        .<span class="fn">map</span> { <span class="cl">BalanceUiState</span>.<span class="cl">Success</span>(it) }
+        .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">BalanceUiState</span>.<span class="cl">Error</span>(it.message)) }
+        .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5000</span>), <span class="cl">BalanceUiState</span>.<span class="cl">Loading</span>)
+}
+
+<span class="cm">// Composable observer — reacts to state changes automatically</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">BalanceScreen</span>(vm: <span class="cl">AccountViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> state <span class="kw">by</span> vm.balance.<span class="fn">collectAsStateWithLifecycle</span>()
+    <span class="kw">when</span> (state) {
+        <span class="kw">is</span> <span class="cl">BalanceUiState</span>.<span class="cl">Loading</span> -&gt; <span class="fn">CircularProgressIndicator</span>()
+        <span class="kw">is</span> <span class="cl">BalanceUiState</span>.<span class="cl">Success</span> -&gt; <span class="fn">BalanceCard</span>(state.balance)
+        <span class="kw">is</span> <span class="cl">BalanceUiState</span>.<span class="cl">Error</span>   -&gt; <span class="fn">ErrorCard</span>(state.message)
+    }
+}</code></pre>
+
+    <h3>2. Strategy Pattern</h3>
+    <p>Defines a family of algorithms, encapsulates each one, and makes them interchangeable. The strategy pattern lets the algorithm vary independently from clients that use it.</p>
+    <pre><code><span class="cm">// Strategy interface — different sorting algorithms for product lists</span>
+<span class="kw">fun interface</span> <span class="cl">SortStrategy</span>&lt;<span class="cl">T</span>&gt; {
+    <span class="kw">fun</span> <span class="fn">sort</span>(items: <span class="cl">List</span>&lt;<span class="cl">T</span>&gt;): <span class="cl">List</span>&lt;<span class="cl">T</span>&gt;
+}
+
+<span class="kw">val</span> byPriceAsc = <span class="cl">SortStrategy</span>&lt;<span class="cl">Product</span>&gt; { items -&gt; items.<span class="fn">sortedBy</span> { it.price } }
+<span class="kw">val</span> byNameAsc  = <span class="cl">SortStrategy</span>&lt;<span class="cl">Product</span>&gt; { items -&gt; items.<span class="fn">sortedBy</span> { it.name } }
+<span class="kw">val</span> byRating   = <span class="cl">SortStrategy</span>&lt;<span class="cl">Product</span>&gt; { items -&gt; items.<span class="fn">sortedByDescending</span> { it.rating } }
+
+<span class="cm">// Context — uses whatever strategy is injected</span>
+<span class="kw">class</span> <span class="cl">ProductListViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getProducts: <span class="cl">GetProductsUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+    <span class="kw">private var</span> sortStrategy: <span class="cl">SortStrategy</span>&lt;<span class="cl">Product</span>&gt; = byPriceAsc
+
+    <span class="kw">fun</span> <span class="fn">sortBy</span>(strategy: <span class="cl">SortStrategy</span>&lt;<span class="cl">Product</span>&gt;) {
+        sortStrategy = strategy
+        <span class="cm">// re-emit sorted list</span>
+    }
+}</code></pre>
+
+    <h3>3. Command Pattern</h3>
+    <p>Encapsulates a request as an object, parameterises clients with different requests, and supports undoable operations.</p>
+    <pre><code><span class="cm">// Command interface</span>
+<span class="kw">interface</span> <span class="cl">Command</span> {
+    <span class="kw">suspend fun</span> <span class="fn">execute</span>()
+    <span class="kw">suspend fun</span> <span class="fn">undo</span>()
+}
+
+<span class="cm">// Concrete command — add item to cart</span>
+<span class="kw">class</span> <span class="cl">AddToCartCommand</span>(
+    <span class="kw">private val</span> cartRepository: <span class="cl">CartRepository</span>,
+    <span class="kw">private val</span> item: <span class="cl">CartItem</span>
+) : <span class="cl">Command</span> {
+    <span class="kw">override suspend fun</span> <span class="fn">execute</span>() = cartRepository.<span class="fn">addItem</span>(item)
+    <span class="kw">override suspend fun</span> <span class="fn">undo</span>()    = cartRepository.<span class="fn">removeItem</span>(item.id)
+}
+
+<span class="cm">// Command history — supports undo/redo</span>
+<span class="kw">class</span> <span class="cl">CommandExecutor</span> {
+    <span class="kw">private val</span> history = <span class="fn">ArrayDeque</span>&lt;<span class="cl">Command</span>&gt;()
+    <span class="kw">suspend fun</span> <span class="fn">execute</span>(command: <span class="cl">Command</span>) { command.<span class="fn">execute</span>(); history.<span class="fn">addLast</span>(command) }
+    <span class="kw">suspend fun</span> <span class="fn">undo</span>() { history.<span class="fn">removeLastOrNull</span>()?.<span class="fn">undo</span>() }
+}
+
+<span class="cm">// WorkManager as Command — work request is a command object</span>
+<span class="kw">val</span> uploadWork = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">UploadTransactionWorker</span>&gt;()
+    .<span class="fn">setInputData</span>(<span class="fn">workDataOf</span>(<span class="str">"txn_id"</span> <span class="kw">to</span> transactionId))
+    .<span class="fn">setConstraints</span>(<span class="cl">Constraints</span>.<span class="cl">Builder</span>().<span class="fn">setRequiredNetworkType</span>(<span class="cl">NetworkType</span>.<span class="cl">CONNECTED</span>).<span class="fn">build</span>())
+    .<span class="fn">build</span>()
+<span class="cl">WorkManager</span>.<span class="fn">getInstance</span>(context).<span class="fn">enqueue</span>(uploadWork)  <span class="cm">// enqueue = execute(command)</span></code></pre>
+
+    <h3>4. State Pattern</h3>
+    <p>Allows an object to alter its behaviour when its internal state changes. In Kotlin, sealed classes represent the states; the object transitions between them explicitly.</p>
+    <pre><code><span class="cm">// Sealed class UI state — each state is a first-class object</span>
+<span class="kw">sealed class</span> <span class="cl">OrderUiState</span> {
+    <span class="kw">object</span> <span class="cl">Idle</span>                                      : <span class="cl">OrderUiState</span>()
+    <span class="kw">object</span> <span class="cl">Loading</span>                                    : <span class="cl">OrderUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> orders: <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;)      : <span class="cl">OrderUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>)            : <span class="cl">OrderUiState</span>()
+    <span class="kw">object</span> <span class="cl">Empty</span>                                      : <span class="cl">OrderUiState</span>()
+}
+
+<span class="cm">// State machine for order lifecycle</span>
+<span class="kw">sealed class</span> <span class="cl">OrderStatus</span> {
+    <span class="kw">object</span> <span class="cl">Pending</span>                                    : <span class="cl">OrderStatus</span>()
+    <span class="kw">object</span> <span class="cl">Confirmed</span>                                  : <span class="cl">OrderStatus</span>()
+    <span class="kw">data class</span> <span class="cl">Shipped</span>(<span class="kw">val</span> trackingId: <span class="cl">String</span>)      : <span class="cl">OrderStatus</span>()
+    <span class="kw">data class</span> <span class="cl">Delivered</span>(<span class="kw">val</span> deliveredAt: <span class="cl">Instant</span>)  : <span class="cl">OrderStatus</span>()
+    <span class="kw">data class</span> <span class="cl">Cancelled</span>(<span class="kw">val</span> reason: <span class="cl">String</span>)        : <span class="cl">OrderStatus</span>()
+}
+
+<span class="cm">// Valid transitions enforced by the state machine</span>
+<span class="kw">fun</span> <span class="cl">OrderStatus</span>.<span class="fn">canTransitionTo</span>(next: <span class="cl">OrderStatus</span>): <span class="cl">Boolean</span> = <span class="kw">when</span> (<span class="kw">this</span>) {
+    <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Pending</span>    -&gt; next <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Confirmed</span> || next <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Cancelled</span>
+    <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Confirmed</span>  -&gt; next <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Shipped</span>   || next <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Cancelled</span>
+    <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Shipped</span>    -&gt; next <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Delivered</span>
+    <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Delivered</span>,
+    <span class="kw">is</span> <span class="cl">OrderStatus</span>.<span class="cl">Cancelled</span>  -&gt; <span class="kw">false</span>  <span class="cm">// terminal states</span>
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Use when</th><th>Avoid when</th></tr>
+      <tr><td>Observer</td><td>Always for UI state — use StateFlow/Flow; never polling</td><td>Fire-and-forget actions (use suspend functions instead of observing a response)</td></tr>
+      <tr><td>Strategy</td><td>Behaviour varies by configuration or user choice at runtime; algorithm families</td><td>Only one algorithm ever exists — just inline it</td></tr>
+      <tr><td>Command</td><td>Undo/redo support, queuing operations, deferred execution (WorkManager)</td><td>Simple one-shot actions that need no history or replay</td></tr>
+      <tr><td>State</td><td>UI screen states (Loading/Success/Error), domain entity lifecycle (Order status machine)</td><td>Simple boolean flags — two states don't need sealed classes</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Cart Feature</h3>
+    <pre><code><span class="cm">// ── STATE: Cart UI state sealed class ─────────────────────────</span>
+<span class="kw">sealed class</span> <span class="cl">CartUiState</span> {
+    <span class="kw">object</span> <span class="cl">Loading</span>                                : <span class="cl">CartUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> cart: <span class="cl">Cart</span>)           : <span class="cl">CartUiState</span>()
+    <span class="kw">object</span> <span class="cl">Empty</span>                                  : <span class="cl">CartUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>)        : <span class="cl">CartUiState</span>()
+    <span class="kw">data class</span> <span class="cl">CheckingOut</span>(<span class="kw">val</span> cart: <span class="cl">Cart</span>)       : <span class="cl">CartUiState</span>()
+}
+
+<span class="cm">// ── OBSERVER: ViewModel emits state, Composable observes ──────</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">CartViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> cartRepo: <span class="cl">CartRepository</span>,
+    <span class="kw">private val</span> commandExecutor: <span class="cl">CommandExecutor</span>,
+    <span class="kw">private var</span> sortStrategy: <span class="cl">SortStrategy</span>&lt;<span class="cl">CartItem</span>&gt; = <span class="fn">sortCartByAdded</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">CartUiState</span>&gt; = cartRepo.<span class="fn">observeCart</span>()
+        .<span class="fn">map</span> { cart -&gt;
+            <span class="kw">if</span> (cart.items.<span class="fn">isEmpty</span>()) <span class="cl">CartUiState</span>.<span class="cl">Empty</span>
+            <span class="kw">else</span> <span class="cl">CartUiState</span>.<span class="cl">Success</span>(cart.<span class="fn">copy</span>(items = sortStrategy.<span class="fn">sort</span>(cart.items)))
+        }
+        .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">CartUiState</span>.<span class="cl">Error</span>(it.message ?: <span class="str">"Unknown error"</span>)) }
+        .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5000</span>), <span class="cl">CartUiState</span>.<span class="cl">Loading</span>)
+
+    <span class="cm">// COMMAND: add/remove with undo support</span>
+    <span class="kw">fun</span> <span class="fn">addItem</span>(item: <span class="cl">CartItem</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            commandExecutor.<span class="fn">execute</span>(<span class="cl">AddToCartCommand</span>(cartRepo, item))
+        }
+    }
+    <span class="kw">fun</span> <span class="fn">undoLastAction</span>() { viewModelScope.<span class="fn">launch</span> { commandExecutor.<span class="fn">undo</span>() } }
+
+    <span class="cm">// STRATEGY: change sort at runtime</span>
+    <span class="kw">fun</span> <span class="fn">sortBy</span>(strategy: <span class="cl">SortStrategy</span>&lt;<span class="cl">CartItem</span>&gt;) { sortStrategy = strategy }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Observer: LiveData vs StateFlow vs SharedFlow</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>Behaviour</th><th>Use case</th></tr>
+      <tr><td>LiveData</td><td>Lifecycle-aware, replays last value, Dispatchers.Main</td><td>Legacy; avoid in new code</td></tr>
+      <tr><td>StateFlow</td><td>Always has a value, replays to new collectors, <code>distinctUntilChanged</code></td><td>UI state — current state always available</td></tr>
+      <tr><td>SharedFlow</td><td>Configurable replay buffer, hot, one-shot events</td><td>Navigation events, Snackbars, one-shot side effects</td></tr>
+    </table></div>
+    <h3>Strategy vs when/if-else</h3>
+    <p>For 2-3 static cases, a <code>when</code> expression is perfectly fine. Strategy pays off when: the algorithm is chosen at runtime, changes frequently, or must be independently tested. In Kotlin, a <code>fun interface</code> + lambda is the lightweight Strategy implementation — no extra class hierarchy needed.</p>
+    <h3>State Pattern vs Boolean Flags</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Anti-Pattern: Boolean Flag Explosion</div>
+      <code>var isLoading: Boolean; var hasError: Boolean; var isEmpty: Boolean</code> — these are 8 possible combinations, most of which are invalid. A sealed <code>UiState</code> restricts to only the valid states, making invalid combinations unrepresentable.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Observer Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Collecting in the Wrong Lifecycle</div>
+      <code>lifecycleScope.launch { viewModel.flow.collect { ... } }</code> continues collecting even when the app is in the background, wasting resources and potentially processing stale data. Use <code>repeatOnLifecycle(Lifecycle.State.STARTED)</code> or <code>collectAsStateWithLifecycle()</code> in Compose, which automatically pauses and resumes collection with the lifecycle.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Using SharedFlow for UI State</div>
+      SharedFlow doesn't have a current value — a new subscriber (e.g., after screen rotation) gets nothing. Always use <code>StateFlow</code> for UI state, and <code>SharedFlow</code> only for one-shot events (navigation, Snackbar).
+    </div>
+    <h3>State Pattern Best Practices</h3>
+    <ul>
+      <li><strong>Use <code>object</code> for stateless states</strong> and <code>data class</code> for states carrying data</li>
+      <li><strong>Transitions should be explicit</strong>: a <code>canTransitionTo()</code> method on the state prevents invalid transitions in the domain model</li>
+      <li><strong>One ViewModel → one UiState sealed class</strong>: don't have separate <code>isLoading</code>, <code>error</code>, <code>data</code> properties — unify into a single state</li>
+    </ul>
+    <h3>Command Pattern Best Practices</h3>
+    <ul>
+      <li>For WorkManager: use unique work names (<code>enqueueUniqueWork</code>) to prevent duplicate background tasks</li>
+      <li>Ensure commands are idempotent when they can be retried (WorkManager retries on failure)</li>
+      <li>Separate the command from its executor — the executor manages history and concurrency, the command encapsulates only the action</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Behavioral patterns govern object communication. In Android: Observer is the foundation — StateFlow and Flow let the UI react to state changes without polling. State is how we model UI screen states and domain lifecycles — sealed classes make all valid states explicit. Strategy lets us swap algorithms at runtime, like sorting or payment method selection. Command encapsulates an action as an object — enabling undo, queuing, and WorkManager's deferred execution."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"Observer is built into Android's reactive stack. The key distinction: StateFlow for UI state (always has a current value — safe after rotation), SharedFlow for one-shot events like navigation. The State pattern with sealed classes is the modern replacement for boolean flag combinations — <code>var isLoading; var hasError</code> gives 4 possible states, many invalid. A sealed <code>UiState</code> restricts to exactly the valid ones. For Command: WorkManager is essentially a distributed command queue — each <code>WorkRequest</code> is a command object with constraints, input data, retry policy, and the ability to chain. For Strategy: using <code>fun interface SortStrategy</code> in Kotlin means any lambda is a strategy — you don't need a class hierarchy."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Observer</strong>: StateFlow for state (has current value), SharedFlow for one-shot events — collect with lifecycle awareness</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>State</strong>: sealed class UI states (Loading/Success/Error/Empty) — invalid combinations are unrepresentable</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Strategy</strong>: Kotlin <code>fun interface</code> + lambda = lightweight strategy; swap algorithms without modifying context</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Command</strong>: WorkManager tasks are command objects — encapsulate work, defer, queue, retry</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Boolean flag anti-pattern</strong>: replaced by sealed UiState — always mention this when asked about State pattern</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>collectAsStateWithLifecycle</strong>: lifecycle-safe observer — stops collection in background, resumes on STARTED</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Iterator, Visitor, Mediator patterns (not commonly asked in Android)</li>
+      <li>Full GoF Command implementation details — keep it at WorkManager/undo pattern level</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"LiveData vs StateFlow?"</td><td>StateFlow is coroutine-native, works on any dispatcher, doesn't need lifecycle on the data side. LiveData is lifecycle-aware at collection but couples to Dispatchers.Main. Use StateFlow in new code.</td></tr>
+      <tr><td>"How do you handle one-shot events (navigation, Snackbar)?"</td><td>SharedFlow with replay=0 (no cached value). Collect in a <code>LaunchedEffect</code> or <code>repeatOnLifecycle(STARTED)</code> block. Avoid Channel-based events — they have different cancellation semantics.</td></tr>
+      <tr><td>"What's the Strategy pattern in Kotlin?"</td><td>A <code>fun interface</code> with a single method. Any lambda conforming to that signature is a strategy — no class needed. This is Kotlin's idiomatic approach to the classic GoF Strategy pattern.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      MVI (Model-View-Intent) is the synthesis of Observer + State + Command. The View emits Intent (Command), the ViewModel reduces it to a new State (State pattern), and the View observes the State (Observer). Recognising that MVI is three behavioral patterns composed together demonstrates deep understanding of both patterns and modern Android architecture.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Observer</h4>
+        <pre><code>StateFlow — for UI state (has value)
+SharedFlow — for one-shot events
+collectAsStateWithLifecycle()
+  — stops in bg, resumes on STARTED</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>State (Sealed UiState)</h4>
+        <pre><code>sealed class UiState {
+    object Loading : UiState()
+    data class Success(val d: D) : UiState()
+    data class Error(val msg: String) : UiState()
+    object Empty : UiState()
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Strategy</h4>
+        <pre><code>fun interface SortStrategy&lt;T&gt; {
+    fun sort(items: List&lt;T&gt;): List&lt;T&gt;
+}
+// Usage: any lambda is a strategy
+val byPrice = SortStrategy { it.sortedBy { p -> p.price } }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Command</h4>
+        <pre><code>interface Command {
+    suspend fun execute()
+    suspend fun undo()
+}
+// WorkManager = distributed command queue
+WorkManager.enqueue(workRequest)</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the Observer pattern and where does Android use it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Observer defines a one-to-many dependency: when a subject changes state, all observers are notified. In Android: <code>StateFlow</code> is the subject — ViewModels emit state, Composables and Fragments observe it. Clicking "Collect" registers as an observer; unsubscribing (leaving the screen) removes it. Room's <code>Flow&lt;List&lt;T&gt;&gt;</code> from DAO queries is also Observer — the database is the subject, the ViewModel is the observer, and Room notifies it automatically when the underlying table changes.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> Why use a sealed class for UI state instead of multiple boolean flags?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Multiple booleans (<code>isLoading</code>, <code>hasError</code>, <code>isEmpty</code>) create 8 possible combinations (2³), but most are invalid — e.g., <code>isLoading=true AND hasError=true</code> is nonsensical. A sealed class <code>UiState</code> with subclasses <code>Loading</code>, <code>Success</code>, <code>Error</code>, <code>Empty</code> has exactly 4 valid states. The compiler exhausts all cases in a <code>when</code> expression, ensuring every state is handled. Invalid state combinations are unrepresentable at compile time.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> How does WorkManager implement the Command pattern?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A <code>WorkRequest</code> is a Command object — it encapsulates the work to be done (<code>ListenableWorker</code> subclass), the constraints (network type, charging state), input data, retry policy, and backoff criteria. <code>WorkManager.enqueue(request)</code> is the execute. WorkManager persists commands to a SQLite database and executes them when constraints are met — even across app restarts. This gives you deferred, reliable, persistent command execution.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What is the difference between StateFlow and SharedFlow?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>StateFlow</strong>: always holds a current value (initial value required); new collectors immediately receive the current value; uses <code>distinctUntilChanged</code> — identical consecutive values are not re-emitted. Best for UI state.<br><br>
+        <strong>SharedFlow</strong>: configurable replay buffer (default 0 — no replay); supports multiple simultaneous emissions; doesn't require an initial value. Best for one-shot events: navigation, Snackbar messages, error popups. A new collector with replay=0 doesn't get past events, which is exactly what you want for "show once" notifications.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Implement the Strategy pattern for a text search algorithm in Kotlin.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>fun interface SearchStrategy { fun search(query: String, items: List&lt;Product&gt;): List&lt;Product&gt; }</code><br>
+        <code>val exactMatch = SearchStrategy { q, items -> items.filter { it.name == q } }</code><br>
+        <code>val fuzzyMatch = SearchStrategy { q, items -> items.filter { it.name.contains(q, ignoreCase = true) } }</code><br>
+        <code>val ftsMatch = SearchStrategy { q, items -> ftsEngine.search(q) }</code><br><br>
+        The ViewModel holds a <code>var searchStrategy: SearchStrategy</code> and the UI calls <code>viewModel.setSearchStrategy(fuzzyMatch)</code>. The search logic never changes — only the strategy does.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you implement undo functionality using the Command pattern?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Define <code>interface Command { suspend fun execute(); suspend fun undo() }</code>. Implement commands like <code>DeleteItemCommand(repo, item)</code> where <code>execute()</code> deletes and <code>undo()</code> re-inserts. A <code>CommandExecutor</code> holds an <code>ArrayDeque&lt;Command&gt;</code> as history. Every executed command is pushed to the deque. <code>undo()</code> pops the last command and calls its <code>undo()</code>. In the UI: show a Snackbar with "Undo" after deletion; the button calls <code>viewModel.undo()</code>. This is exactly how Gmail's "Undo send" or Android's swipe-to-delete work.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What lifecycle-aware way should you use to collect a Flow in a Fragment?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Use <code>viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED)</code> inside <code>onViewCreated</code>:<br><br>
+        <code>viewLifecycleOwner.lifecycleScope.launch { viewLifecycleOwner.repeatOnLifecycle(STARTED) { viewModel.state.collect { render(it) } } }</code><br><br>
+        This automatically stops the collector when the Fragment moves to the STOPPED state (backgrounded) and resumes when it returns to STARTED. Without this, the coroutine runs even when the Fragment is invisible, wasting resources and potentially crashing on updates to destroyed views.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> MVI architecture uses multiple behavioral patterns. Identify them and explain how they compose.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        MVI (Model-View-Intent) is three behavioral patterns composed:<br><br>
+        1. <strong>Command</strong>: User interactions produce "Intents" (UserIntent.AddToCart, UserIntent.Search) — each Intent is a Command describing what the user wants to do. They're dispatched to the ViewModel, not executed inline.<br><br>
+        2. <strong>State</strong>: The ViewModel maintains a single sealed <code>UiState</code> that represents all possible screen states. A "reducer" function takes (currentState, intent) and produces the next state — this is a pure State pattern transition function.<br><br>
+        3. <strong>Observer</strong>: The View observes the single <code>StateFlow&lt;UiState&gt;</code> and re-renders entirely when it changes. The View is a passive observer — it never reads state directly, only reacts to emissions.<br><br>
+        The composition provides: testable transitions (test the reducer with no Android context), unidirectional data flow (commands → state → view, never backwards), and deterministic replay.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design a state machine for an automotive app's vehicle connection lifecycle.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <pre style="margin:0;font-size:12px;">sealed class ConnectionState {
+    object Disconnected : ConnectionState()
+    object Scanning : ConnectionState()
+    data class Connecting(val device: BluetoothDevice) : ConnectionState()
+    data class Connected(val device: BluetoothDevice, val session: Session) : ConnectionState()
+    data class Error(val cause: Throwable) : ConnectionState()
+}
+
+fun ConnectionState.canTransitionTo(next: ConnectionState) = when (this) {
+    is Disconnected -> next is Scanning
+    is Scanning     -> next is Connecting || next is Disconnected
+    is Connecting   -> next is Connected || next is Error || next is Disconnected
+    is Connected    -> next is Disconnected || next is Error
+    is Error        -> next is Disconnected
+}</pre>
+        State machine enforces legal transitions, making it impossible to jump from Disconnected to Connected without going through Scanning → Connecting. The ViewModel emits this as a StateFlow; the dashboard UI maps each state to different UI: spinner for Scanning, progress for Connecting, live data for Connected.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How would you test a Strategy pattern implementation in isolation?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Strategy's key testability benefit: each strategy is an isolated, stateless function — no Android framework needed. Tests:<br><br>
+        1. <strong>Unit test each strategy</strong>: <code>val result = byPriceAsc.sort(sampleList); assertEquals(sortedByPrice, result)</code> — pure Kotlin test, sub-millisecond.<br>
+        2. <strong>Test the context with a fake strategy</strong>: inject a <code>SortStrategy { it }</code> (identity — returns items unchanged) when testing the ViewModel. This isolates the ViewModel test from sorting logic.<br>
+        3. <strong>Test strategy switching</strong>: verify that calling <code>viewModel.sortBy(byRating)</code> causes the StateFlow to emit a re-sorted list.<br><br>
+        This is exactly why Strategy + DIP together produce the highest testability: each algorithm is a function, the context is tested with fakes.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

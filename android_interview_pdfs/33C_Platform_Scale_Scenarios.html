@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>33C — Platform &amp; Scale Scenarios | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.3);color:var(--yellow);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(245,200,66,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .scenario-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:28px;overflow:hidden;}
+  .scenario-header{background:var(--surface2);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+  .scenario-num{background:rgba(245,200,66,.2);color:var(--yellow);font-size:11px;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .scenario-title{font-size:14px;font-weight:700;color:var(--text);}
+  .scenario-body{padding:18px 18px;}
+  .step-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:16px;}
+  .step-label:first-child{margin-top:0;}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">33C · Platform &amp; Scale</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Android 12 → 15/16 Breaks</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Systematic Debug Approach</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Architect for Millions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Monitoring &amp; Reliability</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Trade-offs &amp; Team</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Senior Differentiator</div>
+    <h1><span>33C</span> — Platform &amp; Scale Scenarios</h1>
+    <p class="hero-desc">Two senior scenarios: diagnosing API-level breakage (Android 12 → 15/16 regressions) and architecting for millions of users. Complete system design answer included.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 33C</span>
+      <span class="badge badge-senior">&#11088; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <p>Platform compatibility and scale architecture are the two areas that most clearly separate senior engineers from mid-level. These questions require breadth across the Android platform and depth on architectural trade-offs.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Scenario</th><th>Key Topics</th><th>Senior Signal</th></tr>
+      <tr><td>Android version regression</td><td>Intent mutability, exact alarms, FGS types, exported components, photo picker</td><td>Systematic debugging process, not random guessing</td></tr>
+      <tr><td>Architect for millions</td><td>Modularization, offline-first, feature flags, CI/CD, monitoring</td><td>Team structure + production reliability, not just technical patterns</td></tr>
+    </table></div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Android 12 → 15/16 →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9888;</div>2. App Works on Android 12 but Fails on Android 15/16</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">1</div><div class="scenario-title">App works perfectly on Android 12 but crashes or misbehaves on Android 15+</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Common Root Causes by Area</div>
+        <div class="table-wrap"><table>
+          <tr><th>Area</th><th>Android 12+ Change</th><th>Fix</th></tr>
+          <tr><td>PendingIntent</td><td>Must specify FLAG_IMMUTABLE or FLAG_MUTABLE explicitly</td><td>Add PendingIntent.FLAG_IMMUTABLE to all PendingIntent calls</td></tr>
+          <tr><td>Exact Alarms</td><td>Android 12+ requires SCHEDULE_EXACT_ALARM permission; Android 13+ user must grant it</td><td>Check canScheduleExactAlarms() before calling setExact(); use inexact alarms or WorkManager instead</td></tr>
+          <tr><td>Exported Components</td><td>Activities/Services/Receivers with intent-filters must declare android:exported explicitly</td><td>Add android:exported="true/false" to each component with intent-filter</td></tr>
+          <tr><td>Foreground Service Types</td><td>Android 14+ requires android:foregroundServiceType in manifest</td><td>Declare type: location, camera, mediaPlayback, health, etc.</td></tr>
+          <tr><td>Notification permission</td><td>Android 13+ requires POST_NOTIFICATIONS runtime permission</td><td>Request POST_NOTIFICATIONS permission before showing notifications</td></tr>
+          <tr><td>Photo Picker</td><td>Android 13+ introduces Photo Picker API; old ACTION_PICK may behave differently</td><td>Use ActivityResultContracts.PickVisualMedia for Android 13+</td></tr>
+          <tr><td>Background start restrictions</td><td>Android 12+ stricter limits on starting activities from background</td><td>Show notification instead; only start Activity from user-visible context</td></tr>
+          <tr><td>Predictive back</td><td>Android 13+ adds predictive back gesture; custom back handling may break</td><td>Migrate to OnBackPressedCallback or predictive back APIs</td></tr>
+        </table></div>
+        <pre><code><span class="cm">// ✅ PendingIntent — always specify mutability</span>
+<span class="kw">val</span> pendingIntent = <span class="cl">PendingIntent</span>.<span class="fn">getActivity</span>(
+    context, requestCode, intent,
+    <span class="cl">PendingIntent</span>.<span class="cl">FLAG_UPDATE_CURRENT</span> <span class="kw">or</span> <span class="cl">PendingIntent</span>.<span class="cl">FLAG_IMMUTABLE</span>
+)
+
+<span class="cm">// ✅ Exact alarms — check permission first (Android 12+)</span>
+<span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.<span class="cl">SDK_INT</span> >= <span class="cl">Build</span>.<span class="cl">VERSION_CODES</span>.<span class="cl">S</span>) {
+    <span class="kw">val</span> alarmManager = <span class="fn">getSystemService</span>(<span class="cl">AlarmManager</span>::<span class="kw">class</span>.java)
+    <span class="kw">if</span> (alarmManager.<span class="fn">canScheduleExactAlarms</span>()) {
+        alarmManager.<span class="fn">setExact</span>(...)
+    } <span class="kw">else</span> {
+        <span class="cm">// Redirect to exact alarm settings or use setWindow()</span>
+    }
+}
+
+<span class="cm">// ✅ Notification permission (Android 13+)</span>
+<span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.<span class="cl">SDK_INT</span> >= <span class="nu">33</span>) {
+    <span class="fn">requestPermissions</span>(<span class="fn">arrayOf</span>(<span class="cl">Manifest</span>.permission.<span class="cl">POST_NOTIFICATIONS</span>), RC_NOTIF)
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Systematic Debug →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128202;</div>3. Systematic Debug Approach for Version Regressions</div>
+    <h3>Step-by-Step Process</h3>
+    <ol>
+      <li><strong>Reproduce on a specific API level</strong> — use emulator with Android 15/16 API. Note the exact error in Logcat.</li>
+      <li><strong>Check the Android behavior changes page</strong> — developer.android.com/about/versions/15/behavior-changes. New versions document all breaking changes.</li>
+      <li><strong>Binary search API levels</strong> — does it fail on Android 14? 13? Narrow down which version introduced the break.</li>
+      <li><strong>Check Logcat for security exceptions or permission denials</strong> — these have specific messages pointing to the issue.</li>
+      <li><strong>Search Crashlytics by OS version filter</strong> — compare crash rates by Android version to confirm which versions are affected.</li>
+      <li><strong>Check targetSdkVersion</strong> — some changes only apply when targetSdk is ≥ a certain level.</li>
+    </ol>
+    <pre><code><span class="cm">// Common log messages that identify the cause</span>
+<span class="cm">// "SecurityException: Permission Denial" → missing permission or exported flag</span>
+<span class="cm">// "IllegalArgumentException: Receiver not registered" → lifecycle mismatch</span>
+<span class="cm">// "ActivityNotFoundException" → intent-filter or exported=false issue</span>
+<span class="cm">// "Foreground service did not call startForeground" → FGS type change</span>
+
+<span class="cm">// Runtime permission check pattern</span>
+<span class="kw">fun</span> <span class="fn">hasNotificationPermission</span>(): <span class="cl">Boolean</span> =
+    <span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.<span class="cl">SDK_INT</span> >= <span class="nu">33</span>) {
+        <span class="fn">checkSelfPermission</span>(<span class="cl">Manifest</span>.permission.<span class="cl">POST_NOTIFICATIONS</span>) ==
+            <span class="cl">PackageManager</span>.<span class="cl">PERMISSION_GRANTED</span>
+    } <span class="kw">else</span> <span class="kw">true</span>  <span class="cm">// pre-Android 13: always granted</span></code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Senior Signal</div>
+      Mention that you'd set up CI testing on multiple API levels (16, 23, 26, 28, 33, latest) using Firebase Test Lab or emulator matrix. This prevents version regressions from reaching production.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Architect for Millions →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127963;</div>4. Architect an Android App for Millions of Users</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">2</div><div class="scenario-title">Design an Android client architecture for a consumer app with millions of daily active users</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Architecture Overview</div>
+        <pre>
+:app (shell — navigation + DI)
+  └─ :feature:home, :feature:checkout, :feature:profile (10+ feature modules)
+  └─ :core:data, :core:domain, :core:ui, :core:network, :core:featureflags</pre>
+        <div class="step-label">Offline-first</div>
+        <ul>
+          <li>Room as single source of truth for all persistent data</li>
+          <li>Network is a cache-refresh mechanism, not the primary data source</li>
+          <li>WorkManager for background sync (survives app death)</li>
+          <li>Optimistic updates for user actions (like, add to cart) — sync later</li>
+        </ul>
+        <div class="step-label">Feature Flags + A/B Testing</div>
+        <ul>
+          <li>Firebase Remote Config for all feature flags — kill switch for any feature</li>
+          <li>A/B experiments through Remote Config parameters with user targeting</li>
+          <li>All flags have local defaults (work offline, on first launch before fetch)</li>
+          <li>Staged rollout: internal → 10% → 50% → 100%</li>
+        </ul>
+        <div class="step-label">Performance at Scale</div>
+        <ul>
+          <li>Cold start target &lt;2s: Baseline Profiles + App Startup library</li>
+          <li>Crash-free sessions &gt;99.5%: Crashlytics alerts at 99%</li>
+          <li>ANR rate &lt;0.1%: strict no-main-thread-I/O enforcement</li>
+          <li>Memory &lt;200MB p95: Coil with size limits, no bitmap leaks</li>
+        </ul>
+        <div class="step-label">CI/CD Pipeline</div>
+        <ul>
+          <li>Every PR: unit tests + lint + Detekt + Compose metrics check</li>
+          <li>Every merge to main: instrumented tests on Firebase Test Lab (API matrix)</li>
+          <li>Nightly: full regression suite + startup benchmark</li>
+          <li>Release: automatic Play Console upload to internal track</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Monitoring →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128200;</div>5. Monitoring &amp; Reliability</div>
+    <h3>Observability Stack</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Signal</th><th>Tool</th><th>Alert Threshold</th></tr>
+      <tr><td>Crash-free sessions</td><td>Crashlytics</td><td>&lt;99% → PagerDuty alert</td></tr>
+      <tr><td>ANR rate</td><td>Play Console + Crashlytics ANR detection</td><td>&gt;0.1% → alert</td></tr>
+      <tr><td>App startup time</td><td>Firebase Performance _app_start trace</td><td>p95 &gt;3s → alert</td></tr>
+      <tr><td>HTTP error rate</td><td>Firebase Performance HTTP metrics</td><td>&gt;1% 5xx → alert</td></tr>
+      <tr><td>Custom traces</td><td>Firebase Performance custom traces</td><td>Per feature: checkout_complete p95 &gt;5s</td></tr>
+      <tr><td>Memory</td><td>Firebase Performance memory metric</td><td>p95 &gt;200MB → investigate</td></tr>
+    </table></div>
+    <h3>Progressive Delivery</h3>
+    <ul>
+      <li><strong>Staged rollout</strong> to 10% users → monitor 48 hours → expand</li>
+      <li><strong>Feature flags as kill switch</strong> — no emergency release needed for most issues</li>
+      <li><strong>Version targeting</strong> — can force users on old versions to update if critical security fix</li>
+      <li><strong>Play In-App Updates API</strong> — prompt users to update from within the app</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9878;</div>6. Trade-offs &amp; Team Structure</div>
+    <h3>Key Trade-offs</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Trade-off</th></tr>
+      <tr><td>Modularization</td><td>Faster incremental builds &amp; team isolation vs initial setup complexity and Gradle config overhead</td></tr>
+      <tr><td>Offline-first (Room)</td><td>Better UX &amp; resilience vs more complex sync logic and potential data staleness</td></tr>
+      <tr><td>Feature flags everywhere</td><td>Easy rollback &amp; experiments vs configuration complexity, stale flag cleanup debt</td></tr>
+      <tr><td>Optimistic updates</td><td>Instant UI feedback vs rollback complexity on sync failure</td></tr>
+      <tr><td>DFMs for optional features</td><td>Smaller initial install vs install friction when feature is first accessed</td></tr>
+    </table></div>
+    <h3>Team Ownership Model</h3>
+    <ul>
+      <li>Each feature team owns its <code>:feature:X</code> module end-to-end (UI → ViewModel → UseCase)</li>
+      <li><code>:core:Y</code> modules owned by a platform team (no feature team modifies core without review)</li>
+      <li>Breaking changes to core require RFC (Request for Comment) with affected teams</li>
+      <li>Each team maintains their module's test coverage (&gt;80% unit, &gt;critical UI paths instrumented)</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Version Regression Framework (2 min answer)</div>
+      <strong>1)</strong> Reproduce on target API level emulator → <strong>2)</strong> Check Logcat for SecurityException/permission denial → <strong>3)</strong> Check Android behavior changes page for that version → <strong>4)</strong> Common suspects: PendingIntent mutability, exact alarms, exported components, notification permission → <strong>5)</strong> Fix + add CI test on that API level to prevent regression
+    </div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Millions of Users Framework (10 min answer)</div>
+      <strong>1)</strong> Modularization (feature isolation, fast builds) → <strong>2)</strong> Offline-first (Room single source of truth) → <strong>3)</strong> Feature flags (kill switch, A/B testing) → <strong>4)</strong> Performance SLAs (&lt;2s startup, &gt;99.5% crash-free) → <strong>5)</strong> CI/CD (parallel tests, automated release) → <strong>6)</strong> Monitoring + progressive delivery → <strong>7)</strong> Team ownership model
+    </div>
+    <h3>Common Mistakes</h3>
+    <ul>
+      <li>For version regressions: guessing random causes without a systematic approach</li>
+      <li>For scale architecture: focusing only on code patterns, ignoring team structure and delivery processes</li>
+      <li>Not mentioning monitoring and alerting — production reliability is as important as architecture</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Android 12+ Change</th><th>Fix</th></tr>
+      <tr><td>PendingIntent mutability</td><td>FLAG_IMMUTABLE or FLAG_MUTABLE required</td></tr>
+      <tr><td>Exact alarms</td><td>SCHEDULE_EXACT_ALARM + canScheduleExactAlarms() check</td></tr>
+      <tr><td>Exported components</td><td>android:exported="true/false" required if intent-filter</td></tr>
+      <tr><td>FGS types (Android 14+)</td><td>android:foregroundServiceType in manifest</td></tr>
+      <tr><td>Notification permission (Android 13+)</td><td>POST_NOTIFICATIONS runtime permission</td></tr>
+    </table></div>
+    <div class="table-wrap"><table>
+      <tr><th>Scale Architecture Pillar</th><th>Solution</th></tr>
+      <tr><td>Team isolation</td><td>Multi-module: :feature → :core only</td></tr>
+      <tr><td>Offline resilience</td><td>Room single source of truth + WorkManager sync</td></tr>
+      <tr><td>Feature control</td><td>Firebase Remote Config flags with kill switch + A/B</td></tr>
+      <tr><td>Startup performance</td><td>Baseline Profiles + App Startup library + lazy init</td></tr>
+      <tr><td>Crash monitoring</td><td>Crashlytics alerts at 99% crash-free threshold</td></tr>
+      <tr><td>Progressive delivery</td><td>Staged rollout 10% → 50% → 100%</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Your app shows a SecurityException crash on Android 14 but not Android 12. How do you diagnose it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Step 1: Read the SecurityException message in Logcat — it usually names the missing permission or the component that rejected the call. Step 2: Check Android 14 behavior changes page for breaking security changes. Step 3: Common Android 14 causes: missing foregroundServiceType in manifest (AFGT requirement), background activity launch restrictions, intent redirect restrictions. Step 4: Fix and add an API 34 emulator test to CI to prevent regression.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why must all PendingIntent calls on Android 12+ specify FLAG_IMMUTABLE or FLAG_MUTABLE?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Android 12 tightened PendingIntent security to prevent PendingIntent hijacking attacks. An app could potentially intercept a PendingIntent with extras and modify it before it was used. FLAG_IMMUTABLE prevents the receiving app from modifying the intent's extras (safer for most cases). FLAG_MUTABLE must be used explicitly when you intentionally want the system or another app to modify the intent (e.g., notification direct reply). Not specifying either throws an IllegalArgumentException.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you handle the case where a user denies the POST_NOTIFICATIONS permission?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">On first denial: explain value of notifications with a rationale dialog (shouldShowRequestPermissionRationale() returns true), then request again. On second denial (shouldShowRequestPermissionRationale() returns false after denial): don't request again — direct to Settings: Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS). Design the app to work without notifications — they're an enhancement, not required functionality. Track notification permission state in DataStore and conditionally show notification opt-in prompts in-app.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you architect offline-first data for a banking app with real-time balance updates?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Room as single source of truth. Balance data: cache in Room with a timestamp; show stale data with "last updated X minutes ago" banner. Real-time updates: WebSocket connection when app is foreground; on balance change event, update Room → Flow auto-emits to UI. Background sync: WorkManager polls balance every 15 min (minimum WorkManager interval). On network restore: ConstrainedWork triggers immediate refresh. Sensitive operations (transfers): require network, don't allow offline. Show clear offline indicator in app bar.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the foregroundServiceType requirement in Android 14?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Android 14 requires foreground services to declare a specific type in the manifest: android:foregroundServiceType="location|camera|microphone|mediaPlayback|dataSync|phoneCall|mediaProjection|health|remoteMessaging|shortService|specialUse|systemExempted". If you start a foreground service without the correct type declared (or start a type that requires a permission you don't have), it throws a MissingForegroundServiceTypeException. This forces apps to be explicit about what the foreground service is doing.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do feature flags improve production reliability beyond just enabling/disabling features?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Kill switch: instantly disable a broken feature without releasing a new app version (update propagates within minutes). Gradual rollout: enable for 1% of users first, monitor metrics, expand — same as staged rollout but within a single app version. Canary testing: enable for internal users or beta testers only. Configuration flags: change API timeouts, retry counts, page sizes without a release. Seasonal toggles: enable holiday features on a schedule. Emergency response: during an incident, flip a flag to use a backup API endpoint.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you test your app across multiple Android API levels in CI?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Firebase Test Lab: upload your APK/AAB and run instrumented tests on a matrix of real devices (API 21, 26, 28, 31, 33, 34+). Emulator matrix in CI: use GitHub Actions with multiple emulator runners (each API level in parallel). Minimum coverage: test on minimum supported API (e.g., API 26), the most popular version in your user base, and the latest stable API. Add specific regression tests when you fix a version-specific bug. This catches version regressions before production.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is predictive back gesture and what does it require from app code?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Predictive back gesture (Android 13+) shows a preview of the previous screen as the user swipes back, before completing the gesture. To opt in: set android:enableOnBackInvokedCallback="true" in the manifest. Migrate custom back handling from onBackPressed() (deprecated) to OnBackPressedCallback registered with the Activity's onBackPressedDispatcher. Navigation Component handles this automatically for fragment back stack. Custom back animations must use the new Android 14 predictive back APIs (BackEventCompat).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you monitor and alert on ANR (Application Not Responding) events?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Firebase Crashlytics automatically captures ANR reports (since Crashlytics SDK 17.3+). These appear separately from crashes in the Crashlytics dashboard with a main thread stack trace. Play Console also provides ANR rate metrics. Set up alerts: in Crashlytics, configure alert thresholds; below 0.1% ANR rate is the Play Store target for "good" apps. For prevention: strict mode in debug builds (StrictMode.setThreadPolicy with penaltyDeath) catches blocking main thread operations during development.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the Play In-App Update API and when would you force an update?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Play In-App Update API has two modes: Flexible update — shows an unobtrusive download prompt, user can continue using the app, update installs in background, prompts for restart. Immediate update — full-screen blocking UI, user must update to continue. Use Immediate for: critical security patches, API contract changes where old app will break with new backend, compliance requirements. Use Flexible for: feature updates, non-critical improvements. Check for updates at app startup using AppUpdateManager.getAppUpdateInfo().</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

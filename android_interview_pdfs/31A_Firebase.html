@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>31A — Firebase | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#17221a 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.3);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(62,207,142,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">31A · Firebase</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Auth &amp; Firestore</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> FCM &amp; Realtime DB</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Crashlytics &amp; Analytics</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Remote Config &amp; Perf</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Tier 3</div>
+    <h1><span>31A</span> — Firebase</h1>
+    <p class="hero-desc">Auth, Firestore, Realtime DB, FCM, Crashlytics, Analytics, Remote Config, and Performance Monitoring — the complete Firebase interview guide for Android.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 31A</span>
+      <span class="badge badge-tier3">Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Firebase Services on Android</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Service</th><th>What it does</th><th>Interview frequency</th></tr>
+      <tr><td>Authentication</td><td>Email/password, Google, phone sign-in; manages tokens</td><td>High</td></tr>
+      <tr><td>Cloud Firestore</td><td>NoSQL document database with real-time sync</td><td>High</td></tr>
+      <tr><td>Realtime Database</td><td>JSON tree database with WebSocket sync</td><td>Medium</td></tr>
+      <tr><td>FCM</td><td>Push notifications and data messages</td><td>High</td></tr>
+      <tr><td>Crashlytics</td><td>Crash reporting with symbolication</td><td>High</td></tr>
+      <tr><td>Analytics</td><td>Event-based user behaviour tracking</td><td>Medium</td></tr>
+      <tr><td>Remote Config</td><td>Remote feature flags and A/B testing</td><td>High</td></tr>
+      <tr><td>Performance Monitoring</td><td>Startup time, HTTP latency, custom traces</td><td>Medium</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Firebase is a backend-as-a-service that lets small teams ship quickly. The trade-off is vendor lock-in and limited query flexibility (Firestore can't do JOINs). At scale (&gt;10M users), cost and query limitations push teams to custom backends. Know when to use Firebase vs custom backend.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Auth &amp; Firestore →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128274;</div>2. Authentication &amp; Firestore</div>
+    <h3>Firebase Authentication</h3>
+    <pre><code><span class="cm">// Email/password sign-in</span>
+<span class="kw">suspend fun</span> <span class="fn">signIn</span>(email: <span class="cl">String</span>, password: <span class="cl">String</span>): <span class="cl">FirebaseUser</span>? {
+    <span class="kw">return</span> <span class="fn">try</span> {
+        <span class="kw">val</span> result = auth.<span class="fn">signInWithEmailAndPassword</span>(email, password).<span class="fn">await</span>()
+        result.user
+    } <span class="kw">catch</span> (e: <span class="cl">FirebaseAuthInvalidCredentialsException</span>) {
+        <span class="kw">null</span>   <span class="cm">// wrong password</span>
+    }
+}
+
+<span class="cm">// Google Sign-In flow</span>
+<span class="kw">val</span> googleSignInClient = <span class="cl">GoogleSignIn</span>.<span class="fn">getClient</span>(context, gso)
+<span class="kw">val</span> signInIntent = googleSignInClient.signInIntent
+launcher.<span class="fn">launch</span>(signInIntent)  <span class="cm">// in Activity/Fragment</span>
+
+<span class="cm">// In callback: get credential and sign in to Firebase</span>
+<span class="kw">val</span> account = <span class="cl">GoogleSignIn</span>.<span class="fn">getSignedInAccountFromIntent</span>(data).<span class="fn">getResult</span>()
+<span class="kw">val</span> credential = <span class="cl">GoogleAuthProvider</span>.<span class="fn">getCredential</span>(account.idToken, <span class="kw">null</span>)
+auth.<span class="fn">signInWithCredential</span>(credential).<span class="fn">await</span>()
+
+<span class="cm">// Auth state listener — observe sign-in/out changes</span>
+auth.<span class="fn">addAuthStateListener</span> { firebaseAuth ->
+    <span class="kw">val</span> user = firebaseAuth.currentUser
+    <span class="cm">// user != null → signed in; null → signed out</span>
+}
+
+<span class="cm">// Force token refresh (call when getting 401 from backend)</span>
+<span class="kw">val</span> idToken = auth.currentUser?.<span class="fn">getIdToken</span>(<span class="cm">/* forceRefresh = */</span> <span class="kw">true</span>)?.<span class="fn">await</span>()?.token</code></pre>
+
+    <h3>Cloud Firestore</h3>
+    <pre><code><span class="cm">// Structure: /users/{userId}/orders/{orderId}</span>
+<span class="kw">val</span> db = <span class="cl">FirebaseFirestore</span>.<span class="fn">getInstance</span>()
+
+<span class="cm">// Write document</span>
+db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(userId)
+    .<span class="fn">set</span>(userMap).<span class="fn">await</span>()
+
+<span class="cm">// Real-time listener (Flow wrapper)</span>
+<span class="kw">fun</span> <span class="fn">userFlow</span>(userId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">User</span>&gt; = <span class="fn">callbackFlow</span> {
+    <span class="kw">val</span> listener = db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(userId)
+        .<span class="fn">addSnapshotListener</span> { snapshot, error ->
+            <span class="kw">if</span> (error != <span class="kw">null</span>) { <span class="fn">close</span>(error); <span class="kw">return</span>@addSnapshotListener }
+            snapshot?.<span class="fn">toObject</span>(<span class="cl">User</span>::<span class="kw">class</span>.java)?.<span class="kw">let</span> { <span class="fn">trySend</span>(it) }
+        }
+    <span class="fn">awaitClose</span> { listener.<span class="fn">remove</span>() }   <span class="cm">// clean up on Flow cancellation</span>
+}
+
+<span class="cm">// Pagination with startAfter</span>
+<span class="kw">val</span> firstPage = db.<span class="fn">collection</span>(<span class="str">"posts"</span>)
+    .<span class="fn">orderBy</span>(<span class="str">"timestamp"</span>, <span class="cl">Query</span>.<span class="cl">Direction</span>.<span class="cl">DESCENDING</span>)
+    .<span class="fn">limit</span>(<span class="nu">20</span>)
+    .<span class="fn">get</span>().<span class="fn">await</span>()
+
+<span class="kw">val</span> lastDoc = firstPage.documents.<span class="fn">last</span>()
+<span class="kw">val</span> nextPage = db.<span class="fn">collection</span>(<span class="str">"posts"</span>)
+    .<span class="fn">orderBy</span>(<span class="str">"timestamp"</span>, <span class="cl">Query</span>.<span class="cl">Direction</span>.<span class="cl">DESCENDING</span>)
+    .<span class="fn">startAfter</span>(lastDoc)
+    .<span class="fn">limit</span>(<span class="nu">20</span>)
+    .<span class="fn">get</span>().<span class="fn">await</span>()</code></pre>
+    <h3>Firestore Security Rules (must know)</h3>
+    <pre><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      // Only authenticated user can read/write their own document
+      allow read, write: if request.auth != null &amp;&amp; request.auth.uid == userId;
+    }
+    match /posts/{postId} {
+      allow read: if true;  // public read
+      allow write: if request.auth != null &amp;&amp; request.resource.data.authorId == request.auth.uid;
+    }
+  }
+}</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Firestore vs Realtime Database</div>
+      Use Firestore for: structured data, complex queries, subcollections, offline support. Use Realtime Database for: simple data structures, very low latency (&lt;10ms), presence (online/offline status). Firestore is the default for new apps.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: FCM &amp; Realtime DB →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128241;</div>3. FCM &amp; Realtime Database</div>
+    <h3>Firebase Cloud Messaging (FCM)</h3>
+    <pre><code><span class="cm">// FirebaseMessagingService — extend in your app</span>
+<span class="kw">class</span> <span class="cl">MyFCMService</span> : <span class="cl">FirebaseMessagingService</span>() {
+
+    <span class="cm">// Called when a message is received while app is in foreground</span>
+    <span class="kw">override fun</span> <span class="fn">onMessageReceived</span>(message: <span class="cl">RemoteMessage</span>) {
+        <span class="kw">val</span> title = message.notification?.title
+        <span class="kw">val</span> body  = message.notification?.body
+        <span class="kw">val</span> data  = message.data   <span class="cm">// Map&lt;String, String&gt; — custom payload</span>
+        <span class="fn">showNotification</span>(title, body)
+    }
+
+    <span class="cm">// Called when FCM token is refreshed (or first time)</span>
+    <span class="kw">override fun</span> <span class="fn">onNewToken</span>(token: <span class="cl">String</span>) {
+        <span class="cm">// Send token to your backend so it can target this device</span>
+        <span class="fn">sendTokenToServer</span>(token)
+    }
+}
+
+<span class="cm">// Notification payload (handled by system, shown even in background)</span>
+<span class="cm">// vs Data payload (always delivered to onMessageReceived)</span></code></pre>
+    <h4>Notification Channels (Android 8+, required)</h4>
+    <pre><code><span class="kw">val</span> channel = <span class="cl">NotificationChannel</span>(
+    <span class="str">"ORDERS"</span>, <span class="str">"Order Updates"</span>, <span class="cl">NotificationManager</span>.<span class="cl">IMPORTANCE_HIGH</span>
+)
+channel.description = <span class="str">"Notifications for order status changes"</span>
+notificationManager.<span class="fn">createNotificationChannel</span>(channel)</code></pre>
+    <div class="table-wrap"><table>
+      <tr><th>Payload type</th><th>Foreground</th><th>Background</th><th>Killed</th></tr>
+      <tr><td>notification only</td><td>onMessageReceived called</td><td>System shows notification</td><td>System shows notification</td></tr>
+      <tr><td>data only</td><td>onMessageReceived called</td><td>onMessageReceived called</td><td>NOT delivered (use high priority)</td></tr>
+      <tr><td>notification + data</td><td>onMessageReceived called</td><td>System shows; data in intent extras</td><td>System shows; data in intent extras</td></tr>
+    </table></div>
+
+    <h3>Realtime Database</h3>
+    <pre><code><span class="kw">val</span> database = <span class="cl">FirebaseDatabase</span>.<span class="fn">getInstance</span>()
+<span class="kw">val</span> ref = database.<span class="fn">getReference</span>(<span class="str">"users/$userId/status"</span>)
+
+<span class="cm">// One-time read</span>
+ref.<span class="fn">get</span>().<span class="fn">await</span>().<span class="fn">getValue</span>(<span class="cl">String</span>::<span class="kw">class</span>.java)
+
+<span class="cm">// Real-time listener</span>
+ref.<span class="fn">addValueEventListener</span>(<span class="kw">object</span> : <span class="cl">ValueEventListener</span> {
+    <span class="kw">override fun</span> <span class="fn">onDataChange</span>(snapshot: <span class="cl">DataSnapshot</span>) {
+        <span class="kw">val</span> status = snapshot.<span class="fn">getValue</span>(<span class="cl">String</span>::<span class="kw">class</span>.java)
+    }
+    <span class="kw">override fun</span> <span class="fn">onCancelled</span>(error: <span class="cl">DatabaseError</span>) { }
+})</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Crashlytics &amp; Analytics →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128201;</div>4. Crashlytics &amp; Analytics</div>
+    <h3>Firebase Crashlytics</h3>
+    <pre><code><span class="cm">// Automatic crash reporting — no code needed after setup</span>
+<span class="cm">// Add to gradle: implementation "com.google.firebase:firebase-crashlytics-ktx"</span>
+
+<span class="cm">// Custom keys — add context to crash reports</span>
+<span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">setCustomKey</span>(<span class="str">"user_id"</span>, userId)
+<span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">setCustomKey</span>(<span class="str">"screen"</span>, <span class="str">"checkout"</span>)
+<span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">setCustomKey</span>(<span class="str">"cart_size"</span>, cartItems.size)
+
+<span class="cm">// Custom log — breadcrumbs that appear in crash report</span>
+<span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">log</span>(<span class="str">"User tapped checkout button"</span>)
+
+<span class="cm">// Non-fatal exception — record without crashing</span>
+<span class="kw">try</span> {
+    riskyOperation()
+} <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+    <span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">recordException</span>(e)
+    <span class="cm">// continue — non-fatal, just log it</span>
+}
+
+<span class="cm">// Set user ID for attribution</span>
+<span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">setUserId</span>(userId)</code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">Crash-free Users Metric</div>
+      Crashlytics tracks "crash-free users" — percentage of unique users who had NO crashes. This is the production SLA metric. A 99.5% crash-free rate means 5 in 1,000 users experienced a crash. Monitor this per version in the Crashlytics dashboard.
+    </div>
+    <h3>Firebase Analytics</h3>
+    <pre><code><span class="kw">val</span> analytics = <span class="cl">FirebaseAnalytics</span>.<span class="fn">getInstance</span>(context)
+
+<span class="cm">// Log event</span>
+analytics.<span class="fn">logEvent</span>(<span class="str">"add_to_cart"</span>) {
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">ITEM_ID</span>, productId)
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">ITEM_NAME</span>, productName)
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">VALUE</span>, price)
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">CURRENCY</span>, <span class="str">"USD"</span>)
+}
+
+<span class="cm">// Screen tracking</span>
+analytics.<span class="fn">logEvent</span>(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Event</span>.<span class="cl">SCREEN_VIEW</span>) {
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">SCREEN_NAME</span>, <span class="str">"ProductDetail"</span>)
+    param(<span class="cl">FirebaseAnalytics</span>.<span class="cl">Param</span>.<span class="cl">SCREEN_CLASS</span>, <span class="str">"ProductDetailActivity"</span>)
+}
+
+<span class="cm">// User properties — for segmentation and A/B test targeting</span>
+analytics.<span class="fn">setUserProperty</span>(<span class="str">"subscription_tier"</span>, <span class="str">"premium"</span>)
+analytics.<span class="fn">setUserId</span>(userId)</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Remote Config &amp; Perf →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9881;</div>5. Remote Config &amp; Performance</div>
+    <h3>Firebase Remote Config</h3>
+    <pre><code><span class="kw">val</span> remoteConfig = <span class="cl">FirebaseRemoteConfig</span>.<span class="fn">getInstance</span>()
+
+<span class="cm">// Set default values (used if fetch fails or before first fetch)</span>
+remoteConfig.<span class="fn">setDefaultsAsync</span>(<span class="cl">R</span>.xml.remote_config_defaults)
+
+<span class="cm">// Fetch and activate (MUST call before reading values)</span>
+<span class="kw">suspend fun</span> <span class="fn">initRemoteConfig</span>() {
+    <span class="kw">try</span> {
+        remoteConfig.<span class="fn">fetchAndActivate</span>().<span class="fn">await</span>()
+    } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+        <span class="cm">// Network failure — defaults are active, safe to proceed</span>
+    }
+}
+
+<span class="cm">// Read values</span>
+<span class="kw">val</span> isNewCheckoutEnabled = remoteConfig.<span class="fn">getBoolean</span>(<span class="str">"new_checkout_enabled"</span>)
+<span class="kw">val</span> heroColor = remoteConfig.<span class="fn">getString</span>(<span class="str">"hero_banner_color"</span>)
+<span class="kw">val</span> maxRetries = remoteConfig.<span class="fn">getLong</span>(<span class="str">"api_max_retries"</span>).<span class="fn">toInt</span>()</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Fetch Throttling</div>
+      In production, Remote Config caches fetched values for 12 hours by default. Calls to fetch() more frequently return cached values. In debug builds, use setMinimumFetchIntervalInSeconds(0) for instant updates. Never call fetchAndActivate() on every screen because it's throttled.
+    </div>
+    <h3>Firebase Performance Monitoring</h3>
+    <pre><code><span class="cm">// Automatic traces: app start, activity transitions, HTTP requests</span>
+
+<span class="cm">// Custom trace</span>
+<span class="kw">val</span> trace = <span class="cl">FirebasePerformance</span>.<span class="fn">getInstance</span>().<span class="fn">newTrace</span>(<span class="str">"checkout_flow"</span>)
+trace.<span class="fn">start</span>()
+<span class="cm">// ... checkout logic ...</span>
+trace.<span class="fn">putAttribute</span>(<span class="str">"payment_method"</span>, <span class="str">"credit_card"</span>)
+trace.<span class="fn">putMetric</span>(<span class="str">"items_count"</span>, cartSize.<span class="fn">toLong</span>())
+trace.<span class="fn">stop</span>()
+
+<span class="cm">// HTTP metric monitoring (automatic with OkHttp interceptor)</span>
+<span class="cm">// Add: implementation "com.google.firebase:firebase-perf"</span>
+<span class="cm">// Automatically tracks response time, payload size, status codes</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="table-wrap"><table>
+      <tr><th>Pitfall</th><th>Fix</th></tr>
+      <tr><td>Reading Remote Config before fetchAndActivate()</td><td>Defaults are served — always await fetchAndActivate() at startup</td></tr>
+      <tr><td>Firestore listener not removed</td><td>Store ListenerRegistration, call remove() in onStop/onDestroy or awaitClose in callbackFlow</td></tr>
+      <tr><td>FCM token not refreshed on server</td><td>Always implement onNewToken and update the server with the new token</td></tr>
+      <tr><td>Posting notification without channel on Android 8+</td><td>Create NotificationChannel before building notification</td></tr>
+      <tr><td>Auth token not refreshed on 401</td><td>Use OkHttp Authenticator to call getIdToken(forceRefresh=true) and retry</td></tr>
+      <tr><td>Writing sensitive data without security rules</td><td>Always define and test Firestore security rules; default is deny-all after rules version 2</td></tr>
+      <tr><td>Crashlytics user ID containing PII</td><td>Use hashed or anonymous ID, not email/name in setUserId()</td></tr>
+    </table></div>
+    <h3>Offline Persistence</h3>
+    <pre><code><span class="cm">// Enable Firestore offline persistence (enabled by default on Android)</span>
+<span class="kw">val</span> settings = <span class="fn">firestoreSettings</span> {
+    <span class="fn">setPersistenceEnabled</span>(<span class="kw">true</span>)
+    <span class="fn">setCacheSizeBytes</span>(<span class="cl">FirebaseFirestoreSettings</span>.<span class="cl">CACHE_SIZE_UNLIMITED</span>)
+}
+db.firestoreSettings = settings
+
+<span class="cm">// Reads work offline — serve from local cache</span>
+<span class="cm">// Writes are queued and synced when network returns</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">How to Answer Firebase Questions</div>
+      Structure: <strong>What it does</strong> → <strong>How to set it up</strong> → <strong>Production pattern</strong> → <strong>Pitfall to avoid</strong>. For any Firebase question, always mention the coroutine/Flow integration pattern.
+    </div>
+    <h3>Common Question Patterns</h3>
+    <ul>
+      <li><strong>"How do you handle auth token expiry?"</strong> → OkHttp Authenticator intercepts 401, calls getIdToken(forceRefresh=true), retries with new token. Use Mutex to prevent concurrent refreshes.</li>
+      <li><strong>"Firestore vs Realtime Database?"</strong> → Firestore: structured, better querying, offline, scales. RTDB: simpler, lower latency, presence tracking. Use Firestore for new apps.</li>
+      <li><strong>"How do you handle FCM when app is killed?"</strong> → Use notification payload (not data-only) — the system delivers it even when app is killed. Data-only messages require high priority and may not be delivered on doze mode.</li>
+      <li><strong>"What's a crash-free user rate?"</strong> → Percentage of users with zero crashes in the time window. Industry target: 99.5%+. Monitor per app version in Crashlytics dashboard.</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Topic</th><th>Key API / Concept</th></tr>
+      <tr><td>Auth sign-in</td><td>signInWithEmailAndPassword().await() — suspend-friendly with kotlinx coroutines</td></tr>
+      <tr><td>Auth token refresh</td><td>currentUser?.getIdToken(forceRefresh=true)?.await()?.token</td></tr>
+      <tr><td>Auth state</td><td>addAuthStateListener { user → } — observe sign-in/out changes</td></tr>
+      <tr><td>Firestore real-time</td><td>addSnapshotListener wrapped in callbackFlow; remove listener in awaitClose</td></tr>
+      <tr><td>Firestore pagination</td><td>startAfter(lastDocument).limit(20)</td></tr>
+      <tr><td>FCM foreground</td><td>onMessageReceived() — show manual notification</td></tr>
+      <tr><td>FCM token</td><td>onNewToken() — send to backend; token can change, always update</td></tr>
+      <tr><td>Crashlytics</td><td>setCustomKey, log (breadcrumbs), recordException (non-fatal), setUserId</td></tr>
+      <tr><td>Remote Config</td><td>setDefaultsAsync → fetchAndActivate() → getBoolean/getString/getLong</td></tr>
+      <tr><td>Performance</td><td>newTrace("name").start() ... putMetric() ... stop()</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you handle an expired Firebase auth token when making API calls?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Implement OkHttp Authenticator: when a 401 is received, call FirebaseAuth.currentUser?.getIdToken(forceRefresh=true)?.await()?.token. Use a Mutex to ensure only one refresh happens concurrently — if 5 requests fail with 401, only one should refresh and the others wait. Retry the failed request with the new token.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you choose Realtime Database over Firestore?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Realtime Database is better for: (1) Presence/online status tracking (built-in onDisconnect handlers), (2) Very simple flat data structures (JSON tree), (3) Ultra-low latency requirements (&lt;10ms). Firestore is better for everything else: subcollections, complex queries, better offline support, scales horizontally. Use Firestore for new apps by default.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between FCM notification payload and data payload?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Notification payload: handled by the FCM SDK automatically — shows a system notification when app is in background or killed. Data payload: always delivered to onMessageReceived() regardless of app state. Best practice: use notification+data payload so system handles display when backgrounded, and you also receive data in onMessageReceived() when foreground. Pure data messages need high priority for background delivery.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you prevent a Firestore memory leak from an unremoved snapshot listener?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Wrap the listener in callbackFlow { ... awaitClose { listener.remove() } }. The awaitClose block is called when the Flow is cancelled (collector's coroutine cancelled), which happens when the ViewModel is cleared. This automatically removes the Firestore listener. Never add a listener in Fragment without a corresponding remove() in onDestroyView().</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What are Crashlytics custom keys used for?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Custom keys add context to crash reports — they appear in the Crashlytics dashboard alongside the stack trace. Examples: user's subscription tier, current screen name, feature flag values, cart size. This helps reproduce crashes by understanding the app state at the time. Limit: 64 custom keys, 1KB per value.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why must fetchAndActivate() be called before reading Remote Config values?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Remote Config values are not automatically synced. The app has a local cache of fetched values. fetchAndActivate() fetches the latest values from the server AND activates them (makes them available to getBoolean/getString). Without this call, you read stale cached values or the default values you set in R.xml.remote_config_defaults. Always await this coroutine at startup before using any flag.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does Firestore offline persistence work on Android?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Firestore caches all documents you've read in a local SQLite database. When offline, reads are served from this cache. Writes are added to a local queue and automatically synced when connectivity is restored. Snapshot listeners still fire with cached data. This is enabled by default on Android. Set setCacheSizeBytes to control storage usage.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you track screen views with Firebase Analytics in a Compose app?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">In Compose there's no Activity lifecycle tied to screens, so you must log manually. Use a NavigationListener on NavController that fires on every destination change. In the listener, read the current destination route and log FirebaseAnalytics.Event.SCREEN_VIEW with SCREEN_NAME and SCREEN_CLASS params. This replaces the automatic Activity-based screen tracking.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What Firestore security rule would you write to allow a user to read/write only their own data?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">allow read, write: if request.auth != null && request.auth.uid == userId; — where userId is the document ID wildcard. This checks that the requesting user is authenticated AND their auth UID matches the document path. Without this, any authenticated user could read all users' data.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you use Firebase Performance Monitoring to measure checkout speed?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Create a named trace: val trace = FirebasePerformance.getInstance().newTrace("checkout_complete"). Call trace.start() when user taps "Pay". Add attributes (payment method, item count). Call trace.stop() when the order confirmation is received. Firebase aggregates the duration across all users — you can view p50/p90/p99 in the Performance Monitoring console.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

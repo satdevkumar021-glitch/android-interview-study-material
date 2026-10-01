@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>12C – Advanced Networking | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .ascii{font-family:"JetBrains Mono","Fira Code",monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;font-size:12.5px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:14px 0;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">12C · Advanced Networking</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>12C</span> — Advanced Networking</h1>
+    <p class="hero-desc">Certificate pinning, token refresh with Mutex, concurrent refresh problem, API error handling with sealed Result, and offline-first networking strategies.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 12C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Advanced Production Networking Topics</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Topic</th><th>Problem solved</th></tr>
+      <tr><td>Certificate Pinning</td><td>Prevents MITM attacks even if a rogue CA is trusted</td></tr>
+      <tr><td>Network Security Config</td><td>Declarative security policy — no code needed for basic pinning</td></tr>
+      <tr><td>Token Refresh</td><td>Silently refreshes expired JWT and retries original request</td></tr>
+      <tr><td>Concurrent Refresh Problem</td><td>Multiple simultaneous 401s — only one refresh call is made</td></tr>
+      <tr><td>Sealed Result + Error Mapper</td><td>Type-safe error propagation across layers</td></tr>
+      <tr><td>Offline-First</td><td>App works without network; data syncs when connectivity returns</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      These are the topics that distinguish senior Android engineers from mid-level ones. Certificate pinning is a requirement in banking/healthcare apps. The concurrent token refresh problem is a classic race condition — every banking app must solve it. Offline-first is about more than caching — it's about designing the Room + Retrofit data flow so the UI never shows an error when the network is slow.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>1. Certificate Pinning</h3>
+    <p>Certificate pinning prevents MITM attacks by hardcoding the expected certificate (or its public key hash) in the app. Even if a user installs a malicious CA certificate, a pinned connection will fail.</p>
+    <pre><code><span class="cm">// OkHttp CertificatePinner — pin the server's leaf or intermediate certificate</span>
+<span class="kw">val</span> certificatePinner = <span class="cl">CertificatePinner</span>.<span class="cl">Builder</span>()
+    .<span class="fn">add</span>(<span class="str">"api.bank.com"</span>, <span class="str">"sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="</span>)
+    .<span class="fn">add</span>(<span class="str">"api.bank.com"</span>, <span class="str">"sha256/BACKUP_PIN_HASH_HERE="</span>)  <span class="cm">// backup pin for rotation</span>
+    .<span class="fn">build</span>()
+
+<span class="kw">val</span> client = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+    .<span class="fn">certificatePinner</span>(certificatePinner)
+    .<span class="fn">build</span>()</code></pre>
+
+    <h4>Network Security Config (Declarative, XML)</h4>
+    <pre><code><span class="cm">&lt;!-- res/xml/network_security_config.xml --&gt;</span>
+&lt;<span class="fn">network-security-config</span>&gt;
+    &lt;<span class="fn">domain-config</span> <span class="kw">cleartextTrafficPermitted</span>=<span class="str">"false"</span>&gt;
+        &lt;<span class="fn">domain</span> <span class="kw">includeSubdomains</span>=<span class="str">"true"</span>&gt;api.bank.com&lt;/<span class="fn">domain</span>&gt;
+        &lt;<span class="fn">pin-set</span> <span class="kw">expiration</span>=<span class="str">"2026-01-01"</span>&gt;
+            &lt;<span class="fn">pin</span> <span class="kw">digest</span>=<span class="str">"SHA-256"</span>&gt;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=&lt;/<span class="fn">pin</span>&gt;
+            &lt;<span class="fn">pin</span> <span class="kw">digest</span>=<span class="str">"SHA-256"</span>&gt;BACKUP_PIN=&lt;/<span class="fn">pin</span>&gt;
+        &lt;/<span class="fn">pin-set</span>&gt;
+    &lt;/<span class="fn">domain-config</span>&gt;
+&lt;/<span class="fn">network-security-config</span>&gt;
+
+<span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;<span class="fn">application</span> <span class="kw">android:networkSecurityConfig</span>=<span class="str">"@xml/network_security_config"</span> ... /&gt;</code></pre>
+
+    <h3>2. Token Refresh — The Concurrent Problem</h3>
+    <p>When a JWT expires, multiple in-flight API calls all get 401 simultaneously. Without coordination, each call would try to refresh the token independently — causing multiple refresh requests and race conditions.</p>
+    <div class="ascii">
+PROBLEM (no mutex):
+Thread 1: GET /orders → 401 → starts refresh
+Thread 2: GET /cart  → 401 → starts refresh (duplicate!)
+Thread 3: GET /user  → 401 → starts refresh (triplicate!)
+→ 3 concurrent refresh calls → server confusion, possible logout
+
+SOLUTION (with Mutex):
+Thread 1: GET /orders → 401 → acquires Mutex → refreshes token → releases Mutex → retries
+Thread 2: GET /cart  → 401 → waits for Mutex → (token already refreshed) → retries with new token
+Thread 3: GET /user  → 401 → waits for Mutex → retries with new token
+→ 1 refresh call, all requests succeed
+    </div>
+    <pre><code><span class="kw">class</span> <span class="cl">TokenRefreshInterceptor</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> tokenStore: <span class="cl">TokenStore</span>,
+    <span class="an">@UnauthenticatedOkHttpClient</span> <span class="kw">private val</span> refreshClient: <span class="cl">OkHttpClient</span>
+) : <span class="cl">Interceptor</span> {
+
+    <span class="kw">private val</span> mutex = <span class="cl">Mutex</span>()  <span class="cm">// Coroutine Mutex — only one refresh at a time</span>
+
+    <span class="kw">override fun</span> <span class="fn">intercept</span>(chain: <span class="cl">Interceptor</span>.<span class="cl">Chain</span>): <span class="cl">Response</span> {
+        <span class="kw">val</span> response = chain.<span class="fn">proceed</span>(chain.request())
+        <span class="kw">if</span> (response.code != <span class="nu">401</span>) <span class="kw">return</span> response
+
+        response.<span class="fn">close</span>()
+
+        <span class="cm">// Synchronous token refresh with Mutex to prevent concurrent refreshes</span>
+        <span class="kw">val</span> newToken = <span class="fn">runBlocking</span> {
+            mutex.<span class="fn">withLock</span> {
+                <span class="cm">// Check if another thread already refreshed the token while we waited</span>
+                <span class="kw">val</span> currentToken = tokenStore.<span class="fn">getAccessToken</span>()
+                <span class="kw">val</span> requestToken = chain.request().header(<span class="str">"Authorization"</span>)?.<span class="fn">removePrefix</span>(<span class="str">"Bearer "</span>)
+                <span class="kw">if</span> (currentToken != requestToken) {
+                    <span class="cm">// Token was already refreshed by another thread — use the new one</span>
+                    <span class="kw">return</span><span class="an">@withLock</span> currentToken
+                }
+                <span class="cm">// We are the first thread — perform the refresh</span>
+                <span class="kw">val</span> refreshResponse = refreshClient.<span class="fn">newCall</span>(
+                    <span class="fn">buildRefreshRequest</span>(tokenStore.<span class="fn">getRefreshToken</span>())
+                ).<span class="fn">execute</span>()
+                <span class="kw">if</span> (!refreshResponse.<span class="fn">isSuccessful</span>()) {
+                    tokenStore.<span class="fn">clearTokens</span>()  <span class="cm">// force logout</span>
+                    <span class="kw">return</span><span class="an">@withLock</span> <span class="kw">null</span>
+                }
+                <span class="kw">val</span> newToken = refreshResponse.<span class="fn">parseToken</span>()
+                tokenStore.<span class="fn">saveTokens</span>(newToken)
+                newToken.accessToken
+            }
+        } ?: <span class="kw">return</span> <span class="fn">buildUnauthorizedResponse</span>(chain.request())
+
+        <span class="cm">// Retry original request with new token</span>
+        <span class="kw">return</span> chain.<span class="fn">proceed</span>(
+            chain.request().<span class="fn">newBuilder</span>().<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $newToken"</span>).<span class="fn">build</span>()
+        )
+    }
+}</code></pre>
+
+    <h3>3. Sealed Result Type + Error Mapper</h3>
+    <pre><code><span class="kw">sealed class</span> <span class="cl">NetworkResult</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {
+    <span class="kw">data class</span> <span class="cl">Success</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> data: <span class="cl">T</span>)                     : <span class="cl">NetworkResult</span>&lt;<span class="cl">T</span>&gt;()
+    <span class="kw">data class</span> <span class="cl">HttpError</span>(<span class="kw">val</span> code: <span class="cl">Int</span>, <span class="kw">val</span> error: <span class="cl">ApiError</span>?) : <span class="cl">NetworkResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">data class</span> <span class="cl">NetworkError</span>(<span class="kw">val</span> exception: <span class="cl">IOException</span>)          : <span class="cl">NetworkResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">object</span> <span class="cl">Loading</span>                                                : <span class="cl">NetworkResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+}
+
+<span class="cm">// Extension function — wrap any Retrofit call in a NetworkResult</span>
+<span class="kw">suspend fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">safeApiCall</span>(call: <span class="kw">suspend</span> () -&gt; <span class="cl">Response</span>&lt;<span class="cl">T</span>&gt;): <span class="cl">NetworkResult</span>&lt;<span class="cl">T</span>&gt; =
+    <span class="kw">try</span> {
+        <span class="kw">val</span> response = <span class="fn">call</span>()
+        <span class="kw">if</span> (response.<span class="fn">isSuccessful</span>()) <span class="cl">NetworkResult</span>.<span class="cl">Success</span>(<span class="fn">requireNotNull</span>(response.<span class="fn">body</span>()))
+        <span class="kw">else</span> <span class="cl">NetworkResult</span>.<span class="cl">HttpError</span>(response.<span class="fn">code</span>(), response.<span class="fn">errorBody</span>()?.<span class="fn">parseApiError</span>())
+    } <span class="kw">catch</span> (e: <span class="cl">IOException</span>) {
+        <span class="cl">NetworkResult</span>.<span class="cl">NetworkError</span>(e)
+    }</code></pre>
+
+    <h3>4. Offline-First Networking</h3>
+    <pre><code><span class="cm">// Pattern: emit Room data immediately, then fetch from network and update Room</span>
+<span class="cm">// Room's Flow re-emits when the DB updates → UI automatically shows fresh data</span>
+<span class="kw">fun</span> <span class="fn">getProducts</span>(): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt; = <span class="fn">flow</span> {
+    <span class="cm">// 1. Emit cached data immediately (UI is usable right away)</span>
+    <span class="fn">emitAll</span>(productDao.<span class="fn">getProducts</span>().<span class="fn">map</span> { it.<span class="fn">map</span>(ProductEntity::<span class="fn">toDomain</span>) })
+}.<span class="fn">onStart</span> {
+    <span class="cm">// 2. Fetch from network in parallel — updates Room, which re-emits the Flow</span>
+    <span class="fn">refreshProductsFromNetwork</span>()
+}
+
+<span class="kw">private suspend fun</span> <span class="fn">refreshProductsFromNetwork</span>() {
+    <span class="fn">runCatching</span> { api.<span class="fn">getProducts</span>() }
+        .<span class="fn">onSuccess</span> { dtos -&gt; productDao.<span class="fn">replaceAll</span>(dtos.<span class="fn">map</span>(ProductDto::<span class="fn">toEntity</span>)) }
+        .<span class="fn">onFailure</span> { <span class="cm">/* silently fail — cached data is already shown */</span> }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Certificate Pinning — Required for</h3>
+    <ul>
+      <li>Banking, payments, healthcare apps — any app handling sensitive personal or financial data</li>
+      <li>Apps in regulated industries (PCI-DSS, HIPAA)</li>
+      <li>Internal corporate apps where the server certificate is known and stable</li>
+    </ul>
+    <div class="callout callout-red">
+      <div class="callout-label">Certificate Rotation Warning</div>
+      Always include a backup pin. If the server's certificate is rotated and you've only pinned one certificate hash, all previously installed app versions will stop working until users update. With an expiration date in Network Security Config and a backup pin, you can rotate gracefully.
+    </div>
+    <h3>Mutex Token Refresh — Required when</h3>
+    <ul>
+      <li>The app makes multiple concurrent API calls</li>
+      <li>The authentication token has a TTL and can expire mid-session</li>
+    </ul>
+    <h3>Offline-First — Use when</h3>
+    <ul>
+      <li>Users are in areas with intermittent connectivity (mobile apps in general)</li>
+      <li>The app shows lists of data that should be available instantly</li>
+      <li>A network failure should degrade gracefully, not show an error screen</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>Banking App — Complete Auth Interceptor with Concurrent Refresh</h3>
+    <pre><code><span class="cm">// TokenStore — persists tokens securely (EncryptedSharedPreferences)</span>
+<span class="kw">interface</span> <span class="cl">TokenStore</span> {
+    <span class="kw">fun</span> <span class="fn">getAccessToken</span>(): <span class="cl">String</span>?
+    <span class="kw">fun</span> <span class="fn">getRefreshToken</span>(): <span class="cl">String</span>?
+    <span class="kw">fun</span> <span class="fn">saveTokens</span>(accessToken: <span class="cl">String</span>, refreshToken: <span class="cl">String</span>)
+    <span class="kw">fun</span> <span class="fn">clearTokens</span>()
+}
+
+<span class="cm">// Full interceptor with all production considerations</span>
+<span class="kw">class</span> <span class="cl">BankingAuthInterceptor</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> tokenStore: <span class="cl">TokenStore</span>,
+    <span class="an">@UnauthenticatedOkHttpClient</span>
+    <span class="kw">private val</span> authClient: <span class="cl">OkHttpClient</span>,
+    <span class="kw">private val</span> moshi: <span class="cl">Moshi</span>
+) : <span class="cl">Interceptor</span> {
+
+    <span class="kw">companion object</span> {
+        <span class="kw">private val</span> mutex = <span class="cl">Mutex</span>()  <span class="cm">// static — shared across all interceptor instances</span>
+    }
+
+    <span class="kw">override fun</span> <span class="fn">intercept</span>(chain: <span class="cl">Interceptor</span>.<span class="cl">Chain</span>): <span class="cl">Response</span> {
+        <span class="cm">// 1. Add current token to request</span>
+        <span class="kw">val</span> token = tokenStore.<span class="fn">getAccessToken</span>()
+        <span class="kw">val</span> request = <span class="kw">if</span> (token != <span class="kw">null</span>)
+            chain.request().<span class="fn">newBuilder</span>().<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $token"</span>).<span class="fn">build</span>()
+        <span class="kw">else</span> chain.request()
+
+        <span class="kw">val</span> response = chain.<span class="fn">proceed</span>(request)
+        <span class="kw">if</span> (response.code != <span class="nu">401</span>) <span class="kw">return</span> response
+
+        response.<span class="fn">close</span>()  <span class="cm">// IMPORTANT: close before retrying</span>
+
+        <span class="cm">// 2. Try to refresh token, coordinated with Mutex</span>
+        <span class="kw">val</span> newToken = <span class="fn">runBlocking</span> {
+            mutex.<span class="fn">withLock</span> {
+                <span class="cm">// Was token already refreshed while waiting for Mutex?</span>
+                <span class="kw">val</span> latestToken = tokenStore.<span class="fn">getAccessToken</span>()
+                <span class="kw">if</span> (latestToken != token) {
+                    <span class="kw">return</span><span class="an">@withLock</span> latestToken  <span class="cm">// use the already-refreshed token</span>
+                }
+                <span class="cm">// Perform the refresh</span>
+                <span class="kw">val</span> refreshToken = tokenStore.<span class="fn">getRefreshToken</span>()
+                    ?: <span class="kw">return</span><span class="an">@withLock</span> <span class="kw">null</span>
+
+                <span class="kw">val</span> refreshResult = <span class="fn">runCatching</span> {
+                    authClient.<span class="fn">newCall</span>(
+                        <span class="cl">Request</span>.<span class="cl">Builder</span>()
+                            .<span class="fn">url</span>(<span class="str">"https://auth.bank.com/v1/token/refresh"</span>)
+                            .<span class="fn">post</span>(<span class="fn">jsonBody</span>(<span class="str">"""{"refreshToken":"$refreshToken"}"""</span>))
+                            .<span class="fn">build</span>()
+                    ).<span class="fn">execute</span>()
+                }
+
+                refreshResult.<span class="fn">getOrNull</span>()?.<span class="fn">let</span> { refreshResponse -&gt;
+                    <span class="kw">if</span> (refreshResponse.<span class="fn">isSuccessful</span>()) {
+                        <span class="kw">val</span> tokens = refreshResponse.<span class="fn">parseTokenResponse</span>(moshi)
+                        tokenStore.<span class="fn">saveTokens</span>(tokens.accessToken, tokens.refreshToken)
+                        tokens.accessToken
+                    } <span class="kw">else</span> {
+                        tokenStore.<span class="fn">clearTokens</span>()  <span class="cm">// session expired — force re-login</span>
+                        <span class="kw">null</span>
+                    }
+                }
+            }
+        }
+
+        <span class="kw">return</span> <span class="kw">if</span> (newToken != <span class="kw">null</span>) {
+            chain.<span class="fn">proceed</span>(request.<span class="fn">newBuilder</span>().<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $newToken"</span>).<span class="fn">build</span>())
+        } <span class="kw">else</span> {
+            <span class="cm">// Build 401 response to propagate up to the ViewModel</span>
+            <span class="cl">Response</span>.<span class="cl">Builder</span>().<span class="fn">request</span>(request).<span class="fn">protocol</span>(<span class="cl">Protocol</span>.<span class="cl">HTTP_1_1</span>)
+                .<span class="fn">code</span>(<span class="nu">401</span>).<span class="fn">message</span>(<span class="str">"Unauthorized"</span>)
+                .<span class="fn">body</span>(<span class="str">""</span>.<span class="fn">toResponseBody</span>()).<span class="fn">build</span>()
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Token Refresh: Mutex vs Authenticator vs Queue</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>OkHttp Authenticator</td><td>Built-in OkHttp support; called on 401 automatically</td><td>OkHttp uses its own internal locking; can conflict with manual retry logic</td></tr>
+      <tr><td>Interceptor + Mutex</td><td>Full control; clear logic; works with coroutines</td><td>Requires careful runBlocking usage in interceptor</td></tr>
+      <tr><td>Queue-based (pending calls)</td><td>Queues all pending calls; replays with new token</td><td>Complex implementation; more memory usage</td></tr>
+    </table></div>
+    <h3>Offline-First: Cache-then-Network vs Network-then-Cache vs Cache-only</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Strategy</th><th>Show stale data?</th><th>When to use</th></tr>
+      <tr><td>Cache-then-Network (offline-first)</td><td>Yes (briefly)</td><td>Lists, feeds, catalogue — data freshness matters but offline usability is critical</td></tr>
+      <tr><td>Network-then-Cache</td><td>No</td><td>Account balance, live prices — accuracy more important than speed</td></tr>
+      <tr><td>Cache-only (with background sync)</td><td>Yes</td><td>Notes apps, todo lists — edited locally, synced later</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Certificate Pinning Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Forgotten Backup Pin = App Broken on Certificate Rotation</div>
+      If you pin only the production certificate and the server rotates to a new cert, every installed version of the app breaks until the user updates. Always pin the production certificate AND a backup certificate (can be a pre-generated cert you haven't deployed yet). Include an expiration date in Network Security Config so Trustpilot/Google Play's review catches stale pins.
+    </div>
+    <h3>Token Refresh Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Infinite Refresh Loop</div>
+      If the refresh endpoint itself returns 401 (e.g., refresh token expired), and your interceptor retries on 401, you'll loop infinitely. Always check: if the request is already to the refresh endpoint, don't retry — propagate the 401 up and force re-login.
+    </div>
+    <h3>Offline-First Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Not Closing Response Bodies</div>
+      When you call <code>chain.proceed()</code>, OkHttp returns a <code>Response</code> with an open body stream. If you check the status code and decide to retry without calling <code>response.close()</code>, you leak the connection. Always call <code>response.close()</code> before retrying or returning a different response.
+    </div>
+    <h3>Best Practices</h3>
+    <ul>
+      <li>Store the Mutex as a <code>companion object</code> property — shared across all interceptor instances</li>
+      <li>Use <code>EncryptedSharedPreferences</code> (or DataStore with encryption) to store refresh tokens — never plain SharedPreferences</li>
+      <li>Seal the <code>NetworkResult</code> type — forces callers to handle all cases at compile time</li>
+      <li>Room as single source of truth: always write network data to Room first; let Room's Flow deliver it to the UI</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"For production Android networking: certificate pinning pins the server's certificate hash in the app so MITM attacks fail even with a rogue CA — OkHttp's CertificatePinner or Network Security Config XML handles this. Token refresh: when a JWT expires, multiple concurrent 401s can trigger multiple refresh calls — use a Mutex so only one refresh happens; others wait and reuse the new token. Offline-first: Room is the single source of truth; the repository emits Room's Flow immediately, then fetches from network and writes to Room — the Flow re-emits automatically with fresh data."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"The concurrent token refresh problem is a race condition: if 5 API calls are in-flight and the token expires, all 5 get 401 simultaneously and would each try to refresh — potentially logging the user out. The fix: a Mutex in the auth interceptor. Thread 1 acquires the Mutex and refreshes. Threads 2–5 wait. When they finally acquire the Mutex, they check if the token changed since their 401 — it has, so they skip the refresh and retry with the new token directly. Always store the Mutex as a companion object property — a new interceptor instance per request would have different Mutexes and the protection fails. For pinning: always include a backup pin to survive certificate rotation, and set an expiration date so you remember to update it."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Certificate pinning</strong>: OkHttp CertificatePinner or Network Security Config XML; always include backup pin</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Concurrent 401 problem</strong>: Mutex ensures only one refresh call happens; others reuse the result</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Check token changed before refreshing</strong>: avoids redundant refresh when waiting on Mutex</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Never loop on refresh endpoint 401</strong>: detect and force re-login</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Offline-first</strong>: Room as single source of truth; emit cache immediately, update from network</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Always close Response before retrying</strong>: prevents OkHttp connection leaks</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Full OAuth 2.0 PKCE flow (mention if asked, don't volunteer)</li>
+      <li>TLS handshake mechanics (just say "certificate pinning validates the server cert")</li>
+      <li>Network Security Config for debug builds (mention only if asked about proxy debugging)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"What's the difference between CertificatePinner and Network Security Config?"</td><td>Both pin certificates. CertificatePinner is in code — works for one host at a time, easy to update with app release. NSC is XML — declarative, also controls cleartext traffic and custom CAs, applied at OS level.</td></tr>
+      <tr><td>"What is stale-while-revalidate?"</td><td>Serve the cached response immediately, then fetch fresh data in the background. The UI sees instant data; if the background fetch differs, the UI updates. This is essentially the offline-first pattern described above.</td></tr>
+      <tr><td>"How do you store tokens securely?"</td><td>EncryptedSharedPreferences (wraps Android Keystore) for access and refresh tokens. Never plain SharedPreferences or files. Never in-memory only — tokens are lost on process death.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The subtle part of the Mutex solution is the "check if token changed" step. Without it, threads 2–5 wake up after Thread 1's refresh and each also try to refresh — the Mutex prevents parallel refreshes, but without the stale-token check, you'd refresh N times sequentially. The check makes the solution O(1) refreshes regardless of how many calls failed with 401. This is the kind of detail that separates a correct implementation from a production-ready one.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Certificate Pinning</h4>
+        <pre><code>CertificatePinner.Builder()
+    .add("api.bank.com", "sha256/PROD_HASH=")
+    .add("api.bank.com", "sha256/BACKUP=")  // always add backup!
+    .build()
+// OR: network_security_config.xml</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Concurrent Token Refresh</h4>
+        <pre><code>companion object { val mutex = Mutex() }
+
+runBlocking { mutex.withLock {
+    if (tokenStore.getAccessToken() != oldToken)
+        return@withLock newToken  // already refreshed
+    // do actual refresh here
+}}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Sealed Network Result</h4>
+        <pre><code>sealed class NetworkResult&lt;out T&gt; {
+    data class Success&lt;T&gt;(val data: T)     : NetworkResult&lt;T&gt;()
+    data class HttpError(val code: Int)    : NetworkResult&lt;Nothing&gt;()
+    data class NetworkError(val e: IOException) : NetworkResult&lt;Nothing&gt;()
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Offline-First Pattern</h4>
+        <pre><code>// 1. Emit Room immediately
+emitAll(dao.getProducts().map { it.toDomain() })
+// 2. Fetch network, write to Room
+api.getProducts().onSuccess { dao.replaceAll(it) }
+// Room Flow re-emits → UI updates automatically</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is certificate pinning and why is it needed?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Certificate pinning hardcodes the expected server certificate (or its public key hash) in the app. Standard TLS trusts any certificate signed by a trusted CA. If an attacker installs a rogue CA certificate on the device (or does a corporate MITM), they can intercept TLS traffic. Certificate pinning rejects any certificate not matching the pinned hash — even if it's signed by a "trusted" CA. This is required for apps handling financial or health data where MITM attacks must be prevented.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the concurrent token refresh problem?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        When a JWT expires, multiple in-flight API calls all receive 401 simultaneously. Without coordination, each call would attempt to refresh the token independently — potentially making 5 simultaneous refresh calls, overwhelming the auth server, causing race conditions (which refresh response is "correct"?), and possibly invalidating other refresh tokens in the process. The solution: a Mutex that serialises refresh attempts. The first thread refreshes; subsequent threads wait, then reuse the new token without refreshing again.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What does "offline-first" mean in Android development?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Offline-first means the app is designed to work without network connectivity. The architecture uses Room as the single source of truth: the UI always reads from Room (never directly from the network), so data is instantly available even without a network. When the network is available, the repository fetches fresh data and writes it to Room — Room's Flow automatically re-emits the update to the UI. The user never sees "no connection" errors for data that was previously loaded; they see slightly stale data, which is preferable to a blank screen.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Why must the Mutex be in a companion object in the token refresh interceptor?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        OkHttp creates a new interceptor invocation context per call — but if the <code>Mutex</code> is an instance property, each call could potentially use a different Mutex instance if new interceptor instances are created. The Mutex must be shared across all concurrent calls to the same interceptor. Declaring it in <code>companion object</code> makes it a class-level (static) property, so all instances share the same Mutex. Even if multiple interceptors of the same type exist (which shouldn't happen in production, but might in tests), they share the lock.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How does the "check if token changed" optimisation work in the Mutex refresh pattern?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        When Thread 1 acquires the Mutex and refreshes the token, Threads 2–5 are waiting. When they each acquire the Mutex (one at a time), they check: "Is the current token in the token store different from the token that was in my 401 request?" If yes — Thread 1 already refreshed — they skip the refresh and return the new token immediately. Without this check, Threads 2–5 would each perform a sequential refresh, refreshing the token 5 times and invalidating previously issued refresh tokens. The check makes it so only Thread 1 does real work; the rest benefit from it.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What should happen when the token refresh request itself returns 401?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A 401 on the refresh endpoint means the refresh token itself has expired (or been revoked). The session is invalid and cannot be recovered silently. The interceptor should: (1) Call <code>tokenStore.clearTokens()</code> — remove all stored credentials. (2) Return <code>null</code> from the refresh logic. (3) Build a 401 response to propagate up the call chain. (4) The ViewModel observes the 401 state and navigates to the login screen.<br><br>
+        Critical: guard against infinite loops — if the request URL is the refresh endpoint, skip the 401 retry logic entirely and propagate the 401 immediately.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What is the difference between OkHttp CertificatePinner and Network Security Config?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>CertificatePinner</strong> (code-based): configured in OkHttpClient builder. Per-host configuration. Checked by OkHttp on every request to the pinned hostname. More flexible — can be dynamically updated (e.g., via remote config, though that defeats the purpose). Easy to test.<br><br>
+        <strong>Network Security Config</strong> (XML): declared in <code>res/xml/network_security_config.xml</code>, referenced in AndroidManifest. Applied at the OS networking layer — affects all connections from the app including those not using OkHttp. Also controls cleartext traffic (<code>cleartextTrafficPermitted</code>), custom CAs for debug builds, and domain-specific policies. Has an expiration date feature. Verified by Google Play on upload.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design the full offline-first architecture for a banking transaction history feature.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Room</strong>: <code>TransactionEntity</code> with all fields. <code>TransactionDao</code> returns <code>Flow&lt;List&lt;TransactionEntity&gt;&gt;</code>.<br><br>
+        <strong>Repository</strong>: <code>getTransactions()</code> returns a Flow that: (1) immediately emits Room data (mapped to domain models). Separately, a background refresh: (2) fetches from Retrofit, writes to Room via <code>dao.replaceAll()</code>. Room's Flow auto-re-emits the fresh data.<br><br>
+        <strong>Stale data handling</strong>: each transaction has a server-assigned timestamp. On Room insert, also store a <code>fetchedAt</code> timestamp. Show a "last updated X minutes ago" label in the UI based on this. If <code>fetchedAt</code> is older than 5 minutes and no network is available, show a "data may be outdated" banner.<br><br>
+        <strong>Balance</strong> (accuracy-critical): do NOT use offline-first for balance. Always fetch from network. Show a loading state until fresh data arrives. Cache for display only during temporary connection loss, with a clear "as of [time]" label.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A user's token refresh is failing intermittently in production. How would you debug it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Debugging strategy:<br><br>
+        1. <strong>Add logging</strong> (to a secure backend — not Logcat in production): log refresh request timestamps, HTTP status codes, and whether the token-changed check triggered. Never log token values.<br>
+        2. <strong>Check for clock skew</strong>: JWT expiry is time-based. If the device's clock is ahead/behind the server's, tokens may appear expired before they are. Check the token's <code>exp</code> claim vs system time at the point of 401.<br>
+        3. <strong>Check for Mutex deadlock</strong>: if the Mutex is never released (exception in the refresh block), all calls will hang. Ensure <code>withLock</code> is used (auto-releases on exception).<br>
+        4. <strong>Verify single Mutex instance</strong>: check if the Mutex is actually in <code>companion object</code> — a test configuration change could have moved it to an instance property.<br>
+        5. <strong>Server logs</strong>: check if multiple refresh requests are hitting the server from the same device — indicating the Mutex isn't working as expected.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How would you handle certificate pinning when using a CDN that rotates certificates frequently?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        CDNs like CloudFront rotate leaf certificates frequently (every 30–90 days), making leaf certificate pinning impractical. Solution: pin the <strong>intermediate CA</strong> certificate instead. CDN providers control which intermediate CA they use, and these rotate far less frequently (years). This gives you MITM protection without breaking on every leaf cert rotation.<br><br>
+        Alternative: use the <strong>public key</strong> hash (<code>sha256/</code> of the SubjectPublicKeyInfo) rather than the certificate hash. The public key is stable even when the certificate is renewed — same public key, new certificate = same pin hash.<br><br>
+        Also: implement a remote kill-switch — a mechanism to disable pinning for a specific version via a remote config, in case a pin break in production requires an emergency bypass while an app update propagates.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

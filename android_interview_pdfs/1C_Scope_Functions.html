@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1C — Kotlin Scope Functions | Android Interview Prep</title>
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;
+    --text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;
+    --green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;min-height:100vh;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;letter-spacing:.05em;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:620px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:20px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  /* big comparison table special */
+  .scope-table td:nth-child(1){color:var(--accent);font-family:"JetBrains Mono",monospace;font-size:13px;}
+  .scope-table td:nth-child(2){color:var(--accent2);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-header">1C · Scope Functions</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1C</span> — Kotlin Scope Functions</h1>
+    <p class="hero-desc">let, run, with, apply, also — when to use each, how they differ, and why picking the wrong one is a common interview trap.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What they are</h3>
+    <p>Scope functions are five standard library functions — <code>let</code>, <code>run</code>, <code>with</code>, <code>apply</code>, <code>also</code> — that execute a block of code in the context of an object. They differ in two dimensions: <strong>how the object is referenced inside the block</strong> (<code>this</code> vs <code>it</code>) and <strong>what the block returns</strong> (the object itself vs the result of the last expression).</p>
+    <h3>Why they exist</h3>
+    <p>They replace repetitive patterns: null checks, builder-style init, chaining operations, and temporary scoping of variables. They make code more readable by grouping related operations and avoiding repeated variable names.</p>
+    <h3>Problem they solve</h3>
+    <ul>
+      <li>Repeated variable references: <code>user.name = ""; user.age = 0; user.email = ""</code></li>
+      <li>Null-safe execution blocks: <code>if (x != null) { ... }</code></li>
+      <li>Temporary computed values that shouldn't pollute the outer scope</li>
+      <li>Builder/configuration pattern without a dedicated Builder class</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">The Two Axes — Memorize This</div>
+      <strong>Axis 1 — Block reference:</strong> <code>this</code> (receiver) = apply, run, with &nbsp;|&nbsp; <code>it</code> (argument) = let, also<br>
+      <strong>Axis 2 — Return value:</strong> Returns object = apply, also &nbsp;|&nbsp; Returns lambda result = let, run, with
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- S2 HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>The Master Comparison Table</h3>
+    <div class="table-wrap">
+    <table class="scope-table">
+      <tr><th>Function</th><th>Object ref</th><th>Return value</th><th>Is extension?</th><th>Primary use</th></tr>
+      <tr><td>let</td><td>it</td><td>Lambda result</td><td>Yes</td><td>Null checks, transform, temporary scope</td></tr>
+      <tr><td>run</td><td>this</td><td>Lambda result</td><td>Yes</td><td>Compute a result using object's context</td></tr>
+      <tr><td>with</td><td>this</td><td>Lambda result</td><td>No (takes object as arg)</td><td>Group operations on an object, no return needed</td></tr>
+      <tr><td>apply</td><td>this</td><td>The object itself</td><td>Yes</td><td>Configure/initialize an object, return it</td></tr>
+      <tr><td>also</td><td>it</td><td>The object itself</td><td>Yes</td><td>Side effects (logging, debugging) in a chain</td></tr>
+    </table>
+    </div>
+
+    <h3>let — transform or null-safe execute</h3>
+    <pre><code><span class="cm">// Null-safe block — only executes if token is non-null</span>
+<span class="kw">val</span> result = token<span class="kw">?.</span><span class="fn">let</span> { t ->
+    <span class="fn">buildAuthHeader</span>(t)  <span class="cm">// 'it' (named 't' here) = token</span>
+}                        <span class="cm">// result = String? (null if token was null)</span>
+
+<span class="cm">// Temporary scope — 'trimmed' doesn't leak outside</span>
+<span class="kw">val</span> length = rawInput.<span class="fn">let</span> {
+    <span class="kw">val</span> trimmed = it.<span class="fn">trim</span>()
+    trimmed.length        <span class="cm">// return value of block</span>
+}</code></pre>
+
+    <h3>run — compute a result in object's context</h3>
+    <pre><code><span class="cm">// On an object — 'this' = the object</span>
+<span class="kw">val</span> isValid = userForm.<span class="fn">run</span> {
+    email.<span class="fn">isNotBlank</span>() &amp;&amp; password.length >= <span class="nu">8</span>  <span class="cm">// this = userForm</span>
+}
+
+<span class="cm">// As a non-extension: replace with a block that returns a value</span>
+<span class="kw">val</span> config = <span class="fn">run</span> {
+    <span class="kw">val</span> base = <span class="fn">loadBaseConfig</span>()
+    base.<span class="fn">copy</span>(debug = <span class="cl">BuildConfig</span>.DEBUG)   <span class="cm">// result of block</span>
+}</code></pre>
+
+    <h3>with — group operations, no chain needed</h3>
+    <pre><code><span class="cm">// 'this' = binding; no return value needed</span>
+<span class="fn">with</span>(binding) {
+    tvName.text = user.name
+    tvEmail.text = user.email
+    btnLogout.<span class="fn">setOnClickListener</span> { <span class="fn">onLogout</span>() }
+}
+<span class="cm">// Not an extension — with(obj) { } not obj.with { }</span></code></pre>
+
+    <h3>apply — configure and return the object</h3>
+    <pre><code><span class="cm">// Classic builder pattern: configure, return same object</span>
+<span class="kw">val</span> intent = <span class="cl">Intent</span>(<span class="kw">this</span>, <span class="cl">DetailActivity</span>::<span class="kw">class</span>.java).<span class="fn">apply</span> {
+    <span class="fn">putExtra</span>(<span class="str">"product_id"</span>, productId)   <span class="cm">// this = Intent</span>
+    <span class="fn">putExtra</span>(<span class="str">"from_cart"</span>, <span class="kw">true</span>)
+    <span class="fn">addFlags</span>(<span class="cl">Intent</span>.FLAG_ACTIVITY_SINGLE_TOP)
+}
+<span class="cm">// Returns the Intent — chainable</span></code></pre>
+
+    <h3>also — side effect in a chain</h3>
+    <pre><code><span class="kw">val</span> user = <span class="cl">UserDto</span>(<span class="str">"Alice"</span>, <span class="str">"alice@example.com"</span>)
+    .<span class="fn">toDomain</span>()
+    .<span class="fn">also</span> { <span class="cl">Log</span>.d(<span class="str">"Mapper"</span>, <span class="str">"Mapped: ${it.name}"</span>) }  <span class="cm">// 'it' = domain User</span>
+    .<span class="fn">also</span> { analytics.<span class="fn">track</span>(<span class="str">"user_loaded"</span>) }
+<span class="cm">// Returns original domain User — chain continues</span></code></pre>
+
+    <h3>Flow Diagram</h3>
+    <pre><code><span class="cm">Do you need the object itself returned?
+├── YES → apply (this) or also (it)
+│         └── Need to modify the object? → apply
+│             Need a side effect?        → also
+└── NO  → let (it) or run (this) or with (this)
+          └── Is it an extension call on object?
+              ├── YES → run (this) or let (it)
+              │         └── Need null-safety / 'it' name? → let
+              │             Need object's members directly? → run
+              └── NO  → with(obj) { this = obj }</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+
+    <h3>Decision Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Best choice</th><th>Reason</th></tr>
+      <tr><td>Null-safe block execution</td><td><code>?.let { }</code></td><td>Only runs if non-null; <code>it</code> is non-null inside</td></tr>
+      <tr><td>Transform a value and return result</td><td><code>let</code></td><td>Chain transforms; result of last expression returned</td></tr>
+      <tr><td>Configure an object at creation (Intent, Bundle, etc.)</td><td><code>apply</code></td><td>Returns object itself; <code>this</code> = object — no repeat of variable name</td></tr>
+      <tr><td>Side effects in a chain (logging, analytics)</td><td><code>also</code></td><td>Returns original object; doesn't break the chain</td></tr>
+      <tr><td>Group ViewBinding assignments</td><td><code>with</code></td><td>Non-extension; direct member access; no chaining needed</td></tr>
+      <tr><td>Compute a result using object's members</td><td><code>run</code></td><td><code>this</code> = object; returns last expression</td></tr>
+      <tr><td>Replace an if-not-null block returning a value</td><td><code>?.run { }</code></td><td>Combines null-safety with result-returning block</td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to Use Scope Functions</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Nest scope functions more than 2 levels deep — unreadable and error-prone</li>
+        <li>Use <code>apply</code> when you need the <em>result</em> of the block — use <code>run</code> or <code>let</code></li>
+        <li>Use <code>also</code> to transform — it returns the <em>original</em> object, not the result</li>
+        <li>Use scope functions to hide complex logic — extract a named function instead</li>
+        <li>Use <code>with</code> on a nullable object without null check first</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — payment flow. Each scope function appears in its natural production context.
+    </div>
+
+    <h3>apply — Intent / Bundle configuration</h3>
+    <pre><code><span class="cm">// presentation/payment/PaymentFragment.kt</span>
+<span class="kw">private fun</span> <span class="fn">navigateToConfirmation</span>(payment: <span class="cl">Payment</span>) {
+    <span class="kw">val</span> args = <span class="cl">Bundle</span>().<span class="fn">apply</span> {
+        <span class="fn">putString</span>(<span class="str">"paymentId"</span>, payment.id)
+        <span class="fn">putDouble</span>(<span class="str">"amount"</span>, payment.amount)
+        <span class="fn">putString</span>(<span class="str">"currency"</span>, payment.currency)
+    }   <span class="cm">// returns the Bundle itself</span>
+    findNavController().<span class="fn">navigate</span>(<span class="cl">R</span>.id.confirmationFragment, args)
+}</code></pre>
+
+    <h3>let — null-safe transformation</h3>
+    <pre><code><span class="cm">// domain/usecase/ProcessPaymentUseCase.kt</span>
+<span class="kw">fun</span> <span class="fn">buildPaymentRequest</span>(session: <span class="cl">UserSession?</span>): <span class="cl">PaymentRequest?</span> =
+    session<span class="kw">?.</span><span class="fn">let</span> { s ->           <span class="cm">// only executes if session is non-null</span>
+        <span class="cl">PaymentRequest</span>(
+            userId = s.userId,
+            token  = s.authToken,
+            deviceId = <span class="fn">getDeviceId</span>()
+        )
+    }                               <span class="cm">// returns null if session was null</span></code></pre>
+
+    <h3>also — logging / analytics in a chain</h3>
+    <pre><code><span class="cm">// data/repository/PaymentRepositoryImpl.kt</span>
+<span class="kw">override suspend fun</span> <span class="fn">initiatePayment</span>(request: <span class="cl">PaymentRequest</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentResponse</span>&gt; =
+    <span class="fn">safeApiCall</span> {
+        api.<span class="fn">initiatePayment</span>(request)
+            .<span class="fn">also</span> { <span class="cl">Timber</span>.<span class="fn">d</span>(<span class="str">"Payment initiated: ${it.transactionId}"</span>) }  <span class="cm">// side effect</span>
+            .<span class="fn">also</span> { analytics.<span class="fn">track</span>(<span class="str">"payment_initiated"</span>, it.amount) }
+    }</code></pre>
+
+    <h3>with — ViewBinding grouping</h3>
+    <pre><code><span class="cm">// presentation/payment/PaymentFragment.kt</span>
+<span class="kw">private fun</span> <span class="fn">bindPaymentSummary</span>(payment: <span class="cl">Payment</span>) {
+    <span class="fn">with</span>(binding) {                     <span class="cm">// this = binding — no repeated 'binding.'</span>
+        tvAmount.text  = payment.<span class="fn">formattedAmount</span>()
+        tvRecipient.text = payment.recipient
+        tvDate.text    = payment.date.<span class="fn">toDisplayString</span>()
+        btnConfirm.<span class="fn">isEnabled</span> = payment.isValid
+        progressBar.visibility = <span class="cl">View</span>.GONE
+    }
+}</code></pre>
+
+    <h3>run — compute a result from object state</h3>
+    <pre><code><span class="cm">// presentation/payment/PaymentViewModel.kt</span>
+<span class="kw">private fun</span> <span class="fn">validateForm</span>(): <span class="cl">Boolean</span> = formState.<span class="fn">run</span> {
+    amount > <span class="nu">0.0</span>                         <span class="cm">// this = formState</span>
+        &amp;&amp; recipientAccount.<span class="fn">isNotBlank</span>()
+        &amp;&amp; recipientAccount.length in <span class="nu">9</span>..<span class="nu">18</span>
+        &amp;&amp; remarks.length <= <span class="nu">140</span>
+}   <span class="cm">// returns Boolean — result of last expression</span></code></pre>
+
+    <h3>Key Lines Explained</h3>
+    <ul>
+      <li><code>apply { putString(...) }</code> — no need to write <code>bundle.putString</code> — <code>this</code> is the Bundle inside the block; returns the same Bundle for assignment.</li>
+      <li><code>session?.let { s -> ... }</code> — <code>s</code> is explicitly named (not <code>it</code>) for clarity; the entire block is skipped if session is null.</li>
+      <li><code>.also { Timber.d(...) }</code> — doesn't break the chain; the <code>PaymentResponse</code> flows through unchanged.</li>
+      <li><code>with(binding) { ... }</code> — cleaner than 5 lines of <code>binding.tvAmount.text = ...</code>; no return value needed.</li>
+      <li><code>formState.run { amount > 0.0 && ... }</code> — reads like a method on <code>formState</code> without actually modifying the class; result is returned.</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td>Scope functions</td><td>Concise, idiomatic, reduces repetition</td><td>Misuse causes confusion; nesting is unreadable</td><td>Most Kotlin code — follow the decision guide</td></tr>
+      <tr><td>Explicit local variable</td><td>Clear, debuggable, readable for teams</td><td>More lines, repeated name</td><td>When scope function would be nested 2+ levels</td></tr>
+      <tr><td><code>if (x != null) { }</code></td><td>Familiar, no learning curve</td><td>Verbose; smart cast fails on var fields</td><td>Simple one-line null check with no transform</td></tr>
+      <tr><td>Builder class</td><td>Explicit contract, API documentation</td><td>Boilerplate; usually overkill for Android</td><td>Public library API; Java interop required</td></tr>
+      <tr><td>Named function extract</td><td>Testable, reusable, named</td><td>Extra function for simple logic</td><td>When block logic exceeds ~5 lines</td></tr>
+    </table>
+    </div>
+    <h3>Interviewer Comparisons</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Expect These</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>apply vs also</strong> — both return the object; <code>apply</code> uses <code>this</code> (configure), <code>also</code> uses <code>it</code> (side effect)</li>
+        <li><strong>let vs run</strong> — both return lambda result; <code>let</code> uses <code>it</code> (transform + null-safety), <code>run</code> uses <code>this</code> (compute in object's context)</li>
+        <li><strong>with vs run</strong> — same block semantics; <code>with</code> is a non-extension function, <code>run</code> is an extension</li>
+        <li><strong>let vs if-not-null</strong> — <code>let</code> is more concise and returns a value; if-not-null is clearer for simple boolean checks</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Wrong scope function — apply vs let confusion</h3>
+    <pre><code><span class="cm">// ❌ BAD — apply returns the object, not the block result</span>
+<span class="kw">val</span> isValid = user.<span class="fn">apply</span> {
+    name = name.<span class="fn">trim</span>()
+    name.<span class="fn">isNotBlank</span>()   <span class="cm">// this result is DISCARDED — apply returns 'user'</span>
+}  <span class="cm">// isValid is a User, not Boolean!</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — run returns the lambda result</span>
+<span class="kw">val</span> isValid = user.<span class="fn">run</span> {
+    name = name.<span class="fn">trim</span>()
+    name.<span class="fn">isNotBlank</span>()   <span class="cm">// returned as Boolean</span>
+}</code></pre>
+
+    <h3>also vs let confusion</h3>
+    <pre><code><span class="cm">// ❌ BAD — also returns original object, not transform result</span>
+<span class="kw">val</span> header: <span class="cl">String</span> = token.<span class="fn">also</span> { <span class="str">"Bearer $it"</span> }
+<span class="cm">// header == token (original String), NOT "Bearer token"</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — let returns the lambda result</span>
+<span class="kw">val</span> header: <span class="cl">String</span> = token.<span class="fn">let</span> { <span class="str">"Bearer $it"</span> }
+<span class="cm">// header == "Bearer token"</span></code></pre>
+
+    <h3>Deep nesting — unreadable</h3>
+    <pre><code><span class="cm">// ❌ BAD — nested scope functions kill readability</span>
+<span class="kw">val</span> result = user<span class="kw">?.</span><span class="fn">let</span> { u ->
+    u.session<span class="kw">?.</span><span class="fn">run</span> {
+        token.<span class="fn">let</span> { t ->
+            <span class="fn">buildHeader</span>(t)
+        }
+    }
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — extract to a named function</span>
+<span class="kw">fun</span> <span class="fn">buildAuthHeader</span>(user: <span class="cl">User?</span>): <span class="cl">String?</span> {
+    <span class="kw">val</span> token = user<span class="kw">?.</span>session<span class="kw">?.</span>token <span class="kw">?:</span> <span class="kw">return</span> <span class="kw">null</span>
+    <span class="kw">return</span> <span class="fn">buildHeader</span>(token)
+}</code></pre>
+
+    <h3>using with on nullable</h3>
+    <pre><code><span class="cm">// ❌ BAD — with() doesn't handle null</span>
+<span class="fn">with</span>(user) { tvName.text = name }  <span class="cm">// NPE if user is null</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — use let for nullable</span>
+user<span class="kw">?.</span><span class="fn">let</span> { <span class="fn">with</span>(it) { tvName.text = name } }
+<span class="cm">// or simpler:</span>
+user<span class="kw">?.</span><span class="fn">run</span> { tvName.text = name }</code></pre>
+
+    <h3>return inside scope function</h3>
+    <pre><code><span class="cm">// ❌ BAD — non-local return inside non-inline lambda surprises</span>
+<span class="kw">fun</span> <span class="fn">process</span>(user: <span class="cl">User?</span>) {
+    user<span class="kw">?.</span><span class="fn">let</span> {
+        <span class="kw">if</span> (it.isBlocked) <span class="kw">return</span>  <span class="cm">// returns from 'process', not just let!</span>
+        <span class="fn">doSomething</span>(it)
+    }
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — use labeled return to exit the lambda only</span>
+user<span class="kw">?.</span><span class="fn">let</span> {
+    <span class="kw">if</span> (it.isBlocked) <span class="kw">return</span>@let
+    <span class="fn">doSomething</span>(it)
+}</code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li><strong>apply</strong> for object initialization/configuration — returns the object.</li>
+      <li><strong>let</strong> for null-safety blocks and transforms — use a named param instead of <code>it</code> when nesting.</li>
+      <li><strong>also</strong> strictly for side effects (logging, analytics) — never for transforms.</li>
+      <li><strong>run</strong> when you need the object's members as <code>this</code> and want a computed result back.</li>
+      <li><strong>with</strong> when you have a non-null object and need to group member accesses without a return value.</li>
+      <li>Never nest scope functions more than 2 levels — extract a named function.</li>
+      <li>Name the <code>it</code> parameter explicitly when there are nested lambdas or when the type isn't obvious from context.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Kotlin's five scope functions — let, run, with, apply, also — differ on two axes: how you reference the object inside the block (as <code>this</code> or <code>it</code>) and what gets returned (the object itself or the result of the last expression). Apply and also return the object; let, run, and with return the lambda result. I use <code>apply</code> to configure objects at creation, <code>let</code> for null-safe blocks and transforms, <code>also</code> for side effects like logging in a chain, <code>run</code> to compute a result from an object's state, and <code>with</code> to group ViewBinding assignments."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "The key to understanding scope functions is the two-axis model. First axis: object reference. <code>apply</code>, <code>run</code>, <code>with</code> use <code>this</code> — you access the object's members directly as if you're inside the class. <code>let</code> and <code>also</code> use <code>it</code> — the object is a parameter, which is better when you need to name it explicitly or distinguish it from an outer <code>this</code>.<br><br>
+      Second axis: return value. <code>apply</code> and <code>also</code> return the original object — great for chaining and builder patterns. <code>let</code>, <code>run</code>, <code>with</code> return the result of the lambda — great for computation.<br><br>
+      In production: I use <code>apply</code> for Intent/Bundle configuration — it returns the same object so I can assign in one expression. I use <code>let</code> with safe-call for null-safe blocks that return a value. I use <code>also</code> to insert logging or analytics without breaking a call chain. I use <code>with</code> for ViewBinding — group 5 property assignments without repeating <code>binding.</code> each time. I use <code>run</code> when I need to compute a boolean or value using an object's fields as <code>this</code>.<br><br>
+      The common pitfalls: confusing <code>apply</code> and <code>run</code> when you need the lambda result, using <code>also</code> for transforms (it returns the original, not the result), and nesting more than two levels deep — at that point, extract a named function."
+    </div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Two axes: <strong>object reference</strong> (this vs it) and <strong>return value</strong> (object vs lambda result)</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><code>apply</code> + <code>also</code> return the object; <code>let</code> + <code>run</code> + <code>with</code> return the lambda result</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>apply</code> uses <code>this</code> — configure objects; <code>also</code> uses <code>it</code> — side effects without breaking chains</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>?.let { }</code> is the idiomatic null-safe execution block — <code>it</code> is non-null inside</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>with</code> is a non-extension function — <code>with(obj) { }</code>, not <code>obj.with { }</code></div></div>
+      <div class="must-item"><div class="must-num">6</div><div>Never nest scope functions more than 2 levels — extract a named function instead</div></div>
+      <div class="must-item"><div class="must-num">7</div><div>Name the <code>it</code> parameter explicitly when there are nested lambdas or ambiguity</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>Inline implementation details of each scope function</li>
+      <li>Non-local return semantics with <code>inline</code> (covered in 1I)</li>
+      <li>Coroutine-specific scope functions like <code>coroutineScope { }</code> — different concept, same name pattern</li>
+    </ul>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>What's the difference between <code>apply</code> and <code>also</code>?</td><td>Both return the object. <code>apply</code> uses <code>this</code> — modify/configure the object. <code>also</code> uses <code>it</code> — side effects (logging) without modifying.</td></tr>
+      <tr><td>What's the difference between <code>let</code> and <code>run</code>?</td><td>Both return the lambda result. <code>let</code> uses <code>it</code> — good for null-safety and when you need to name the param. <code>run</code> uses <code>this</code> — good for computing a result from the object's own members.</td></tr>
+      <tr><td>Why use <code>with</code> instead of <code>run</code>?</td><td><code>with</code> is not an extension — you pass the object as an argument: <code>with(obj) { }</code>. Preferred when the object is already assigned to a variable and you just want to group operations. <code>run</code> is an extension: <code>obj.run { }</code> — chains better.</td></tr>
+      <tr><td>Can you use <code>return</code> inside a scope function?</td><td>Inside a non-inline lambda (which scope functions are), bare <code>return</code> does a <em>non-local</em> return — exits the enclosing named function. Use <code>return@let</code>, <code>return@apply</code> etc. to exit only the lambda. This is a common bug.</td></tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "A pattern I enforce in code reviews: scope function choice should communicate <em>intent</em>. <code>apply</code> says 'I'm configuring this object.' <code>also</code> says 'I'm doing a side effect, don't touch the object.' <code>let</code> says 'I'm transforming this — possibly after a null check.' When I see <code>also</code> used to transform a value and return a different result, or <code>apply</code> used when a Boolean result is expected, that's a bug waiting to happen — and it's a sign the developer learned scope functions syntactically without understanding the two-axis model."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+
+    <div class="table-wrap">
+    <table class="scope-table">
+      <tr><th>Function</th><th>Ref</th><th>Returns</th><th>Mnemonic</th><th>Typical use</th></tr>
+      <tr><td>let</td><td>it</td><td>Lambda result</td><td>"Let me transform it"</td><td>Null-safe block, transform, temp scope</td></tr>
+      <tr><td>run</td><td>this</td><td>Lambda result</td><td>"Run a computation on this"</td><td>Compute result using object's members</td></tr>
+      <tr><td>with</td><td>this</td><td>Lambda result</td><td>"Work with this object"</td><td>Group operations — non-extension</td></tr>
+      <tr><td>apply</td><td>this</td><td>Object</td><td>"Apply config to this, return it"</td><td>Object initialization / builder</td></tr>
+      <tr><td>also</td><td>it</td><td>Object</td><td>"Also do this side effect"</td><td>Logging, debugging in chains</td></tr>
+    </table>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>NULL-SAFE PATTERN</h4>
+        <pre><code>token?.let { t ->
+  "Bearer $t"   // returns String?
+}
+
+// vs run (also null-safe):
+token?.run { "Bearer $this" }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>BUILDER PATTERN</h4>
+        <pre><code>Intent(this, DetailActivity::class.java)
+  .apply {
+    putExtra("id", id)
+    addFlags(FLAG_SINGLE_TOP)
+  }  // returns the Intent</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SIDE EFFECT IN CHAIN</h4>
+        <pre><code>api.getUser()
+  .also { Timber.d("$it") }  // logs
+  .also { cache.save(it) }   // caches
+  .toDomain()                // transforms</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>VIEWBINDING GROUP</h4>
+        <pre><code>with(binding) {
+  tvName.text = user.name
+  tvEmail.text = user.email
+  btnSave.isEnabled = true
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY GOTCHAS</h4>
+        <pre><code>apply returns object → don't use for result
+also returns object → don't use for transform
+with(null) → NPE → use ?.let or ?.run
+return in lambda = non-local return!
+use return@let to exit lambda only
+max 2 nesting levels → else extract fn</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DECISION SHORTCUT</h4>
+        <pre><code>Need the object back?
+  → apply (this) or also (it)
+
+Need a result?
+  → let (it) or run (this) or with(obj)
+
+Null-safe block?
+  → ?.let { } or ?.run { }</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — Name the five scope functions and the two axes that distinguish them.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The five are: <strong>let, run, with, apply, also</strong>.<br><br>
+        Axis 1 — Object reference inside the block: <code>this</code> (apply, run, with) vs <code>it</code> (let, also).<br>
+        Axis 2 — Return value: returns the <em>object itself</em> (apply, also) vs returns the <em>lambda result</em> (let, run, with).
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What does <code>apply</code> return? Give a real Android example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>apply</code> returns the original object (the receiver). Classic use: configuring an Intent or Bundle at creation:
+<pre><code><span class="kw">val</span> intent = <span class="cl">Intent</span>(<span class="kw">this</span>, <span class="cl">DetailActivity</span>::<span class="kw">class</span>.java).<span class="fn">apply</span> {
+    <span class="fn">putExtra</span>(<span class="str">"id"</span>, productId)
+    <span class="fn">addFlags</span>(<span class="cl">Intent</span>.FLAG_ACTIVITY_SINGLE_TOP)
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is the primary difference between <code>also</code> and <code>let</code>?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Both use <code>it</code> as the object reference. The difference is the return value. <code>also</code> returns the <em>original object</em> — used for side effects (logging, analytics) that shouldn't change what's being chained. <code>let</code> returns the <em>result of the last expression</em> — used for transformations and null-safe execution blocks.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — What is the difference between <code>run</code> and <code>with</code>? When would you pick one over the other?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Both use <code>this</code> as the object reference and return the lambda result. The difference is syntax: <code>run</code> is an extension function called on the object (<code>obj.run { }</code>), while <code>with</code> is a regular function that takes the object as an argument (<code>with(obj) { }</code>).<br><br>
+      Pick <code>run</code> when: you want to chain it onto an expression, or combine with a safe call (<code>obj?.run { }</code>).<br>
+      Pick <code>with</code> when: the object is already assigned to a variable and you want to group a series of operations without needing a return value — e.g., setting multiple ViewBinding properties.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) What does this code print? <code>val x = "hello".also { it.uppercase() }; println(x)</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Prints <strong>"hello"</strong>. <code>also</code> returns the <em>original receiver</em>, not the result of the lambda. The <code>it.uppercase()</code> expression inside the block is evaluated but its result is discarded. To get "HELLO", you'd use <code>let</code>: <code>val x = "hello".let { it.uppercase() }</code> → prints "HELLO".</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What happens when you use a bare <code>return</code> inside a <code>let</code> block? How do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A bare <code>return</code> inside a lambda performs a <em>non-local return</em> — it exits the enclosing named function entirely, not just the <code>let</code> block. This can cause hard-to-find bugs where a function returns early unexpectedly.<br><br>
+      Fix: use a labeled return to exit only the lambda:
+<pre><code>user<span class="kw">?.</span><span class="fn">let</span> {
+    <span class="kw">if</span> (it.isBlocked) <span class="kw">return</span>@let  <span class="cm">// exits let block only</span>
+    <span class="fn">processUser</span>(it)
+}</code></pre>
+      Note: non-local returns are only possible in lambdas passed to <em>inline</em> functions. Since scope functions are <code>inline</code>, this behavior applies to all five.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — (Coding) Refactor: <code>val b = Bundle(); b.putString("k","v"); b.putInt("n",1); startActivity(Intent(this, X::class.java).also { it.putExtras(b) })</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="fn">startActivity</span>(
+    <span class="cl">Intent</span>(<span class="kw">this</span>, <span class="cl">X</span>::<span class="kw">class</span>.java).<span class="fn">apply</span> {
+        <span class="fn">putExtra</span>(<span class="str">"k"</span>, <span class="str">"v"</span>)   <span class="cm">// apply: this = Intent, configure it</span>
+        <span class="fn">putExtra</span>(<span class="str">"n"</span>, <span class="nu">1</span>)
+    }
+)</code></pre>
+      <code>apply</code> is the right choice — we're configuring the Intent at creation and returning it. The separate Bundle is unnecessary here since Intent has <code>putExtra</code> directly.
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — Code review: a colleague used <code>apply</code> to validate a form and assigned the result to a Boolean. What's the bug? Rewrite it.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// ❌ Bug: apply returns the object (FormState), not Boolean</span>
+<span class="kw">val</span> isValid: <span class="cl">Boolean</span> = formState.<span class="fn">apply</span> {
+    amount > <span class="nu">0</span> &amp;&amp; account.<span class="fn">isNotBlank</span>()  <span class="cm">// result discarded!</span>
+}  <span class="cm">// compile error: FormState cannot be assigned to Boolean</span></code></pre>
+<pre><code><span class="cm">// ✅ Fix: use run — returns lambda result</span>
+<span class="kw">val</span> isValid: <span class="cl">Boolean</span> = formState.<span class="fn">run</span> {
+    amount > <span class="nu">0</span> &amp;&amp; account.<span class="fn">isNotBlank</span>()
+}</code></pre>
+      This would actually be a compile error (type mismatch) rather than a silent bug — but it's still a sign the developer confused the two functions.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — When would you NOT use a scope function and write an explicit local variable instead?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Use an explicit local variable when:
+        <ol style="margin-top:8px;padding-left:20px;">
+          <li>The block logic exceeds 5–6 lines — at that point, extract a named function; scope functions should be concise.</li>
+          <li>Nesting would exceed 2 levels — nested scope functions are harder to read and debug.</li>
+          <li>The variable needs to be reused in multiple places in the same scope — a named variable is more readable and debuggable (you can set a breakpoint on it).</li>
+          <li>Code review feedback: if the team isn't familiar with scope functions, an explicit variable is clearer in a shared codebase.</li>
+          <li>Debugging complex state bugs — the explicit variable shows up in the debugger with its name; a scope function's intermediate value may be harder to inspect.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — (Scenario) A junior dev complains: "I used <code>?.let</code> but the block sometimes still gets a NullPointerException on <code>it.address.city</code>." What's happening?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>?.let</code> only guarantees that the direct receiver (<code>user</code>) is non-null inside the block. It does <em>not</em> guarantee that nested properties (<code>user.address</code>, <code>user.address.city</code>) are non-null. <code>it</code> is non-null, but <code>it.address</code> might be null if <code>address: Address?</code> in the model.<br><br>Fix: chain the safe calls inside the block, or use nested <code>?.let</code>:
+<pre><code>user<span class="kw">?.</span><span class="fn">let</span> { u ->
+    <span class="kw">val</span> city = u.address<span class="kw">?.</span>city <span class="kw">?:</span> <span class="str">"Unknown"</span>
+    <span class="fn">showCity</span>(city)
+}</code></pre>
+      The broader lesson: <code>?.let</code> handles one level of nullability — the receiver. Model your domain properly with <code>T?</code> at every level and chain safe calls as needed.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

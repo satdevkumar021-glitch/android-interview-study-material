@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5D — Cancellation &amp; Exceptions | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">5D · Cancellation &amp; Exceptions</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>5D</span> — Cancellation &amp; Exceptions</h1>
+    <p class="hero-desc">Cooperative cancellation, CancellationException, isActive/ensureActive/yield, NonCancellable, exception propagation, CoroutineExceptionHandler, SupervisorJob — everything about keeping coroutines safe.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 5D</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Cooperative cancellation</h3>
+    <p>Coroutines can only be cancelled at <strong>suspension points</strong>. Code between suspension points runs to completion — you cannot interrupt a tight CPU loop from outside. The coroutine must actively check for cancellation.</p>
+    <ul>
+      <li><strong>isActive</strong> — check in tight loops: <code>while (isActive) { ... }</code></li>
+      <li><strong>ensureActive()</strong> — throws CancellationException if not active; use at loop top</li>
+      <li><strong>yield()</strong> — checks cancellation AND yields control to other coroutines (fairness)</li>
+      <li><strong>delay()</strong> — any suspension point, checks cancellation automatically</li>
+    </ul>
+    <h3>CancellationException is special</h3>
+    <p><code>CancellationException</code> is a subclass of <code>IllegalStateException</code> but is treated specially — it is <strong>not</strong> a failure from the structured concurrency perspective. It propagates downward only and does NOT cancel the parent. Catch it carefully.</p>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Cancellation check mechanisms</h3>
+    <pre><code><span class="cm">// 1. isActive — manual check, no exception thrown</span>
+<span class="kw">while</span> (isActive) {
+    <span class="fn">processItem</span>(queue.<span class="fn">poll</span>())
+}
+
+<span class="cm">// 2. ensureActive() — throws CancellationException if cancelled</span>
+<span class="kw">for</span> (item <span class="kw">in</span> items) {
+    <span class="fn">ensureActive</span>()           <span class="cm">// check at top of loop</span>
+    <span class="fn">processItem</span>(item)
+}
+
+<span class="cm">// 3. yield() — checks + gives up thread for other coroutines</span>
+<span class="kw">for</span> (item <span class="kw">in</span> items) {
+    <span class="fn">yield</span>()                   <span class="cm">// check + fairness</span>
+    <span class="fn">processItem</span>(item)
+}
+
+<span class="cm">// 4. Any suspend function (delay, withContext) checks automatically</span>
+<span class="kw">for</span> (item <span class="kw">in</span> items) {
+    <span class="fn">delay</span>(<span class="nu">0</span>)                  <span class="cm">// zero-delay still checks cancellation</span>
+    <span class="fn">processItem</span>(item)
+}</code></pre>
+
+    <h3>NonCancellable — for cleanup work</h3>
+    <pre><code><span class="cm">// Problem: finally blocks run in cancelled coroutine context</span>
+<span class="cm">// Suspend calls in finally fail with CancellationException</span>
+<span class="kw">try</span> {
+    <span class="fn">doWork</span>()
+} <span class="kw">finally</span> {
+    <span class="cm">// This throws if coroutine is cancelled:</span>
+    <span class="fn">delay</span>(<span class="nu">100</span>)            <span class="cm">// ❌ CancellationException thrown</span>
+    db.<span class="fn">closeConnection</span>()  <span class="cm">// ❌ Never reached</span>
+}
+
+<span class="cm">// Fix: withContext(NonCancellable) for cleanup</span>
+<span class="kw">try</span> {
+    <span class="fn">doWork</span>()
+} <span class="kw">finally</span> {
+    <span class="fn">withContext</span>(<span class="cl">NonCancellable</span>) {
+        <span class="fn">delay</span>(<span class="nu">100</span>)           <span class="cm">// ✅ runs even if cancelled</span>
+        db.<span class="fn">closeConnection</span>() <span class="cm">// ✅ cleanup completes</span>
+    }
+}</code></pre>
+
+    <h3>CoroutineExceptionHandler</h3>
+    <pre><code><span class="kw">val</span> handler = <span class="cl">CoroutineExceptionHandler</span> { context, exception ->
+    <span class="cl">Timber</span>.<span class="fn">e</span>(exception, <span class="str">"Unhandled in ${context[CoroutineName]}"</span>)
+    <span class="cm">// Log to Crashlytics, show error UI, etc.</span>
+}
+
+<span class="cm">// Handler must be on the ROOT coroutine (not a child)</span>
+<span class="kw">val</span> scope = <span class="cl">CoroutineScope</span>(<span class="cl">SupervisorJob</span>() + <span class="cl">Dispatchers</span>.Main + handler)
+scope.<span class="fn">launch</span> {              <span class="cm">// root — handler fires here</span>
+    <span class="fn">launch</span> {               <span class="cm">// child — handler does NOT fire here</span>
+        <span class="kw">throw</span> <span class="cl">IOException</span>()  <span class="cm">// propagates to root launch</span>
+    }
+}
+
+<span class="cm">// ⚠️ Handler does NOT catch exceptions from async { }.await()</span>
+<span class="cm">// Those must be caught with try/catch around await()</span></code></pre>
+
+    <h3>Exception propagation rules</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Scenario</th><th>Behaviour</th></tr>
+      <tr><td>launch throws, regular Job parent</td><td>Exception propagates to parent → cancels all siblings → crashes scope</td></tr>
+      <tr><td>launch throws, SupervisorJob parent</td><td>Exception goes to CoroutineExceptionHandler → siblings unaffected</td></tr>
+      <tr><td>async throws, not awaited</td><td>Exception stored in Deferred — nothing happens yet</td></tr>
+      <tr><td>async throws, .await() called</td><td>Exception re-thrown at await() site — catch it there</td></tr>
+      <tr><td>CancellationException thrown</td><td>Never treated as failure — scope NOT cancelled</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128337;</div>3. When to Use</div>
+    <h3>Cancellation pattern guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Use</th></tr>
+      <tr><td>Tight CPU loop that should be cancellable</td><td><code>ensureActive()</code> or <code>yield()</code> at top of iteration</td></tr>
+      <tr><td>Cleanup (close socket, commit to DB) after cancellation</td><td><code>finally { withContext(NonCancellable) { ... } }</code></td></tr>
+      <tr><td>Catch all unhandled exceptions from root coroutines</td><td><code>CoroutineExceptionHandler</code> on scope</td></tr>
+      <tr><td>Catch exceptions from async</td><td><code>try/catch</code> around <code>.await()</code></td></tr>
+      <tr><td>Treat partial failures as ok</td><td><code>supervisorScope</code> + per-child <code>try/catch</code></td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-commerce: resilient order processing</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">OrderProcessor</span>(
+    <span class="kw">private val</span> ioDispatcher: <span class="cl">CoroutineDispatcher</span> = <span class="cl">Dispatchers</span>.IO
+) {
+    <span class="kw">private val</span> exceptionHandler = <span class="cl">CoroutineExceptionHandler</span> { _, e ->
+        <span class="kw">if</span> (e <span class="kw">is</span> <span class="cl">CancellationException</span>) <span class="kw">return</span>@CoroutineExceptionHandler
+        <span class="cl">Crashlytics</span>.<span class="fn">log</span>(e)
+        <span class="fn">alertOpsTeam</span>(e)
+    }
+
+    <span class="kw">private val</span> scope = <span class="cl">CoroutineScope</span>(
+        <span class="cl">SupervisorJob</span>() + ioDispatcher + exceptionHandler
+    )
+
+    <span class="kw">fun</span> <span class="fn">processOrders</span>(orders: <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;) {
+        scope.<span class="fn">launch</span> {
+            <span class="kw">for</span> (order <span class="kw">in</span> orders) {
+                <span class="fn">ensureActive</span>()  <span class="cm">// check before each order</span>
+                <span class="kw">try</span> {
+                    <span class="fn">processOrder</span>(order)
+                } <span class="kw">catch</span> (e: <span class="cl">OrderException</span>) {
+                    <span class="fn">markFailed</span>(order, e)   <span class="cm">// one failure → next order</span>
+                }
+            }
+        }
+    }
+
+    <span class="kw">private suspend fun</span> <span class="fn">processOrder</span>(order: <span class="cl">Order</span>) {
+        <span class="kw">try</span> {
+            <span class="fn">withContext</span>(ioDispatcher) {
+                paymentService.<span class="fn">charge</span>(order)
+                inventoryService.<span class="fn">reserve</span>(order)
+            }
+        } <span class="kw">finally</span> {
+            <span class="cm">// Cleanup runs even if this coroutine is cancelled</span>
+            <span class="fn">withContext</span>(<span class="cl">NonCancellable</span>) {
+                auditLog.<span class="fn">record</span>(order)    <span class="cm">// audit must complete</span>
+            }
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">cancel</span>() = scope.<span class="fn">cancel</span>()
+}</code></pre>
+
+    <h3>try/catch and CancellationException — critical rule</h3>
+    <pre><code><span class="cm">// ❌ WRONG: catching Exception swallows CancellationException</span>
+<span class="kw">try</span> {
+    <span class="fn">longRunningOp</span>()
+} <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+    <span class="fn">log</span>(e)  <span class="cm">// CancellationException caught and dropped!</span>
+    <span class="cm">// Coroutine continues running after cancel() — LEAK</span>
+}
+
+<span class="cm">// ✅ CORRECT: re-throw CancellationException</span>
+<span class="kw">try</span> {
+    <span class="fn">longRunningOp</span>()
+} <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+    <span class="kw">throw</span> e   <span class="cm">// always re-throw</span>
+} <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+    <span class="fn">handleError</span>(e)
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Pattern</th><th>When to use</th><th>Caveat</th></tr>
+      <tr><td>try/catch around await()</td><td>Handle async failures inline</td><td>Must re-throw CancellationException</td></tr>
+      <tr><td>CoroutineExceptionHandler</td><td>Global catch-all for root coroutines</td><td>Only works on root; not child coroutines; not async</td></tr>
+      <tr><td>runCatching { }</td><td>Wrap suspend call, get Result&lt;T&gt;</td><td>Also catches CancellationException — must check</td></tr>
+      <tr><td>supervisorScope</td><td>Independent child failures</td><td>Each child still needs its own handler</td></tr>
+    </table>
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">runCatching Gotcha</div>
+      <code>runCatching { suspendFn() }</code> catches ALL exceptions including <code>CancellationException</code>. This is dangerous: the coroutine appears to have been cancelled but the exception is trapped in a <code>Result.Failure</code>. Always check: <code>result.exceptionOrNull()?.let { if (it is CancellationException) throw it }</code>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Tight loop without cancellation check</div>
+      A CPU-intensive loop with no suspension points is not cancellable. Even if you call <code>job.cancel()</code>, the coroutine keeps running until the loop finishes. Fix: add <code>ensureActive()</code> or <code>yield()</code> inside the loop.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — Catching CancellationException</div>
+      Catching <code>Exception</code> or <code>Throwable</code> and not re-throwing will swallow <code>CancellationException</code>, breaking cooperative cancellation — the coroutine continues running after <code>cancel()</code> is called.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — Using CoroutineExceptionHandler on child coroutines</div>
+      <code>CoroutineExceptionHandler</code> only fires on <em>root</em> coroutines (those whose parent is a Job without a coroutine parent, e.g. <code>scope.launch</code>). Adding it to a child <code>launch { }</code> has no effect — exceptions still propagate to the parent.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — Always use NonCancellable for critical cleanup</div>
+      Any suspend call in a <code>finally</code> block needs <code>withContext(NonCancellable) { }</code>. This includes: closing network connections, committing database transactions, writing audit logs, sending analytics events.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Coroutine cancellation is cooperative — it only happens at suspension points. The coroutine receives a CancellationException which must be propagated, not swallowed. For non-cancellable cleanup like closing connections, wrap suspend calls in withContext(NonCancellable) inside finally blocks. For unhandled exceptions from root coroutines, use CoroutineExceptionHandler."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "Cancellation works by marking the Job as cancelling and throwing CancellationException at the next suspension point. This means a tight CPU loop without suspension is not cancellable — you need to add ensureActive() or yield() checks. CancellationException is special: it's not treated as a failure by the parent Job, so cancellation is a clean lifecycle event, not an error.<br><br>The most dangerous mistake is catching Exception and not re-throwing CancellationException — this breaks cancellation entirely, causing coroutine leaks.<br><br>For cleanup after cancellation, wrap suspend calls in withContext(NonCancellable) — this creates a context that ignores cancellation, allowing your cleanup to complete. For application-level error handling, put a CoroutineExceptionHandler on your root scope — not on child coroutines, where it has no effect."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Cooperative cancellation</strong> — only happens at suspension points</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Always re-throw CancellationException</strong> — never swallow it</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>NonCancellable for cleanup</strong> — finally block suspend calls need this</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>CoroutineExceptionHandler = root only</strong> — no effect on child coroutines or async</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>ensureActive() / yield()</strong> — add to tight loops for cancellability</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What is the difference between ensureActive() and yield()?"</h4>
+    <p>A: Both throw CancellationException if the coroutine is cancelled. <code>ensureActive()</code> only checks — no suspension, no thread switch. <code>yield()</code> also suspends briefly, giving other coroutines a chance to run — provides fairness in the thread pool. Use <code>ensureActive()</code> for tight loops where you just want cancellability; use <code>yield()</code> when the work is heavy and you want to be a good citizen in the coroutine pool.</p>
+    <h4>Q: "Where does CoroutineExceptionHandler fit vs try/catch?"</h4>
+    <p>A: <code>CoroutineExceptionHandler</code> is the "last resort" for exceptions that escape the coroutine hierarchy — like an <code>UncaughtExceptionHandler</code> for threads. It's for logging/reporting, not for recovery. For recoverable errors, use try/catch locally. For async results, use try/catch around <code>.await()</code>. The handler only fires on root coroutines inside a scope.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In an automotive app processing continuous sensor streams, every processing loop must have <code>ensureActive()</code>. When the car park scenario ends, the system scope is cancelled — without this check, the sensor processor would continue consuming CPU and battery on a dead screen. This is the difference between a battery-draining app and a well-behaved one.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Cancellation checks</h4>
+        <pre><code>isActive       // check, no throw
+ensureActive() // throw if cancelled
+yield()        // throw + yield CPU
+delay(0)       // also checks</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CancellationException rules</h4>
+        <pre><code>// ALWAYS re-throw it!
+catch (e: CancellationException) {
+    throw e  // never swallow
+}
+catch (e: Exception) { handle() }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>NonCancellable cleanup</h4>
+        <pre><code>finally {
+  withContext(NonCancellable) {
+    db.close()    // suspend ok
+    audit.log()   // suspend ok
+  }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ExceptionHandler scope</h4>
+        <pre><code>// ✅ Root coroutine — fires
+scope.launch(handler) { throw E() }
+
+// ❌ Child coroutine — no effect
+scope.launch {
+  launch(handler) { throw E() }
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does "cooperative cancellation" mean in coroutines?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Cancellation is cooperative — the coroutine is not forcefully stopped; instead, calling <code>cancel()</code> marks the Job as cancelling and throws <code>CancellationException</code> at the next suspension point. Code between suspension points runs to completion. If a coroutine has no suspension points (e.g., a tight CPU loop), it cannot be cancelled unless you add explicit checks like <code>ensureActive()</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is CancellationException and how should you handle it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>CancellationException</code> is a subclass of <code>IllegalStateException</code> used to signal cooperative cancellation. It should <em>always be re-thrown</em> when caught. Catching it with a broad <code>catch (e: Exception)</code> and not rethrowing breaks cancellation — the coroutine continues running after being cancelled. Rule: <code>catch (e: CancellationException) { throw e }</code> always comes first.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use withContext(NonCancellable)?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">When you need to run suspend calls inside a <code>finally</code> block after a coroutine has been cancelled. Normally, any suspension inside a cancelled coroutine throws <code>CancellationException</code> immediately, preventing cleanup. <code>withContext(NonCancellable)</code> overrides this, letting cleanup code (close connections, audit logs, commit transactions) complete even in a cancelled coroutine.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A tight data processing loop is not responding to cancel(). Why and how do you fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The loop has no suspension points — cancellation can only happen at suspension points. Fix: add <code>ensureActive()</code> at the top of each iteration (checks and throws <code>CancellationException</code> if cancelled) or <code>yield()</code> (also yields the thread to other coroutines). For example: <code>for (item in items) { ensureActive(); process(item) }</code>. Both options make the loop respect cancellation.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Where should you place CoroutineExceptionHandler — on the scope, root coroutine, or child coroutine?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">On the scope or root coroutine — never on a child coroutine. The handler only fires when an exception has propagated all the way up to the root of the coroutine hierarchy (a coroutine whose parent context is a bare Job, not another coroutine). Adding it to a child launch has no effect — the exception still propagates to the parent.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Does CoroutineExceptionHandler catch exceptions from async { }.await()?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">No. The handler only catches exceptions from <code>launch</code>-based coroutines. Exceptions from <code>async { }.await()</code> are re-thrown at the <code>await()</code> call site and must be caught with try/catch there. This is a common misconception — developers add a handler expecting it to catch all errors, but async failures still require local handling.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the danger of using runCatching with suspend functions?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>runCatching</code> catches ALL exceptions, including <code>CancellationException</code>. If used inside a coroutine, it may silently trap a cancellation signal, breaking cooperative cancellation. The coroutine would continue executing as if nothing happened. Workaround: after calling <code>runCatching</code>, check if the result contains a <code>CancellationException</code> and re-throw it: <code>result.exceptionOrNull()?.let { if (it is CancellationException) throw it }</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design cancellation-safe order processing for a banking app that must always write an audit log, even when cancelled.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Structure the processing as: <code>try { processPayment(order) } catch (e: CancellationException) { markOrderCancelled(order); throw e } catch (e: Exception) { markOrderFailed(order, e) } finally { withContext(NonCancellable) { auditLog.write(order) } }</code>. The <code>finally</code> with <code>NonCancellable</code> guarantees the audit log is written regardless of outcome. Re-throwing <code>CancellationException</code> after marking the order cancelled ensures structured concurrency still works. The catch for Exception handles business failures gracefully without breaking cancellation.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain why a coroutine can appear "stuck" even after calling scope.cancel().</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Three root causes: (1) The coroutine is in a tight loop with no suspension points — cancellation can't be delivered. Fix: add ensureActive(). (2) The code caught CancellationException and didn't rethrow — the coroutine thinks it's still running normally. Fix: always rethrow CancellationException. (3) The coroutine holds a NonCancellable context from a misused <code>withContext(NonCancellable)</code> not just in finally — if wrapped around a long operation, cancellation is indefinitely blocked. Fix: use NonCancellable only in finally blocks.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between ensureActive() and yield() and when would you choose each?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>ensureActive()</code> only checks the cancellation flag and throws CancellationException if cancelled — no suspension, no thread yield. It has minimal overhead and is ideal for high-speed loops that must remain cancellable but should not voluntarily give up the CPU. <code>yield()</code> also throws on cancellation but additionally suspends the coroutine, allowing other coroutines on the same dispatcher to run. Use yield() in CPU-heavy loops that run on a limited pool (Default) where fairness matters — without it, a single heavy coroutine can starve others on the same thread.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

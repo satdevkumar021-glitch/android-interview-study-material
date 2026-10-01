@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30F — System Design: Image-heavy Feed | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(86,207,178,.12);border:1px solid rgba(86,207,178,.3);color:var(--accent2);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(86,207,178,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .ascii-diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;font-family:"JetBrains Mono","Fira Code",monospace;font-size:12.5px;color:#8b90b8;line-height:1.8;overflow-x:auto;margin:14px 0 20px;}
+  .ascii-diagram .hl{color:var(--accent2);}
+  .ascii-diagram .hl2{color:var(--accent);}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">30F · Image-heavy Feed</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Decisions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability &amp; Failure</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Quiz</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; System Design</div>
+    <h1><span>30F</span> — System Design: Image-heavy Feed</h1>
+    <p class="hero-desc">Design an infinite-scroll image feed for Android — Paging 3, Coil, three-level cache, offline support, 60fps smoothness. Senior differentiator unit.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 30F</span>
+      <span class="badge badge-senior">&#11088; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1: Problem -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
+    <h3>Scenario</h3>
+    <p>Design an Android client for an <strong>image-heavy social feed</strong> (think Instagram-style) that scrolls infinitely, loads images fast, works offline, and maintains 60fps throughout.</p>
+    <h3>Functional Requirements</h3>
+    <ul>
+      <li>Infinite scroll — load next page as user approaches end of list</li>
+      <li>Fast image loading with progressive reveal (no pop-in jank)</li>
+      <li>Offline support — users must see cached content with no internet</li>
+      <li>Smooth 60fps / 120fps scroll under load</li>
+      <li>Like/comment counts update in real-time (WebSocket or polling)</li>
+    </ul>
+    <h3>Non-Functional Requirements</h3>
+    <ul>
+      <li><strong>Performance:</strong> image load &lt;100ms from cache, &lt;500ms from CDN</li>
+      <li><strong>Memory:</strong> no OOM on 2GB RAM devices; evict images when not visible</li>
+      <li><strong>Battery:</strong> batch network requests; cancel requests when item scrolls off screen</li>
+      <li><strong>Bandwidth:</strong> serve thumbnails first, full-res on demand / WiFi</li>
+    </ul>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Clarifying Questions to Ask</div>
+      (1) Is the feed real-time or pull-to-refresh? (2) What image sizes — fixed aspect ratio or variable? (3) Is there a CDN? (4) Do we need Stories/Reels or just feed? (5) What's the p50/p99 feed latency from backend?
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2: Architecture -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#127963;</div>2. Architecture</div>
+    <h3>Layer Breakdown</h3>
+    <div class="ascii-diagram">
+<span class="hl">┌─────────────────────────────────────────────────────┐</span>
+<span class="hl">│                  UI Layer (Compose)                  │</span>
+│   FeedScreen (LazyColumn)  ←  PagingData&lt;FeedItem&gt;   │
+<span class="hl">└──────────────────────┬──────────────────────────────┘</span>
+                       │ collectAsLazyPagingItems()
+<span class="hl">┌──────────────────────▼──────────────────────────────┐</span>
+<span class="hl">│               ViewModel Layer                        │</span>
+│   FeedViewModel  →  Pager(config, remoteMediator)    │
+<span class="hl">└──────────────────────┬──────────────────────────────┘</span>
+                       │ Flow&lt;PagingData&lt;FeedItem&gt;&gt;
+<span class="hl">┌──────────────────────▼──────────────────────────────┐</span>
+<span class="hl">│               Domain Layer                           │</span>
+│            GetFeedUseCase (optional)                  │
+<span class="hl">└──────────────────────┬──────────────────────────────┘</span>
+                       │
+<span class="hl">┌──────────────────────▼──────────────────────────────┐</span>
+<span class="hl">│               Data Layer                             │</span>
+│  FeedRepository ← FeedRemoteMediator                 │</span>
+│       ↓ Room (FeedItemEntity)                        │</span>
+│       ↓ Retrofit (FeedItemDto)                       │</span>
+<span class="hl">└─────────────────────────────────────────────────────┘</span>
+
+<span class="hl2">Image Loading (Coil):</span>
+AsyncImage → MemoryCache (LRU) → DiskCache → Network (CDN)
+    </div>
+    <h3>Key Components</h3>
+    <ul>
+      <li><strong>FeedScreen</strong> — Compose <code>LazyColumn</code> with <code>items(lazyPagingItems)</code>; stable <code>key = { it.id }</code> for scroll position preservation</li>
+      <li><strong>FeedViewModel</strong> — creates <code>Pager</code>, exposes <code>Flow&lt;PagingData&gt;</code> cached with <code>.cachedIn(viewModelScope)</code></li>
+      <li><strong>FeedRemoteMediator</strong> — Paging 3's offline-first bridge: loads from network, saves to Room, Room is single source of truth</li>
+      <li><strong>FeedRepository</strong> — returns <code>@PagingSource</code> from Room; mediator handles network boundary</li>
+      <li><strong>Coil</strong> — Compose-native, coroutine-based, handles memory + disk cache automatically</li>
+    </ul>
+    <h3>Domain Models</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Model</th><th>Layer</th><th>Fields</th></tr>
+      <tr><td>FeedItem</td><td>Domain</td><td>id, authorId, imageUrl, thumbUrl, caption, likes, timestamp</td></tr>
+      <tr><td>FeedItemEntity</td><td>Room</td><td>same + page key for Paging</td></tr>
+      <tr><td>FeedItemDto</td><td>API</td><td>snake_case JSON; mapped to domain in repository</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// ViewModel — Pager setup</span>
+<span class="kw">class</span> <span class="cl">FeedViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repository: <span class="cl">FeedRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> feedPagingData: <span class="cl">Flow</span>&lt;<span class="cl">PagingData</span>&lt;<span class="cl">FeedItem</span>&gt;&gt; = <span class="cl">Pager</span>(
+        config = <span class="cl">PagingConfig</span>(
+            pageSize = <span class="nu">20</span>,
+            prefetchDistance = <span class="nu">5</span>,       <span class="cm">// start loading 5 items before end</span>
+            enablePlaceholders = <span class="kw">false</span>
+        ),
+        remoteMediator = repository.<span class="fn">remoteMediator</span>(),
+        pagingSourceFactory = { repository.<span class="fn">pagingSource</span>() }
+    ).<span class="fn">flow</span>().<span class="fn">cachedIn</span>(viewModelScope)   <span class="cm">// survive rotation</span>
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3: Data Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128257;</div>3. Data Flow</div>
+    <h3>Paging 3 + RemoteMediator Flow</h3>
+    <div class="ascii-diagram">
+User scrolls near end
+        │
+        ▼
+PagingSource exhausted (no more local data)
+        │
+        ▼
+<span class="hl">RemoteMediator.load(LoadType.APPEND, state)</span>
+        │
+        ├─── Fetch page from Retrofit API
+        │         (cursor = lastItem.cursor)
+        │
+        ├─── Map Dto → Entity
+        │
+        ├─── Room.withTransaction {
+        │       if REFRESH: delete old rows
+        │       insert new FeedItemEntity rows
+        │    }
+        │
+        └─── return MediatorResult.Success(endOfPaginationReached)
+                │
+                ▼
+<span class="hl2">Room PagingSource automatically invalidated → emits new data → UI updates</span>
+    </div>
+    <h3>Image Loading Flow</h3>
+    <div class="ascii-diagram">
+<span class="hl">AsyncImage(model = item.imageUrl)</span>
+        │
+        ▼
+  MemoryCache (LRU, ~20% heap by default in Coil)
+        │ MISS
+        ▼
+  DiskCache (up to 250MB on disk, LRU)
+        │ MISS
+        ▼
+  Network request to CDN URL
+        │
+        ▼
+  Decode in background thread (IO dispatcher)
+        │
+        ▼
+  Store in Disk + Memory cache
+        │
+        ▼
+  <span class="hl2">Display with crossfade animation</span>
+    </div>
+    <h3>Placeholder / Shimmer Strategy</h3>
+    <pre><code><span class="cl">AsyncImage</span>(
+    model = <span class="cl">ImageRequest</span>.<span class="cl">Builder</span>(context)
+        .<span class="fn">data</span>(item.imageUrl)
+        .<span class="fn">crossfade</span>(<span class="kw">true</span>)
+        .<span class="fn">size</span>(<span class="cl">Size</span>.<span class="cl">ORIGINAL</span>)
+        .<span class="fn">build</span>(),
+    placeholder = <span class="fn">painterResource</span>(<span class="cl">R</span>.drawable.shimmer_placeholder),
+    error = <span class="fn">painterResource</span>(<span class="cl">R</span>.drawable.ic_broken_image),
+    contentDescription = item.caption,
+    modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxWidth</span>().<span class="fn">aspectRatio</span>(<span class="nu">1f</span>)
+)</code></pre>
+    <h3>Cursor-based Pagination</h3>
+    <p>Real-time feeds should use <strong>cursor-based pagination</strong> (not offset-based). Reason: if 3 new items are inserted at top while user is on page 2, offset-based pagination skips or duplicates items. Cursor points to a specific item ID/timestamp — always consistent.</p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
+    </div>
+  </div>
+
+  <!-- S4: Key Decisions -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9878;</div>4. Key Decisions</div>
+    <h3>Why Coil over Glide / Picasso?</h3>
+    <ul>
+      <li>Compose-native — <code>AsyncImage</code> composable with no XML</li>
+      <li>Coroutine-based cancellation — image load auto-cancels when composable leaves composition</li>
+      <li>Kotlin-first API, same coroutine dispatcher as the rest of the app</li>
+      <li>Built-in SVG, GIF, video frame support</li>
+    </ul>
+    <h3>Why Room as single source of truth?</h3>
+    <ul>
+      <li>Offline support is free — Room emits cached data even with no network</li>
+      <li>Paging 3 + RemoteMediator is purpose-built for this pattern</li>
+      <li>Single source of truth prevents UI/data inconsistency</li>
+    </ul>
+    <h3>Image Format Decision</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Format</th><th>Pros</th><th>Cons</th><th>Use when</th></tr>
+      <tr><td>WebP</td><td>25–35% smaller than JPEG same quality</td><td>Older Android &lt;4.0 no support (irrelevant now)</td><td>Default for CDN</td></tr>
+      <tr><td>Progressive JPEG</td><td>Low-res version loads first (visible fast)</td><td>Larger than WebP</td><td>Fallback</td></tr>
+      <tr><td>AVIF</td><td>Best compression</td><td>Android 12+ only, slow decode</td><td>Future / high-end</td></tr>
+    </table></div>
+    <h3>Thumbnail vs Full-resolution Strategy</h3>
+    <ul>
+      <li>Feed row: load thumbnail URL (CDN resized to 400px width) — fast, cheap</li>
+      <li>Detail view: load full-res on demand</li>
+      <li>On WiFi: pre-fetch next 3 full-res images in background</li>
+      <li>On metered: thumbnail only unless user taps</li>
+    </ul>
+    <pre><code><span class="cm">// Check connection type before pre-fetching</span>
+<span class="kw">val</span> isWifi = connectivityManager
+    .<span class="fn">getNetworkCapabilities</span>(connectivityManager.activeNetwork)
+    ?.<span class="fn">hasTransport</span>(<span class="cl">NetworkCapabilities</span>.<span class="cl">TRANSPORT_WIFI</span>) == <span class="kw">true</span>
+
+<span class="kw">if</span> (isWifi) {
+    <span class="cm">// pre-load full-res for next 3 items</span>
+    nextItems.<span class="fn">take</span>(<span class="nu">3</span>).<span class="fn">forEach</span> { item ->
+        imageLoader.<span class="fn">enqueue</span>(<span class="cl">ImageRequest</span>.<span class="cl">Builder</span>(context).<span class="fn">data</span>(item.imageUrl).<span class="fn">build</span>())
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5: Trade-offs -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Trade-offs</div>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Why chosen</th></tr>
+      <tr><td>Pagination library</td><td>Paging 3</td><td>Manual offset paging</td><td>RemoteMediator handles offline-first; built-in loading states</td></tr>
+      <tr><td>Image loader</td><td>Coil</td><td>Glide</td><td>Compose-native, coroutine cancellation, Kotlin API</td></tr>
+      <tr><td>Pagination strategy</td><td>Cursor-based</td><td>Offset-based</td><td>Stable under real-time insertions; no duplicate/skip</td></tr>
+      <tr><td>Storage</td><td>Room single source of truth</td><td>In-memory only</td><td>Offline support; survives process death</td></tr>
+      <tr><td>Image cache size</td><td>Memory: 20% heap, Disk: 250MB</td><td>Smaller</td><td>Coil defaults are sane; reducing causes re-downloads</td></tr>
+      <tr><td>List component</td><td>LazyColumn</td><td>RecyclerView</td><td>Compose project; lazy recomposition with stable keys</td></tr>
+    </table></div>
+    <h3>Memory Pressure Trade-off</h3>
+    <p>Coil evicts memory cache under low-memory conditions automatically (respects <code>onLowMemory</code> / <code>ComponentCallbacks2</code>). Disk cache persists across memory pressure — ensures images reload from disk not network after eviction.</p>
+    <div class="callout callout-red">
+      <div class="callout-label">Common Mistake</div>
+      Loading full-resolution images (2000×2000px) into feed thumbnails. Coil's <code>.size()</code> modifier or <code>ImageRequest.size()</code> should be set to the display size. Decoding a 4K image into a 400px thumbnail wastes 10× memory and CPU.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
+    </div>
+  </div>
+
+  <!-- S6: Scalability & Failure -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128200;</div>6. Scalability &amp; Failure Modes</div>
+    <h3>Failure Scenarios</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Failure</th><th>Behaviour</th><th>Solution</th></tr>
+      <tr><td>No network on app launch</td><td>RemoteMediator returns Error; PagingSource reads Room cache</td><td>Show cached data + error banner; retry button</td></tr>
+      <tr><td>Image CDN down</td><td>Coil returns error drawable</td><td>Show broken-image icon; disk cache still serves previously loaded images</td></tr>
+      <tr><td>API returns empty page prematurely</td><td>endOfPaginationReached=true too early</td><td>Validate with backend; add retry with exponential backoff in mediator</td></tr>
+      <tr><td>OOM from image cache</td><td>Coil handles via ComponentCallbacks2</td><td>Set memory cache max size explicitly; use thumbnail URLs in feed</td></tr>
+      <tr><td>Scroll jank on image decode</td><td>Decode blocks main thread</td><td>Coil decodes on IO by default; ensure not calling on main thread manually</td></tr>
+    </table></div>
+    <h3>60fps Checklist</h3>
+    <ul>
+      <li>Stable <code>key</code> in <code>LazyColumn</code> — prevents full recomposition on data update</li>
+      <li>Use <code>@Immutable</code> or <code>@Stable</code> on <code>FeedItem</code> to tell Compose it won't change unexpectedly</li>
+      <li>Avoid allocating lambdas inside composable functions — hoist them to top level or <code>remember</code></li>
+      <li>Fixed item height where possible — avoids measure passes</li>
+      <li>Pre-fetch distance = 5 items — network request starts before user reaches end</li>
+      <li>Avoid <code>notifyDataSetChanged()</code> equiv — Paging uses diffing internally</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7: Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">10-Minute Answer Structure</div>
+      <strong>1 min</strong>: Clarify requirements (real-time? offline needed? image sizes?) → <strong>2 min</strong>: High-level architecture diagram (layers) → <strong>3 min</strong>: Deep-dive Paging 3 + RemoteMediator → <strong>2 min</strong>: Image loading + three-level cache → <strong>1 min</strong>: Trade-offs → <strong>1 min</strong>: Failure modes
+    </div>
+    <h3>Opening Statement</h3>
+    <p><em>"I'd design this as an offline-first feed using Paging 3 with a RemoteMediator. Room is the single source of truth — the UI always reads from Room, and the mediator loads from network and writes to Room. For images, I'd use Coil with a three-level cache: memory LRU, disk up to 250MB, then CDN. The key senior decisions are cursor-based pagination for real-time correctness and serving thumbnail URLs in the feed to control memory pressure."</em></p>
+    <h3>Must-mention Points (Senior Level)</h3>
+    <ul>
+      <li>Why cursor-based over offset-based pagination</li>
+      <li>Why <code>cachedIn(viewModelScope)</code> is critical (survives rotation without re-fetch)</li>
+      <li>Three-level cache: memory → disk → network and eviction policy</li>
+      <li>Stable keys in LazyColumn for scroll position + performance</li>
+      <li>Canceling image loads when composable leaves composition (Coil handles automatically)</li>
+      <li>Bandwidth strategy: thumbnails in feed, full-res on detail</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8: Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Concept</th><th>One-liner</th></tr>
+      <tr><td>RemoteMediator</td><td>Bridge between network and local DB; loads pages, saves to Room, Room is source of truth</td></tr>
+      <tr><td>cachedIn(viewModelScope)</td><td>Prevents re-fetch on rotation; shares PagingData across collectors</td></tr>
+      <tr><td>Cursor pagination</td><td>Stable under real-time insertions; use lastItem.cursor not page offset</td></tr>
+      <tr><td>Coil three-level cache</td><td>MemoryCache (LRU ~20% heap) → DiskCache (250MB) → Network CDN</td></tr>
+      <tr><td>Stable key in LazyColumn</td><td>key = { item.id } prevents recomposition on unrelated data changes</td></tr>
+      <tr><td>@Immutable on FeedItem</td><td>Tells Compose compiler this object won't change — skip recomposition</td></tr>
+      <tr><td>prefetchDistance = 5</td><td>Triggers network load 5 items before list end — smooth infinite scroll</td></tr>
+      <tr><td>Thumbnail URL strategy</td><td>Feed gets CDN-resized 400px; full-res only on detail or WiFi pre-fetch</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9: Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Quiz</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is cursor-based pagination preferred over offset-based for a real-time feed?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Offset-based pagination (page=2&size=20) breaks when new items are inserted at the top — page 2 now contains items that were on page 1. Cursor-based pagination points to a specific item (cursor = lastItem.id or timestamp), so the next page always starts after that item regardless of insertions above it.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does cachedIn(viewModelScope) do and why is it critical?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">It caches the PagingData Flow in the ViewModel's scope, so when the screen rotates (Fragment/Activity recreated), the new collector gets the same in-memory pages immediately — no network re-fetch and no scroll position loss. Without it, rotation triggers a full reload from RemoteMediator.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Describe Coil's three-level cache and when each level is hit.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">1) MemoryCache — LRU in-process heap (~20% by default); fastest, cleared on process death. 2) DiskCache — stored as files on device (default 250MB); survives process restart, cleared by OS under storage pressure. 3) Network — CDN fetch; slowest, billed against data. Coil checks each level in order.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does RemoteMediator enable offline-first behaviour?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">The PagingSource always reads from Room. The RemoteMediator's job is to fill Room with data from the network. If the network is unavailable, load() returns MediatorResult.Error — but Room already has cached items, so the PagingSource keeps serving them. The UI shows stale data + an error banner. No blank screen.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why use stable keys in LazyColumn and what happens without them?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Without stable keys (key = { item.id }), Compose uses list position as the key. When Paging 3 inserts items or the list is refreshed, items shift positions — causing Compose to recompose and re-measure all visible items, which causes jank. Stable keys let Compose diff by identity and only recompose changed items.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does Coil automatically cancel image loads when items scroll off screen?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">AsyncImage is a Composable that binds its image request to the composition lifecycle. When the composable leaves composition (item scrolled off screen and recycled by LazyColumn), the coroutine backing the image load is automatically cancelled. This prevents wasted network bandwidth and decoding CPU on off-screen items.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What image format would you use for a CDN serving an Android feed and why?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">WebP — supported since Android 4.0, 25–35% smaller than JPEG at the same quality, lossless and lossy modes available. The CDN should serve WebP to Android clients (via Accept header negotiation) and fall back to JPEG for unsupported clients. AVIF offers even better compression but decoding is slow and Android 12+ only.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the role of @Immutable on FeedItem and how does it affect performance?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">@Immutable tells the Compose compiler that none of FeedItem's public properties will change after construction. This enables "skippable" recomposition — if a FeedItem composable's parameters haven't changed (by reference), Compose skips recomposing it. Without @Immutable (or @Stable), Compose conservatively recomposes all items whenever the parent recomposes, causing jank.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you handle a user tapping "Like" while offline?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Optimistic update: immediately update Room (which flows to UI via PagingSource) and enqueue a WorkManager background task to sync the like to the server when network is available. If the server rejects the like, roll back the Room update and show an error. This gives instant feedback and survives app restart before sync.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is prefetchDistance in PagingConfig and what value would you use?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">prefetchDistance is how many items before the end of the loaded list Paging 3 starts loading the next page. A value of 5 means "start loading the next page when the user is 5 items from the bottom." Too small causes visible load indicators; too large wastes bandwidth. 3–10 is typical; tune based on network latency and scroll speed.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

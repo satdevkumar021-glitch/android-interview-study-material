@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1E — Kotlin Special Classes | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;min-height:100vh;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;letter-spacing:.05em;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1E · Special Classes</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1E</span> — Kotlin Special Classes</h1>
+    <p class="hero-desc">data classes, enum classes, sealed classes &amp; interfaces, object declarations, companion objects, anonymous objects — the Kotlin class variants that power Android architecture daily.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1E</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What they are</h3>
+    <p>Kotlin's special class variants solve recurring patterns that require verbose boilerplate in Java: value objects (data classes), fixed sets of constants (enum), exhaustive type hierarchies (sealed), singletons (object), static-like members (companion object), and one-off anonymous implementations (anonymous object).</p>
+    <h3>Why they matter for Android</h3>
+    <ul>
+      <li><strong>data class</strong> — domain models, DTOs, UI states, events</li>
+      <li><strong>sealed class/interface</strong> — <code>UiState</code>, <code>Result</code>, navigation events, one-time UI effects</li>
+      <li><strong>enum class</strong> — fixed sets: order status, payment type, network state</li>
+      <li><strong>object</strong> — singleton services, Retrofit instance, constants file</li>
+      <li><strong>companion object</strong> — factory methods, constants, <code>newInstance()</code> for Fragments</li>
+      <li><strong>anonymous object</strong> — one-off interface implementations, test fakes inline</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <strong>sealed class</strong> is the most interview-critical here. It models <em>closed type hierarchies</em> — the compiler knows every possible subtype, enabling exhaustive <code>when</code> expressions. This is the foundation of safe, compile-time-checked UiState machines in MVVM.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>data class</h3>
+    <pre><code><span class="kw">data class</span> <span class="cl">UserProfile</span>(
+    <span class="kw">val</span> userId: <span class="cl">String</span>,
+    <span class="kw">val</span> name: <span class="cl">String</span>,
+    <span class="kw">val</span> email: <span class="cl">String?</span>
+)</code></pre>
+    <p>The compiler auto-generates: <code>equals()</code> / <code>hashCode()</code> (structural equality), <code>toString()</code>, <code>copy()</code>, and <code>componentN()</code> functions (for destructuring). All based on properties declared in the <strong>primary constructor</strong>.</p>
+    <pre><code><span class="kw">val</span> u1 = <span class="cl">UserProfile</span>(<span class="str">"1"</span>, <span class="str">"Alice"</span>, <span class="str">"a@b.com"</span>)
+<span class="kw">val</span> u2 = u1.<span class="fn">copy</span>(name = <span class="str">"Bob"</span>)          <span class="cm">// new object, only name changed</span>
+<span class="kw">val</span> (id, name, email) = u1               <span class="cm">// destructuring via componentN()</span>
+u1 == u2                                  <span class="cm">// false — structural equality</span></code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Key Rules</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Properties in <strong>body</strong> (not primary constructor) are NOT included in <code>equals</code>/<code>hashCode</code>/<code>copy</code></li>
+        <li>Data classes cannot be <code>abstract</code>, <code>open</code>, <code>sealed</code>, or inner</li>
+        <li>At least one primary constructor parameter required</li>
+        <li>All primary constructor params should be <code>val</code> — mutability with <code>var</code> in data classes breaks structural equality invariants</code></li>
+      </ul>
+    </div>
+
+    <h3>enum class</h3>
+    <pre><code><span class="kw">enum class</span> <span class="cl">PaymentStatus</span>(val displayName: <span class="cl">String</span>) {
+    PENDING(<span class="str">"Pending"</span>),
+    PROCESSING(<span class="str">"Processing"</span>),
+    SUCCESS(<span class="str">"Paid"</span>),
+    FAILED(<span class="str">"Failed"</span>),
+    REFUNDED(<span class="str">"Refunded"</span>);
+
+    <span class="kw">fun</span> <span class="fn">isFinal</span>(): <span class="cl">Boolean</span> = <span class="kw">this</span> == SUCCESS || <span class="kw">this</span> == FAILED || <span class="kw">this</span> == REFUNDED
+}
+
+<span class="kw">val</span> status = <span class="cl">PaymentStatus</span>.SUCCESS
+<span class="fn">println</span>(status.displayName)   <span class="cm">// "Paid"</span>
+<span class="fn">println</span>(status.name)          <span class="cm">// "SUCCESS" — built-in</span>
+<span class="fn">println</span>(status.ordinal)       <span class="cm">// 2 — zero-based index</span>
+<span class="cl">PaymentStatus</span>.<span class="fn">valueOf</span>(<span class="str">"PENDING"</span>)  <span class="cm">// by name string</span>
+<span class="cl">PaymentStatus</span>.entries           <span class="cm">// all values (Kotlin 1.9+), replaces values()</span></code></pre>
+
+    <h3>sealed class</h3>
+    <pre><code><span class="kw">sealed class</span> <span class="cl">UiState</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {
+    <span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">Success</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> data: <span class="cl">T</span>) : <span class="cl">UiState</span>&lt;<span class="cl">T</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()
+}
+
+<span class="cm">// Exhaustive when — compiler error if a subtype is missing</span>
+<span class="kw">when</span> (<span class="kw">val</span> state = uiState) {
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Loading</span>  -> <span class="fn">showLoading</span>()
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Success</span>  -> <span class="fn">showData</span>(state.data)
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Error</span>    -> <span class="fn">showError</span>(state.message)
+    <span class="cm">// No else needed — compiler guarantees exhaustiveness</span>
+}</code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">sealed class vs sealed interface</div>
+      <strong>sealed class</strong>: subclasses can only be in the same package (Kotlin 1.5+: same compilation unit). Can hold state via constructor. <strong>sealed interface</strong>: subclasses/implementors can be data classes, objects, or regular classes — more flexible. Preferred for pure type hierarchies with no shared state. Use sealed interface when subtypes need to implement multiple interfaces.
+    </div>
+
+    <h3>object declaration (Singleton)</h3>
+    <pre><code><span class="cm">// Thread-safe singleton — initialized on first access</span>
+<span class="kw">object</span> <span class="cl">NetworkConfig</span> {
+    <span class="kw">const val</span> BASE_URL = <span class="str">"https://api.bank.com/"</span>
+    <span class="kw">const val</span> TIMEOUT_SECONDS = <span class="nu">30L</span>
+
+    <span class="kw">fun</span> <span class="fn">buildOkHttpClient</span>(): <span class="cl">OkHttpClient</span> = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+        .<span class="fn">connectTimeout</span>(TIMEOUT_SECONDS, <span class="cl">TimeUnit</span>.SECONDS)
+        .<span class="fn">build</span>()
+}
+<span class="cm">// Usage: NetworkConfig.BASE_URL</span>
+<span class="cm">// Compiled to: public final class NetworkConfig with static INSTANCE field</span></code></pre>
+
+    <h3>companion object</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">PaymentFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">companion object</span> {
+        <span class="kw">private const val</span> ARG_PAYMENT_ID = <span class="str">"payment_id"</span>
+
+        <span class="cm">// Factory method — idiomatic Fragment instantiation</span>
+        <span class="kw">fun</span> <span class="fn">newInstance</span>(paymentId: <span class="cl">String</span>): <span class="cl">PaymentFragment</span> =
+            <span class="cl">PaymentFragment</span>().<span class="fn">apply</span> {
+                arguments = <span class="cl">Bundle</span>().<span class="fn">apply</span> { <span class="fn">putString</span>(ARG_PAYMENT_ID, paymentId) }
+            }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="cl">View</span>, ...) {
+        <span class="kw">val</span> paymentId = arguments<span class="kw">?.</span><span class="fn">getString</span>(ARG_PAYMENT_ID)
+    }
+}
+<span class="cm">// Usage: PaymentFragment.newInstance("pay_123")</span>
+<span class="cm">// companion object members are NOT truly static — accessed via INSTANCE</span>
+<span class="cm">// Add @JvmStatic for Java interop</span></code></pre>
+
+    <h3>anonymous object</h3>
+    <pre><code><span class="cm">// One-off implementation — no need for a named class</span>
+<span class="kw">val</span> loginListener = <span class="kw">object</span> : <span class="cl">AuthListener</span> {
+    <span class="kw">override fun</span> <span class="fn">onSuccess</span>(token: <span class="cl">String</span>) { <span class="fn">navigateToHome</span>() }
+    <span class="kw">override fun</span> <span class="fn">onFailure</span>(e: <span class="cl">Exception</span>) { <span class="fn">showError</span>(e.message) }
+}
+
+<span class="cm">// Anonymous object with no supertype — local temporary state</span>
+<span class="kw">val</span> counter = <span class="kw">object</span> {
+    <span class="kw">var</span> count = <span class="nu">0</span>
+    <span class="kw">fun</span> <span class="fn">increment</span>() = ++count
+}</code></pre>
+
+    <h3>data object (Kotlin 1.9+)</h3>
+    <pre><code><span class="cm">// Singleton with proper equals/hashCode/toString — perfect for sealed subtypes</span>
+<span class="kw">sealed class</span> <span class="cl">NetworkState</span> {
+    <span class="kw">data object</span> <span class="cl">Connected</span>    : <span class="cl">NetworkState</span>()
+    <span class="kw">data object</span> <span class="cl">Disconnected</span> : <span class="cl">NetworkState</span>()
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> code: <span class="cl">Int</span>) : <span class="cl">NetworkState</span>()
+}
+<span class="cm">// data object: toString() = "Connected", equals() works correctly</span>
+<span class="cm">// plain object: toString() = "NetworkState$Connected@1234abc" — ugly</span></code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Instances</th><th>Auto-generated</th><th>Primary use</th></tr>
+      <tr><td><code>data class</code></td><td>Many</td><td>equals, hashCode, toString, copy, componentN</td><td>Domain models, DTOs, UI states</td></tr>
+      <tr><td><code>enum class</code></td><td>Fixed set</td><td>name, ordinal, valueOf, entries</td><td>Closed constants with behaviour</td></tr>
+      <tr><td><code>sealed class</code></td><td>Closed hierarchy</td><td>Exhaustive when</td><td>UiState, Result, navigation events</td></tr>
+      <tr><td><code>sealed interface</code></td><td>Closed hierarchy</td><td>Exhaustive when</td><td>Multi-interface subtypes, pure type unions</td></tr>
+      <tr><td><code>object</code></td><td>1 (singleton)</td><td>Thread-safe init</td><td>Singletons, constants holders</td></tr>
+      <tr><td><code>companion object</code></td><td>1 per class</td><td>—</td><td>Factory methods, constants, @JvmStatic</td></tr>
+      <tr><td><code>anonymous object</code></td><td>1 inline</td><td>—</td><td>One-off interface implementation</td></tr>
+      <tr><td><code>data object</code></td><td>1 (singleton)</td><td>equals, hashCode, toString</td><td>Singleton sealed subtypes (Loading, Idle)</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+
+    <h3>Decision Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Need</th><th>Use</th><th>Android Example</th></tr>
+      <tr><td>Value object — structural equality, copy, destructuring</td><td><code>data class</code></td><td><code>UserProfile</code>, <code>ProductDto</code>, <code>CartItem</code></td></tr>
+      <tr><td>Fixed named constants with optional behaviour/properties</td><td><code>enum class</code></td><td><code>PaymentStatus</code>, <code>OrderState</code>, <code>Theme</code></td></tr>
+      <tr><td>Closed type hierarchy — exhaustive when</td><td><code>sealed class</code> or <code>sealed interface</code></td><td><code>UiState</code>, <code>ViewEvent</code>, <code>ApiResult</code></td></tr>
+      <tr><td>App-wide singleton with no DI</td><td><code>object</code></td><td><code>NetworkConfig</code>, <code>AppConstants</code></td></tr>
+      <tr><td>Factory method / constants tied to a class</td><td><code>companion object</code></td><td><code>Fragment.newInstance()</code>, TAG constant</td></tr>
+      <tr><td>One-off multi-method interface implementation</td><td><code>anonymous object</code></td><td>Auth callback, test fake inline</td></tr>
+      <tr><td>Singleton sealed subtype (no data)</td><td><code>data object</code></td><td><code>UiState.Loading</code>, <code>UiState.Idle</code></td></tr>
+    </table>
+    </div>
+
+    <h3>sealed class vs enum class — when to pick which</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Criterion</th><th>enum class</th><th>sealed class</th></tr>
+      <tr><td>Number of instances</td><td>Fixed at compile time</td><td>Fixed subtypes, unlimited instances per subtype</td></tr>
+      <tr><td>Each variant carries data</td><td>Same fields for all</td><td>Each subtype has its own fields</td></tr>
+      <tr><td>Hierarchy depth</td><td>Flat only</td><td>Can nest further</td></tr>
+      <tr><td>Exhaustive when</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Example</td><td><code>PaymentStatus.SUCCESS</code></td><td><code>UiState.Success(data)</code></td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to Use</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Use <code>data class</code> for mutable state — all properties should be <code>val</code></li>
+        <li>Put business logic in a <code>data class</code> body — keep it a dumb value object</li>
+        <li>Use <code>object</code> for things that need DI or testing — use Hilt <code>@Singleton</code> instead</li>
+        <li>Use <code>enum</code> when subtypes need different data shapes — use <code>sealed class</code></li>
+        <li>Use <code>companion object</code> as a dumping ground for utility functions — extract to top-level or proper class</li>
+        <li>Use a plain <code>object</code> for sealed singleton subtypes (use <code>data object</code> instead — better <code>toString()</code> / equality)</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      E-commerce app — order management. Each special class type appears in its natural production context across Clean Architecture layers.
+    </div>
+
+    <h3>data class — Domain Model</h3>
+    <pre><code><span class="cm">// domain/model/Order.kt</span>
+<span class="kw">data class</span> <span class="cl">Order</span>(
+    <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="kw">val</span> items: <span class="cl">List</span>&lt;<span class="cl">OrderItem</span>&gt;,
+    <span class="kw">val</span> status: <span class="cl">OrderStatus</span>,
+    <span class="kw">val</span> totalAmount: <span class="cl">Double</span>,
+    <span class="kw">val</span> createdAt: <span class="cl">Long</span>
+) {
+    <span class="cm">// Body properties excluded from equals/hashCode/copy</span>
+    <span class="kw">val</span> formattedTotal: <span class="cl">String</span>
+        <span class="kw">get</span>() = <span class="str">"₹${String.format("%.2f", totalAmount)}"</span>
+}
+
+<span class="cm">// Deep copy with modification — immutable update pattern</span>
+<span class="kw">val</span> updatedOrder = order.<span class="fn">copy</span>(status = <span class="cl">OrderStatus</span>.DELIVERED)</code></pre>
+
+    <h3>enum class — Order Status</h3>
+    <pre><code><span class="cm">// domain/model/OrderStatus.kt</span>
+<span class="kw">enum class</span> <span class="cl">OrderStatus</span>(
+    <span class="kw">val</span> displayName: <span class="cl">String</span>,
+    <span class="kw">val</span> colorRes: <span class="cl">Int</span>
+) {
+    PLACED(<span class="str">"Order Placed"</span>, R.color.status_blue),
+    CONFIRMED(<span class="str">"Confirmed"</span>, R.color.status_indigo),
+    SHIPPED(<span class="str">"Shipped"</span>, R.color.status_orange),
+    DELIVERED(<span class="str">"Delivered"</span>, R.color.status_green),
+    CANCELLED(<span class="str">"Cancelled"</span>, R.color.status_red);
+
+    <span class="kw">val</span> isFinal: <span class="cl">Boolean</span>
+        <span class="kw">get</span>() = <span class="kw">this</span> == DELIVERED || <span class="kw">this</span> == CANCELLED
+}</code></pre>
+
+    <h3>sealed interface — UiState</h3>
+    <pre><code><span class="cm">// presentation/orders/OrderListUiState.kt</span>
+<span class="kw">sealed interface</span> <span class="cl">OrderListUiState</span> {
+    <span class="kw">data object</span> <span class="cl">Loading</span>  : <span class="cl">OrderListUiState</span>
+    <span class="kw">data object</span> <span class="cl">Empty</span>    : <span class="cl">OrderListUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Success</span>(<span class="kw">val</span> orders: <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;) : <span class="cl">OrderListUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>, <span class="kw">val</span> retryable: <span class="cl">Boolean</span> = <span class="kw">true</span>) : <span class="cl">OrderListUiState</span>
+}
+
+<span class="cm">// One-time events (side effects) — also sealed</span>
+<span class="kw">sealed interface</span> <span class="cl">OrderEvent</span> {
+    <span class="kw">data class</span> <span class="cl">NavigateToDetail</span>(<span class="kw">val</span> orderId: <span class="cl">String</span>) : <span class="cl">OrderEvent</span>
+    <span class="kw">data class</span> <span class="cl">ShowSnackbar</span>(<span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">OrderEvent</span>
+    <span class="kw">data object</span> <span class="cl">ShowCancelConfirmation</span> : <span class="cl">OrderEvent</span>
+}</code></pre>
+
+    <h3>ViewModel — sealed state + events</h3>
+    <pre><code><span class="cm">// presentation/orders/OrderListViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">OrderListViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getOrders: <span class="cl">GetOrdersUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">OrderListUiState</span>&gt;(<span class="cl">OrderListUiState</span>.Loading)
+    <span class="kw">val</span> uiState = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">private val</span> _events = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">OrderEvent</span>&gt;()
+    <span class="kw">val</span> events = _events.<span class="fn">asSharedFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">loadOrders</span>() {
+        viewModelScope.<span class="fn">launch</span> {
+            <span class="fn">getOrders</span>()
+                .<span class="fn">onSuccess</span> { orders ->
+                    _uiState.value = <span class="kw">if</span> (orders.<span class="fn">isEmpty</span>())
+                        <span class="cl">OrderListUiState</span>.Empty
+                    <span class="kw">else</span>
+                        <span class="cl">OrderListUiState</span>.<span class="cl">Success</span>(orders)
+                }
+                .<span class="fn">onFailure</span> {
+                    _uiState.value = <span class="cl">OrderListUiState</span>.<span class="cl">Error</span>(it.message <span class="kw">?:</span> <span class="str">"Unknown"</span>)
+                }
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">onOrderClicked</span>(orderId: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            _events.<span class="fn">emit</span>(<span class="cl">OrderEvent</span>.<span class="cl">NavigateToDetail</span>(orderId))
+        }
+    }
+}</code></pre>
+
+    <h3>Compose UI — exhaustive when on sealed</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">OrderListScreen</span>(viewModel: <span class="cl">OrderListViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> uiState <span class="kw">by</span> viewModel.uiState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="kw">when</span> (uiState) {                                     <span class="cm">// exhaustive — no else needed</span>
+        <span class="cl">OrderListUiState</span>.Loading -> <span class="fn">LoadingIndicator</span>()
+        <span class="cl">OrderListUiState</span>.Empty   -> <span class="fn">EmptyState</span>()
+        <span class="kw">is</span> <span class="cl">OrderListUiState</span>.<span class="cl">Success</span> -> <span class="fn">OrderList</span>((uiState <span class="kw">as</span> <span class="cl">OrderListUiState</span>.<span class="cl">Success</span>).orders)
+        <span class="kw">is</span> <span class="cl">OrderListUiState</span>.<span class="cl">Error</span>   -> <span class="fn">ErrorView</span>((uiState <span class="kw">as</span> <span class="cl">OrderListUiState</span>.<span class="cl">Error</span>).message)
+    }
+}</code></pre>
+
+    <h3>companion object — Fragment factory + TAG</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">OrderDetailFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">companion object</span> {
+        <span class="kw">const val</span> TAG = <span class="str">"OrderDetailFragment"</span>              <span class="cm">// compile-time constant</span>
+        <span class="kw">private const val</span> ARG_ORDER_ID = <span class="str">"order_id"</span>
+
+        <span class="kw">fun</span> <span class="fn">newInstance</span>(orderId: <span class="cl">String</span>) =
+            <span class="cl">OrderDetailFragment</span>().<span class="fn">apply</span> {
+                arguments = <span class="cl">Bundle</span>().<span class="fn">apply</span> { <span class="fn">putString</span>(ARG_ORDER_ID, orderId) }
+            }
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td><code>data class</code></td><td>Auto equals/hashCode/copy, immutable by convention</td><td>Can't be open/abstract; body props excluded from equals</td><td>Always for value objects and domain models</td></tr>
+      <tr><td>Regular class</td><td>Flexible</td><td>Manual equals/hashCode, no copy()</td><td>When mutable state or inheritance needed</td></tr>
+      <tr><td><code>sealed class</code></td><td>Exhaustive when, type safety, can hold state per subtype</td><td>All subtypes in same package</td><td>UiState, Result, navigation events</td></tr>
+      <tr><td><code>sealed interface</code></td><td>Subtypes can implement multiple interfaces, more flexible</td><td>No shared constructor/fields</td><td>Pure type hierarchy, multi-interface subtypes</td></tr>
+      <tr><td><code>enum class</code></td><td>Simple, ordinal, valueOf, exhaustive when</td><td>All instances have same fields; no per-instance data shapes</td><td>Fixed constant set with optional shared behaviour</td></tr>
+      <tr><td>Kotlin <code>Result&lt;T&gt;</code></td><td>Built-in, interops with coroutines</td><td>Only Success/Failure — no Loading, no custom error types</td><td>Simple success/failure; use sealed UiState for UI layer</td></tr>
+      <tr><td><code>object</code> singleton</td><td>Thread-safe, simple</td><td>Hard to test (no DI), global state</td><td>Constants, config — not for service classes</td></tr>
+      <tr><td>Hilt <code>@Singleton</code></td><td>Testable, injectable, lifecycle-aware</td><td>More setup</td><td>Services, repositories — always over raw <code>object</code></td></tr>
+    </table>
+    </div>
+    <h3>Interviewer Comparisons</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Expect These</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>sealed class vs enum</strong> — enum: fixed instances, same data shape; sealed: fixed subtypes, different data per subtype</li>
+        <li><strong>sealed class vs sealed interface</strong> — interface: more flexible (multi-interface), no shared state; class: shared constructor/fields</li>
+        <li><strong>data class vs regular class</strong> — data: auto value semantics; regular: manual, needed for inheritance</li>
+        <li><strong>object vs companion object</strong> — object is standalone singleton; companion is tied to an enclosing class</li>
+        <li><strong>object vs Hilt @Singleton</strong> — object is hard to test; Hilt singleton is injectable and mockable</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>data class with var — breaks equals/hashCode contract</h3>
+    <pre><code><span class="cm">// ❌ BAD — mutable data class breaks structural equality guarantees</span>
+<span class="kw">data class</span> <span class="cl">CartItem</span>(<span class="kw">var</span> quantity: <span class="cl">Int</span>, <span class="kw">val</span> productId: <span class="cl">String</span>)
+<span class="kw">val</span> item = <span class="cl">CartItem</span>(<span class="nu">1</span>, <span class="str">"p1"</span>)
+<span class="kw">val</span> set = <span class="fn">hashSetOf</span>(item)
+item.quantity = <span class="nu">2</span>    <span class="cm">// mutates! hashCode changes → item "lost" in the set</span>
+<span class="fn">println</span>(item <span class="kw">in</span> set)  <span class="cm">// false! bucket changed</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — all val; use copy() for updates</span>
+<span class="kw">data class</span> <span class="cl">CartItem</span>(<span class="kw">val</span> quantity: <span class="cl">Int</span>, <span class="kw">val</span> productId: <span class="cl">String</span>)
+<span class="kw">val</span> updated = item.<span class="fn">copy</span>(quantity = <span class="nu">2</span>)   <span class="cm">// new object</span></code></pre>
+
+    <h3>Body property included in equals — invisible bug</h3>
+    <pre><code><span class="cm">// ❌ BAD — 'displayName' is in the body; NOT compared in equals()</span>
+<span class="kw">data class</span> <span class="cl">Product</span>(<span class="kw">val</span> id: <span class="cl">String</span>) {
+    <span class="kw">var</span> displayName: <span class="cl">String</span> = <span class="str">""</span>   <span class="cm">// body property — ignored by equals/hashCode</span>
+}
+<span class="kw">val</span> a = <span class="cl">Product</span>(<span class="str">"1"</span>).<span class="fn">apply</span> { displayName = <span class="str">"Phone"</span> }
+<span class="kw">val</span> b = <span class="cl">Product</span>(<span class="str">"1"</span>).<span class="fn">apply</span> { displayName = <span class="str">"Laptop"</span> }
+<span class="fn">println</span>(a == b)  <span class="cm">// true! displayName not in equals</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — all meaningful fields in primary constructor</span>
+<span class="kw">data class</span> <span class="cl">Product</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> displayName: <span class="cl">String</span>)</code></pre>
+
+    <h3>sealed class when without else — missing new subtype</h3>
+    <pre><code><span class="cm">// ❌ BAD — using else loses the compile-time exhaustiveness guarantee</span>
+<span class="kw">when</span> (state) {
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Loading</span> -> <span class="fn">showLoading</span>()
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Success</span> -> <span class="fn">showData</span>()
+    <span class="kw">else</span> -> <span class="fn">showError</span>()  <span class="cm">// silently swallows new subtypes added later</span>
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — no else; adding a new sealed subtype causes compile error here</span>
+<span class="kw">when</span> (state) {
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Loading</span> -> <span class="fn">showLoading</span>()
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Success</span> -> <span class="fn">showData</span>()
+    <span class="kw">is</span> <span class="cl">UiState</span>.<span class="cl">Error</span>   -> <span class="fn">showError</span>()
+}</code></pre>
+
+    <h3>object singleton vs Hilt — testability trap</h3>
+    <pre><code><span class="cm">// ❌ BAD — singleton object impossible to replace in tests</span>
+<span class="kw">object</span> <span class="cl">AnalyticsManager</span> {
+    <span class="kw">fun</span> <span class="fn">track</span>(event: <span class="cl">String</span>) { <span class="cm">/* sends to Firebase */</span> }
+}
+<span class="cm">// In tests: can't inject a no-op; real events fire</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — interface + Hilt @Singleton</span>
+<span class="kw">interface</span> <span class="cl">Analytics</span> { <span class="kw">fun</span> <span class="fn">track</span>(event: <span class="cl">String</span>) }
+<span class="kw">class</span> <span class="cl">FirebaseAnalytics</span> <span class="kw">@Inject constructor</span>() : <span class="cl">Analytics</span> { ... }
+<span class="cm">// Test: inject FakeAnalytics that does nothing</span></code></pre>
+
+    <h3>enum ordinal as persisted value — fragile</h3>
+    <pre><code><span class="cm">// ❌ BAD — storing ordinal in DB; reordering enum breaks all stored data</span>
+dao.<span class="fn">insert</span>(order.<span class="fn">copy</span>(statusCode = status.ordinal))
+
+<span class="cm">// ✅ GOOD — store name or a stable Int field</span>
+<span class="kw">enum class</span> <span class="cl">OrderStatus</span>(<span class="kw">val</span> code: <span class="cl">Int</span>) {
+    PLACED(<span class="nu">1</span>), SHIPPED(<span class="nu">2</span>), DELIVERED(<span class="nu">3</span>), CANCELLED(<span class="nu">4</span>)
+}
+dao.<span class="fn">insert</span>(order.<span class="fn">copy</span>(statusCode = status.code))  <span class="cm">// stable</span></code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>All <code>data class</code> primary constructor properties should be <code>val</code> — use <code>copy()</code> for updates.</li>
+      <li>Use <code>sealed interface</code> over <code>sealed class</code> when subtypes need no shared state — more flexible.</li>
+      <li>Never use <code>else</code> in a <code>when</code> on a sealed type — defeats the exhaustiveness guarantee.</li>
+      <li>Use <code>data object</code> (Kotlin 1.9+) for no-data sealed subtypes — correct <code>toString()</code> and equality.</li>
+      <li>Use <code>enum class</code> for fixed constants; use a stable explicit <code>code: Int</code> field if persisting to DB.</li>
+      <li>Keep <code>companion object</code> lean — factory methods and constants only, not utility functions.</li>
+      <li>Prefer Hilt <code>@Singleton</code> over raw <code>object</code> for anything that needs to be replaced in tests.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Kotlin's special classes each solve a specific pattern. Data classes give you value semantics — equals, hashCode, copy, destructuring — auto-generated from primary constructor properties. Sealed classes and interfaces model closed type hierarchies, enabling exhaustive when expressions — the compiler guarantees you handle every subtype. I use sealed interface for UiState and UI events throughout my ViewModels. Enum classes handle fixed constant sets. Object declarations are thread-safe singletons. Companion objects provide factory methods and constants scoped to a class."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "I'll focus on the ones that come up most in Android work.<br><br>
+      Data classes: I use these for domain models, DTOs, and UI states. The key thing is they provide structural equality — two instances with the same property values are equal. All primary constructor properties should be <code>val</code>. Properties in the body are NOT included in equals or copy, which is a common source of subtle bugs. I use copy() for immutable updates — never mutate.<br><br>
+      Sealed classes/interfaces: this is the most powerful one. A sealed type has a closed set of subtypes known at compile time. This makes when exhaustive — no else branch needed, and if I add a new subtype later, every when expression that doesn't handle it becomes a compile error. I model every ViewModel's state as a sealed interface with data object Loading, data object Empty, data class Success(val data), and data class Error(val message). I also use a separate sealed interface for one-time events like navigation and snackbars.<br><br>
+      Sealed vs enum: enum is for a fixed set of named constants where all instances share the same fields. Sealed is for when each subtype needs different data — Success needs a result, Error needs a message, Loading needs nothing.<br><br>
+      Object vs companion: object is a standalone singleton. Companion object lives inside a class and gives you factory methods and constants scoped to that class — the idiomatic way to do Fragment.newInstance()."
+    </div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><code>data class</code>: equals/hashCode/copy/componentN auto-generated from <strong>primary constructor</strong> properties only</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>All <code>data class</code> primary constructor params should be <code>val</code> — mutable data class breaks equals/hashCode in collections</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>sealed</code> = closed type hierarchy; compiler-enforced exhaustive <code>when</code> — never add <code>else</code> on a sealed type</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>sealed class</code> vs <code>enum</code>: enum = same data shape for all instances; sealed = different data per subtype</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>sealed interface</code> preferred over <code>sealed class</code> when no shared state needed — subtypes can implement multiple interfaces</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><code>data object</code> (Kotlin 1.9+) for no-data sealed subtypes — gives correct <code>toString()</code> and equality vs plain <code>object</code></div></div>
+      <div class="must-item"><div class="must-num">7</div><div><code>object</code> = thread-safe singleton; prefer Hilt <code>@Singleton</code> for anything testable</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>Bytecode representation of data classes (componentN, Intrinsics checks)</li>
+      <li>Kotlin <code>value class</code> (inline classes) — different concept</li>
+      <li>Enum reflection / <code>enumValueOf</code> internals</li>
+    </ul>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>Can a data class extend another class?</td><td>It can extend a non-data class or implement interfaces. It cannot extend another data class (data classes cannot be <code>open</code>).</td></tr>
+      <tr><td>What does copy() do?</td><td>Creates a new instance with the same values as the original, overriding only the specified properties. It does a <em>shallow</em> copy — nested objects are not deep-copied.</td></tr>
+      <tr><td>What's the difference between object and companion object?</td><td><code>object</code> = standalone singleton class. <code>companion object</code> = singleton tied to the enclosing class — members accessed via the class name. Only one companion object per class. Neither generates truly static JVM members — add <code>@JvmStatic</code> for Java interop.</td></tr>
+      <tr><td>Why use sealed interface over sealed class?</td><td>A sealed interface's subtypes can implement multiple other interfaces, and can be data classes or regular classes independently. A sealed class requires subtypes to extend it — they can't extend another class. Prefer sealed interface unless you need shared constructor parameters or state in the base.</td></tr>
+      <tr><td>How do you make when exhaustive in Compose when it's used as a statement, not expression?</td><td>Use the <code>when</code> extension trick: <code>val exhaustive = when(state) { ... }</code> as an expression, or use a custom <code>exhaustive</code> extension property. Compose smart recomposition also benefits from sealed state changes being distinct object types.</td></tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I model UI state as a sealed interface with <code>data object</code> for no-data states and <code>data class</code> for states with data. I keep state and one-time events separate — state goes in <code>StateFlow</code>, events go in <code>SharedFlow</code> (replay=0). The sealed interface guarantees the UI handles every state, and adding a new state (e.g., <code>Refreshing</code>) causes compile errors at every <code>when</code> expression — you can't miss it. That's architecture enforced by the type system, not by documentation or convention."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>DATA CLASS</h4>
+        <pre><code>Auto: equals/hashCode/toString
+      copy() / componentN()
+Only primary constructor params
+All params → val (avoid var!)
+Body props excluded from equals
+Can't be open/abstract/sealed</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ENUM CLASS</h4>
+        <pre><code>Fixed set of named instances
+Properties: name, ordinal (0-based)
+entries (1.9+) replaces values()
+Can have constructor params + fns
+Store code field, NOT ordinal in DB
+Use when: fixed constants</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SEALED CLASS / INTERFACE</h4>
+        <pre><code>Closed hierarchy → exhaustive when
+sealed class  → shared state OK
+sealed interface → multi-interface OK
+data object  → no-data subtypes (1.9+)
+NEVER use else on sealed when
+Prefer sealed interface in new code</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>OBJECT / COMPANION</h4>
+        <pre><code>object Foo { }  // singleton
+companion object { }  // tied to class
+// Both: not truly static JVM
+// Add @JvmStatic for Java interop
+// object = hard to test → use Hilt
+// companion = factory + constants</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ANONYMOUS OBJECT</h4>
+        <pre><code>val x = object : SomeInterface {
+  override fun method() { }
+}
+// One-off, local scope
+// Captures outer this → leak risk
+// For SAM → use lambda instead</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY GOTCHAS</h4>
+        <pre><code>data class var → breaks hashSet
+body props excluded from copy/equals
+enum ordinal → fragile for DB/API
+object singleton → untestable
+else on sealed when → misses new types
+data object toString = "Loading"
+plain object toString = "Foo@abc123"</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What does a data class auto-generate? What is NOT included in equals/hashCode?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Auto-generated: <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>, <code>copy()</code>, and <code>componentN()</code> functions for destructuring — all based on properties declared in the <strong>primary constructor</strong> only.<br><br>NOT included: properties declared in the class body (outside the primary constructor). This is a common source of bugs — if you add a <code>var</code> property in the body, two instances with different body-property values will still be considered equal if their constructor properties match.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is a sealed class? How does it enable exhaustive when?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A sealed class defines a <em>closed type hierarchy</em> — all direct subclasses must be in the same compilation unit (package in Kotlin 1.5+). Because the compiler knows every possible subtype at compile time, a <code>when</code> expression on a sealed type can be exhaustive without an <code>else</code> branch. If you add a new subtype later, every <code>when</code> expression that doesn't handle it becomes a compile error — preventing silent bugs.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is the difference between object and companion object?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>object</code> is a standalone singleton class declaration — it exists independently. <code>companion object</code> lives inside another class and its members are accessed via the enclosing class name (like Java static members, but not truly static in JVM bytecode). Only one companion object per class is allowed. Add <code>@JvmStatic</code> to companion members for actual Java static interop. Common use: <code>companion object { fun newInstance() }</code> for Fragment factories.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — When would you use a sealed class vs an enum class?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Enum</strong>: fixed set of named constants where all instances share the same data shape. Good for: <code>PaymentStatus</code>, <code>Theme</code>, <code>NetworkType</code>. Each enum value is a singleton.<br><br>
+      <strong>Sealed class</strong>: fixed set of subtypes where each subtype can carry <em>different</em> data. Good for: <code>UiState</code> (Loading has no data, Success has a list, Error has a message), <code>Result</code>, navigation events. Each subtype can have its own constructor and multiple instances.<br><br>
+      Rule: if the variants have the same fields → enum. If each variant needs different data → sealed.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) What is wrong? <code>data class User(val id: String) { var name = "" }; val a = User("1").apply { name = "Alice" }; val b = User("1").apply { name = "Bob" }; println(a == b)</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Prints <strong>true</strong> — which is likely NOT what the developer intended.<br><br>
+      <code>name</code> is declared in the class body, not the primary constructor. Data class <code>equals()</code> and <code>hashCode()</code> are generated only from primary constructor properties (<code>id</code> here). So two User objects with the same <code>id</code> but different <code>name</code> values are considered equal.<br><br>
+      Fix: move <code>name</code> to the primary constructor: <code>data class User(val id: String, val name: String)</code></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What is data object? Why is it better than plain object for sealed subtypes?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>data object</code> (Kotlin 1.9+) is a singleton with auto-generated <code>equals()</code>, <code>hashCode()</code>, and <code>toString()</code> — like a data class with no properties.<br><br>
+      Why better for sealed subtypes: a plain <code>object</code>'s <code>toString()</code> returns the JVM identity string like <code>"UiState$Loading@1a2b3c"</code> — useless for logging and debugging. A <code>data object</code>'s <code>toString()</code> returns <code>"Loading"</code> — much cleaner. Also, <code>equals()</code> works correctly (two references to the same singleton are equal), though for objects this is true anyway since there's only one instance.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — Why should you never use else in a when expression on a sealed type?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Using <code>else</code> defeats the compile-time exhaustiveness guarantee. If you add a new subtype to the sealed hierarchy later, the <code>when</code> with <code>else</code> will silently handle it with the else branch — the compiler won't warn you. You could be rendering the wrong UI for a new state for weeks without realizing.<br><br>
+      Without <code>else</code>, adding a new sealed subtype causes a compile error at every <code>when</code> expression that doesn't handle it. This is intentional — it forces you to explicitly handle every state, making the system fail fast at compile time rather than silently at runtime.</div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — Design a complete UiState and ViewEvent sealed hierarchy for a payment screen. Justify your choices.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// State — flows in StateFlow, represents current screen state</span>
+<span class="kw">sealed interface</span> <span class="cl">PaymentUiState</span> {
+    <span class="kw">data object</span> <span class="cl">Idle</span>       : <span class="cl">PaymentUiState</span>
+    <span class="kw">data object</span> <span class="cl">Loading</span>    : <span class="cl">PaymentUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Success</span>(<span class="kw">val</span> transactionId: <span class="cl">String</span>) : <span class="cl">PaymentUiState</span>
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>, <span class="kw">val</span> retryable: <span class="cl">Boolean</span>) : <span class="cl">PaymentUiState</span>
+}
+
+<span class="cm">// Events — one-time side effects in SharedFlow(replay=0)</span>
+<span class="kw">sealed interface</span> <span class="cl">PaymentEvent</span> {
+    <span class="kw">data class</span>  <span class="cl">NavigateToReceipt</span>(<span class="kw">val</span> txId: <span class="cl">String</span>) : <span class="cl">PaymentEvent</span>
+    <span class="kw">data class</span>  <span class="cl">ShowSnackbar</span>(<span class="kw">val</span> msg: <span class="cl">String</span>) : <span class="cl">PaymentEvent</span>
+    <span class="kw">data object</span> <span class="cl">NavigateBack</span> : <span class="cl">PaymentEvent</span>
+}</code></pre>
+      <strong>Justifications:</strong> sealed interface (not class) — no shared state; subtypes can implement other interfaces. <code>data object</code> for Idle/Loading — no data, but clean <code>toString()</code>. <code>data class</code> for Success/Error — each has different fields. Events separate from state — state is persistent (StateFlow), events fire once (SharedFlow replay=0) to prevent re-delivery on recomposition.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — (Scenario) A junior dev stored <code>PaymentStatus.ordinal</code> in the Room database. Three months later, the team added a new status between PROCESSING and SUCCESS. What broke and how do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>What broke:</strong> ordinal is the zero-based position in the enum declaration. Adding a new status shifted all ordinals after it by 1. Every row in the DB that had ordinal 2 (SUCCESS) is now interpreted as the new status. Orders that were previously marked SUCCESS are now read back as the wrong status — silent data corruption.<br><br>
+      <strong>Fix:</strong> Add a stable <code>code: Int</code> field to the enum that never changes regardless of declaration order:
+<pre><code><span class="kw">enum class</span> <span class="cl">PaymentStatus</span>(<span class="kw">val</span> code: <span class="cl">Int</span>) {
+    PENDING(<span class="nu">1</span>), PROCESSING(<span class="nu">2</span>), UNDER_REVIEW(<span class="nu">5</span>), SUCCESS(<span class="nu">3</span>), FAILED(<span class="nu">4</span>)
+}</code></pre>
+      Write a Room migration to convert stored ordinal values to the new stable codes. Going forward, always persist <code>status.code</code>, not <code>status.ordinal</code>. Add a Room <code>TypeConverter</code> that converts by <code>code</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — (Scenario) copy() on a data class gives you a "deep copy" — true or false? What are the implications in an Android app?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>False.</strong> <code>copy()</code> performs a <em>shallow copy</em> — only the top-level object is a new instance. Any nested objects (lists, other data classes) are <em>shared references</em>.<br><br>
+      <strong>Implications:</strong>
+<pre><code><span class="kw">data class</span> <span class="cl">Cart</span>(<span class="kw">val</span> items: <span class="cl">MutableList</span>&lt;<span class="cl">Item</span>&gt;)
+<span class="kw">val</span> cart1 = <span class="cl">Cart</span>(<span class="fn">mutableListOf</span>(<span class="cl">Item</span>(<span class="str">"A"</span>)))
+<span class="kw">val</span> cart2 = cart1.<span class="fn">copy</span>()
+cart2.items.<span class="fn">add</span>(<span class="cl">Item</span>(<span class="str">"B"</span>))   <span class="cm">// MUTATES cart1.items too!</span></code></pre>
+      Fix: use immutable collections (<code>List</code> not <code>MutableList</code>) in data classes. If you need a deep copy, manually create new instances. In StateFlow with Compose, sharing mutable lists between states causes incorrect recomposition — Compose compares by reference for stability. Always use immutable <code>List&lt;T&gt;</code> in your UI state data classes.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

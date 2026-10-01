@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1H — Kotlin Collections | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1H · Collections</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1H</span> — Kotlin Collections</h1>
+    <p class="hero-desc">List, Set, Map (mutable vs immutable), map/filter/flatMap/fold/reduce, and Sequences vs collections — the complete functional collection toolkit for Android production code.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1H</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What it is</h3>
+    <p>Kotlin's collection framework has a clear <strong>mutable/immutable split</strong>. Immutable collections (<code>List</code>, <code>Set</code>, <code>Map</code>) are read-only views — preferred in domain models and Compose state. Mutable counterparts (<code>MutableList</code>, etc.) allow modification. Rich higher-order operators (<code>map</code>, <code>filter</code>, <code>flatMap</code>, <code>fold</code>, <code>groupBy</code>, etc.) transform data declaratively. <code>Sequence</code> provides lazy evaluation for large datasets.</p>
+    <h3>Why it matters for Android</h3>
+    <ul>
+      <li>Domain models use <code>List&lt;T&gt;</code> — immutable, safe to share across layers</li>
+      <li>ViewModel state with <code>List&lt;T&gt;</code> in StateFlow — Compose needs immutable state for stability</li>
+      <li>Mapper transforms: <code>dto.products.map { it.toDomain() }</code></li>
+      <li>Filtering, grouping, aggregation of transaction lists, product catalogs, orders</li>
+      <li>Sequences for large dataset processing without intermediate list allocation</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <strong>Collections</strong> are eager — every operator creates a new list immediately. <strong>Sequences</strong> are lazy — operators are chained and evaluated only when a terminal operation is called. For large datasets (&gt; ~1000 elements) with multiple operations, Sequence avoids unnecessary intermediate allocations.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Collection Types</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Mutable</th><th>Ordered</th><th>Duplicates</th><th>JVM impl</th></tr>
+      <tr><td><code>List&lt;T&gt;</code> / <code>MutableList&lt;T&gt;</code></td><td>MutableList</td><td>Yes</td><td>Yes</td><td>ArrayList</td></tr>
+      <tr><td><code>Set&lt;T&gt;</code> / <code>MutableSet&lt;T&gt;</code></td><td>MutableSet</td><td>No (LinkedHashSet preserves insertion)</td><td>No</td><td>LinkedHashSet</td></tr>
+      <tr><td><code>Map&lt;K,V&gt;</code> / <code>MutableMap&lt;K,V&gt;</code></td><td>MutableMap</td><td>No (LinkedHashMap preserves insertion)</td><td>Keys unique</td><td>LinkedHashMap</td></tr>
+    </table>
+    </div>
+    <pre><code><span class="cm">// Immutable (read-only views) — PREFER in domain models</span>
+<span class="kw">val</span> list: <span class="cl">List</span>&lt;<span class="cl">String</span>&gt;    = <span class="fn">listOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>)
+<span class="kw">val</span> set: <span class="cl">Set</span>&lt;<span class="cl">Int</span>&gt;          = <span class="fn">setOf</span>(<span class="nu">1</span>, <span class="nu">2</span>, <span class="nu">3</span>)
+<span class="kw">val</span> map: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Int</span>&gt; = <span class="fn">mapOf</span>(<span class="str">"a"</span> <span class="fn">to</span> <span class="nu">1</span>, <span class="str">"b"</span> <span class="fn">to</span> <span class="nu">2</span>)
+
+<span class="cm">// Mutable — only when mutation is explicitly needed</span>
+<span class="kw">val</span> mList = <span class="fn">mutableListOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>)
+<span class="kw">val</span> mMap  = <span class="fn">mutableMapOf</span>(<span class="str">"key"</span> <span class="fn">to</span> <span class="nu">1</span>)
+
+<span class="cm">// Empty collections</span>
+<span class="kw">val</span> empty = <span class="fn">emptyList</span>&lt;<span class="cl">String</span>&gt;()    <span class="cm">// singleton, no allocation</span>
+<span class="kw">val</span> sized = <span class="cl">ArrayList</span>&lt;<span class="cl">String</span>&gt;(<span class="nu">100</span>) <span class="cm">// pre-size to avoid resizing</span></code></pre>
+
+    <h3>Core Operators</h3>
+    <pre><code><span class="kw">val</span> transactions = <span class="fn">listOf</span>(
+    <span class="cl">Transaction</span>(<span class="str">"t1"</span>, <span class="nu">500.0</span>, <span class="str">"DEBIT"</span>),
+    <span class="cl">Transaction</span>(<span class="str">"t2"</span>, <span class="nu">200.0</span>, <span class="str">"CREDIT"</span>),
+    <span class="cl">Transaction</span>(<span class="str">"t3"</span>, <span class="nu">750.0</span>, <span class="str">"DEBIT"</span>)
+)
+
+<span class="cm">// map — transform each element</span>
+<span class="kw">val</span> amounts = transactions.<span class="fn">map</span> { it.amount }           <span class="cm">// [500.0, 200.0, 750.0]</span>
+
+<span class="cm">// filter — keep matching elements</span>
+<span class="kw">val</span> debits = transactions.<span class="fn">filter</span> { it.type == <span class="str">"DEBIT"</span> }
+
+<span class="cm">// flatMap — map + flatten</span>
+<span class="kw">val</span> allTags = orders.<span class="fn">flatMap</span> { it.tags }                <span class="cm">// List&lt;Tag&gt; from List&lt;Order&gt;</span>
+
+<span class="cm">// fold — accumulate with initial value</span>
+<span class="kw">val</span> total = amounts.<span class="fn">fold</span>(<span class="nu">0.0</span>) { acc, amt -> acc + amt } <span class="cm">// 1450.0</span>
+
+<span class="cm">// reduce — accumulate without initial value (throws on empty)</span>
+<span class="kw">val</span> total2 = amounts.<span class="fn">reduce</span> { acc, amt -> acc + amt }
+
+<span class="cm">// groupBy — Map&lt;K, List&lt;T&gt;&gt;</span>
+<span class="kw">val</span> byType: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; = transactions.<span class="fn">groupBy</span> { it.type }
+
+<span class="cm">// sortedBy / sortedByDescending</span>
+<span class="kw">val</span> sorted = transactions.<span class="fn">sortedByDescending</span> { it.amount }
+
+<span class="cm">// associate — build a Map from a list</span>
+<span class="kw">val</span> byId: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Transaction</span>&gt; = transactions.<span class="fn">associateBy</span> { it.id }
+
+<span class="cm">// partition — split into two lists (Pair)</span>
+<span class="kw">val</span> (debits2, credits) = transactions.<span class="fn">partition</span> { it.type == <span class="str">"DEBIT"</span> }
+
+<span class="cm">// any / all / none / count</span>
+<span class="kw">val</span> hasLarge = transactions.<span class="fn">any</span> { it.amount > <span class="nu">1000</span> }
+<span class="kw">val</span> allValid = transactions.<span class="fn">all</span> { it.amount > <span class="nu">0</span> }
+<span class="kw">val</span> debitCount = transactions.<span class="fn">count</span> { it.type == <span class="str">"DEBIT"</span> }
+
+<span class="cm">// takeWhile / dropWhile</span>
+<span class="kw">val</span> firstLarge = transactions.<span class="fn">takeWhile</span> { it.amount < <span class="nu">600</span> }
+
+<span class="cm">// distinct / distinctBy</span>
+<span class="kw">val</span> uniqueTypes = transactions.<span class="fn">distinctBy</span> { it.type }</code></pre>
+
+    <h3>Sequences — lazy evaluation</h3>
+    <pre><code><span class="cm">// Eager (collections) — creates 2 intermediate lists</span>
+<span class="kw">val</span> result1 = (1..<span class="nu">1_000_000</span>)
+    .<span class="fn">map</span> { it * <span class="nu">2</span> }          <span class="cm">// new list of 1M ints</span>
+    .<span class="fn">filter</span> { it % <span class="nu">3</span> == <span class="nu">0</span> }   <span class="cm">// new list of ~333K ints</span>
+    .<span class="fn">take</span>(<span class="nu">5</span>)                   <span class="cm">// still processed all 1M first!</span>
+
+<span class="cm">// Lazy (sequences) — processes element-by-element, stops at 5</span>
+<span class="kw">val</span> result2 = (1..<span class="nu">1_000_000</span>)
+    .<span class="fn">asSequence</span>()
+    .<span class="fn">map</span> { it * <span class="nu">2</span> }
+    .<span class="fn">filter</span> { it % <span class="nu">3</span> == <span class="nu">0</span> }
+    .<span class="fn">take</span>(<span class="nu">5</span>)
+    .<span class="fn">toList</span>()                  <span class="cm">// terminal op — only 15 elements ever processed!</span>
+
+<span class="cm">// generateSequence — infinite sequence</span>
+<span class="kw">val</span> fibonacci = <span class="fn">generateSequence</span>(<span class="nu">0</span> <span class="fn">to</span> <span class="nu">1</span>) { (a, b) -> b <span class="fn">to</span> a + b }
+    .<span class="fn">map</span> { it.first }
+    .<span class="fn">take</span>(<span class="nu">10</span>)
+    .<span class="fn">toList</span>()   <span class="cm">// [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</span></code></pre>
+
+    <h3>Map utilities</h3>
+    <pre><code><span class="kw">val</span> cache = <span class="fn">mutableMapOf</span>&lt;<span class="cl">String</span>, <span class="cl">User</span>&gt;()
+
+<span class="cm">// getOrPut — get or compute and store</span>
+<span class="kw">val</span> user = cache.<span class="fn">getOrPut</span>(userId) { repo.<span class="fn">fetchUser</span>(userId) }
+
+<span class="cm">// getOrDefault / getOrElse</span>
+<span class="kw">val</span> value = map.<span class="fn">getOrDefault</span>(<span class="str">"key"</span>, <span class="nu">0</span>)
+<span class="kw">val</span> value2 = map.<span class="fn">getOrElse</span>(<span class="str">"key"</span>) { computeDefault() }
+
+<span class="cm">// mapValues — transform values keeping keys</span>
+<span class="kw">val</span> displayMap = userMap.<span class="fn">mapValues</span> { (_, user) -> user.displayName }
+
+<span class="cm">// filterValues / filterKeys</span>
+<span class="kw">val</span> activeUsers = userMap.<span class="fn">filterValues</span> { it.isActive }</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+    <h3>Collection vs Sequence — Decision Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Use</th><th>Reason</th></tr>
+      <tr><td>Small list (&lt;1000 elements), few operations</td><td>Collection operators</td><td>Simpler, no overhead, JIT-optimized</td></tr>
+      <tr><td>Large dataset, multiple chained operations</td><td><code>asSequence()</code></td><td>No intermediate lists; lazy stops early</td></tr>
+      <tr><td>Need only the first N results</td><td>Sequence + <code>take(n)</code></td><td>Stops processing after N — collection would process all</td></tr>
+      <tr><td>Infinite or very large data source</td><td>Sequence / <code>generateSequence</code></td><td>Collections can't be infinite</td></tr>
+      <tr><td>Terminal result needed multiple times</td><td>Collection (materialize once)</td><td>Sequence re-evaluates on each terminal call</td></tr>
+    </table>
+    </div>
+    <h3>Operator Selection Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Goal</th><th>Operator</th></tr>
+      <tr><td>Transform each element</td><td><code>map</code></td></tr>
+      <tr><td>Keep only matching elements</td><td><code>filter</code></td></tr>
+      <tr><td>Flatten nested lists</td><td><code>flatMap</code></td></tr>
+      <tr><td>Accumulate to single value</td><td><code>fold</code> (with initial) or <code>reduce</code> (without)</td></tr>
+      <tr><td>Group by key</td><td><code>groupBy</code></td></tr>
+      <tr><td>Build a Map from list</td><td><code>associateBy</code> / <code>associate</code></td></tr>
+      <tr><td>Split into two lists</td><td><code>partition</code></td></tr>
+      <tr><td>Check conditions</td><td><code>any</code>, <code>all</code>, <code>none</code></td></tr>
+      <tr><td>Remove duplicates</td><td><code>distinct</code> / <code>distinctBy</code></td></tr>
+      <tr><td>Sum / average</td><td><code>sumOf</code> / <code>averageOf</code></td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — transaction analytics and product catalog. Shows real-world collection transformations, Sequence use, and Map operations across Clean Architecture layers.
+    </div>
+
+    <h3>Transaction analytics UseCase</h3>
+    <pre><code><span class="cm">// domain/usecase/GetTransactionSummaryUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">GetTransactionSummaryUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">TransactionRepository</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(accountId: <span class="cl">String</span>): <span class="cl">TransactionSummary</span> {
+        <span class="kw">val</span> transactions = repo.<span class="fn">getTransactions</span>(accountId)
+
+        <span class="kw">val</span> byType: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; = transactions.<span class="fn">groupBy</span> { it.type }
+
+        <span class="kw">val</span> totalDebits = byType[<span class="str">"DEBIT"</span>]
+            <span class="kw">?.</span><span class="fn">sumOf</span> { it.amount } <span class="kw">?:</span> <span class="nu">0.0</span>
+
+        <span class="kw">val</span> totalCredits = byType[<span class="str">"CREDIT"</span>]
+            <span class="kw">?.</span><span class="fn">sumOf</span> { it.amount } <span class="kw">?:</span> <span class="nu">0.0</span>
+
+        <span class="kw">val</span> topDebits = transactions
+            .<span class="fn">filter</span> { it.type == <span class="str">"DEBIT"</span> }
+            .<span class="fn">sortedByDescending</span> { it.amount }
+            .<span class="fn">take</span>(<span class="nu">5</span>)
+
+        <span class="kw">val</span> categoryBreakdown = transactions
+            .<span class="fn">groupBy</span> { it.category }
+            .<span class="fn">mapValues</span> { (_, txs) -> txs.<span class="fn">sumOf</span> { it.amount } }
+            .<span class="fn">entries</span>
+            .<span class="fn">sortedByDescending</span> { it.value }
+
+        <span class="kw">return</span> <span class="cl">TransactionSummary</span>(totalDebits, totalCredits, topDebits, categoryBreakdown)
+    }
+}</code></pre>
+
+    <h3>Sequence for large product search</h3>
+    <pre><code><span class="cm">// domain/usecase/SearchProductsUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">SearchProductsUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">ProductRepository</span>
+) {
+    <span class="cm">// 50,000 products in cache — use sequence to avoid 3 intermediate lists</span>
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(query: <span class="cl">String</span>, maxResults: <span class="cl">Int</span> = <span class="nu">50</span>): <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt; =
+        repo.<span class="fn">getAllProducts</span>()
+            .<span class="fn">asSequence</span>()
+            .<span class="fn">filter</span> { it.isActive }
+            .<span class="fn">filter</span> { it.name.<span class="fn">contains</span>(query, ignoreCase = <span class="kw">true</span>) || it.tags.<span class="fn">any</span> { t -> t.<span class="fn">contains</span>(query) } }
+            .<span class="fn">sortedByDescending</span> { it.relevanceScore }
+            .<span class="fn">take</span>(maxResults)    <span class="cm">// stops after maxResults — huge perf win</span>
+            .<span class="fn">toList</span>()
+}</code></pre>
+
+    <h3>Mapper using collection operators</h3>
+    <pre><code><span class="cm">// data/mapper/OrderMapper.kt</span>
+<span class="kw">fun</span> <span class="cl">OrderResponse</span>.<span class="fn">toDomain</span>(): <span class="cl">Order</span> = <span class="cl">Order</span>(
+    id = id,
+    items = items.<span class="fn">map</span> { it.<span class="fn">toDomain</span>() },              <span class="cm">// map DTO list to domain list</span>
+    totalAmount = items.<span class="fn">sumOf</span> { it.price * it.quantity },
+    tags = items.<span class="fn">flatMap</span> { it.tags }.<span class="fn">distinct</span>(),      <span class="cm">// collect all unique tags</span>
+    status = <span class="cl">OrderStatus</span>.<span class="fn">valueOf</span>(status)
+)
+
+<span class="cm">// ViewModel grouping orders for section list</span>
+<span class="kw">fun</span> <span class="fn">groupOrdersByDate</span>(orders: <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;): <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;&gt; =
+    orders.<span class="fn">groupBy</span> { it.createdDate.<span class="fn">toDisplayDate</span>() }
+          .<span class="fn">toSortedMap</span>(<span class="fn">reverseOrder</span>())   <span class="cm">// newest first</span></code></pre>
+
+    <h3>fold for cart total with discount</h3>
+    <pre><code><span class="cm">// domain/usecase/CalculateCartTotalUseCase.kt</span>
+<span class="kw">fun</span> <span class="fn">calculateTotal</span>(items: <span class="cl">List</span>&lt;<span class="cl">CartItem</span>&gt;, discount: <span class="cl">Double</span>): <span class="cl">Money</span> =
+    items
+        .<span class="fn">fold</span>(<span class="cl">Money</span>(<span class="nu">0</span>)) { acc, item ->
+            acc + <span class="cl">Money</span>((item.price * item.quantity * <span class="nu">100</span>).<span class="fn">toLong</span>())
+        }
+        .<span class="fn">let</span> { total ->
+            <span class="cl">Money</span>((total.paise * (<span class="nu">1</span> - discount)).<span class="fn">toLong</span>())
+        }</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td>Collection operators (eager)</td><td>Simple, readable, fast for small lists, JIT-optimized</td><td>Intermediate list per operator; all elements processed</td><td>Small-medium datasets (&lt;1000 items), few operations</td></tr>
+      <tr><td>Sequence (lazy)</td><td>No intermediate allocations; short-circuit on take/first</td><td>Slight overhead per element; re-evaluates on each terminal; not always faster for small lists</td><td>Large datasets, multiple chained ops, take/first usage</td></tr>
+      <tr><td>Imperative for loop</td><td>Maximum performance, no allocation</td><td>Verbose; harder to read complex transformations</td><td>Performance-critical tight loops; when profiler shows collection ops as bottleneck</td></tr>
+      <tr><td>Java Streams</td><td>Parallel execution option</td><td>Verbose; not idiomatic Kotlin; no Android parallelism benefit usually</td><td>Avoid — use Kotlin sequences/coroutines instead</td></tr>
+      <tr><td>Immutable (persistent) collections (kotlinx)</td><td>Structural sharing, efficient updates</td><td>Extra dependency; less idiomatic</td><td>Functional programming patterns; Compose state advanced scenarios</td></tr>
+    </table>
+    </div>
+    <h3>fold vs reduce</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Key Difference</div>
+      <strong>fold</strong>: has an explicit initial value — safe on empty collections; can produce a different type from the collection's element type.<br>
+      <strong>reduce</strong>: no initial value — uses first element as initial accumulator; throws <code>UnsupportedOperationException</code> on empty collection. Use <code>fold</code> when the collection might be empty.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>reduce on empty collection — crashes</h3>
+    <pre><code><span class="cm">// ❌ BAD — throws UnsupportedOperationException if list is empty</span>
+<span class="kw">val</span> total = transactions.<span class="fn">reduce</span> { acc, t -> acc + t.amount }  <span class="cm">// CRASH if empty</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — fold is always safe</span>
+<span class="kw">val</span> total = transactions.<span class="fn">fold</span>(<span class="nu">0.0</span>) { acc, t -> acc + t.amount }</code></pre>
+
+    <h3>mutable collection in StateFlow — Compose stability issue</h3>
+    <pre><code><span class="cm">// ❌ BAD — MutableList in state breaks Compose structural equality</span>
+<span class="kw">data class</span> <span class="cl">UiState</span>(<span class="kw">val</span> items: <span class="cl">MutableList</span>&lt;<span class="cl">Item</span>&gt;)
+<span class="cm">// Compose can't detect changes; recomposition may be missed</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — immutable List; create new state on update</span>
+<span class="kw">data class</span> <span class="cl">UiState</span>(<span class="kw">val</span> items: <span class="cl">List</span>&lt;<span class="cl">Item</span>&gt; = <span class="fn">emptyList</span>())
+<span class="cm">// Update: _uiState.value = _uiState.value.copy(items = newItems)</span></code></pre>
+
+    <h3>Sequence misuse — worse performance for small lists</h3>
+    <pre><code><span class="cm">// ❌ BAD — sequence overhead worse than eager for tiny list</span>
+<span class="kw">val</span> result = <span class="fn">listOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>)
+    .<span class="fn">asSequence</span>()
+    .<span class="fn">map</span> { it.<span class="fn">uppercase</span>() }
+    .<span class="fn">toList</span>()  <span class="cm">// more overhead than just .map { }</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — sequence only for large data + multiple operations</span>
+<span class="kw">val</span> result2 = <span class="fn">listOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>).<span class="fn">map</span> { it.<span class="fn">uppercase</span>() }  <span class="cm">// just use map directly</span></code></pre>
+
+    <h3>Sequence evaluated multiple times</h3>
+    <pre><code><span class="cm">// ❌ BAD — sequence re-evaluated on each terminal operation</span>
+<span class="kw">val</span> seq = list.<span class="fn">asSequence</span>().<span class="fn">filter</span> { it.isActive }
+<span class="kw">val</span> count = seq.<span class="fn">count</span>()    <span class="cm">// evaluates full pipeline</span>
+<span class="kw">val</span> first = seq.<span class="fn">first</span>()    <span class="cm">// evaluates full pipeline AGAIN</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — materialize once if needed multiple times</span>
+<span class="kw">val</span> filtered = list.<span class="fn">asSequence</span>().<span class="fn">filter</span> { it.isActive }.<span class="fn">toList</span>()
+<span class="kw">val</span> count = filtered.<span class="fn">size</span>
+<span class="kw">val</span> first = filtered.<span class="fn">first</span>()</code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Use immutable <code>List&lt;T&gt;</code> in domain models and UI state — mutable collections in state cause Compose stability issues.</li>
+      <li>Prefer <code>fold</code> over <code>reduce</code> unless you're certain the collection is non-empty.</li>
+      <li>Use <code>asSequence()</code> for processing &gt;1000 elements with multiple chained operators.</li>
+      <li>Use <code>emptyList()</code> for empty defaults — returns a singleton, no allocation.</li>
+      <li>Pre-size <code>ArrayList(capacity)</code> when the final size is known in advance.</li>
+      <li>Use <code>associateBy</code> to convert a list to a Map for O(1) lookups by ID.</li>
+      <li>Use <code>getOrPut</code> for simple caching patterns in MutableMaps.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Kotlin collections have a clear mutable/immutable split — I use immutable List, Set, Map in domain models and UI state. The collection operators — map, filter, flatMap, fold, groupBy — transform data declaratively without loops. For large datasets with multiple chained operations, I use asSequence() for lazy evaluation — no intermediate list allocations and short-circuit with take/first. The key sequence vs collection trade-off: sequences have overhead per element, so they're only worth it for large data with multiple ops."
+    </div>
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Three areas. First, immutability. Kotlin's List, Set, Map are read-only views. I use them everywhere in domain models and ViewModel state. In Compose, putting a MutableList in a data class used as state breaks stability — Compose can't detect the mutation. Immutable list with copy() is the right approach.<br><br>
+      Second, the operators. The most-used are: map for transforming elements, filter for keeping matching ones, flatMap for flattening nested collections, groupBy for building a Map of lists, fold for safe aggregation (unlike reduce which throws on empty), and associateBy for converting a list to a Map for O(1) lookups. I use these extensively in mappers, use cases, and ViewModel transformations.<br><br>
+      Third, Sequences. Collections are eager — every operator creates an intermediate list. For 50,000 products with filter + sort + take(50), that's two full intermediate lists I don't need. With asSequence(), the operations are lazy and chained element-by-element. take(50) stops after 50 results. But for small lists, sequence overhead is worse — I only switch to sequences when profiling or logic shows the benefit: large data + multiple ops + terminal limiting operation like take or first."
+    </div>
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Kotlin collections have a mutable/immutable split — <code>List</code> is read-only, <code>MutableList</code> allows modification</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Collections are <strong>eager</strong> — each operator creates an intermediate list; Sequences are <strong>lazy</strong> — chain evaluated element-by-element</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>fold</code> vs <code>reduce</code> — fold has initial value (safe on empty); reduce uses first element (throws on empty)</div></div>
+      <div class="must-item"><div class="must-num">4</div><td>Sequence advantage: no intermediate allocations + short-circuit on <code>take</code>/<code>first</code></td></div>
+      <div class="must-item"><div class="must-num">5</div><div>Immutable <code>List&lt;T&gt;</code> in Compose state is required for stability — <code>MutableList</code> breaks recomposition detection</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><code>groupBy</code> → <code>Map&lt;K, List&lt;T&gt;&gt;</code>; <code>associateBy</code> → <code>Map&lt;K, T&gt;</code> (one value per key)</div></div>
+    </div>
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>Kotlin collections JVM backing implementation (ArrayList, LinkedHashMap internals)</li>
+      <li>Persistent/immutable collections from kotlinx.collections.immutable</li>
+      <li>Parallel streams — not applicable in Android; use coroutines instead</li>
+    </ul>
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>When would you use Sequence over a collection?</td><td>Large dataset (>1000 elements) + multiple chained operators + a terminal operation that limits results (take, first, find). The lazy evaluation avoids intermediate allocations and short-circuits early.</td></tr>
+      <tr><td>What's the difference between map and flatMap?</td><td><code>map</code> transforms each element 1:1 — result has same size. <code>flatMap</code> maps each element to a collection, then flattens — result may have different size. Use flatMap to collect nested lists: <code>orders.flatMap { it.items }</code></td></tr>
+      <tr><td>Immutable vs read-only collection in Kotlin?</td><td>Kotlin's <code>List</code> is read-only — not truly immutable. The underlying JVM object (ArrayList) could be cast and mutated. For true immutability, use <code>kotlinx.collections.immutable</code> or <code>Collections.unmodifiableList()</code>. In practice, read-only is sufficient for most Android use cases.</td></tr>
+      <tr><td>What does associateBy do?</td><td>Builds a <code>Map&lt;K, T&gt;</code> from a <code>List&lt;T&gt;</code> using a key selector. <code>users.associateBy { it.id }</code> → <code>Map&lt;String, User&gt;</code>. Useful for O(1) lookups. If multiple elements have the same key, the last one wins.</td></tr>
+    </table>
+    </div>
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "In production, I convert list-to-map early for lookup-heavy operations. When the ViewModel gets a list of 500 products and the user is searching by barcode, I <code>associateBy { it.barcode }</code> once and do O(1) lookups on every scan. That's more impactful than any Sequence optimization. The second pattern: in Compose, domain layer returns <code>List&lt;T&gt;</code>, not <code>MutableList&lt;T&gt;</code>. When I update state, I always create a new list: <code>_uiState.update { it.copy(items = newItems) }</code>. StateFlow's structural equality check then correctly detects the change and triggers only the affected composable."
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>COLLECTION TYPES</h4>
+        <pre><code>listOf()        → List (read-only)
+mutableListOf() → MutableList
+setOf()         → Set (no dups, insertion order)
+mapOf()         → Map (key unique)
+emptyList()     → singleton, no alloc
+ArrayList(cap)  → pre-sized</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CORE OPERATORS</h4>
+        <pre><code>map { }          → transform 1:1
+filter { }       → keep matching
+flatMap { }      → map + flatten
+fold(init) { }   → aggregate (safe empty)
+reduce { }       → aggregate (throws empty)
+groupBy { }      → Map&lt;K, List&lt;T&gt;&gt;
+associateBy { }  → Map&lt;K, T&gt; (1:1)
+partition { }    → Pair&lt;List,List&gt;</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>QUERIES</h4>
+        <pre><code>any { }           → true if 1+ match
+all { }           → true if all match
+none { }          → true if 0 match
+count { }         → matching count
+first/last { }    → throws if empty
+firstOrNull { }   → null if empty
+find { }          → firstOrNull alias
+sumOf / maxOf / minOf / averageOf</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SEQUENCES</h4>
+        <pre><code>list.asSequence()  → lazy chain
+generateSequence(seed) { next }
+// lazy: no intermediate lists
+// take(n) short-circuits
+// terminal: toList/first/count/etc
+// re-evaluates on each terminal call
+// Only use for large data + many ops</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>MAP UTILITIES</h4>
+        <pre><code>getOrDefault(k, def)
+getOrElse(k) { compute() }
+getOrPut(k) { compute() }  // cache
+mapValues { (k,v) -> }
+filterValues { }
+filterKeys { }
+toSortedMap()
+entries / keys / values</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>GOTCHAS</h4>
+        <pre><code>reduce → throws on empty → use fold
+MutableList in Compose state → broken
+Sequence re-evaluated per terminal op
+Sequence not faster for small lists
+List is read-only, NOT truly immutable
+associateBy: duplicate keys → last wins</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the difference between List and MutableList in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>List&lt;T&gt;</code> is a read-only interface — it has no <code>add()</code>, <code>remove()</code>, or set operations. <code>MutableList&lt;T&gt;</code> extends <code>List&lt;T&gt;</code> and adds mutation methods. Note: <code>List</code> is read-only, not truly immutable — the underlying object could be a <code>MutableList</code> that someone else holds a mutable reference to. In practice, use <code>List</code> everywhere in domain models and UI state for safety. Only use <code>MutableList</code> when you explicitly need to build or modify a list locally.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the difference between fold and reduce?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>fold(initial) { acc, element -> }</code> starts with an explicit initial value. Safe on empty collections (returns the initial value). Can produce a different type from the list's element type.<br><br>
+      <code>reduce { acc, element -> }</code> uses the first element as the initial accumulator. Throws <code>UnsupportedOperationException</code> on an empty collection. Result must be the same type as the elements.<br><br>
+      Rule: use <code>fold</code> by default; use <code>reduce</code> only when you can guarantee non-empty and want the same type.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is the difference between map and flatMap?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>map</code> transforms each element 1:1 — the result list has the same number of elements. <code>flatMap</code> maps each element to a collection, then flattens all those collections into one — the result list can have a different (usually larger) number of elements.<br><br>
+      Example: <code>orders.map { it.items }</code> → <code>List&lt;List&lt;Item&gt;&gt;</code> (nested). <code>orders.flatMap { it.items }</code> → <code>List&lt;Item&gt;</code> (flat). Use flatMap to aggregate nested lists.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — When should you use Sequence instead of a regular collection? What are the trade-offs?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Use Sequence when:</strong> the dataset is large (&gt;1000 elements) AND you have multiple chained operators AND there's a limiting terminal operation (take, first, find) that can short-circuit.<br><br>
+      <strong>Trade-offs:</strong><br>
+      Pros: No intermediate list allocations between operators; lazy evaluation stops at the first N results.<br>
+      Cons: Per-element overhead (Sequence wrapping); sequences re-evaluate the entire pipeline on each terminal call (don't call multiple terminals on the same sequence); no benefit and possible degradation for small lists.<br><br>
+      Rule of thumb: benchmark before switching. If the profiler shows collection operator allocations as a bottleneck, switch to Sequence. Otherwise, eager collections with their JIT optimization are often faster for typical list sizes in Android.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) Given a list of transactions, group them by type, sum the amounts per type, and return the top-3 types by amount.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">data class</span> <span class="cl">Transaction</span>(<span class="kw">val</span> type: <span class="cl">String</span>, <span class="kw">val</span> amount: <span class="cl">Double</span>)
+
+<span class="kw">fun</span> <span class="fn">top3TypesByAmount</span>(txs: <span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;): <span class="cl">List</span>&lt;<span class="cl">Pair</span>&lt;<span class="cl">String</span>, <span class="cl">Double</span>&gt;&gt; =
+    txs
+        .<span class="fn">groupBy</span> { it.type }
+        .<span class="fn">mapValues</span> { (_, list) -> list.<span class="fn">sumOf</span> { it.amount } }
+        .<span class="fn">entries</span>
+        .<span class="fn">sortedByDescending</span> { it.value }
+        .<span class="fn">take</span>(<span class="nu">3</span>)
+        .<span class="fn">map</span> { it.key <span class="fn">to</span> it.value }</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What is the difference between groupBy and associateBy?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>groupBy { keySelector }</code> → <code>Map&lt;K, List&lt;T&gt;&gt;</code> — each key maps to a <em>list</em> of elements. Multiple elements can share the same key. Use when multiple elements have the same key value (e.g., group transactions by type).<br><br>
+      <code>associateBy { keySelector }</code> → <code>Map&lt;K, T&gt;</code> — each key maps to exactly <em>one</em> element. If multiple elements share the same key, the last one wins (earlier ones are overwritten). Use when keys are unique (e.g., build a lookup map from users by userId).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — (Coding) Why does this cause a bug in Compose and how do you fix it?<br><code>data class UiState(val items: MutableList&lt;Product&gt; = mutableListOf())</code></div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Bug:</strong> Compose uses structural equality (equals/hashCode) to detect state changes. <code>data class</code> includes <code>items</code> in <code>equals()</code>. But <code>MutableList.equals()</code> compares content — so if you mutate the list in-place (add/remove items), the data class object itself doesn't change (same reference), and <code>StateFlow</code> won't emit a new value (it checks if the new value equals the old). Recomposition is skipped; UI shows stale data.<br><br>
+      <strong>Fix:</strong> Use immutable <code>List&lt;T&gt;</code> and create a new state object on every update:
+<pre><code><span class="kw">data class</span> <span class="cl">UiState</span>(<span class="kw">val</span> items: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt; = <span class="fn">emptyList</span>())
+
+<span class="cm">// In ViewModel — creates new state with new list reference:</span>
+_uiState.<span class="fn">update</span> { it.<span class="fn">copy</span>(items = newItems) }</code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — You have a list of 100,000 user events. You need: filter active users, take their first 3 events, sort by timestamp, and take the top 10 users by event count. Should you use Sequence? How would you structure it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Yes — Sequence is appropriate here</strong> for the early filtering stage, but structure matters:
+<pre><code><span class="kw">val</span> result = allEvents   <span class="cm">// 100,000 events</span>
+    .<span class="fn">asSequence</span>()
+    .<span class="fn">filter</span> { it.userId <span class="kw">in</span> activeUserIds }   <span class="cm">// lazy, no intermediate list</span>
+    .<span class="fn">groupBy</span> { it.userId }                    <span class="cm">// terminal op — materializes filtered set</span>
+    .<span class="fn">mapValues</span> { (_, events) ->
+        events.<span class="fn">sortedBy</span> { it.timestamp }.<span class="fn">take</span>(<span class="nu">3</span>)   <span class="cm">// per-user, small</span>
+    }
+    .<span class="fn">entries</span>
+    .<span class="fn">sortedByDescending</span> { it.value.size }
+    .<span class="fn">take</span>(<span class="nu">10</span>)
+    .<span class="fn">toList</span>()</code></pre>
+      Key point: <code>groupBy</code> is a terminal operation on the sequence — it materializes the filtered results. After that, you're back to eager collection operations which are fine since the intermediate set is much smaller. The sequence benefit is the initial filter on 100K elements without creating a full intermediate list.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — (Scenario) A colleague says "List in Kotlin is immutable, so it's thread-safe." Is this correct?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Partially correct, but the reasoning is wrong.</strong><br><br>
+      <code>List&lt;T&gt;</code> is <em>read-only</em>, not <em>immutable</em>. The underlying JVM object could be a <code>MutableList</code>. Another thread holding a <code>MutableList</code> reference to the same object could add/remove elements while another thread is iterating — causing <code>ConcurrentModificationException</code>.<br><br>
+      However, in practice in Android: if you follow the rule "domain layer produces immutable List, ViewModel holds it in StateFlow, UI only reads it," then the list is effectively safe because you never hold a MutableList reference in a shared scope — you create a new List on each state update. This is a convention-based safety, not a type-system guarantee.<br><br>
+      For true thread-safety with concurrent mutation, use <code>CopyOnWriteArrayList</code>, or manage access with a <code>Mutex</code> in coroutines, or use kotlinx.collections.immutable persistent collections.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

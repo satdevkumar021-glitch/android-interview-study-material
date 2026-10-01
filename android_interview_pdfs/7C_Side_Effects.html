@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>7C — Side Effects | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">7C · Side Effects</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> LaunchedEffect</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> DisposableEffect</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> SideEffect &amp; Scope</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> produceState &amp; snapshotFlow</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>7C</span> — Side Effects</h1>
+    <p class="hero-desc">LaunchedEffect, DisposableEffect, SideEffect, rememberCoroutineScope, produceState, derivedStateOf, snapshotFlow — every side-effect API with its precise use case.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 7C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What is a side effect in Compose?</h3>
+    <p>A side effect is any operation that affects state or the outside world and is not directly part of describing the UI. Examples: launching a coroutine, registering a listener, calling analytics, updating external state. Because composables can re-run at any time, side effects must be carefully managed through dedicated APIs.</p>
+    <h3>Side effect APIs summary</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>API</th><th>Suspend?</th><th>Re-runs when</th><th>Cleanup?</th><th>Use for</th></tr>
+      <tr><td>LaunchedEffect(key)</td><td>Yes</td><td>Key changes</td><td>Cancels coroutine</td><td>Coroutines tied to composition</td></tr>
+      <tr><td>DisposableEffect(key)</td><td>No</td><td>Key changes</td><td>onDispose { }</td><td>Non-suspend setup + teardown</td></tr>
+      <tr><td>SideEffect</td><td>No</td><td>Every recomposition</td><td>No</td><td>Sync Compose state to non-Compose code</td></tr>
+      <tr><td>rememberCoroutineScope</td><td>Yes (manual)</td><td>Manual launch</td><td>Cancels on leave</td><td>Event-triggered coroutines (button click)</td></tr>
+      <tr><td>produceState</td><td>Yes</td><td>Key changes</td><td>awaitDispose { }</td><td>Convert non-Compose state to State&lt;T&gt;</td></tr>
+      <tr><td>snapshotFlow</td><td>Yes (in LaunchedEffect)</td><td>State changes</td><td>N/A</td><td>Convert Compose State to Flow</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: LaunchedEffect →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. LaunchedEffect</div>
+    <p><code>LaunchedEffect(key)</code> launches a coroutine when the composable enters composition. If the key changes, the current coroutine is cancelled and a new one is launched. When the composable leaves composition, the coroutine is cancelled.</p>
+    <pre><code><span class="cm">// LaunchedEffect(Unit): run once when composable enters composition</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductScreen</span>(productId: <span class="cl">String</span>, viewModel: <span class="cl">ProductViewModel</span>) {
+    <span class="cm">// Load when screen appears</span>
+    <span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+        viewModel.<span class="fn">loadProduct</span>(productId)
+    }
+
+    <span class="cm">// LaunchedEffect(productId): re-runs when productId changes</span>
+    <span class="cl">LaunchedEffect</span>(productId) {
+        viewModel.<span class="fn">loadProduct</span>(productId)  <span class="cm">// new productId → cancel old → start new</span>
+    }
+}
+
+<span class="cm">// Snackbar: show when SnackbarEvent fires</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CheckoutScreen</span>(viewModel: <span class="cl">CheckoutViewModel</span>) {
+    <span class="kw">val</span> snackbarHostState = <span class="fn">remember</span> { <span class="cl">SnackbarHostState</span>() }
+
+    <span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+        viewModel.events.<span class="fn">collect</span> { event ->
+            <span class="kw">when</span> (event) {
+                <span class="kw">is</span> <span class="cl">UiEvent</span>.<span class="cl">ShowSnackbar</span> ->
+                    snackbarHostState.<span class="fn">showSnackbar</span>(event.message)
+                <span class="kw">is</span> <span class="cl">UiEvent</span>.<span class="cl">Navigate</span> ->
+                    navController.<span class="fn">navigate</span>(event.route)
+            }
+        }
+    }
+
+    <span class="cl">Scaffold</span>(snackbarHost = { <span class="cl">SnackbarHost</span>(snackbarHostState) }) { <span class="cm">/* ... */</span> }
+}
+
+<span class="cm">// LaunchedEffect with multiple keys: re-runs when ANY key changes</span>
+<span class="cl">LaunchedEffect</span>(userId, filterType) {
+    repo.<span class="fn">loadFiltered</span>(userId, filterType)
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: DisposableEffect →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9878;</div>3. DisposableEffect</div>
+    <p><code>DisposableEffect(key)</code> is for setup/teardown of non-suspending resources. It runs the block on composition and its <code>onDispose { }</code> block on disposal or key change.</p>
+    <pre><code><span class="cm">// DisposableEffect: lifecycle observer registration</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">LifecycleObserver</span>(onResume: () -> <span class="cl">Unit</span>, onPause: () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> lifecycleOwner = <span class="cl">LocalLifecycleOwner</span>.current
+
+    <span class="cl">DisposableEffect</span>(lifecycleOwner) {
+        <span class="kw">val</span> observer = <span class="cl">LifecycleEventObserver</span> { _, event ->
+            <span class="kw">when</span> (event) {
+                <span class="cl">Lifecycle</span>.<span class="cl">Event</span>.<span class="cl">ON_RESUME</span> -> <span class="fn">onResume</span>()
+                <span class="cl">Lifecycle</span>.<span class="cl">Event</span>.<span class="cl">ON_PAUSE</span> -> <span class="fn">onPause</span>()
+                <span class="kw">else</span> -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.<span class="fn">addObserver</span>(observer)
+
+        <span class="fn">onDispose</span> {
+            lifecycleOwner.lifecycle.<span class="fn">removeObserver</span>(observer)  <span class="cm">// ✅ cleanup</span>
+        }
+    }
+}
+
+<span class="cm">// DisposableEffect for MediaPlayer lifecycle</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">VideoPlayer</span>(url: <span class="cl">String</span>) {
+    <span class="kw">val</span> context = <span class="cl">LocalContext</span>.current
+
+    <span class="cl">DisposableEffect</span>(url) {        <span class="cm">// re-creates on URL change</span>
+        <span class="kw">val</span> player = <span class="cl">MediaPlayer</span>()
+        player.<span class="fn">setDataSource</span>(url)
+        player.<span class="fn">prepare</span>()
+        player.<span class="fn">start</span>()
+
+        <span class="fn">onDispose</span> {
+            player.<span class="fn">stop</span>()
+            player.<span class="fn">release</span>()     <span class="cm">// ✅ no resource leak</span>
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: SideEffect &amp; Scope →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128204;</div>4. SideEffect &amp; rememberCoroutineScope</div>
+
+    <h3>SideEffect — every recomposition</h3>
+    <pre><code><span class="cm">// SideEffect: runs after every successful recomposition</span>
+<span class="cm">// Use to sync Compose state to non-Compose systems</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AnalyticsScreen</span>(screenName: <span class="cl">String</span>) {
+    <span class="kw">val</span> analyticsTracker = <span class="cl">LocalAnalyticsTracker</span>.current
+
+    <span class="cl">SideEffect</span> {
+        <span class="cm">// Runs after every recomposition — sync state to external system</span>
+        analyticsTracker.<span class="fn">setScreen</span>(screenName)
+    }
+}
+
+<span class="cm">// ❌ WRONG: do NOT use SideEffect for one-time operations</span>
+<span class="cl">SideEffect</span> { analytics.<span class="fn">logScreenView</span>() }  <span class="cm">// logs on EVERY recomposition!</span>
+<span class="cm">// ✅ Use LaunchedEffect(Unit) for one-time operations</span></code></pre>
+
+    <h3>rememberCoroutineScope — for event-triggered coroutines</h3>
+    <pre><code><span class="cm">// rememberCoroutineScope: a scope tied to composition lifetime</span>
+<span class="cm">// Used when you need to launch a coroutine from a non-composable callback</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">PayButton</span>(onPay: suspend () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> scope = <span class="fn">rememberCoroutineScope</span>()
+    <span class="kw">var</span> isLoading by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+
+    <span class="cl">Button</span>(
+        onClick = {                    <span class="cm">// onClick is NOT a suspend function</span>
+            scope.<span class="fn">launch</span> {           <span class="cm">// use scope to launch coroutine</span>
+                isLoading = <span class="kw">true</span>
+                <span class="fn">onPay</span>()
+                isLoading = <span class="kw">false</span>
+            }
+        },
+        enabled = !isLoading
+    ) {
+        <span class="kw">if</span> (isLoading) <span class="cl">CircularProgressIndicator</span>()
+        <span class="kw">else</span> <span class="cl">Text</span>(<span class="str">"Pay"</span>)
+    }
+}
+<span class="cm">// When composable leaves, scope is cancelled → in-flight coroutines cancelled</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: produceState &amp; snapshotFlow →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128202;</div>5. produceState &amp; snapshotFlow</div>
+
+    <h3>produceState — convert non-Compose state to State&lt;T&gt;</h3>
+    <pre><code><span class="cm">// produceState: bridge non-Compose async sources to State&lt;T&gt;</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">NetworkImage</span>(url: <span class="cl">String</span>): <span class="cl">State</span>&lt;<span class="cl">ImageResult</span>&gt; = <span class="fn">produceState</span>(
+    initialValue = <span class="cl">ImageResult</span>.<span class="cl">Loading</span>,
+    key1 = url
+) {
+    <span class="kw">value</span> = imageLoader.<span class="fn">load</span>(url)   <span class="cm">// suspend call</span>
+    <span class="cm">// awaitDispose: cleanup if composable leaves before image loads</span>
+    <span class="fn">awaitDispose</span> { imageLoader.<span class="fn">cancel</span>(url) }
+}
+
+<span class="cm">// Usage</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductImage</span>(url: <span class="cl">String</span>) {
+    <span class="kw">val</span> imageState by <span class="fn">NetworkImage</span>(url)
+    <span class="kw">when</span> (imageState) {
+        <span class="kw">is</span> <span class="cl">ImageResult</span>.<span class="cl">Loading</span> -> <span class="cl">Shimmer</span>()
+        <span class="kw">is</span> <span class="cl">ImageResult</span>.<span class="cl">Success</span> -> <span class="cl">Image</span>(imageState.bitmap)
+        <span class="kw">is</span> <span class="cl">ImageResult</span>.<span class="cl">Error</span> -> <span class="cl">ErrorIcon</span>()
+    }
+}</code></pre>
+
+    <h3>snapshotFlow — convert Compose State to Flow</h3>
+    <pre><code><span class="cm">// snapshotFlow: read Compose State inside a Flow context</span>
+<span class="cm">// Emits when the read State values change</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AutoSaveForm</span>(text: <span class="cl">String</span>, onSave: (<span class="cl">String</span>) -> <span class="cl">Unit</span>) {
+    <span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+        <span class="fn">snapshotFlow</span> { text }      <span class="cm">// reads Compose state → becomes Flow</span>
+            .<span class="fn">debounce</span>(<span class="nu">2000</span>)         <span class="cm">// wait 2s after user stops typing</span>
+            .<span class="fn">distinctUntilChanged</span>() <span class="cm">// only if text actually changed</span>
+            .<span class="fn">collect</span> { <span class="fn">onSave</span>(it) }  <span class="cm">// auto-save</span>
+    }
+}
+
+<span class="cm">// snapshotFlow for analytics: track what user reads in a list</span>
+<span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+    <span class="fn">snapshotFlow</span> { listState.firstVisibleItemIndex }
+        .<span class="fn">distinctUntilChanged</span>()
+        .<span class="fn">collect</span> { index -> analytics.<span class="fn">trackItemImpression</span>(items[index]) }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — LaunchedEffect(Unit) for key-sensitive operations</div>
+      Using <code>LaunchedEffect(Unit)</code> means the effect never re-runs when parameters change. If you load data by ID and the ID can change (navigation backstack, deep links), use <code>LaunchedEffect(id)</code>. Forgetting to pass the correct key is a common source of stale data bugs.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — SideEffect for one-time operations</div>
+      <code>SideEffect</code> runs on EVERY successful recomposition. Using it to log a screen view would fire the analytics event on every UI update, not just once. Use <code>LaunchedEffect(Unit)</code> for one-time effects.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — rememberCoroutineScope for one-time initialization</div>
+      <code>rememberCoroutineScope</code> is for user-triggered events (button clicks). For automatic initialization on screen enter, use <code>LaunchedEffect</code>. Using <code>rememberCoroutineScope</code> + launching in the body (not a callback) will launch on every recomposition — same as calling the code directly.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — DisposableEffect for any listener registration</div>
+      Any time you register a listener, callback, or observer in a composable, always use DisposableEffect with <code>onDispose</code> cleanup. This prevents listener leaks when the composable leaves the composition.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Compose provides specific APIs for side effects. LaunchedEffect launches a coroutine tied to composition — re-runs when key changes, cancelled on leave. DisposableEffect is for non-suspend setup/teardown with onDispose cleanup. SideEffect runs after every recomposition for syncing external state. rememberCoroutineScope gives a scope for event-triggered coroutines. produceState converts async sources to State, snapshotFlow converts Compose State to Flow."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The key decision is: does the effect run once, on key change, on every recomposition, or on a user event? LaunchedEffect(key) handles the first two cases — it starts a coroutine when composition enters or key changes, and cancels it when leaving. The key is the dependency: LaunchedEffect(Unit) = run once; LaunchedEffect(userId) = re-run when user changes.<br><br>DisposableEffect handles non-coroutine resources: lifecycle observers, BroadcastReceivers, Bluetooth listeners. The onDispose block guarantees cleanup regardless of why the composable leaves.<br><br>SideEffect is specifically for syncing Compose state to non-Compose systems — like updating a legacy View system or a custom analytics SDK's current screen. It fires after every successful recomposition, ensuring external state stays in sync.<br><br>rememberCoroutineScope is used in click handlers and other non-composable callbacks where you need to launch a coroutine but aren't inside a suspend context."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>LaunchedEffect(key)</strong> — coroutine; re-runs on key change; cancel on leave</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>DisposableEffect + onDispose</strong> — non-suspend; cleanup guaranteed</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>SideEffect = every recomposition</strong> — not for one-time effects</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>rememberCoroutineScope = event-triggered</strong> — button clicks, not auto-init</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>snapshotFlow</strong> — converts Compose State to Flow; enables Flow operators on UI state</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "When would you use produceState vs LaunchedEffect + mutableStateOf?"</h4>
+    <p>A: They're similar — <code>produceState</code> is cleaner syntactic sugar. <code>produceState</code> is preferred when the result is the entire return value of a composable (a reusable component that wraps an async source). <code>LaunchedEffect + mutableStateOf</code> is more flexible when you need multiple state updates inside the effect or more complex logic.</p>
+    <h4>Q: "What is the key in LaunchedEffect — can it be anything?"</h4>
+    <p>A: The key can be any value. Compose uses equals() to compare old and new key on recomposition. If they differ, the current coroutine is cancelled and a new one starts. Common keys: <code>Unit</code> (run once), a specific ID, a boolean state, a composable parameter. Multiple keys: <code>LaunchedEffect(key1, key2)</code> — re-runs if either changes.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking app, use <code>snapshotFlow</code> to convert the active account ID state to a Flow, then combine with server-sent events: <code>LaunchedEffect(Unit) { snapshotFlow { activeAccountId }.flatMapLatest { id -> serverEvents.filterByAccount(id) }.collect { event -> handleLiveUpdate(event) } }</code>. This gives you the full power of Flow operators on Compose state, including debounce, filtering, and flatMapLatest for account switching.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Which API when?</h4>
+        <pre><code>One-time init      → LaunchedEffect(Unit)
+Key-sensitive       → LaunchedEffect(key)
+Listener reg/unreg → DisposableEffect(key)
+Every recompose    → SideEffect
+Button click       → rememberCoroutineScope</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LaunchedEffect</h4>
+        <pre><code>LaunchedEffect(Unit)   // once
+LaunchedEffect(key)    // on key change
+// cancelled when composable leaves
+// key: anything with equals()</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DisposableEffect</h4>
+        <pre><code>DisposableEffect(key) {
+  val cb = register(listener)
+  onDispose {
+    unregister(cb)  // always called
+  }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>snapshotFlow</h4>
+        <pre><code>// Compose State → Flow
+LaunchedEffect(Unit) {
+  snapshotFlow { scrollState.value }
+    .debounce(300)
+    .collect { onScroll(it) }
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is LaunchedEffect and how does the key work?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>LaunchedEffect(key)</code> launches a coroutine that is tied to the composition. When the composable enters composition, the coroutine starts. If the key changes on recomposition, the current coroutine is cancelled and a new one starts. When the composable leaves composition, the coroutine is cancelled. The key can be any value — Compose uses equals() to detect changes.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is DisposableEffect and when must you use onDispose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>DisposableEffect(key)</code> runs a non-suspending setup block when the composable enters composition or when the key changes. The block must end with <code>onDispose { }</code> which runs when: the composable leaves composition, or the key changes (before re-running the setup block). onDispose is mandatory — it provides the cleanup for listeners, observers, resources registered in the setup block.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When should you use SideEffect vs LaunchedEffect?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>SideEffect</code> runs after EVERY successful recomposition — use for continuously syncing Compose state to external non-Compose systems (e.g., updating an analytics SDK's current screen, updating a legacy View's property). <code>LaunchedEffect(Unit)</code> runs once when the composable enters composition — use for one-time initialization, loading data, starting observation. Never use SideEffect for one-time operations.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use rememberCoroutineScope instead of LaunchedEffect?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>rememberCoroutineScope</code> when you need to launch a coroutine in response to a user event (button click, gesture) — from a non-composable callback context where you can't call suspend functions directly. <code>LaunchedEffect</code> when the coroutine should start automatically based on composition entry or a state change. Rule: event-triggered → rememberCoroutineScope; automatic/reactive → LaunchedEffect.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A composable uses LaunchedEffect(Unit) to load data for a product. The user navigates to a different product. What happens and how do you fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">With <code>LaunchedEffect(Unit)</code>, the effect runs only once when the composable enters composition. If the same composable recomposes with a different productId, the effect does NOT re-run — the old data stays. Fix: <code>LaunchedEffect(productId)</code>. Now when productId changes (e.g., navigation to a different product), the old coroutine is cancelled and a new one starts loading the new product.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you register and unregister a lifecycle observer safely in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>DisposableEffect(lifecycleOwner)</code>: in the block, create and add the observer; in onDispose, remove it. Use <code>LocalLifecycleOwner.current</code> to get the current lifecycle owner and pass it as the key — if the owner changes (e.g., nested Navigation), the effect re-runs. Without DisposableEffect (e.g., registering directly in the body), the observer would be added on every recomposition and never removed — a leak.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is snapshotFlow and what can you do with it that you can't do with just collecting a StateFlow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>snapshotFlow { }</code> converts any Compose State read inside its lambda into a Flow. Unlike a StateFlow (which has a value), snapshotFlow can read any combination of State values: <code>snapshotFlow { state1 + state2 }</code> — emits when either state1 or state2 changes. You can then apply all Flow operators: debounce, distinctUntilChanged, flatMapLatest. This enables complex reactive patterns on local Compose state that wouldn't be possible with just StateFlow.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design an auto-save feature for a notes app that saves to the database after the user stops typing for 2 seconds.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>@Composable fun NoteEditor(noteId: String, viewModel: NoteViewModel) { val content by viewModel.content.collectAsStateWithLifecycle(); LaunchedEffect(Unit) { snapshotFlow { content }.debounce(2000).distinctUntilChanged().drop(1) // skip initial load .collect { text -> viewModel.saveNote(noteId, text) } }; TextField(value = content, onValueChange = viewModel::onContentChange) }</code>. snapshotFlow converts the content state to Flow. debounce(2000) waits 2s after last keystroke. distinctUntilChanged prevents saving if content didn't change. drop(1) skips the initial emission when the composable enters (don't save before user types).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is produceState and how is it different from LaunchedEffect + mutableStateOf?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>produceState(initialValue, key) { value = compute() }</code> is syntactic sugar for <code>LaunchedEffect + mutableStateOf</code> — internally it does exactly that. The difference is idiomatic: produceState returns a <code>State&lt;T&gt;</code> directly, making it ideal for composable functions that compute and return a State (not just a void composable). It also provides <code>awaitDispose { }</code> for cleanup. Use produceState when building a composable abstraction over an async data source; use LaunchedEffect when the coroutine is a side effect of an existing composable, not its primary purpose.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A developer registers a BroadcastReceiver in a composable body (not in DisposableEffect). What bugs will occur?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Three bugs: (1) The receiver is registered on EVERY recomposition — if the screen recomposes 10 times, 10 receivers are registered. Each will respond to broadcasts, causing the handler to fire 10x. (2) No unregistration ever happens — when the composable leaves composition, no cleanup runs. The receiver continues receiving broadcasts forever, holding a reference to the composable's context. (3) Memory leak — the receiver holds a context reference; if the context is Activity-scoped, the Activity leaks. Fix: DisposableEffect with onDispose { context.unregisterReceiver(receiver) }.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

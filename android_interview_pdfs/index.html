@@ -1,0 +1,2710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Android Staff & Senior Interview Master Portal</title>
+<style>
+  :root {
+    --bg: #0b0d14;
+    --surface: #141724;
+    --surface-card: #1b1f30;
+    --surface-hover: #242940;
+    --border: #292d47;
+    --border-subtle: #1f2338;
+    --text: #e6e8f5;
+    --muted: #8d93b8;
+    --accent: #7c6af7;
+    --accent-light: #9d8fff;
+    --accent-glow: rgba(124, 106, 247, 0.25);
+    --green: #3ecf8e;
+    --green-glow: rgba(62, 207, 142, 0.2);
+    --blue: #4f9eff;
+    --yellow: #f5c842;
+    --red: #ff6b6b;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header.portal-header {
+    background: linear-gradient(180deg, #181b2b 0%, #0e101a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .header-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .header-title-box h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-title-box h1 span.logo-tag {
+    background: linear-gradient(135deg, #7c6af7, #4f9eff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-title-box p {
+    color: var(--muted);
+    font-size: 15px;
+    margin-top: 6px;
+    max-width: 780px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124, 106, 247, 0.4);
+  }
+
+  .btn-secondary {
+    background: var(--surface-card);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .btn-accent2 {
+    background: rgba(62, 207, 142, 0.12);
+    color: var(--green);
+    border-color: rgba(62, 207, 142, 0.3);
+  }
+  .btn-accent2:hover {
+    background: rgba(62, 207, 142, 0.2);
+    border-color: var(--green);
+  }
+
+  /* STATS BAR */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .stat-card {
+    background: rgba(27, 31, 48, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .stat-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .stat-val span.sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .progress-bar-wrap {
+    background: var(--surface);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c6af7, #3ecf8e);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* TOOLBAR / CONTROLS */
+  .controls-bar {
+    max-width: 1440px;
+    margin: 24px auto 0;
+    padding: 0 40px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+    max-width: 500px;
+  }
+
+  .search-box input {
+    width: 100%;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px 12px 42px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .search-box input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .search-box svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    fill: var(--muted);
+  }
+
+  .filter-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    background: var(--surface-card);
+    color: var(--muted);
+    border: 1px solid var(--border-subtle);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .pill:hover {
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .pill.active {
+    background: rgba(124, 106, 247, 0.15);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* BODY LAYOUT */
+  .portal-body {
+    max-width: 1440px;
+    margin: 24px auto 80px;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media(max-width: 1024px) {
+    .portal-body {
+      grid-template-columns: 1fr;
+      padding: 0 20px;
+    }
+    .controls-bar {
+      padding: 0 20px;
+    }
+    header.portal-header {
+      padding: 24px 20px;
+    }
+  }
+
+  /* SIDEBAR ACCORDION */
+  .modules-sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 700;
+    padding: 4px 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .module-group {
+    margin-top: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 10px;
+  }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .module-header:hover {
+    background: var(--surface-card);
+  }
+
+  .module-header .m-num {
+    background: rgba(124, 106, 247, 0.15);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+
+  .module-header .arrow {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .module-group.collapsed .arrow {
+    transform: rotate(-90deg);
+  }
+  .module-group.collapsed .module-topics-list {
+    display: none;
+  }
+
+  .module-topics-list {
+    padding: 4px 0 4px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  /* REAL HYPERLINK FOR SIDEBAR */
+  .sidebar-topic-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .sidebar-topic-link:hover {
+    background: var(--surface-card);
+    color: var(--text);
+    transform: translateX(2px);
+  }
+  .sidebar-topic-link.active {
+    background: rgba(124, 106, 247, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .sidebar-topic-link .check-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    color: transparent;
+  }
+  .sidebar-topic-link.studied .check-icon {
+    background: var(--green);
+    border-color: var(--green);
+    color: #0b0d14;
+    font-weight: 900;
+  }
+
+  /* MAIN CONTENT AREA */
+  .portal-main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* IN-APP STUDY READER CONTAINER */
+  #studyReaderContainer {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    margin-bottom: 24px;
+  }
+
+  #studyReaderContainer.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reader-toolbar {
+    background: #10121d;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .reader-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .reader-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .reader-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reader-iframe {
+    width: 100%;
+    height: 82vh;
+    border: none;
+    background: #0f1117;
+  }
+
+  /* TOPIC GRID ROADMAP */
+  .module-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .module-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .module-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .module-badge {
+    background: rgba(124, 106, 247, 0.12);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(124, 106, 247, 0.3);
+  }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  /* THE TOPIC CARD IS NOW A DIRECT CLICKABLE LINK */
+  a.topic-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    position: relative;
+  }
+
+  a.topic-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  }
+
+  a.topic-card.studied {
+    border-color: rgba(62, 207, 142, 0.35);
+    background: linear-gradient(180deg, #182030 0%, #131726 100%);
+  }
+
+  .topic-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .topic-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(124, 106, 247, 0.12);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(124, 106, 247, 0.25);
+  }
+
+  .badge-tier1 {
+    background: rgba(62, 207, 142, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(62, 207, 142, 0.25);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-tier2 {
+    background: rgba(245, 200, 66, 0.12);
+    color: var(--yellow);
+    border: 1px solid rgba(245, 200, 66, 0.25);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-tier3 {
+    background: rgba(79, 158, 255, 0.12);
+    color: var(--blue);
+    border: 1px solid rgba(79, 158, 255, 0.25);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .topic-card-body h3 {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+    transition: color 0.15s;
+  }
+  a.topic-card:hover .topic-card-body h3 {
+    color: var(--accent-light);
+  }
+
+  .topic-card-body p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .topic-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+    gap: 8px;
+  }
+
+  .quiz-count-badge {
+    font-size: 12px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+
+  .study-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+    transition: transform 0.15s;
+  }
+  .study-toggle-btn:hover {
+    transform: scale(1.15);
+  }
+
+  .open-arrow {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  a.topic-card:hover .open-arrow {
+    color: #fff;
+    transform: translateX(3px);
+  }
+
+  /* EMPTY SEARCH STATE */
+  #noResults {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  .shortcut-hint {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface-card);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<header class="portal-header">
+  <div class="header-content">
+    <div class="header-top">
+      <div class="header-title-box">
+        <h1>
+          <span>⚡</span>
+          <span class="logo-tag">Android Interview Master Hub</span>
+        </h1>
+        <p>Complete curriculum covering Android & Kotlin senior/staff engineering topics. Click any topic card to open the complete study material, or use the interactive Study Reader or All-in-One Compendium.</p>
+      </div>
+      <div class="header-actions">
+        <a href="all_topics_combined.html" class="btn btn-primary" target="_blank">
+          📚 Open Full Master Compendium
+        </a>
+        <button class="btn btn-secondary" onclick="openStudyReader(currentTopicCode)">
+          📖 Study Reader
+        </button>
+        <button class="btn btn-secondary" onclick="resetProgress()">
+          🔄 Reset Progress
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS METRICS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Topics</span>
+        <div class="stat-val">60 <span class="sub">deep dives</span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Modules</span>
+        <div class="stat-val">20 <span class="sub">core tracks</span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Interview Quizzes</span>
+        <div class="stat-val">597 <span class="sub">scenarios</span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Study Progress</span>
+        <div class="stat-val"><span id="progressPercent">0%</span> <span class="sub" id="progressFraction">0/60</span></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SEARCH & FILTERS -->
+<div class="controls-bar">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input type="text" id="searchInput" placeholder="Search topics, coroutines, compose, binder, SOLID, security..." oninput="handleSearch()"/>
+  </div>
+
+  <div class="filter-pills">
+    <div class="pill active" data-filter="all" onclick="setFilter('all')">All (60)</div>
+    <div class="pill" data-filter="Tier 1" onclick="setFilter('Tier 1')">Tier 1: Core (42)</div>
+    <div class="pill" data-filter="Tier 2" onclick="setFilter('Tier 2')">Tier 2: Advanced (16)</div>
+    <div class="pill" data-filter="Tier 3" onclick="setFilter('Tier 3')">Tier 3: Specialized (2)</div>
+    <div class="pill" data-filter="studied" onclick="setFilter('studied')">Studied (<span id="studiedCount">0</span>)</div>
+    <div class="pill" data-filter="unstudied" onclick="setFilter('unstudied')">Remaining (<span id="unstudiedCount">60</span>)</div>
+  </div>
+</div>
+
+<!-- BODY LAYOUT -->
+<div class="portal-body">
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="modules-sidebar">
+    <div class="sidebar-title">
+      <span>Curriculum Modules</span>
+      <span class="shortcut-hint">60 Topics</span>
+    </div>
+    <div id="sidebarModulesList">
+      <!-- Populated via JS with actual <a> links -->
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="portal-main">
+    <!-- IN-APP STUDY READER CONTAINER -->
+    <div id="studyReaderContainer">
+      <div class="reader-toolbar">
+        <div class="reader-info">
+          <button class="btn btn-secondary btn-sm" onclick="navigateTopic(-1)" title="Previous Topic (Shortcut: Left Arrow or [)">← Prev</button>
+          <div class="reader-title" id="readerTopicTitle">Topic Title</div>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTopic(1)" title="Next Topic (Shortcut: Right Arrow or ])">Next →</button>
+        </div>
+        <div class="reader-controls">
+          <button class="btn btn-accent2 btn-sm" id="readerMarkStudiedBtn" onclick="toggleCurrentTopicStudied()">Mark Studied ✓</button>
+          <a id="readerExternalLink" href="#" target="_blank" class="btn btn-secondary btn-sm" title="Open in dedicated tab">Open Dedicated Tab ↗</a>
+          <button class="btn btn-secondary btn-sm" onclick="closeStudyReader()">Close ✕</button>
+        </div>
+      </div>
+      <iframe id="studyIframe" class="reader-iframe" src="about:blank"></iframe>
+    </div>
+
+    <!-- ROADMAP MODULE SECTIONS -->
+    <div id="roadmapContainer">
+
+      <div class="module-section" id="mod-sec-1" data-mod-id="1">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 1</span>
+            <span>Kotlin Core & Language Features</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>10 topics · 97 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="1A_Kotlin_Basics_Null_Safety.html" class="topic-card" id="card-1A" data-code="1A" data-tier="Tier 1" data-file="1A_Kotlin_Basics_Null_Safety.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin Basics &amp; Null Safety</h3>
+              <p>Core Kotlin syntax and the type-system mechanism that eliminates NullPointerExceptions at compile time.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1B_Kotlin_Functions.html" class="topic-card" id="card-1B" data-code="1B" data-tier="Tier 1" data-file="1B_Kotlin_Functions.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin Functions</h3>
+              <p>Default &amp; named arguments, vararg, extension functions, infix, higher-order functions, lambdas, function references, and SAM conversions — the full Kotlin function toolkit.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1C_Scope_Functions.html" class="topic-card" id="card-1C" data-code="1C" data-tier="Tier 1" data-file="1C_Scope_Functions.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin Scope Functions</h3>
+              <p>let, run, with, apply, also — when to use each, how they differ, and why picking the wrong one is a common interview trap.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1D_Kotlin_OOP.html" class="topic-card" id="card-1D" data-code="1D" data-tier="Tier 1" data-file="1D_Kotlin_OOP.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1D</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin OOP</h3>
+              <p>Classes, constructors, init, inheritance, interfaces, abstract classes, visibility modifiers, and open/final/abstract — how Kotlin&#x27;s OOP differs from Java and why it matters for Android architecture.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1E_Special_Classes.html" class="topic-card" id="card-1E" data-code="1E" data-tier="Tier 1" data-file="1E_Special_Classes.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1E</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin Special Classes</h3>
+              <p>data classes, enum classes, sealed classes &amp; interfaces, object declarations, companion objects, anonymous objects — the Kotlin class variants that power Android architecture daily.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1E', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1E');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1F_Generics_Variance.html" class="topic-card" id="card-1F" data-code="1F" data-tier="Tier 1" data-file="1F_Generics_Variance.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1F</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Generics &amp; Variance</h3>
+              <p>Generics, in / out variance annotations, covariance, contravariance — the type-system mechanics behind Flow, StateFlow, Result, and Clean Architecture generics.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1F', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1F');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1G_Delegation_Operators.html" class="topic-card" id="card-1G" data-code="1G" data-tier="Tier 1" data-file="1G_Delegation_Operators.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1G</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Delegation &amp; Operators</h3>
+              <p>Class delegation ( by ), property delegation, by lazy , observable , vetoable , custom delegates, operator overloading, and destructuring — Kotlin features used throughout Android architecture.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 9 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1G', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1G');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1H_Collections.html" class="topic-card" id="card-1H" data-code="1H" data-tier="Tier 1" data-file="1H_Collections.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1H</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Kotlin Collections</h3>
+              <p>List, Set, Map (mutable vs immutable), map/filter/flatMap/fold/reduce, and Sequences vs collections — the complete functional collection toolkit for Android production code.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 9 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1H', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1H');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1I_Inline_Recursion.html" class="topic-card" id="card-1I" data-code="1I" data-tier="Tier 1" data-file="1I_Inline_Recursion.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1I</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Inline &amp; Recursion</h3>
+              <p>inline , noinline , crossinline , reified type parameters, and tail recursion — performance and type-safety features that power Kotlin&#x27;s standard library and Flow operators.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 9 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1I', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1I');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="1J_Equality_Interop_Errors.html" class="topic-card" id="card-1J" data-code="1J" data-tier="Tier 1" data-file="1J_Equality_Interop_Errors.html">
+            <div class="topic-card-header">
+              <span class="topic-code">1J</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Equality, Interop &amp; Errors</h3>
+              <p>== vs === , Kotlin–JVM interoperability, Kotlin compilation basics, exceptions, and the Result type — the final Kotlin unit before moving into Android fundamentals.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('1J', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('1J');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-2" data-mod-id="2">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 2</span>
+            <span>Android Core Components & Lifecycle</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>5 topics · 50 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="2A_Components_Overview.html" class="topic-card" id="card-2A" data-code="2A" data-tier="Tier 2" data-file="2A_Components_Overview.html">
+            <div class="topic-card-header">
+              <span class="topic-code">2A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Android Components Overview</h3>
+              <p>Tier 2 Activity · Fragment · Service · BroadcastReceiver · ContentProvider · Application · Context</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('2A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('2A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="2B_Activity_Lifecycle_State.html" class="topic-card" id="card-2B" data-code="2B" data-tier="Tier 2" data-file="2B_Activity_Lifecycle_State.html">
+            <div class="topic-card-header">
+              <span class="topic-code">2B</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Activity Lifecycle &amp; State</h3>
+              <p>Tier 2 onCreate · onStart · onResume · onPause · onStop · onDestroy · config changes · process death · onSaveInstanceState</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('2B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('2B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="2C_Launch_Modes_Back_Stack.html" class="topic-card" id="card-2C" data-code="2C" data-tier="Tier 2" data-file="2C_Launch_Modes_Back_Stack.html">
+            <div class="topic-card-header">
+              <span class="topic-code">2C</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Launch Modes &amp; Back Stack</h3>
+              <p>Tier 2 standard · singleTop · singleTask · singleInstance · Tasks · Back Stack · Intent Flags</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('2C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('2C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="2D_Fragments.html" class="topic-card" id="card-2D" data-code="2D" data-tier="Tier 2" data-file="2D_Fragments.html">
+            <div class="topic-card-header">
+              <span class="topic-code">2D</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Fragments</h3>
+              <p>Tier 2 Fragment lifecycle · View lifecycle · FragmentManager · transactions · back stack · communication · Navigation Component</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('2D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('2D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="2E_Intents.html" class="topic-card" id="card-2E" data-code="2E" data-tier="Tier 2" data-file="2E_Intents.html">
+            <div class="topic-card-header">
+              <span class="topic-code">2E</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Intents</h3>
+              <p>Tier 2 Explicit · Implicit · Intent Filters · PendingIntent · Deep Links · App Links</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('2E', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('2E');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-3" data-mod-id="3">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 3</span>
+            <span>System Architecture & Android Internals</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>4 topics · 40 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="3A_App_Startup.html" class="topic-card" id="card-3A" data-code="3A" data-tier="Tier 1" data-file="3A_App_Startup.html">
+            <div class="topic-card-header">
+              <span class="topic-code">3A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>App Startup</h3>
+              <p>Tier 1 · Senior Differentiator Zygote · SystemServer · AMS/ATMS · PMS · WMS · ActivityThread · Application Creation</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('3A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('3A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="3B_Main_Thread_Internals.html" class="topic-card" id="card-3B" data-code="3B" data-tier="Tier 1" data-file="3B_Main_Thread_Internals.html">
+            <div class="topic-card-header">
+              <span class="topic-code">3B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Main Thread Internals</h3>
+              <p>Tier 1 · Core Framework Internals Main Thread · UI Thread · Looper · MessageQueue · Handler · Epoll · Choreographer</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('3B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('3B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="3C_Binder_IPC.html" class="topic-card" id="card-3C" data-code="3C" data-tier="Tier 1" data-file="3C_Binder_IPC.html">
+            <div class="topic-card-header">
+              <span class="topic-code">3C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Binder &amp; IPC</h3>
+              <p>Tier 1 · Architecture Core Binder Driver · IPC · AIDL · Parcelable · ServiceManager · Memory Mapping (mmap)</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('3C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('3C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="3D_Process_Model.html" class="topic-card" id="card-3D" data-code="3D" data-tier="Tier 1" data-file="3D_Process_Model.html">
+            <div class="topic-card-header">
+              <span class="topic-code">3D</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Process Model</h3>
+              <p>Tier 1 · Senior Architecture Process Priority · oom_adj / oom_score_adj · LMK · Application Sandbox · UID · ANR Internals</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('3D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('3D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-4" data-mod-id="4">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 4</span>
+            <span>Architecture Components & Lifecycle State</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>3 topics · 30 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="4A_ViewModel.html" class="topic-card" id="card-4A" data-code="4A" data-tier="Tier 1" data-file="4A_ViewModel.html">
+            <div class="topic-card-header">
+              <span class="topic-code">4A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>ViewModel</h3>
+              <p>Tier 1 · Architecture Core ViewModel · ViewModelStore · ViewModelProvider · viewModelScope · SavedStateHandle · NonConfigurationInstances</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('4A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('4A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="4B_LiveData.html" class="topic-card" id="card-4B" data-code="4B" data-tier="Tier 1" data-file="4B_LiveData.html">
+            <div class="topic-card-header">
+              <span class="topic-code">4B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>LiveData</h3>
+              <p>Tier 1 · Architecture Core Lifecycle Awareness · Observer Pattern · setValue vs postValue · MediatorLiveData · LiveData vs StateFlow</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('4B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('4B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="4C_Lifecycle.html" class="topic-card" id="card-4C" data-code="4C" data-tier="Tier 1" data-file="4C_Lifecycle.html">
+            <div class="topic-card-header">
+              <span class="topic-code">4C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Lifecycle</h3>
+              <p>Tier 1 · Architecture Core LifecycleOwner · DefaultLifecycleObserver · lifecycleScope · repeatOnLifecycle · flowWithLifecycle</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('4C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('4C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-5" data-mod-id="5">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 5</span>
+            <span>Kotlin Coroutines & Concurrency</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>5 topics · 50 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="5A_Coroutines_Fundamentals.html" class="topic-card" id="card-5A" data-code="5A" data-tier="Tier 1" data-file="5A_Coroutines_Fundamentals.html">
+            <div class="topic-card-header">
+              <span class="topic-code">5A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Coroutines Fundamentals</h3>
+              <p>What a coroutine is, how it differs from a thread, CoroutineScope, CoroutineContext, Job, and Dispatchers — the core concepts every Android engineer must own.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('5A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('5A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="5B_Builders_Dispatchers.html" class="topic-card" id="card-5B" data-code="5B" data-tier="Tier 1" data-file="5B_Builders_Dispatchers.html">
+            <div class="topic-card-header">
+              <span class="topic-code">5B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Builders &amp; Dispatchers</h3>
+              <p>launch , async/await , withContext , runBlocking — when each builder fits, plus dispatcher internals and thread pool selection.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('5B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('5B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="5C_Structured_Concurrency.html" class="topic-card" id="card-5C" data-code="5C" data-tier="Tier 1" data-file="5C_Structured_Concurrency.html">
+            <div class="topic-card-header">
+              <span class="topic-code">5C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Structured Concurrency &amp; Key Differences</h3>
+              <p>The hierarchy: CoroutineScope → CoroutineContext → Job → children. Plus the most-asked comparison questions: launch vs async, coroutineScope vs supervisorScope, Job vs SupervisorJob, delay vs Thread.sleep.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('5C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('5C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="5D_Cancellation_Exceptions.html" class="topic-card" id="card-5D" data-code="5D" data-tier="Tier 1" data-file="5D_Cancellation_Exceptions.html">
+            <div class="topic-card-header">
+              <span class="topic-code">5D</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Cancellation &amp; Exceptions</h3>
+              <p>Cooperative cancellation, CancellationException, isActive/ensureActive/yield, NonCancellable, exception propagation, CoroutineExceptionHandler, SupervisorJob — everything about keeping coroutines safe.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('5D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('5D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="5E_Scopes_Concurrency_Testing.html" class="topic-card" id="card-5E" data-code="5E" data-tier="Tier 1" data-file="5E_Scopes_Concurrency_Testing.html">
+            <div class="topic-card-header">
+              <span class="topic-code">5E</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Scopes, Concurrency &amp; Testing</h3>
+              <p>lifecycleScope, viewModelScope, custom scopes. Race conditions with Mutex/Semaphore/AtomicInteger. runTest, StandardTestDispatcher vs UnconfinedTestDispatcher, virtual time control.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('5E', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('5E');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-6" data-mod-id="6">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 6</span>
+            <span>Kotlin Flow & Reactive Streams</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>4 topics · 40 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="6A_Flow_Core.html" class="topic-card" id="card-6A" data-code="6A" data-tier="Tier 1" data-file="6A_Flow_Core.html">
+            <div class="topic-card-header">
+              <span class="topic-code">6A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Flow Core</h3>
+              <p>Cold Flow vs hot StateFlow vs hot SharedFlow. collect vs collectLatest. The definitive StateFlow vs SharedFlow vs LiveData comparison. Most-asked Flow questions.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('6A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('6A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="6B_Flow_Operators.html" class="topic-card" id="card-6B" data-code="6B" data-tier="Tier 1" data-file="6B_Flow_Operators.html">
+            <div class="topic-card-header">
+              <span class="topic-code">6B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Flow Operators</h3>
+              <p>Transforming, combining, flatMapping, timing, error handling, and lifecycle operators. Production examples for each. flatMapConcat vs flatMapMerge vs flatMapLatest comparison.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('6B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('6B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="6C_Builders_Channels.html" class="topic-card" id="card-6C" data-code="6C" data-tier="Tier 1" data-file="6C_Builders_Channels.html">
+            <div class="topic-card-header">
+              <span class="topic-code">6C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Builders &amp; Channels</h3>
+              <p>flow{} , flowOn , callbackFlow , channelFlow . Channel types: Rendezvous, Buffered, Conflated, Unlimited. Backpressure strategies.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('6C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('6C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="6D_Sharing.html" class="topic-card" id="card-6D" data-code="6D" data-tier="Tier 1" data-file="6D_Sharing.html">
+            <div class="topic-card-header">
+              <span class="topic-code">6D</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Sharing: stateIn &amp; shareIn</h3>
+              <p>stateIn() converts cold Flow to StateFlow. shareIn() to SharedFlow. SharingStarted strategies: Eagerly, Lazily, WhileSubscribed(5000). When to use each.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('6D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('6D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-7" data-mod-id="7">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 7</span>
+            <span>Jetpack Compose & Modern UI</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>4 topics · 40 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="7A_Compose_Fundamentals.html" class="topic-card" id="card-7A" data-code="7A" data-tier="Tier 1" data-file="7A_Compose_Fundamentals.html">
+            <div class="topic-card-header">
+              <span class="topic-code">7A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Compose Fundamentals</h3>
+              <p>@Composable, declarative vs imperative UI, the Composition, recomposition mechanics, slot table, State&lt;T&gt;, remember, and the composable lifecycle.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('7A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('7A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="7B_State_Management.html" class="topic-card" id="card-7B" data-code="7B" data-tier="Tier 1" data-file="7B_State_Management.html">
+            <div class="topic-card-header">
+              <span class="topic-code">7B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>State Management</h3>
+              <p>remember vs rememberSaveable, mutableStateOf, derivedStateOf. State hoisting, UDF (Unidirectional Data Flow). ViewModel as state holder. collectAsStateWithLifecycle. When to use local vs hoisted state.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('7B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('7B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="7C_Side_Effects.html" class="topic-card" id="card-7C" data-code="7C" data-tier="Tier 1" data-file="7C_Side_Effects.html">
+            <div class="topic-card-header">
+              <span class="topic-code">7C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Side Effects</h3>
+              <p>LaunchedEffect, DisposableEffect, SideEffect, rememberCoroutineScope, produceState, derivedStateOf, snapshotFlow — every side-effect API with its precise use case.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('7C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('7C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="7D_Compose_Performance.html" class="topic-card" id="card-7D" data-code="7D" data-tier="Tier 1" data-file="7D_Compose_Performance.html">
+            <div class="topic-card-header">
+              <span class="topic-code">7D</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Compose Performance</h3>
+              <p>Smart recomposition, stability system, @Stable/@Immutable, unstable List&lt;&gt;, LazyColumn keys, remember for expensive computations, derivedStateOf, lambda stability, Compose compiler metrics.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('7D', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('7D');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-8" data-mod-id="8">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 8</span>
+            <span>Architecture Patterns & Clean Architecture</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>2 topics · 20 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="8A_Architecture_Patterns.html" class="topic-card" id="card-8A" data-code="8A" data-tier="Tier 1" data-file="8A_Architecture_Patterns.html">
+            <div class="topic-card-header">
+              <span class="topic-code">8A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Architecture Patterns</h3>
+              <p>MVC, MVP, MVVM, MVI — what each solves and its trade-offs. Full layered architecture: UI → ViewModel → UseCase → Repository → Data Sources. When to use each pattern.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('8A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('8A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="8B_Clean_Architecture.html" class="topic-card" id="card-8B" data-code="8B" data-tier="Tier 1" data-file="8B_Clean_Architecture.html">
+            <div class="topic-card-header">
+              <span class="topic-code">8B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Clean Architecture</h3>
+              <p>Three concentric layers, the Dependency Rule, and the art of keeping your domain pure. The architecture standard for production Android apps.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('8B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('8B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-9" data-mod-id="9">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 9</span>
+            <span>SOLID Principles in Android/Kotlin</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>1 topics · 10 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="9A_SOLID_Principles.html" class="topic-card" id="card-9A" data-code="9A" data-tier="Tier 1" data-file="9A_SOLID_Principles.html">
+            <div class="topic-card-header">
+              <span class="topic-code">9A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>SOLID Principles</h3>
+              <p>Five object-oriented design principles that produce maintainable, scalable Android code. Each principle with definition, Android violation, and correct fix.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('9A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('9A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-10" data-mod-id="10">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 10</span>
+            <span>Design Patterns (GoF & Android)</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>3 topics · 30 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="10A_Creational_Patterns.html" class="topic-card" id="card-10A" data-code="10A" data-tier="Tier 1" data-file="10A_Creational_Patterns.html">
+            <div class="topic-card-header">
+              <span class="topic-code">10A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Creational Patterns</h3>
+              <p>Singleton, Factory Method, Abstract Factory, and Builder — the four creational patterns that govern object construction in production Android apps.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('10A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('10A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="10B_Structural_Patterns.html" class="topic-card" id="card-10B" data-code="10B" data-tier="Tier 2" data-file="10B_Structural_Patterns.html">
+            <div class="topic-card-header">
+              <span class="topic-code">10B</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Structural Patterns</h3>
+              <p>Adapter, Decorator, Facade, and Proxy — how Android and its libraries compose objects to build larger structures without tight coupling.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('10B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('10B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="10C_Behavioral_Patterns.html" class="topic-card" id="card-10C" data-code="10C" data-tier="Tier 2" data-file="10C_Behavioral_Patterns.html">
+            <div class="topic-card-header">
+              <span class="topic-code">10C</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Behavioral Patterns</h3>
+              <p>Observer, Strategy, Command, and State — the behavioral patterns that govern communication and responsibility assignment in Android apps.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('10C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('10C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-11" data-mod-id="11">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 11</span>
+            <span>Dependency Injection (Hilt & Dagger)</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>2 topics · 20 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="11A_DI_Hilt_Basics.html" class="topic-card" id="card-11A" data-code="11A" data-tier="Tier 1" data-file="11A_DI_Hilt_Basics.html">
+            <div class="topic-card-header">
+              <span class="topic-code">11A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>DI &amp; Hilt Basics</h3>
+              <p>Why dependency injection, constructor vs field injection, and Hilt&#x27;s core annotations: @Inject , @Module , @Provides , @Binds , @InstallIn , scopes, and qualifiers.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('11A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('11A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="11B_Hilt_Components.html" class="topic-card" id="card-11B" data-code="11B" data-tier="Tier 1" data-file="11B_Hilt_Components.html">
+            <div class="topic-card-header">
+              <span class="topic-code">11B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Hilt Components</h3>
+              <p>Component hierarchy and lifetimes, Dagger code generation, @HiltViewModel internals, compile-time graph validation, and SubComponents vs Component dependencies.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('11B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('11B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-12" data-mod-id="12">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 12</span>
+            <span>Networking, REST & HTTP Protocols</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>3 topics · 30 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="12A_REST_HTTP.html" class="topic-card" id="card-12A" data-code="12A" data-tier="Tier 1" data-file="12A_REST_HTTP.html">
+            <div class="topic-card-header">
+              <span class="topic-code">12A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>REST &amp; HTTP</h3>
+              <p>HTTP verbs, status codes, headers, authentication, timeouts, retry strategies, HTTP caching, and pagination — the networking fundamentals every Android engineer must know cold.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('12A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('12A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="12B_Retrofit_OkHttp.html" class="topic-card" id="card-12B" data-code="12B" data-tier="Tier 1" data-file="12B_Retrofit_OkHttp.html">
+            <div class="topic-card-header">
+              <span class="topic-code">12B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Retrofit &amp; OkHttp</h3>
+              <p>Retrofit annotations, suspend vs Call, Moshi/Gson/kotlinx.serialization, OkHttp interceptors, Application vs Network interceptors, and how Retrofit wraps OkHttp.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('12B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('12B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="12C_Advanced_Networking.html" class="topic-card" id="card-12C" data-code="12C" data-tier="Tier 1" data-file="12C_Advanced_Networking.html">
+            <div class="topic-card-header">
+              <span class="topic-code">12C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Advanced Networking</h3>
+              <p>Certificate pinning, token refresh with Mutex, concurrent refresh problem, API error handling with sealed Result, and offline-first networking strategies.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('12C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('12C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-13" data-mod-id="13">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 13</span>
+            <span>Local Data Storage & Persistence</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>3 topics · 30 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="13A_Room.html" class="topic-card" id="card-13A" data-code="13A" data-tier="Tier 1" data-file="13A_Room.html">
+            <div class="topic-card-header">
+              <span class="topic-code">13A</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Room</h3>
+              <p>Room&#x27;s full API — @Entity , @Dao , @Database , relations, @TypeConverter , @Transaction , migrations, Flow integration, FTS, and indexing.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('13A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('13A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="13B_Room_vs_SQLite.html" class="topic-card" id="card-13B" data-code="13B" data-tier="Tier 1" data-file="13B_Room_vs_SQLite.html">
+            <div class="topic-card-header">
+              <span class="topic-code">13B</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Room vs SQLite</h3>
+              <p>Full comparison — compile-time safety, type safety, LiveData/Flow support, migration DSL, @RawQuery , and when raw SQLite still makes sense.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('13B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('13B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="13C_Other_Storage.html" class="topic-card" id="card-13C" data-code="13C" data-tier="Tier 1" data-file="13C_Other_Storage.html">
+            <div class="topic-card-header">
+              <span class="topic-code">13C</span>
+              <span class="badge-tier1">Tier 1</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Other Storage</h3>
+              <p>SharedPreferences (legacy), DataStore (Preferences + Proto), Files (internal/external/FileProvider), Android Keystore, and EncryptedSharedPreferences.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('13C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('13C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-14" data-mod-id="14">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 14</span>
+            <span>Background Processing & Task Scheduling</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>2 topics · 20 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="14A_WorkManager.html" class="topic-card" id="card-14A" data-code="14A" data-tier="Tier 2" data-file="14A_WorkManager.html">
+            <div class="topic-card-header">
+              <span class="topic-code">14A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>WorkManager</h3>
+              <p>Guaranteed, battery-efficient, constraint-aware, and SQLite-persisted background task scheduling on Android. Mastering CoroutineWorker, chaining, unique policies, and retry strategies.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('14A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('14A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="14B_Choosing_Right_Tool.html" class="topic-card" id="card-14B" data-code="14B" data-tier="Tier 2" data-file="14B_Choosing_Right_Tool.html">
+            <div class="topic-card-header">
+              <span class="topic-code">14B</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Choosing the Right Background Tool</h3>
+              <p>The ultimate background processing decision matrix: WorkManager vs Foreground Services vs AlarmManager vs Coroutines under modern Android battery constraints (Doze, App Standby, API 34+ restrictions).</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('14B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('14B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-15" data-mod-id="15">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 15</span>
+            <span>Android Services Deep Dive</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>1 topics · 10 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="15A_Services.html" class="topic-card" id="card-15A" data-code="15A" data-tier="Tier 2" data-file="15A_Services.html">
+            <div class="topic-card-header">
+              <span class="topic-code">15A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Services</h3>
+              <p>Started Services, Bound Services, Foreground Services (API 34+ types), IntentService deprecation, Background Execution Limits (API 26+), and LifecycleService.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('15A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('15A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-16" data-mod-id="16">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 16</span>
+            <span>Broadcast Receivers & IPC Events</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>1 topics · 10 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="16A_BroadcastReceiver.html" class="topic-card" id="card-16A" data-code="16A" data-tier="Tier 3" data-file="16A_BroadcastReceiver.html">
+            <div class="topic-card-header">
+              <span class="topic-code">16A</span>
+              <span class="badge-tier3">Tier 3</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>BroadcastReceiver</h3>
+              <p>Inter-process and system event messaging: Static vs Dynamic receivers, modern API 26+ broadcast limits, receiver security permissions, ordered broadcasts, and goAsync().</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('16A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('16A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-17" data-mod-id="17">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 17</span>
+            <span>Content Providers & Scoped Data Sharing</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>1 topics · 10 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="17A_ContentProvider.html" class="topic-card" id="card-17A" data-code="17A" data-tier="Tier 3" data-file="17A_ContentProvider.html">
+            <div class="topic-card-header">
+              <span class="topic-code">17A</span>
+              <span class="badge-tier3">Tier 3</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>ContentProvider</h3>
+              <p>Secure inter-app data sharing, ContentResolver clients, URI syntax, MIME conventions, Binder IPC architecture, and FileProvider integration.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('17A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('17A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-18" data-mod-id="18">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 18</span>
+            <span>Jetpack Navigation & Deep Linking</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>1 topics · 10 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="18A_Navigation.html" class="topic-card" id="card-18A" data-code="18A" data-tier="Tier 2" data-file="18A_Navigation.html">
+            <div class="topic-card-header">
+              <span class="topic-code">18A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Navigation &amp; Deep Linking</h3>
+              <p>Jetpack Navigation Component, Compose NavHost, Type-Safe Safe Args, Deep Links vs Verified App Links, and Back Stack manipulation.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('18A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('18A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-19" data-mod-id="19">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 19</span>
+            <span>Android Security, Cryptography & App Hardening</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>2 topics · 20 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="19A_Data_Network_Security.html" class="topic-card" id="card-19A" data-code="19A" data-tier="Tier 2" data-file="19A_Data_Network_Security.html">
+            <div class="topic-card-header">
+              <span class="topic-code">19A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Data &amp; Network Security</h3>
+              <p>Android Sandbox, Hardware-Backed Keystore, EncryptedSharedPreferences, SQLCipher, TLS enforcement, Certificate Pinning, Network Security Config, and secrets handling.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('19A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('19A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="19B_App_Hardening.html" class="topic-card" id="card-19B" data-code="19B" data-tier="Tier 2" data-file="19B_App_Hardening.html">
+            <div class="topic-card-header">
+              <span class="topic-code">19B</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>App Hardening &amp; Auth</h3>
+              <p>BiometricPrompt, Play Integrity API, Root/Hook detection limitations, R8 code shrinking and obfuscation, WebView security, Intent hardening, and OWASP MASVS.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('19B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('19B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="module-section" id="mod-sec-20" data-mod-id="20">
+        <div class="module-section-header">
+          <div class="module-section-title">
+            <span class="module-badge">Module 20</span>
+            <span>Performance, Profiling & Memory Optimization</span>
+          </div>
+          <div class="quiz-count-badge">
+            <span>3 topics · 30 interview Q&As</span>
+          </div>
+        </div>
+        <div class="topics-grid">
+
+          <a href="20A_Unit_Testing.html" class="topic-card" id="card-20A" data-code="20A" data-tier="Tier 2" data-file="20A_Unit_Testing.html">
+            <div class="topic-card-header">
+              <span class="topic-code">20A</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Unit Testing</h3>
+              <p>JUnit 4 vs JUnit 5, MockK (Kotlin-first mocking, coEvery, slots, relaxed mocks) vs Mockito, Fake vs Mock vs Stub, Testing Pyramid, and Clean Architecture testability.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('20A', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('20A');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="20B_Coroutines_Flow_Testing.html" class="topic-card" id="card-20B" data-code="20B" data-tier="Tier 2" data-file="20B_Coroutines_Flow_Testing.html">
+            <div class="topic-card-header">
+              <span class="topic-code">20B</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>Coroutines &amp; Flow Testing</h3>
+              <p>Modern kotlinx-coroutines-test: runTest {}, StandardTestDispatcher vs UnconfinedTestDispatcher, advanceUntilIdle(), advanceTimeBy(), and Turbine for testing StateFlow, SharedFlow, and cold Flows.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('20B', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('20B');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="20C_UI_Network_Testing.html" class="topic-card" id="card-20C" data-code="20C" data-tier="Tier 2" data-file="20C_UI_Network_Testing.html">
+            <div class="topic-card-header">
+              <span class="topic-code">20C</span>
+              <span class="badge-tier2">Tier 2</span>
+            </div>
+            <div class="topic-card-body">
+              <h3>UI &amp; Network Testing</h3>
+              <p>Espresso view assertions, Compose UI testing via SemanticsMatchers, cross-app testing with UI Automator, and OkHttp MockWebServer for reliable network integration tests.</p>
+            </div>
+            <div class="topic-card-footer">
+              <div class="quiz-count-badge">
+                <span>⚡ 10 Q&As</span>
+              </div>
+              <div class="card-action-btns">
+                <button class="study-toggle-btn" onclick="toggleTopicDone('20C', event)" title="Toggle studied status">
+                  <span class="check-box-display">⚪</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('20C');" title="Open inside portal study reader">Reader 📖</button>
+                <span class="open-arrow">Study →</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div id="noResults">
+        <h3>No matching topics found</h3>
+        <p style="margin-top:8px;">Try searching for another keyword like "coroutine", "binder", "compose", or "security".</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const ALL_TOPICS = [{"file": "1A_Kotlin_Basics_Null_Safety.html", "code": "1A", "mod_num": 1, "mod_sub": "A", "slug": "Kotlin_Basics_Null_Safety", "clean_title": "Kotlin Basics & Null Safety", "raw_title": "1A \u2014 Kotlin Basics & Null Safety | Android Interview Prep", "desc": "Core Kotlin syntax and the type-system mechanism that eliminates NullPointerExceptions at compile time.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1B_Kotlin_Functions.html", "code": "1B", "mod_num": 1, "mod_sub": "B", "slug": "Kotlin_Functions", "clean_title": "Kotlin Functions", "raw_title": "1B \u2014 Kotlin Functions | Android Interview Prep", "desc": "Default & named arguments, vararg, extension functions, infix, higher-order functions, lambdas, function references, and SAM conversions \u2014 the full Kotlin function toolkit.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1C_Scope_Functions.html", "code": "1C", "mod_num": 1, "mod_sub": "C", "slug": "Scope_Functions", "clean_title": "Kotlin Scope Functions", "raw_title": "1C \u2014 Kotlin Scope Functions | Android Interview Prep", "desc": "let, run, with, apply, also \u2014 when to use each, how they differ, and why picking the wrong one is a common interview trap.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1D_Kotlin_OOP.html", "code": "1D", "mod_num": 1, "mod_sub": "D", "slug": "Kotlin_OOP", "clean_title": "Kotlin OOP", "raw_title": "1D \u2014 Kotlin OOP | Android Interview Prep", "desc": "Classes, constructors, init, inheritance, interfaces, abstract classes, visibility modifiers, and open/final/abstract \u2014 how Kotlin's OOP differs from Java and why it matters for Android architecture.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1E_Special_Classes.html", "code": "1E", "mod_num": 1, "mod_sub": "E", "slug": "Special_Classes", "clean_title": "Kotlin Special Classes", "raw_title": "1E \u2014 Kotlin Special Classes | Android Interview Prep", "desc": "data classes, enum classes, sealed classes & interfaces, object declarations, companion objects, anonymous objects \u2014 the Kotlin class variants that power Android architecture daily.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1F_Generics_Variance.html", "code": "1F", "mod_num": 1, "mod_sub": "F", "slug": "Generics_Variance", "clean_title": "Generics & Variance", "raw_title": "1F \u2014 Generics & Variance | Android Interview Prep", "desc": "Generics, in / out variance annotations, covariance, contravariance \u2014 the type-system mechanics behind Flow, StateFlow, Result, and Clean Architecture generics.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "1G_Delegation_Operators.html", "code": "1G", "mod_num": 1, "mod_sub": "G", "slug": "Delegation_Operators", "clean_title": "Delegation & Operators", "raw_title": "1G \u2014 Delegation & Operators | Android Interview Prep", "desc": "Class delegation ( by ), property delegation, by lazy , observable , vetoable , custom delegates, operator overloading, and destructuring \u2014 Kotlin features used throughout Android architecture.", "tier": "Tier 1", "quizzes": 9, "sections": 9, "style_type": "Tabbed"}, {"file": "1H_Collections.html", "code": "1H", "mod_num": 1, "mod_sub": "H", "slug": "Collections", "clean_title": "Kotlin Collections", "raw_title": "1H \u2014 Kotlin Collections | Android Interview Prep", "desc": "List, Set, Map (mutable vs immutable), map/filter/flatMap/fold/reduce, and Sequences vs collections \u2014 the complete functional collection toolkit for Android production code.", "tier": "Tier 1", "quizzes": 9, "sections": 9, "style_type": "Tabbed"}, {"file": "1I_Inline_Recursion.html", "code": "1I", "mod_num": 1, "mod_sub": "I", "slug": "Inline_Recursion", "clean_title": "Inline & Recursion", "raw_title": "1I \u2014 Inline & Recursion | Android Interview Prep", "desc": "inline , noinline , crossinline , reified type parameters, and tail recursion \u2014 performance and type-safety features that power Kotlin's standard library and Flow operators.", "tier": "Tier 1", "quizzes": 9, "sections": 9, "style_type": "Tabbed"}, {"file": "1J_Equality_Interop_Errors.html", "code": "1J", "mod_num": 1, "mod_sub": "J", "slug": "Equality_Interop_Errors", "clean_title": "Equality, Interop & Errors", "raw_title": "1J \u2014 Equality, Interop & Errors | Android Interview Prep", "desc": "== vs === , Kotlin\u2013JVM interoperability, Kotlin compilation basics, exceptions, and the Result type \u2014 the final Kotlin unit before moving into Android fundamentals.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "2A_Components_Overview.html", "code": "2A", "mod_num": 2, "mod_sub": "A", "slug": "Components_Overview", "clean_title": "Android Components Overview", "raw_title": "2A \u2013 Android Components Overview", "desc": "Tier 2 Activity \u00b7 Fragment \u00b7 Service \u00b7 BroadcastReceiver \u00b7 ContentProvider \u00b7 Application \u00b7 Context", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "2B_Activity_Lifecycle_State.html", "code": "2B", "mod_num": 2, "mod_sub": "B", "slug": "Activity_Lifecycle_State", "clean_title": "Activity Lifecycle & State", "raw_title": "2B \u2013 Activity Lifecycle & State", "desc": "Tier 2 onCreate \u00b7 onStart \u00b7 onResume \u00b7 onPause \u00b7 onStop \u00b7 onDestroy \u00b7 config changes \u00b7 process death \u00b7 onSaveInstanceState", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "2C_Launch_Modes_Back_Stack.html", "code": "2C", "mod_num": 2, "mod_sub": "C", "slug": "Launch_Modes_Back_Stack", "clean_title": "Launch Modes & Back Stack", "raw_title": "2C \u2013 Launch Modes & Back Stack", "desc": "Tier 2 standard \u00b7 singleTop \u00b7 singleTask \u00b7 singleInstance \u00b7 Tasks \u00b7 Back Stack \u00b7 Intent Flags", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "2D_Fragments.html", "code": "2D", "mod_num": 2, "mod_sub": "D", "slug": "Fragments", "clean_title": "Fragments", "raw_title": "2D \u2013 Fragments", "desc": "Tier 2 Fragment lifecycle \u00b7 View lifecycle \u00b7 FragmentManager \u00b7 transactions \u00b7 back stack \u00b7 communication \u00b7 Navigation Component", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "2E_Intents.html", "code": "2E", "mod_num": 2, "mod_sub": "E", "slug": "Intents", "clean_title": "Intents", "raw_title": "2E \u2013 Intents", "desc": "Tier 2 Explicit \u00b7 Implicit \u00b7 Intent Filters \u00b7 PendingIntent \u00b7 Deep Links \u00b7 App Links", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "3A_App_Startup.html", "code": "3A", "mod_num": 3, "mod_sub": "A", "slug": "App_Startup", "clean_title": "App Startup", "raw_title": "3A \u2013 App Startup", "desc": "Tier 1 \u00b7 Senior Differentiator Zygote \u00b7 SystemServer \u00b7 AMS/ATMS \u00b7 PMS \u00b7 WMS \u00b7 ActivityThread \u00b7 Application Creation", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "3B_Main_Thread_Internals.html", "code": "3B", "mod_num": 3, "mod_sub": "B", "slug": "Main_Thread_Internals", "clean_title": "Main Thread Internals", "raw_title": "3B \u2013 Main Thread Internals", "desc": "Tier 1 \u00b7 Core Framework Internals Main Thread \u00b7 UI Thread \u00b7 Looper \u00b7 MessageQueue \u00b7 Handler \u00b7 Epoll \u00b7 Choreographer", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "3C_Binder_IPC.html", "code": "3C", "mod_num": 3, "mod_sub": "C", "slug": "Binder_IPC", "clean_title": "Binder & IPC", "raw_title": "3C \u2013 Binder & IPC", "desc": "Tier 1 \u00b7 Architecture Core Binder Driver \u00b7 IPC \u00b7 AIDL \u00b7 Parcelable \u00b7 ServiceManager \u00b7 Memory Mapping (mmap)", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "3D_Process_Model.html", "code": "3D", "mod_num": 3, "mod_sub": "D", "slug": "Process_Model", "clean_title": "Process Model", "raw_title": "3D \u2013 Process Model", "desc": "Tier 1 \u00b7 Senior Architecture Process Priority \u00b7 oom_adj / oom_score_adj \u00b7 LMK \u00b7 Application Sandbox \u00b7 UID \u00b7 ANR Internals", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "4A_ViewModel.html", "code": "4A", "mod_num": 4, "mod_sub": "A", "slug": "ViewModel", "clean_title": "ViewModel", "raw_title": "4A \u2013 ViewModel", "desc": "Tier 1 \u00b7 Architecture Core ViewModel \u00b7 ViewModelStore \u00b7 ViewModelProvider \u00b7 viewModelScope \u00b7 SavedStateHandle \u00b7 NonConfigurationInstances", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "4B_LiveData.html", "code": "4B", "mod_num": 4, "mod_sub": "B", "slug": "LiveData", "clean_title": "LiveData", "raw_title": "4B \u2013 LiveData", "desc": "Tier 1 \u00b7 Architecture Core Lifecycle Awareness \u00b7 Observer Pattern \u00b7 setValue vs postValue \u00b7 MediatorLiveData \u00b7 LiveData vs StateFlow", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "4C_Lifecycle.html", "code": "4C", "mod_num": 4, "mod_sub": "C", "slug": "Lifecycle", "clean_title": "Lifecycle", "raw_title": "4C \u2013 Lifecycle", "desc": "Tier 1 \u00b7 Architecture Core LifecycleOwner \u00b7 DefaultLifecycleObserver \u00b7 lifecycleScope \u00b7 repeatOnLifecycle \u00b7 flowWithLifecycle", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Scrollable"}, {"file": "5A_Coroutines_Fundamentals.html", "code": "5A", "mod_num": 5, "mod_sub": "A", "slug": "Coroutines_Fundamentals", "clean_title": "Coroutines Fundamentals", "raw_title": "5A \u2014 Coroutines Fundamentals | Android Interview Prep", "desc": "What a coroutine is, how it differs from a thread, CoroutineScope, CoroutineContext, Job, and Dispatchers \u2014 the core concepts every Android engineer must own.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "5B_Builders_Dispatchers.html", "code": "5B", "mod_num": 5, "mod_sub": "B", "slug": "Builders_Dispatchers", "clean_title": "Builders & Dispatchers", "raw_title": "5B \u2014 Builders &amp; Dispatchers | Android Interview Prep", "desc": "launch , async/await , withContext , runBlocking \u2014 when each builder fits, plus dispatcher internals and thread pool selection.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "5C_Structured_Concurrency.html", "code": "5C", "mod_num": 5, "mod_sub": "C", "slug": "Structured_Concurrency", "clean_title": "Structured Concurrency & Key Differences", "raw_title": "5C \u2014 Structured Concurrency &amp; Key Differences | Android Interview Prep", "desc": "The hierarchy: CoroutineScope \u2192 CoroutineContext \u2192 Job \u2192 children. Plus the most-asked comparison questions: launch vs async, coroutineScope vs supervisorScope, Job vs SupervisorJob, delay vs Thread.sleep.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "5D_Cancellation_Exceptions.html", "code": "5D", "mod_num": 5, "mod_sub": "D", "slug": "Cancellation_Exceptions", "clean_title": "Cancellation & Exceptions", "raw_title": "5D \u2014 Cancellation &amp; Exceptions | Android Interview Prep", "desc": "Cooperative cancellation, CancellationException, isActive/ensureActive/yield, NonCancellable, exception propagation, CoroutineExceptionHandler, SupervisorJob \u2014 everything about keeping coroutines safe.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "5E_Scopes_Concurrency_Testing.html", "code": "5E", "mod_num": 5, "mod_sub": "E", "slug": "Scopes_Concurrency_Testing", "clean_title": "Scopes, Concurrency & Testing", "raw_title": "5E \u2014 Scopes, Concurrency &amp; Testing | Android Interview Prep", "desc": "lifecycleScope, viewModelScope, custom scopes. Race conditions with Mutex/Semaphore/AtomicInteger. runTest, StandardTestDispatcher vs UnconfinedTestDispatcher, virtual time control.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "6A_Flow_Core.html", "code": "6A", "mod_num": 6, "mod_sub": "A", "slug": "Flow_Core", "clean_title": "Flow Core", "raw_title": "6A \u2014 Flow Core | Android Interview Prep", "desc": "Cold Flow vs hot StateFlow vs hot SharedFlow. collect vs collectLatest. The definitive StateFlow vs SharedFlow vs LiveData comparison. Most-asked Flow questions.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "6B_Flow_Operators.html", "code": "6B", "mod_num": 6, "mod_sub": "B", "slug": "Flow_Operators", "clean_title": "Flow Operators", "raw_title": "6B \u2014 Flow Operators | Android Interview Prep", "desc": "Transforming, combining, flatMapping, timing, error handling, and lifecycle operators. Production examples for each. flatMapConcat vs flatMapMerge vs flatMapLatest comparison.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "6C_Builders_Channels.html", "code": "6C", "mod_num": 6, "mod_sub": "C", "slug": "Builders_Channels", "clean_title": "Builders & Channels", "raw_title": "6C \u2014 Builders &amp; Channels | Android Interview Prep", "desc": "flow{} , flowOn , callbackFlow , channelFlow . Channel types: Rendezvous, Buffered, Conflated, Unlimited. Backpressure strategies.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "6D_Sharing.html", "code": "6D", "mod_num": 6, "mod_sub": "D", "slug": "Sharing", "clean_title": "Sharing: stateIn & shareIn", "raw_title": "6D \u2014 Sharing: stateIn &amp; shareIn | Android Interview Prep", "desc": "stateIn() converts cold Flow to StateFlow. shareIn() to SharedFlow. SharingStarted strategies: Eagerly, Lazily, WhileSubscribed(5000). When to use each.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "7A_Compose_Fundamentals.html", "code": "7A", "mod_num": 7, "mod_sub": "A", "slug": "Compose_Fundamentals", "clean_title": "Compose Fundamentals", "raw_title": "7A \u2014 Compose Fundamentals | Android Interview Prep", "desc": "@Composable, declarative vs imperative UI, the Composition, recomposition mechanics, slot table, State<T>, remember, and the composable lifecycle.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "7B_State_Management.html", "code": "7B", "mod_num": 7, "mod_sub": "B", "slug": "State_Management", "clean_title": "State Management", "raw_title": "7B \u2014 State Management | Android Interview Prep", "desc": "remember vs rememberSaveable, mutableStateOf, derivedStateOf. State hoisting, UDF (Unidirectional Data Flow). ViewModel as state holder. collectAsStateWithLifecycle. When to use local vs hoisted state.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "7C_Side_Effects.html", "code": "7C", "mod_num": 7, "mod_sub": "C", "slug": "Side_Effects", "clean_title": "Side Effects", "raw_title": "7C \u2014 Side Effects | Android Interview Prep", "desc": "LaunchedEffect, DisposableEffect, SideEffect, rememberCoroutineScope, produceState, derivedStateOf, snapshotFlow \u2014 every side-effect API with its precise use case.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "7D_Compose_Performance.html", "code": "7D", "mod_num": 7, "mod_sub": "D", "slug": "Compose_Performance", "clean_title": "Compose Performance", "raw_title": "7D \u2014 Compose Performance | Android Interview Prep", "desc": "Smart recomposition, stability system, @Stable/@Immutable, unstable List<>, LazyColumn keys, remember for expensive computations, derivedStateOf, lambda stability, Compose compiler metrics.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "8A_Architecture_Patterns.html", "code": "8A", "mod_num": 8, "mod_sub": "A", "slug": "Architecture_Patterns", "clean_title": "Architecture Patterns", "raw_title": "8A \u2014 Architecture Patterns | Android Interview Prep", "desc": "MVC, MVP, MVVM, MVI \u2014 what each solves and its trade-offs. Full layered architecture: UI \u2192 ViewModel \u2192 UseCase \u2192 Repository \u2192 Data Sources. When to use each pattern.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "8B_Clean_Architecture.html", "code": "8B", "mod_num": 8, "mod_sub": "B", "slug": "Clean_Architecture", "clean_title": "Clean Architecture", "raw_title": "8B \u2013 Clean Architecture | Android Interview Prep", "desc": "Three concentric layers, the Dependency Rule, and the art of keeping your domain pure. The architecture standard for production Android apps.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "9A_SOLID_Principles.html", "code": "9A", "mod_num": 9, "mod_sub": "A", "slug": "SOLID_Principles", "clean_title": "SOLID Principles", "raw_title": "9A \u2013 SOLID Principles | Android Interview Prep", "desc": "Five object-oriented design principles that produce maintainable, scalable Android code. Each principle with definition, Android violation, and correct fix.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "10A_Creational_Patterns.html", "code": "10A", "mod_num": 10, "mod_sub": "A", "slug": "Creational_Patterns", "clean_title": "Creational Patterns", "raw_title": "10A \u2013 Creational Patterns | Android Interview Prep", "desc": "Singleton, Factory Method, Abstract Factory, and Builder \u2014 the four creational patterns that govern object construction in production Android apps.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "10B_Structural_Patterns.html", "code": "10B", "mod_num": 10, "mod_sub": "B", "slug": "Structural_Patterns", "clean_title": "Structural Patterns", "raw_title": "10B \u2013 Structural Patterns | Android Interview Prep", "desc": "Adapter, Decorator, Facade, and Proxy \u2014 how Android and its libraries compose objects to build larger structures without tight coupling.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "10C_Behavioral_Patterns.html", "code": "10C", "mod_num": 10, "mod_sub": "C", "slug": "Behavioral_Patterns", "clean_title": "Behavioral Patterns", "raw_title": "10C \u2013 Behavioral Patterns | Android Interview Prep", "desc": "Observer, Strategy, Command, and State \u2014 the behavioral patterns that govern communication and responsibility assignment in Android apps.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "11A_DI_Hilt_Basics.html", "code": "11A", "mod_num": 11, "mod_sub": "A", "slug": "DI_Hilt_Basics", "clean_title": "DI & Hilt Basics", "raw_title": "11A \u2013 DI &amp; Hilt Basics | Android Interview Prep", "desc": "Why dependency injection, constructor vs field injection, and Hilt's core annotations: @Inject , @Module , @Provides , @Binds , @InstallIn , scopes, and qualifiers.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "11B_Hilt_Components.html", "code": "11B", "mod_num": 11, "mod_sub": "B", "slug": "Hilt_Components", "clean_title": "Hilt Components", "raw_title": "11B \u2013 Hilt Components | Android Interview Prep", "desc": "Component hierarchy and lifetimes, Dagger code generation, @HiltViewModel internals, compile-time graph validation, and SubComponents vs Component dependencies.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "12A_REST_HTTP.html", "code": "12A", "mod_num": 12, "mod_sub": "A", "slug": "REST_HTTP", "clean_title": "REST & HTTP", "raw_title": "12A \u2013 REST &amp; HTTP | Android Interview Prep", "desc": "HTTP verbs, status codes, headers, authentication, timeouts, retry strategies, HTTP caching, and pagination \u2014 the networking fundamentals every Android engineer must know cold.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "12B_Retrofit_OkHttp.html", "code": "12B", "mod_num": 12, "mod_sub": "B", "slug": "Retrofit_OkHttp", "clean_title": "Retrofit & OkHttp", "raw_title": "12B \u2013 Retrofit &amp; OkHttp | Android Interview Prep", "desc": "Retrofit annotations, suspend vs Call, Moshi/Gson/kotlinx.serialization, OkHttp interceptors, Application vs Network interceptors, and how Retrofit wraps OkHttp.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "12C_Advanced_Networking.html", "code": "12C", "mod_num": 12, "mod_sub": "C", "slug": "Advanced_Networking", "clean_title": "Advanced Networking", "raw_title": "12C \u2013 Advanced Networking | Android Interview Prep", "desc": "Certificate pinning, token refresh with Mutex, concurrent refresh problem, API error handling with sealed Result, and offline-first networking strategies.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "13A_Room.html", "code": "13A", "mod_num": 13, "mod_sub": "A", "slug": "Room", "clean_title": "Room", "raw_title": "13A \u2013 Room | Android Interview Prep", "desc": "Room's full API \u2014 @Entity , @Dao , @Database , relations, @TypeConverter , @Transaction , migrations, Flow integration, FTS, and indexing.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "13B_Room_vs_SQLite.html", "code": "13B", "mod_num": 13, "mod_sub": "B", "slug": "Room_vs_SQLite", "clean_title": "Room vs SQLite", "raw_title": "13B \u2013 Room vs SQLite | Android Interview Prep", "desc": "Full comparison \u2014 compile-time safety, type safety, LiveData/Flow support, migration DSL, @RawQuery , and when raw SQLite still makes sense.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "13C_Other_Storage.html", "code": "13C", "mod_num": 13, "mod_sub": "C", "slug": "Other_Storage", "clean_title": "Other Storage", "raw_title": "13C \u2013 Other Storage | Android Interview Prep", "desc": "SharedPreferences (legacy), DataStore (Preferences + Proto), Files (internal/external/FileProvider), Android Keystore, and EncryptedSharedPreferences.", "tier": "Tier 1", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "14A_WorkManager.html", "code": "14A", "mod_num": 14, "mod_sub": "A", "slug": "WorkManager", "clean_title": "WorkManager", "raw_title": "14A \u2014 WorkManager | Android Interview Prep", "desc": "Guaranteed, battery-efficient, constraint-aware, and SQLite-persisted background task scheduling on Android. Mastering CoroutineWorker, chaining, unique policies, and retry strategies.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "14B_Choosing_Right_Tool.html", "code": "14B", "mod_num": 14, "mod_sub": "B", "slug": "Choosing_Right_Tool", "clean_title": "Choosing the Right Background Tool", "raw_title": "14B \u2014 Choosing the Right Background Tool | Android Interview Prep", "desc": "The ultimate background processing decision matrix: WorkManager vs Foreground Services vs AlarmManager vs Coroutines under modern Android battery constraints (Doze, App Standby, API 34+ restrictions).", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "15A_Services.html", "code": "15A", "mod_num": 15, "mod_sub": "A", "slug": "Services", "clean_title": "Services", "raw_title": "15A \u2014 Services | Android Interview Prep", "desc": "Started Services, Bound Services, Foreground Services (API 34+ types), IntentService deprecation, Background Execution Limits (API 26+), and LifecycleService.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "16A_BroadcastReceiver.html", "code": "16A", "mod_num": 16, "mod_sub": "A", "slug": "BroadcastReceiver", "clean_title": "BroadcastReceiver", "raw_title": "16A \u2014 BroadcastReceiver | Android Interview Prep", "desc": "Inter-process and system event messaging: Static vs Dynamic receivers, modern API 26+ broadcast limits, receiver security permissions, ordered broadcasts, and goAsync().", "tier": "Tier 3", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "17A_ContentProvider.html", "code": "17A", "mod_num": 17, "mod_sub": "A", "slug": "ContentProvider", "clean_title": "ContentProvider", "raw_title": "17A \u2014 ContentProvider | Android Interview Prep", "desc": "Secure inter-app data sharing, ContentResolver clients, URI syntax, MIME conventions, Binder IPC architecture, and FileProvider integration.", "tier": "Tier 3", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "18A_Navigation.html", "code": "18A", "mod_num": 18, "mod_sub": "A", "slug": "Navigation", "clean_title": "Navigation & Deep Linking", "raw_title": "18A \u2014 Navigation &amp; Deep Linking | Android Interview Prep", "desc": "Jetpack Navigation Component, Compose NavHost, Type-Safe Safe Args, Deep Links vs Verified App Links, and Back Stack manipulation.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "19A_Data_Network_Security.html", "code": "19A", "mod_num": 19, "mod_sub": "A", "slug": "Data_Network_Security", "clean_title": "Data & Network Security", "raw_title": "19A \u2014 Data &amp; Network Security | Android Interview Prep", "desc": "Android Sandbox, Hardware-Backed Keystore, EncryptedSharedPreferences, SQLCipher, TLS enforcement, Certificate Pinning, Network Security Config, and secrets handling.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "19B_App_Hardening.html", "code": "19B", "mod_num": 19, "mod_sub": "B", "slug": "App_Hardening", "clean_title": "App Hardening & Auth", "raw_title": "19B \u2014 App Hardening &amp; Auth | Android Interview Prep", "desc": "BiometricPrompt, Play Integrity API, Root/Hook detection limitations, R8 code shrinking and obfuscation, WebView security, Intent hardening, and OWASP MASVS.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "20A_Unit_Testing.html", "code": "20A", "mod_num": 20, "mod_sub": "A", "slug": "Unit_Testing", "clean_title": "Unit Testing", "raw_title": "20A \u2014 Unit Testing | Android Interview Prep", "desc": "JUnit 4 vs JUnit 5, MockK (Kotlin-first mocking, coEvery, slots, relaxed mocks) vs Mockito, Fake vs Mock vs Stub, Testing Pyramid, and Clean Architecture testability.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "20B_Coroutines_Flow_Testing.html", "code": "20B", "mod_num": 20, "mod_sub": "B", "slug": "Coroutines_Flow_Testing", "clean_title": "Coroutines & Flow Testing", "raw_title": "20B \u2014 Coroutines &amp; Flow Testing | Android Interview Prep", "desc": "Modern kotlinx-coroutines-test: runTest {}, StandardTestDispatcher vs UnconfinedTestDispatcher, advanceUntilIdle(), advanceTimeBy(), and Turbine for testing StateFlow, SharedFlow, and cold Flows.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}, {"file": "20C_UI_Network_Testing.html", "code": "20C", "mod_num": 20, "mod_sub": "C", "slug": "UI_Network_Testing", "clean_title": "UI & Network Testing", "raw_title": "20C \u2014 UI &amp; Network Testing | Android Interview Prep", "desc": "Espresso view assertions, Compose UI testing via SemanticsMatchers, cross-app testing with UI Automator, and OkHttp MockWebServer for reliable network integration tests.", "tier": "Tier 2", "quizzes": 10, "sections": 9, "style_type": "Tabbed"}];
+  let currentTopicCode = ALL_TOPICS[0].code;
+  let currentFilter = 'all';
+  let searchQuery = '';
+
+  const STORAGE_KEY = 'android_prep_studied_topics_v1';
+  let studiedSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+
+  function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(studiedSet)));
+    updateProgressUI();
+  }
+
+  function resetProgress() {
+    if (confirm("Reset all study progress checkmarks?")) {
+      studiedSet.clear();
+      saveProgress();
+    }
+  }
+
+  function updateProgressUI() {
+    const total = ALL_TOPICS.length;
+    const studiedCount = studiedSet.size;
+    const pct = Math.round((studiedCount / total) * 100);
+
+    document.getElementById('progressPercent').innerText = pct + '%';
+    document.getElementById('progressFraction').innerText = studiedCount + '/' + total;
+    document.getElementById('progressBarFill').style.width = pct + '%';
+    document.getElementById('studiedCount').innerText = studiedCount;
+    document.getElementById('unstudiedCount').innerText = total - studiedCount;
+
+    ALL_TOPICS.forEach(t => {
+      const card = document.getElementById('card-' + t.code);
+      const isDone = studiedSet.has(t.code);
+      if (card) {
+        card.classList.toggle('studied', isDone);
+        const checkDisplay = card.querySelector('.check-box-display');
+        if (checkDisplay) {
+          checkDisplay.innerText = isDone ? '🟢' : '⚪';
+        }
+      }
+      const sideLink = document.getElementById('sidelink-' + t.code);
+      if (sideLink) {
+        sideLink.classList.toggle('studied', isDone);
+      }
+    });
+
+    const markBtn = document.getElementById('readerMarkStudiedBtn');
+    if (markBtn) {
+      const done = studiedSet.has(currentTopicCode);
+      markBtn.innerText = done ? 'Studied ✓' : 'Mark Studied';
+      markBtn.classList.toggle('btn-accent2', done);
+      markBtn.classList.toggle('btn-secondary', !done);
+    }
+  }
+
+  function toggleTopicDone(code, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (studiedSet.has(code)) {
+      studiedSet.delete(code);
+    } else {
+      studiedSet.add(code);
+    }
+    saveProgress();
+  }
+
+  function toggleCurrentTopicStudied() {
+    toggleTopicDone(currentTopicCode);
+  }
+
+  function buildSidebar() {
+    const sidebarEl = document.getElementById('sidebarModulesList');
+    const modulesMap = {};
+    ALL_TOPICS.forEach(t => {
+      if (!modulesMap[t.mod_num]) {
+        modulesMap[t.mod_num] = [];
+      }
+      modulesMap[t.mod_num].push(t);
+    });
+
+    let html = '';
+    for (const modNum in modulesMap) {
+      const topics = modulesMap[modNum];
+      html += `
+        <div class="module-group" id="side-mod-${modNum}">
+          <div class="module-header" onclick="toggleModuleGroup('${modNum}')">
+            <span><span class="m-num">M${modNum}</span> Track</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="module-topics-list">
+      `;
+      topics.forEach(t => {
+        const isDone = studiedSet.has(t.code);
+        html += `
+          <a href="${t.file}" class="sidebar-topic-link ${isDone ? 'studied' : ''}" id="sidelink-${t.code}">
+            <span class="check-icon">✓</span>
+            <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700; color:var(--accent);">${t.code}</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.clean_title}</span>
+          </a>
+        `;
+      });
+      html += `</div></div>`;
+    }
+    sidebarEl.innerHTML = html;
+  }
+
+  function toggleModuleGroup(modNum) {
+    const el = document.getElementById('side-mod-' + modNum);
+    if (el) el.classList.toggle('collapsed');
+  }
+
+  // Study Reader Controller
+  function openStudyReader(code) {
+    const topic = ALL_TOPICS.find(t => t.code === code);
+    if (!topic) return;
+
+    currentTopicCode = code;
+    const container = document.getElementById('studyReaderContainer');
+    const iframe = document.getElementById('studyIframe');
+    const titleEl = document.getElementById('readerTopicTitle');
+    const extLink = document.getElementById('readerExternalLink');
+
+    titleEl.innerHTML = `<span style="color:var(--accent); font-family:var(--font-mono); font-weight:700;">[${topic.code}]</span> ${topic.clean_title}`;
+    extLink.href = topic.file;
+    iframe.src = topic.file;
+
+    container.classList.add('active');
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    document.querySelectorAll('.sidebar-topic-link').forEach(el => el.classList.remove('active'));
+    const sideLink = document.getElementById('sidelink-' + code);
+    if (sideLink) sideLink.classList.add('active');
+
+    updateProgressUI();
+  }
+
+  function closeStudyReader() {
+    const container = document.getElementById('studyReaderContainer');
+    const iframe = document.getElementById('studyIframe');
+    container.classList.remove('active');
+    iframe.src = 'about:blank';
+  }
+
+  function navigateTopic(dir) {
+    const idx = ALL_TOPICS.findIndex(t => t.code === currentTopicCode);
+    if (idx === -1) return;
+    const nextIdx = idx + dir;
+    if (nextIdx >= 0 && nextIdx < ALL_TOPICS.length) {
+      openStudyReader(ALL_TOPICS[nextIdx].code);
+    }
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-pills .pill').forEach(p => {
+      p.classList.toggle('active', p.getAttribute('data-filter') === filter);
+    });
+    applyFilters();
+  }
+
+  function handleSearch() {
+    searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let visibleCount = 0;
+    ALL_TOPICS.forEach(t => {
+      const card = document.getElementById('card-' + t.code);
+      const isStudied = studiedSet.has(t.code);
+      
+      let matchesFilter = true;
+      if (currentFilter === 'Tier 1' || currentFilter === 'Tier 2' || currentFilter === 'Tier 3') {
+        matchesFilter = (t.tier === currentFilter);
+      } else if (currentFilter === 'studied') {
+        matchesFilter = isStudied;
+      } else if (currentFilter === 'unstudied') {
+        matchesFilter = !isStudied;
+      }
+
+      let matchesSearch = true;
+      if (searchQuery) {
+        const fullHaystack = (t.code + ' ' + t.clean_title + ' ' + t.desc + ' ' + t.tier).toLowerCase();
+        matchesSearch = fullHaystack.includes(searchQuery);
+      }
+
+      const show = matchesFilter && matchesSearch;
+      if (card) {
+        card.style.display = show ? 'flex' : 'none';
+        if (show) visibleCount++;
+      }
+    });
+
+    const modSections = document.querySelectorAll('.module-section');
+    modSections.forEach(sec => {
+      const visibleCards = sec.querySelectorAll('.topic-card:not([style*="display: none"])');
+      sec.style.display = visibleCards.length > 0 ? 'block' : 'none';
+    });
+
+    document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('studyReaderContainer').classList.contains('active')) {
+      if (e.key === 'ArrowLeft' || e.key === '[') {
+        navigateTopic(-1);
+      } else if (e.key === 'ArrowRight' || e.key === ']') {
+        navigateTopic(1);
+      } else if (e.key === 'Escape') {
+        closeStudyReader();
+      } else if (e.key.toLowerCase() === 'c') {
+        toggleCurrentTopicStudied();
+      }
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    buildSidebar();
+    updateProgressUI();
+  });
+</script>
+
+</body>
+</html>

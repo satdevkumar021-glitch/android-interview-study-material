@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30E — System Design: Push Notifications | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">30E · Push Notifications</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem Statement</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture &amp; Components</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Design Decisions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs &amp; Failure</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep · Senior System Design</div>
+    <h1><span>30E</span> — Push Notification System</h1>
+    <p class="hero-desc">Design a complete Android push notification system: FCM architecture, token management, data vs notification messages, custom notification channels, deep link handling, grouping, foreground handling, and delivery receipts.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 30E</span>
+      <span class="badge badge-senior">&#9733; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 Problem Statement -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
+    <h3>Requirements</h3>
+    <h4>Functional</h4>
+    <ul>
+      <li>Transactional alerts: order shipped, payment confirmed, security alerts</li>
+      <li>Marketing / promotional: new deals, personalized recommendations</li>
+      <li>Deep link handling: notification tap opens the correct in-app screen</li>
+      <li>Notification grouping: multiple messages bundled under one summary</li>
+      <li>Handle notification when app is in foreground (don't show system notification)</li>
+      <li>Delivery receipts: know whether the user received/tapped the notification</li>
+    </ul>
+    <h4>Non-Functional</h4>
+    <ul>
+      <li>No notification for revoked consent (POST_NOTIFICATIONS permission denied)</li>
+      <li>Token refresh handled automatically — server always has valid token</li>
+      <li>Correct channel importance — transactional uses HIGH, marketing uses DEFAULT</li>
+      <li>Works on all Android versions from API 26+</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2 Architecture -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#127963;</div>2. Architecture &amp; Components</div>
+    <h3>FCM Architecture — ASCII Diagram</h3>
+    <pre><code>┌──────────────────────────────────────────────────────────────┐
+│                     BACKEND SERVER                           │
+│  Notification Service                                        │
+│   • Stores FCM tokens per userId in database                 │
+│   • Calls FCM HTTP v1 API with token + message payload       │
+│   • Handles INVALID_REGISTRATION → delete stale token        │
+└─────────────────────┬────────────────────────────────────────┘
+                      │  POST https://fcm.googleapis.com/v1/...
+                      ▼
+┌──────────────────────────────────────────────────────────────┐
+│                  FIREBASE CLOUD MESSAGING                    │
+│   Routes message to the correct device via Google's          │
+│   infrastructure (GCM connection, reliable delivery)         │
+└─────────────────────┬────────────────────────────────────────┘
+                      │
+                      ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   ANDROID DEVICE                             │
+│                                                              │
+│  FirebaseMessagingService                                    │
+│   ┌───────────────────────────────────────────────────────┐  │
+│   │  onNewToken(token)                                    │  │
+│   │   → send token to backend API                        │  │
+│   │   → store locally (SharedPreferences)                │  │
+│   │                                                       │  │
+│   │  onMessageReceived(message: RemoteMessage)            │  │
+│   │   → parse data payload                               │  │
+│   │   → if FOREGROUND: show in-app UI or custom notif    │  │
+│   │   → if BACKGROUND: auto-shown (notification msg)     │  │
+│   │     or manually shown (data msg)                     │  │
+│   │   → send delivery receipt to backend                 │  │
+│   └───────────────────────────────────────────────────────┘  │
+│                                                              │
+│  NotificationManager                                         │
+│   • Creates NotificationChannels (TRANSACTIONAL, MARKETING)  │
+│   • Builds and shows notifications                           │
+│   • Handles grouping (setGroup + summary)                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Problem</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3 Data Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#8594;</div>3. Data Flow</div>
+    <h3>FCM Token Registration Flow</h3>
+    <pre><code>App starts for first time
+  → FirebaseMessaging.getInstance().getToken()
+  → Token generated by Firebase
+  → FirebaseMessagingService.onNewToken(token) called
+  → Store token in SharedPreferences (local)
+  → POST /notifications/register { token, deviceId, platform: "android" }
+  → Server stores: userId → [token1(phone), token2(tablet)]
+
+Token refresh (rare, but must handle):
+  → FCM rotates token if: app reinstalled, data cleared, new device
+  → onNewToken() called again with new token
+  → Same flow: POST /notifications/register with new token
+  → Server upserts token for this deviceId</code></pre>
+
+    <h3>Notification Message Delivery</h3>
+    <pre><code>Backend sends order shipped notification:
+  → FCM HTTP v1 POST with { token, notification: {title, body}, data: {...} }
+
+Case 1: App in BACKGROUND
+  → System shows notification automatically (from `notification` field)
+  → User taps notification
+  → Intent with data payload delivered to MainActivity
+  → NavController.handleDeepLink(intent)
+
+Case 2: App in FOREGROUND
+  → System does NOT show notification (if `notification` field present)
+  → onMessageReceived() called
+  → App shows in-app snackbar / banner
+  → OR: build and show notification manually from onMessageReceived()
+
+Case 3: Data-only message (no `notification` field)
+  → onMessageReceived() always called (foreground AND background)
+  → App handles display entirely — full control
+  → This is the RECOMMENDED pattern for apps wanting full control</code></pre>
+
+    <h3>Deep Link Handling</h3>
+    <pre><code><span class="cm">// In AndroidManifest.xml — declare intent filter for notification deep links</span>
+&lt;activity android:name=".MainActivity"&gt;
+    &lt;intent-filter android:autoVerify="true"&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;data android:scheme="https" android:host="app.example.com" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+
+<span class="cm">// In onMessageReceived() — build PendingIntent with deep link</span>
+<span class="kw">val</span> deepLinkUri = Uri.<span class="fn">parse</span>(message.data[<span class="str">"deep_link"</span>])
+<span class="kw">val</span> intent = <span class="cl">NavDeepLinkBuilder</span>(context)
+    .<span class="fn">setGraph</span>(R.navigation.nav_graph)
+    .<span class="fn">setDestination</span>(R.id.orderDetailFragment)
+    .<span class="fn">setArguments</span>(<span class="fn">bundleOf</span>(<span class="str">"orderId"</span> to message.data[<span class="str">"order_id"</span>]))
+    .<span class="fn">createPendingIntent</span>()
+
+<span class="cm">// TaskStackBuilder for proper back stack</span>
+<span class="kw">val</span> stackBuilder = <span class="cl">TaskStackBuilder</span>.<span class="fn">create</span>(context)
+stackBuilder.<span class="fn">addNextIntentWithParentStack</span>(Intent(context, <span class="cl">MainActivity</span>::<span class="kw">class</span>.java))
+<span class="kw">val</span> pendingIntent = stackBuilder.<span class="fn">getPendingIntent</span>(<span class="nu">0</span>, <span class="cl">PendingIntent</span>.FLAG_IMMUTABLE)</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Architecture</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
+    </div>
+  </div>
+
+  <!-- S4 Key Design Decisions -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9881;</div>4. Key Design Decisions</div>
+
+    <h3>1. Data Message vs Notification Message</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>When delivered</th><th>Who shows notification</th><th>Use when</th></tr>
+      <tr><td>Notification message</td><td>Background: always. Foreground: onMessageReceived only</td><td>System (background), App (foreground)</td><td>Simple notifications, don't need foreground handling</td></tr>
+      <tr><td>Data message</td><td>Always (foreground + background)</td><td>App always (onMessageReceived)</td><td>Full control, rich notifications, foreground handling needed</td></tr>
+      <tr><td>Both (data + notification)</td><td>System shows notification in background</td><td>System (background), App (foreground)</td><td>Fallback behavior in background, custom in foreground</td></tr>
+    </table></div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Recommendation</div>
+      Use <strong>data-only messages</strong> for full control. Always show notifications manually in <code>onMessageReceived()</code>. This ensures consistent behavior in foreground and background, and allows custom notification styling.
+    </div>
+
+    <h3>2. Notification Channels</h3>
+    <pre><code><span class="cm">// Create channels in Application.onCreate() — idempotent</span>
+<span class="kw">fun</span> <span class="fn">createNotificationChannels</span>(context: <span class="cl">Context</span>) {
+    <span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.SDK_INT < <span class="cl">Build</span>.<span class="cl">VERSION_CODES</span>.O) <span class="kw">return</span>
+    <span class="kw">val</span> manager = context.<span class="fn">getSystemService</span>(<span class="cl">NotificationManager</span>::<span class="kw">class</span>.java)
+
+    <span class="cm">// Transactional: HIGH importance — makes sound, pops up</span>
+    manager.<span class="fn">createNotificationChannel</span>(<span class="cl">NotificationChannel</span>(
+        <span class="str">"transactional"</span>, <span class="str">"Orders &amp; Payments"</span>,
+        <span class="cl">NotificationManager</span>.IMPORTANCE_HIGH
+    ).<span class="fn">apply</span> { description = <span class="str">"Order updates, payment confirmations, security alerts"</span> })
+
+    <span class="cm">// Marketing: DEFAULT importance — silent, no popup</span>
+    manager.<span class="fn">createNotificationChannel</span>(<span class="cl">NotificationChannel</span>(
+        <span class="str">"marketing"</span>, <span class="str">"Promotions"</span>,
+        <span class="cl">NotificationManager</span>.IMPORTANCE_DEFAULT
+    ).<span class="fn">apply</span> { description = <span class="str">"Deals, offers, and personalized recommendations"</span> })
+}</code></pre>
+
+    <h3>3. Notification Grouping</h3>
+    <pre><code><span class="cm">// Multiple chat messages → group under conversation summary</span>
+<span class="kw">val</span> GROUP_KEY = <span class="str">"com.example.CHAT_MESSAGES"</span>
+
+<span class="cm">// Individual notifications (each message)</span>
+<span class="kw">val</span> msgNotification = <span class="cl">NotificationCompat</span>.<span class="cl">Builder</span>(context, <span class="str">"chat"</span>)
+    .<span class="fn">setContentTitle</span>(<span class="str">"Alice"</span>)
+    .<span class="fn">setContentText</span>(messageText)
+    .<span class="fn">setGroup</span>(GROUP_KEY)
+    .<span class="fn">build</span>()
+
+<span class="cm">// Summary notification (required for grouping on Android 7+)</span>
+<span class="kw">val</span> summaryNotification = <span class="cl">NotificationCompat</span>.<span class="cl">Builder</span>(context, <span class="str">"chat"</span>)
+    .<span class="fn">setStyle</span>(<span class="cl">NotificationCompat</span>.<span class="cl">InboxStyle</span>()
+        .<span class="fn">setSummaryText</span>(<span class="str">"3 new messages"</span>))
+    .<span class="fn">setGroup</span>(GROUP_KEY)
+    .<span class="fn">setGroupSummary</span>(<span class="kw">true</span>)
+    .<span class="fn">build</span>()
+
+notificationManager.<span class="fn">notify</span>(messageId, msgNotification)
+notificationManager.<span class="fn">notify</span>(SUMMARY_ID, summaryNotification)</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Data Flow</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 Trade-offs & Failure -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Trade-offs &amp; Failure Handling</div>
+    <h3>Trade-offs</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Reason</th></tr>
+      <tr><td>Message type</td><td>Data-only messages</td><td>Notification messages</td><td>Full control in all app states</td></tr>
+      <tr><td>Token storage</td><td>SharedPreferences + server DB</td><td>Server only</td><td>Quick local check; server for targeting</td></tr>
+      <tr><td>Deep links</td><td>NavDeepLinkBuilder + TaskStackBuilder</td><td>Custom Activity flags</td><td>Correct back stack, integrates with NavComponent</td></tr>
+      <tr><td>Foreground handling</td><td>onMessageReceived → show custom banner</td><td>Let system show notification</td><td>Better UX — contextual in-app alert instead of interrupting notification</td></tr>
+    </table></div>
+
+    <h3>Failure Scenarios</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Failure</th><th>Handling</th></tr>
+      <tr><td>INVALID_REGISTRATION from FCM</td><td>Remove this token from server DB — device uninstalled or cleared app data</td></tr>
+      <tr><td>NOT_REGISTERED from FCM</td><td>Same as above — unregister token</td></tr>
+      <tr><td>Token not registered on server</td><td>On launch: always re-register token even if it seems the same; server upserts</td></tr>
+      <tr><td>User denied POST_NOTIFICATIONS (API 33+)</td><td>Server still sends FCM; onMessageReceived runs; just don't call notificationManager.notify()</td></tr>
+      <tr><td>High-priority message not delivered</td><td>FCM guarantees best-effort; for critical: also check via WebSocket or polling fallback</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Key Decisions</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
+    </div>
+  </div>
+
+  <!-- S6 Scalability -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128200;</div>6. Scalability</div>
+    <h3>Delivery Receipts</h3>
+    <pre><code><span class="cm">// When notification is delivered:</span>
+<span class="kw">override fun</span> <span class="fn">onMessageReceived</span>(message: <span class="cl">RemoteMessage</span>) {
+    <span class="kw">val</span> notifId = message.data[<span class="str">"notification_id"</span>] ?: <span class="kw">return</span>
+    <span class="cm">// Send delivery receipt to backend</span>
+    CoroutineScope(Dispatchers.IO).<span class="fn">launch</span> {
+        notificationApi.<span class="fn">sendReceipt</span>(<span class="cl">DeliveryReceipt</span>(
+            notificationId = notifId,
+            status = <span class="str">"DELIVERED"</span>,
+            timestamp = <span class="cl">System</span>.<span class="fn">currentTimeMillis</span>()
+        ))
+    }
+    <span class="fn">showNotification</span>(message)
+}
+
+<span class="cm">// When user taps notification — track "opened"</span>
+<span class="cm">// In the Activity/Composable that receives the deep link intent:</span>
+intent.extras?.<span class="fn">getString</span>(<span class="str">"notification_id"</span>)?.<span class="fn">let</span> { notifId ->
+    notificationApi.<span class="fn">sendReceipt</span>(<span class="cl">DeliveryReceipt</span>(notifId, <span class="str">"OPENED"</span>, ...))
+}</code></pre>
+
+    <h3>Multi-device Token Management</h3>
+    <pre><code><span class="cm">// Server schema: user_notification_tokens</span>
+<span class="cm">// user_id | device_id | token      | platform | created_at | last_active</span>
+<span class="cm">// Send to ALL active tokens for a user (multi-device support)</span>
+<span class="cm">// On INVALID_REGISTRATION: delete the specific token (not all tokens)</span>
+<span class="cm">// Prune tokens not seen in 60 days: DELETE WHERE last_active &lt; NOW - 60d</span></code></pre>
+
+    <h3>Topic-Based Notifications</h3>
+    <p>Use FCM Topics for broadcast notifications (e.g., "new_sale" topic sent to all users who subscribed). Subscribe in app: <code>FirebaseMessaging.getInstance().subscribeToTopic("new_sale")</code>. Use for marketing pushes — no individual token management needed.</p>
+
+    <h3>NotificationCompat Foreground Service</h3>
+    <pre><code><span class="cm">// Long-running operations (download, upload) require foreground service notification</span>
+<span class="kw">val</span> notification = <span class="cl">NotificationCompat</span>.<span class="cl">Builder</span>(this, <span class="str">"downloads"</span>)
+    .<span class="fn">setContentTitle</span>(<span class="str">"Downloading..."</span>)
+    .<span class="fn">setProgress</span>(<span class="nu">100</span>, progress, <span class="kw">false</span>)
+    .<span class="fn">setOngoing</span>(<span class="kw">true</span>)  <span class="cm">// can't be dismissed</span>
+    .<span class="fn">build</span>()
+<span class="fn">startForeground</span>(NOTIF_ID, notification)</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Trade-offs</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"The system uses FCM for delivery. The app registers its FCM token on launch and whenever onNewToken() fires — token sent to the backend and stored per userId+deviceId. I use data-only messages so onMessageReceived() always runs, giving full control in foreground and background. Notification channels separate transactional (IMPORTANCE_HIGH) from marketing (IMPORTANCE_DEFAULT). Deep links use NavDeepLinkBuilder + TaskStackBuilder for correct back stack. Groups bundle related notifications with a summary notification."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"FCM architecture: app → Firebase → FCM → device. Token lifecycle: onNewToken() sends the token to our backend. Always re-register on every app start (server upserts) to handle reinstalls. For message types: data-only messages are preferred over notification messages — onMessageReceived() fires regardless of app state, giving us full rendering control. For importance: transactional notifications (orders, security alerts) use NotificationChannel with IMPORTANCE_HIGH — they pop over other apps and make sound. Marketing uses IMPORTANCE_DEFAULT — delivered silently to the notification shade. For deep links: NavDeepLinkBuilder creates an intent that navigates to the right screen with proper arguments, and TaskStackBuilder ensures back button works correctly. For notification grouping: set the same GROUP_KEY on individual notifications and add a summary notification with setGroupSummary(true). To handle notifications in foreground: detect in onMessageReceived() whether the chat screen is currently visible — if yes, show an in-app banner instead of a system notification. Delivery receipts: POST /notifications/{id}/receipt when onMessageReceived fires (DELIVERED) and again when the user taps (OPENED). Handle invalid tokens: FCM returns INVALID_REGISTRATION for uninstalled devices — server must delete that token."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>FCM flow: app → Firebase → FCM → device; token registered per userId+deviceId on server</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Data-only messages → onMessageReceived always fires; full app control in all states</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Notification channels: IMPORTANCE_HIGH (transactional) vs IMPORTANCE_DEFAULT (marketing)</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Deep links: NavDeepLinkBuilder + TaskStackBuilder for correct back stack</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Handle INVALID_REGISTRATION → delete stale token from server to prevent sending to uninstalled apps</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Know that notification messages in the background are shown by the system — your onMessageReceived() is NOT called if the app is in the background and the payload has a <code>notification</code> field. The data in the <code>data</code> field is put in the activity's intent when the user taps. This is the #1 source of confusion in FCM integration: developers assume onMessageReceived always fires, but it doesn't for notification messages in the background. Use data-only to avoid this asymmetry.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Scalability</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>FCM Flow</h4>
+        <pre><code>App → Firebase → FCM → Device
+onNewToken() → POST /register
+Token per userId + deviceId
+Re-register on every launch</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Message Types</h4>
+        <pre><code>notification msg → system shows BG
+                   app shows FG
+data msg → onMessageReceived ALWAYS
+→ Prefer data-only for full control</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Channels</h4>
+        <pre><code>IMPORTANCE_HIGH  → transactional
+  heads-up, sound, vibrate
+IMPORTANCE_DEFAULT → marketing
+  silent, shade only</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Deep Links</h4>
+        <pre><code>NavDeepLinkBuilder → destination
+TaskStackBuilder → back stack
+PendingIntent.FLAG_IMMUTABLE
+Target: specific Fragment + args</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What is an FCM token and when does it change?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">An FCM token is a unique identifier for an app installation on a specific device. FCM uses it to route messages. The token changes when: app is uninstalled and reinstalled, user clears app data, app is restored to a new device. When it changes, onNewToken(newToken) is called — you must send the new token to your server. Always call FirebaseMessaging.getInstance().getToken() on app launch and register it (server upserts) to ensure the server has the current token.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What is the difference between notification messages and data messages in FCM?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Notification messages: have a "notification" JSON field (title, body). In background: system shows the notification automatically. onMessageReceived is NOT called when in background. In foreground: onMessageReceived is called, system does NOT show notification. Data messages: only have a "data" field. onMessageReceived is ALWAYS called regardless of app state. App handles all display logic. Recommendation: use data-only messages for consistent behavior — always goes through onMessageReceived in all app states.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What are notification channels and why were they introduced?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">NotificationChannels (API 26+) let users control notification behavior per category instead of per app. Apps define channels with importance levels: IMPORTANCE_HIGH (heads-up, sound), DEFAULT (sound only), LOW (silent), MIN (no visual). Users can disable specific channels without disabling all notifications. Required since API 26 — notifications without a valid channel are silently dropped. Create channels in Application.onCreate() — creation is idempotent (safe to call multiple times).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. How do you handle a notification tap that should open a specific screen?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use NavDeepLinkBuilder to create a PendingIntent pointing to a specific NavGraph destination with arguments. Wrap with TaskStackBuilder to ensure the back stack is correct (Back button returns to the parent screen, not exits the app). Attach this PendingIntent to the notification's setContentIntent(). When the user taps: PendingIntent fires, MainActivity opens (or resumes), NavController navigates to the destination. Handle the case where MainActivity was already running: check getIntent() in onNewIntent() for the deep link data.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. How do you handle a notification when the app is in the foreground?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">With data-only messages, onMessageReceived() fires in foreground. Decide based on context: if the user is already on the chat screen where the notification applies, show a subtle in-app banner (Snackbar, custom composable toast) rather than interrupting with a system notification. If they're on a different screen, show a normal notification or an in-app heads-up. Implement by: checking the current NavDestination ID against the notification's target screen. If match → show in-app UI. If not → show system notification.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. How do you implement notification grouping?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Set .setGroup(GROUP_KEY) on each notification with a consistent group key per category (e.g., per chat conversation). Create a separate summary notification with .setGroup(GROUP_KEY) and .setGroupSummary(true). Style the summary with NotificationCompat.InboxStyle(). Android bundles all notifications with the same GROUP_KEY under the summary. Required: show the summary notification alongside individual notifications. On Android 7+, system auto-groups if there are 4+ notifications with the same group key, but explicitly setting the summary ensures control over the summary text.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you handle stale/invalid FCM tokens?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">FCM HTTP API returns error codes for invalid tokens: INVALID_REGISTRATION (token format invalid), NOT_REGISTERED (app uninstalled or token revoked). Server must: detect these error codes in FCM API responses, immediately delete the corresponding token from the database, not retry sending to that token. If sending to multiple tokens for a user (multi-device), remove only the failed token — not all tokens. Also: prune tokens not active in 60+ days as a maintenance policy. Client: always re-register on launch to replace stale tokens.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. How do you implement notification delivery receipts?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Two events to track: DELIVERED (device received it) and OPENED (user tapped). DELIVERED: POST receipt in onMessageReceived() with notification_id from the data payload. Fire and forget — use a background coroutine. OPENED: attach the notification_id to the PendingIntent's data. When MainActivity receives the intent (from notification tap), extract notification_id and POST OPENED receipt. Be careful: if the app is killed and relaunched from the notification, handle this in onCreate() too. Store receipts locally if offline (Room) and flush when connected.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. How does POST_NOTIFICATIONS permission on Android 13+ affect your system?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Android 13 (API 33) requires POST_NOTIFICATIONS runtime permission. On API 33+: must declare &lt;uses-permission android:name="android.permission.POST_NOTIFICATIONS"/&gt; and request at runtime. Without permission: NotificationManager.notify() silently does nothing. FCM still delivers the data message (onMessageReceived fires) — the permission only affects showing system notifications. Approach: request permission on first launch or when the user first accesses a feature that needs notifications. Show rationale explaining value. If denied: suppress all notification display, but FCM data messages still arrive for in-app banners.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. Design a notification system that distinguishes transactional from marketing pushes.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Server: tag every notification with a type field in the data payload (type: "ORDER_SHIPPED" vs "PROMO_DEAL"). Client: in onMessageReceived(), route to the correct channel based on type. Transactional → channel "transactional" (IMPORTANCE_HIGH: heads-up notification, sound, vibration). Marketing → channel "marketing" (IMPORTANCE_DEFAULT: silent). Users can disable the "marketing" channel in Settings without losing order updates. Backend: respect opt-out preferences — don't send marketing to users who unsubscribed (check marketing_consent before sending). Include campaign_id in data payload for analytics tracking.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

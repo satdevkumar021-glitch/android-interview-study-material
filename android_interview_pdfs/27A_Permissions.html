@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>27A — Permissions | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">27A · Permissions</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Normal vs Dangerous</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Runtime Permissions Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Location &amp; Notifications</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Storage Permissions</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Android Version Evolution</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>27A</span> — Permissions</h1>
+    <p class="hero-desc">Normal vs dangerous permissions, runtime permissions flow with ActivityResultContracts, one-time permissions, location levels, notification permissions (API 33+), storage evolution, and Android permission behavior changes across versions.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 27A</span>
+      <span class="badge badge-tier3">&#9733; Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Permission Types</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>Grant mechanism</th><th>Examples</th></tr>
+      <tr><td>Normal</td><td>Auto-granted at install time</td><td>INTERNET, ACCESS_NETWORK_STATE, VIBRATE, RECEIVE_BOOT_COMPLETED</td></tr>
+      <tr><td>Dangerous</td><td>Requires runtime request from user</td><td>CAMERA, RECORD_AUDIO, READ_CONTACTS, ACCESS_FINE_LOCATION</td></tr>
+      <tr><td>Signature</td><td>Auto-granted if same signing cert</td><td>Used for inter-app communication between your own apps</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Key Rule</div>
+      Always declare permissions in <code>AndroidManifest.xml</code> regardless of type. Normal permissions are auto-granted — you don't need to request them at runtime. Dangerous permissions must be requested at runtime on API 23+ (Android 6.0). Always check before use with <code>ContextCompat.checkSelfPermission()</code>.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Normal vs Dangerous →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128274;</div>2. Normal vs Dangerous</div>
+    <h3>Normal Permissions (auto-granted)</h3>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml — declare, no runtime request needed --&gt;</span>
+&lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+&lt;uses-permission android:name="android.permission.VIBRATE" /&gt;
+&lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;</code></pre>
+
+    <h3>Dangerous Permissions — must declare AND request</h3>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;uses-permission android:name="android.permission.CAMERA" /&gt;
+&lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+&lt;uses-permission android:name="android.permission.READ_CONTACTS" /&gt;
+&lt;uses-permission android:name="android.permission.POST_NOTIFICATIONS" /&gt; <span class="cm">&lt;!-- API 33+ --&gt;</span></code></pre>
+
+    <h3>Permission Groups</h3>
+    <p>Dangerous permissions belong to groups. Granting one permission in a group may auto-grant others in the same group. However, <strong>always request each individual permission</strong> — don't rely on group behavior.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Group</th><th>Permissions</th></tr>
+      <tr><td>LOCATION</td><td>ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, ACCESS_BACKGROUND_LOCATION</td></tr>
+      <tr><td>CAMERA</td><td>CAMERA</td></tr>
+      <tr><td>MICROPHONE</td><td>RECORD_AUDIO</td></tr>
+      <tr><td>CONTACTS</td><td>READ_CONTACTS, WRITE_CONTACTS, GET_ACCOUNTS</td></tr>
+      <tr><td>NOTIFICATIONS</td><td>POST_NOTIFICATIONS (API 33+)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Runtime Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3 Runtime Permissions Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9881;</div>3. Runtime Permissions Flow</div>
+    <h3>Complete Permission Request Flow</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">CameraFragment</span> : <span class="cl">Fragment</span>() {
+
+    <span class="cm">// Register launcher BEFORE fragment/activity is created</span>
+    <span class="kw">private val</span> requestPermissionLauncher = <span class="fn">registerForActivityResult</span>(
+        <span class="cl">ActivityResultContracts</span>.<span class="cl">RequestPermission</span>()
+    ) { isGranted ->
+        <span class="kw">if</span> (isGranted) {
+            <span class="fn">openCamera</span>()
+        } <span class="kw">else</span> {
+            <span class="fn">showPermissionDeniedMessage</span>()
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">checkAndRequestCamera</span>() {
+        <span class="kw">when</span> {
+            <span class="cm">// 1. Already granted — proceed</span>
+            <span class="cl">ContextCompat</span>.<span class="fn">checkSelfPermission</span>(
+                requireContext(), <span class="cl">Manifest</span>.permission.CAMERA
+            ) == <span class="cl">PackageManager</span>.PERMISSION_GRANTED -> <span class="fn">openCamera</span>()
+
+            <span class="cm">// 2. Show rationale — user previously denied</span>
+            <span class="fn">shouldShowRequestPermissionRationale</span>(<span class="cl">Manifest</span>.permission.CAMERA) -> {
+                <span class="fn">showRationaleDialog</span> {
+                    requestPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.CAMERA)
+                }
+            }
+
+            <span class="cm">// 3. Request permission — first time or after "don't ask again"</span>
+            <span class="kw">else</span> -> requestPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.CAMERA)
+        }
+    }
+}</code></pre>
+
+    <h3>shouldShowRequestPermissionRationale()</h3>
+    <div class="table-wrap"><table>
+      <tr><th>State</th><th>Returns</th><th>Meaning</th></tr>
+      <tr><td>First time asking</td><td>false</td><td>Show dialog directly, no rationale needed</td></tr>
+      <tr><td>User denied once</td><td>true</td><td>Show rationale explaining why permission is needed</td></tr>
+      <tr><td>User checked "Don't ask again"</td><td>false</td><td>Direct to Settings — can't request again programmatically</td></tr>
+      <tr><td>Permission granted</td><td>false</td><td>Already have permission</td></tr>
+    </table></div>
+
+    <h3>Multiple Permissions</h3>
+    <pre><code><span class="kw">private val</span> multiplePermissionsLauncher = <span class="fn">registerForActivityResult</span>(
+    <span class="cl">ActivityResultContracts</span>.<span class="cl">RequestMultiplePermissions</span>()
+) { permissions ->
+    <span class="kw">val</span> cameraGranted = permissions[<span class="cl">Manifest</span>.permission.CAMERA] == <span class="kw">true</span>
+    <span class="kw">val</span> audioGranted = permissions[<span class="cl">Manifest</span>.permission.RECORD_AUDIO] == <span class="kw">true</span>
+    <span class="kw">if</span> (cameraGranted && audioGranted) <span class="fn">startVideoRecording</span>()
+}
+multiplePermissionsLauncher.<span class="fn">launch</span>(<span class="fn">arrayOf</span>(
+    <span class="cl">Manifest</span>.permission.CAMERA,
+    <span class="cl">Manifest</span>.permission.RECORD_AUDIO
+))</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Normal vs Dangerous</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Location &amp; Notifications →</button>
+    </div>
+  </div>
+
+  <!-- S4 Location & Notifications -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128205;</div>4. Location &amp; Notification Permissions</div>
+    <h3>Location Permission Levels</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Permission</th><th>Accuracy</th><th>API</th><th>Notes</th></tr>
+      <tr><td>ACCESS_COARSE_LOCATION</td><td>~1 km (cell/WiFi)</td><td>1+</td><td>Low precision, minimal privacy impact</td></tr>
+      <tr><td>ACCESS_FINE_LOCATION</td><td>~10 m (GPS)</td><td>1+</td><td>High precision, runtime request</td></tr>
+      <tr><td>ACCESS_BACKGROUND_LOCATION</td><td>Either</td><td>29+</td><td><strong>Separate request</strong> — must request foreground first, then background. Play Store requires justification.</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// Android 10+ (API 29+): background location is a SEPARATE permission</span>
+<span class="cm">// Step 1: request foreground location first</span>
+requestPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.ACCESS_FINE_LOCATION)
+
+<span class="cm">// Step 2: ONLY after foreground is granted, request background</span>
+<span class="cm">// This shows a different system dialog on Android 11+</span>
+requestPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.ACCESS_BACKGROUND_LOCATION)
+<span class="cm">// Android 11: system redirects user to Settings for background permission</span></code></pre>
+
+    <h3>Notification Permission (POST_NOTIFICATIONS — API 33+)</h3>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;uses-permission android:name="android.permission.POST_NOTIFICATIONS" /&gt;
+
+<span class="cm">// Runtime request on Android 13+ (API 33+)</span>
+<span class="cm">// On Android 12 and below: notifications are auto-granted</span>
+<span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.SDK_INT >= <span class="cl">Build</span>.<span class="cl">VERSION_CODES</span>.TIRAMISU) {
+    requestPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS)
+}
+
+<span class="cm">// One-time permissions (Android 11+)</span>
+<span class="cm">// User can grant camera/mic/location "only this time"</span>
+<span class="cm">// App loses permission when it goes to background</span>
+<span class="cm">// No code change needed — system handles it; just check permission before use</span></code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">One-Time Permissions (API 30+)</div>
+      Android 11 introduced "Only this time" for CAMERA, RECORD_AUDIO, and location. The permission is automatically revoked when the app goes to background. You don't need to handle this specially — just always call <code>checkSelfPermission()</code> before using sensitive features, even if you thought you had permission.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Runtime Flow</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Storage →</button>
+    </div>
+  </div>
+
+  <!-- S5 Storage -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128193;</div>5. Storage Permissions</div>
+    <h3>Storage Evolution</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>When to use</th><th>API</th></tr>
+      <tr><td>MediaStore API</td><td>Images, videos, audio files in shared media collections</td><td>All, best on 29+</td></tr>
+      <tr><td>SAF (Storage Access Framework)</td><td>User picks any file type via system file picker</td><td>19+</td></tr>
+      <tr><td>MANAGE_EXTERNAL_STORAGE</td><td>File manager apps — broad access; Play Store review required</td><td>30+</td></tr>
+      <tr><td>READ_EXTERNAL_STORAGE</td><td>Legacy — deprecated on API 33+</td><td>Legacy</td></tr>
+      <tr><td>READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO</td><td>Granular media access on API 33+</td><td>33+</td></tr>
+    </table></div>
+
+    <h3>Modern Storage Approach</h3>
+    <pre><code><span class="cm">// Modern approach: scoped storage (Android 10+)</span>
+<span class="cm">// Apps can read/write their own files WITHOUT permissions</span>
+<span class="cm">// To access OTHER apps' media: request specific media permission</span>
+
+<span class="cm">// Android 13+ granular media permissions</span>
+<span class="kw">val</span> mediaPermissions = <span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.SDK_INT >= 33) {
+    <span class="fn">arrayOf</span>(
+        <span class="cl">Manifest</span>.permission.READ_MEDIA_IMAGES,
+        <span class="cl">Manifest</span>.permission.READ_MEDIA_VIDEO
+    )
+} <span class="kw">else</span> {
+    <span class="fn">arrayOf</span>(<span class="cl">Manifest</span>.permission.READ_EXTERNAL_STORAGE)
+}
+multiplePermissionsLauncher.<span class="fn">launch</span>(mediaPermissions)
+
+<span class="cm">// SAF — user picks file, you get a Uri (no storage permission needed)</span>
+<span class="kw">val</span> openDocument = <span class="fn">registerForActivityResult</span>(<span class="cl">ActivityResultContracts</span>.<span class="cl">OpenDocument</span>()) { uri ->
+    uri?.<span class="fn">let</span> { <span class="cm">/* process the file */</span> }
+}
+openDocument.<span class="fn">launch</span>(<span class="fn">arrayOf</span>(<span class="str">"application/pdf"</span>, <span class="str">"image/*"</span>))</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Location</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Version Evolution →</button>
+    </div>
+  </div>
+
+  <!-- S6 Version Evolution -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128203;</div>6. Android Version Evolution</div>
+    <div class="table-wrap"><table>
+      <tr><th>Android Version</th><th>API</th><th>Permission Changes</th></tr>
+      <tr><td>Android 6.0 Marshmallow</td><td>23</td><td>Runtime permissions introduced — dangerous perms must be requested at runtime</td></tr>
+      <tr><td>Android 10 Q</td><td>29</td><td>Scoped storage; background location separate permission; ACCESS_BACKGROUND_LOCATION added</td></tr>
+      <tr><td>Android 11 R</td><td>30</td><td>One-time permissions (camera, mic, location); background location: system redirects to Settings; MANAGE_EXTERNAL_STORAGE added; auto-reset permissions for unused apps</td></tr>
+      <tr><td>Android 12 S</td><td>31/32</td><td>Approximate vs precise location: user can grant coarse instead of fine; Bluetooth permissions split (BLUETOOTH_SCAN, BLUETOOTH_CONNECT)</td></tr>
+      <tr><td>Android 13 T</td><td>33</td><td>POST_NOTIFICATIONS required at runtime; granular media permissions (READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO) replace READ_EXTERNAL_STORAGE; nearby WiFi permission</td></tr>
+      <tr><td>Android 14 U</td><td>34</td><td>Photo picker: partial media access — user grants specific photos not all; READ_MEDIA_VISUAL_USER_SELECTED for partial access</td></tr>
+    </table></div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Android permissions have evolved toward <strong>granularity and transparency</strong>. Each version restricts more and gives users more control. Always check the target API level and use <code>Build.VERSION.SDK_INT</code> to handle different permission models. Compile against the latest targetSdk so your app gets the new privacy features.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Storage</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Normal permissions are auto-granted at install. Dangerous permissions require runtime requests via ActivityResultContracts.RequestPermission. The flow is: check if granted → show rationale if previously denied (shouldShowRequestPermissionRationale) → request → handle result. Always check before use, especially with one-time permissions on Android 11+."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"Permissions split into normal (auto-granted, like INTERNET) and dangerous (require runtime request, like CAMERA). The modern way is ActivityResultContracts — register the launcher before the fragment starts, then when needed: check if already granted, check shouldShowRequestPermissionRationale to decide whether to show rationale UI, then launch the request. For location: coarse and fine are one-step; background location is a SEPARATE request on API 29+ and must happen after foreground is granted. Android 11 added one-time permissions — apps lose access when backgrounded. API 33 added POST_NOTIFICATIONS as a required runtime permission, so notification apps must request it on Android 13+. For storage: scoped storage on API 29+, granular media permissions on API 33+, and SAF for user-picked files with no permission needed."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>ActivityResultContracts.RequestPermission — modern API; must register before fragment/activity created</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>shouldShowRequestPermissionRationale() — shows rationale after first denial, returns false after "don't ask again"</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Background location (API 29+) — SEPARATE request, must have foreground first</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>POST_NOTIFICATIONS required on API 33+ — needs runtime request</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>One-time permissions (API 30+) — revoked when app goes background; always check before use</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Understand that "don't ask again" can never be detected directly (shouldShowRationale returns false for both first-time and permanently denied). The pattern to detect "permanently denied": track whether you've asked before using SharedPreferences. If you asked before AND shouldShowRationale is false AND permission is denied → permanently denied → direct to Settings via Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Version Evolution</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Permission Flow</h4>
+        <pre><code>1. checkSelfPermission()
+2. shouldShowRationale() → show UI
+3. launch(permission)
+4. Handle grant/deny result</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Location Levels</h4>
+        <pre><code>COARSE  → ~1km, cell/WiFi
+FINE    → ~10m, GPS
+BACKGROUND → API 29+, separate
+           request after foreground</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>API Version Milestones</h4>
+        <pre><code>API 23: Runtime perms
+API 29: Scoped storage + bg location
+API 30: One-time perms
+API 33: POST_NOTIFICATIONS + granular media
+API 34: Partial photo access</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Storage Modern</h4>
+        <pre><code>MediaStore  → media collections
+SAF         → user picks any file
+API 33+     → READ_MEDIA_IMAGES
+              READ_MEDIA_VIDEO
+              READ_MEDIA_AUDIO</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What is the difference between normal and dangerous permissions?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Normal permissions (like INTERNET, VIBRATE) are automatically granted at install time — no user interaction needed. Dangerous permissions (like CAMERA, LOCATION, READ_CONTACTS) can access sensitive user data or device features, so they must be declared in the manifest AND explicitly requested at runtime on Android 6+ (API 23). The user must grant them; they can be revoked at any time.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What does shouldShowRequestPermissionRationale() return in each state?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">First time asking: false (no rationale needed, show dialog). User denied once: true (show rationale UI explaining why you need it). User checked "Don't ask again": false (same as first time — can't distinguish programmatically). Permission already granted: false. The key gotcha: false doesn't tell you whether it's first-time or permanently denied — you must track "has the user been asked before" separately.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What changed about notifications in Android 13?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Android 13 (API 33) made POST_NOTIFICATIONS a dangerous permission requiring a runtime request. On Android 12 and below, apps could post notifications without permission. Apps targeting API 33+ must declare the permission in the manifest and request it at runtime. The user can deny it, in which case all notifications from the app are blocked. Apps upgraded from lower target SDK get a one-time automatic grant prompt.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. How do you request background location on Android 10+?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Two separate requests: Step 1: request ACCESS_FINE_LOCATION (or COARSE). Wait for it to be granted. Step 2: only after foreground is granted, request ACCESS_BACKGROUND_LOCATION. On Android 11+, the system dialog for background location has no "Allow all the time" option — it redirects the user to Settings where they manually select "Allow all the time." Request both permissions in separate user actions, not simultaneously. Play Store requires a declaration explaining why you need background location.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. What are one-time permissions and how do they affect your app?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Introduced in Android 11. Users can grant CAMERA, RECORD_AUDIO, and location permissions "Only this time." The permission is automatically revoked when the app goes to background or the user switches away. No code change required — your app doesn't know it's a one-time grant. The implication: always call checkSelfPermission() before using these features, even mid-session. If the user put your app in background while recording, you might lose the permission when returning.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. What is scoped storage and which permissions does it affect?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Scoped storage (Android 10+) gives each app its own private storage area it can read/write without permissions, and limits access to shared storage. Apps can access their own app-specific directory (getFilesDir()) freely. For shared media: use MediaStore API. For arbitrary files: use SAF (user picks via system file picker, no permission needed). MANAGE_EXTERNAL_STORAGE grants broad access but requires Play Store justification. On API 33+, READ_EXTERNAL_STORAGE is split into READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you handle the "permanently denied" (Don't ask again) case?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">You can't directly detect "don't ask again" since shouldShowRationale returns false for both first-time and permanently denied. Pattern: store a boolean (e.g., "hasAskedForCamera") in SharedPreferences. If hasAskedForCamera is true AND shouldShowRationale returns false AND permission is DENIED → permanently denied. Show a dialog explaining the situation and open Settings: Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName)).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. Walk through the full permission request flow for a camera feature in a Compose app.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">In Compose, use rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()). On button tap: 1) Check ContextCompat.checkSelfPermission — if GRANTED, open camera. 2) Check shouldShowRequestPermissionRationale — if true, show rationale dialog with "OK" button that triggers launcher.launch(CAMERA). 3) Otherwise, launch directly. In result callback: if granted → open camera; if denied → check if permanently denied (using stored pref), if so show Settings dialog. Handle lifecycle correctly — the launcher must be registered at composition time, not in a click handler.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. What is the Storage Access Framework (SAF) and when do you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">SAF lets users pick files from any location (local storage, Google Drive, Dropbox) via the system file picker. The app receives a content URI — no storage permissions needed. Use SAF when users need to select arbitrary file types (PDFs, documents, custom formats). Use ActivityResultContracts.OpenDocument for single file, OpenMultipleDocuments for multiple. The returned URI has persisted permissions (take persistable URI permission for across-session access). Contrast with MediaStore (media collections only) and direct file access (app-private directory only).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. How does Android 12's approximate location affect your app?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Android 12 (API 31) lets users grant only approximate location (COARSE) even when your app requests precise (FINE). The permission dialog shows "Precise" vs "Approximate" options. Your app must handle receiving COARSE when it requested FINE. Design: if the feature genuinely requires precise GPS, check that ACCESS_FINE_LOCATION is granted — don't just check that any location permission is granted. If the user chose approximate, show UI explaining why precise is needed for this specific feature, or degrade gracefully to coarse-based functionality.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

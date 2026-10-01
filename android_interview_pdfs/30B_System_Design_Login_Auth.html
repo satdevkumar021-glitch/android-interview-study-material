@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30B — System Design: Login / Auth | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">30B · Login / Auth</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem Statement</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture &amp; Components</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Design Decisions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs &amp; Failure</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep · Senior System Design</div>
+    <h1><span>30B</span> — Login / Authentication System</h1>
+    <p class="hero-desc">Design a complete authentication system: email/password login, OAuth, biometric, JWT token management, silent refresh via OkHttp interceptor, secure storage, and session lifecycle.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 30B</span>
+      <span class="badge badge-senior">&#9733; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 Problem Statement -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
+    <h3>Requirements</h3>
+    <h4>Functional</h4>
+    <ul>
+      <li>Email/password login and registration</li>
+      <li>OAuth 2.0 / social login (Google, Apple)</li>
+      <li>Biometric authentication (fingerprint, face)</li>
+      <li>Remember me / persistent sessions</li>
+      <li>Secure token storage and automatic token refresh</li>
+      <li>Logout — clear all session data, navigate to login</li>
+    </ul>
+    <h4>Non-Functional</h4>
+    <ul>
+      <li>Tokens never stored in plaintext or SharedPreferences</li>
+      <li>Silent token refresh — user never sees "session expired" unexpectedly</li>
+      <li>Biometric enrollment tied to security key — re-enrollment required if biometrics change</li>
+      <li>Thread-safe token refresh (concurrent requests during refresh must wait, not each refresh independently)</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2 Architecture -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#127963;</div>2. Architecture &amp; Components</div>
+    <h3>ASCII Architecture Diagram</h3>
+    <pre><code>┌──────────────────────────────────────────────────────────┐
+│                       UI LAYER                           │
+│  LoginScreen   RegisterScreen   BiometricPrompt          │
+│  (Compose)     (Compose)        (BiometricManager API)   │
+└───────────────────────┬──────────────────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────────────────┐
+│                   VIEWMODEL LAYER                        │
+│  AuthViewModel                                           │
+│   • uiState: StateFlow&lt;AuthUiState&gt;                      │
+│   • onLoginClicked(email, password)                      │
+│   • onBiometricSuccess(cryptoObject)                     │
+│   • onLogout()                                           │
+└───────────────────────┬──────────────────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────────────────┐
+│                   DOMAIN LAYER                           │
+│  LoginUseCase   RegisterUseCase   BiometricUseCase       │
+│  LogoutUseCase  GetSessionUseCase                        │
+└───────────────────────┬──────────────────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────────────────┐
+│                   DATA LAYER                             │
+│  AuthRepository                                          │
+│   • login(email, pwd) → Result&lt;AuthSession&gt;              │
+│   • refreshToken(refreshToken) → Result&lt;AuthSession&gt;     │
+│   • logout()                                             │
+│       │                        │                         │
+│       ▼                        ▼                         │
+│  Retrofit (AuthApi)     TokenStorage                     │
+│  /auth/login            EncryptedSharedPreferences       │
+│  /auth/refresh          or Android Keystore              │
+│  /auth/logout           stores: access_token,            │
+│                                 refresh_token,           │
+│                                 expiry                   │
+└──────────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌──────────────────────────────────────────────────────────┐
+│              OkHttp Authenticator / Interceptor          │
+│  TokenRefreshInterceptor                                 │
+│   • Attaches Bearer token to every request               │
+│   • On 401: refresh token → retry original request       │
+│   • Thread-safe: Mutex ensures only 1 concurrent refresh │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Problem</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3 Data Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#8594;</div>3. Data Flow</div>
+    <h3>Login Flow</h3>
+    <pre><code>User enters email + password → taps Login
+  → AuthViewModel.onLoginClicked()
+  → LoginUseCase.invoke(email, password)
+  → AuthRepository.login(email, password)
+  → Retrofit POST /auth/login
+  → Response: { access_token, refresh_token, expires_in }
+  → TokenStorage.save(accessToken, refreshToken, expiry)
+  → AuthRepository emits Success(AuthSession)
+  → AuthViewModel updates uiState = LoggedIn
+  → NavController navigates to HomeScreen
+    (FLAG_ACTIVITY_CLEAR_TASK clears login back stack)</code></pre>
+
+    <h3>Automatic Token Refresh Flow</h3>
+    <pre><code>App makes any API request
+  → TokenRefreshInterceptor adds Authorization: Bearer {accessToken}
+  → Server returns 401 Unauthorized (token expired)
+  → OkHttp Authenticator is called
+  → Checks refreshToken exists
+  → Calls AuthApi.refreshToken(refreshToken) synchronously
+  → (Thread-safe: Mutex prevents concurrent refreshes)
+  → On success: save new accessToken + refreshToken
+  → Retry original request with new accessToken
+  → On refresh failure (401 on refresh):
+      → TokenStorage.clear()
+      → Emit session expired event
+      → Navigate to LoginScreen</code></pre>
+
+    <h3>Biometric Auth Flow</h3>
+    <pre><code>Biometric Login button tapped
+  → BiometricUseCase creates CryptoObject
+      (Cipher initialized with Keystore key)
+  → BiometricPrompt.authenticate(cryptoObject)
+  → User authenticates with fingerprint/face
+  → OnSuccess callback: CryptoObject has authenticated Cipher
+  → Decrypt stored refresh_token using Cipher
+  → AuthRepository.refreshToken(decryptedRefreshToken)
+  → Navigate to HomeScreen</code></pre>
+
+    <h3>Logout Flow</h3>
+    <pre><code>Logout tapped / session expired
+  → LogoutUseCase.invoke()
+  → AuthRepository.logout()
+      → API POST /auth/logout (invalidate server-side)
+      → TokenStorage.clear()
+  → AuthViewModel emits LoggedOut state
+  → NavController navigate to LoginScreen with:
+      Intent.FLAG_ACTIVITY_CLEAR_TASK or
+      NavOptions popUpTo(root) inclusive=true</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Architecture</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
+    </div>
+  </div>
+
+  <!-- S4 Key Design Decisions -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9881;</div>4. Key Design Decisions</div>
+
+    <h3>1. Token Storage — EncryptedSharedPreferences vs Keystore</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Option</th><th>Security</th><th>Use When</th></tr>
+      <tr><td>SharedPreferences (plain)</td><td>❌ Plaintext on rooted device</td><td>Never for tokens</td></tr>
+      <tr><td>EncryptedSharedPreferences</td><td>✅ AES-256 encrypted, Keystore-backed key</td><td>Access + refresh tokens — standard choice</td></tr>
+      <tr><td>Android Keystore directly</td><td>✅✅ Hardware-backed, key never leaves Keystore</td><td>Keys for biometric binding — highest security</td></tr>
+      <tr><td>In-memory only</td><td>✅ Wiped on process kill</td><td>Access token only (short-lived)</td></tr>
+    </table></div>
+
+    <h3>2. JWT Strategy</h3>
+    <pre><code><span class="cm">// Access token: short-lived (15 min)</span>
+<span class="cm">// • Stored in memory (most secure) OR EncryptedSharedPreferences</span>
+<span class="cm">// • Sent in every API request as Bearer token</span>
+<span class="cm">// • If it expires: use refresh token to get a new one silently</span>
+
+<span class="cm">// Refresh token: long-lived (30 days)</span>
+<span class="cm">// • Stored in EncryptedSharedPreferences only</span>
+<span class="cm">// • Used only to get a new access token</span>
+<span class="cm">// • Rotated on each refresh (server issues new refresh token)</span>
+<span class="cm">// • On refresh failure: session expired → force login</span></code></pre>
+
+    <h3>3. Thread-Safe Token Refresh</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">TokenRefreshAuthenticator</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> authRepository: <span class="cl">AuthRepository</span>
+) : <span class="cl">Authenticator</span> {
+
+    <span class="kw">private val</span> refreshMutex = <span class="cl">Mutex</span>()
+
+    <span class="kw">override fun</span> <span class="fn">authenticate</span>(route: <span class="cl">Route</span>?, response: <span class="cl">Response</span>): <span class="cl">Request</span>? {
+        <span class="kw">if</span> (response.<span class="fn">code</span> != <span class="nu">401</span>) <span class="kw">return null</span>
+        <span class="cm">// runBlocking here because OkHttp Authenticator is synchronous</span>
+        <span class="kw">return</span> <span class="fn">runBlocking</span> {
+            refreshMutex.<span class="fn">withLock</span> {
+                <span class="cm">// Check if another thread already refreshed while we waited</span>
+                <span class="kw">val</span> currentToken = authRepository.<span class="fn">getAccessToken</span>()
+                <span class="kw">val</span> requestToken = response.request.header(<span class="str">"Authorization"</span>)
+                    ?.<span class="fn">removePrefix</span>(<span class="str">"Bearer "</span>)
+                <span class="kw">if</span> (currentToken != requestToken) {
+                    <span class="cm">// Token already refreshed by another request</span>
+                    <span class="kw">return</span>@runBlocking response.request.<span class="fn">newBuilder</span>()
+                        .<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $currentToken"</span>)
+                        .<span class="fn">build</span>()
+                }
+                <span class="kw">val</span> result = authRepository.<span class="fn">refreshToken</span>()
+                result.<span class="fn">getOrNull</span>()?.let { session ->
+                    response.request.<span class="fn">newBuilder</span>()
+                        .<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer ${session.accessToken}"</span>)
+                        .<span class="fn">build</span>()
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>4. Biometric Binding</h3>
+    <pre><code><span class="cm">// Keystore key tied to biometric enrollment</span>
+<span class="cm">// Key is invalidated if biometrics change (new fingerprint added)</span>
+<span class="kw">val</span> keyGenSpec = <span class="cl">KeyGenParameterSpec</span>.<span class="cl">Builder</span>(
+    <span class="str">"biometric_key"</span>,
+    <span class="cl">KeyProperties</span>.PURPOSE_ENCRYPT or <span class="cl">KeyProperties</span>.PURPOSE_DECRYPT
+).<span class="fn">apply</span> {
+    <span class="fn">setBlockModes</span>(<span class="cl">KeyProperties</span>.BLOCK_MODE_CBC)
+    <span class="fn">setEncryptionPaddings</span>(<span class="cl">KeyProperties</span>.ENCRYPTION_PADDING_PKCS7)
+    <span class="fn">setUserAuthenticationRequired</span>(<span class="kw">true</span>)
+    <span class="fn">setInvalidatedByBiometricEnrollment</span>(<span class="kw">true</span>)  <span class="cm">// KEY SECURITY FEATURE</span>
+}.<span class="fn">build</span>()
+<span class="cl">KeyGenerator</span>.<span class="fn">getInstance</span>(<span class="cl">KeyProperties</span>.KEY_ALGORITHM_AES, <span class="str">"AndroidKeyStore"</span>)
+    .<span class="fn">also</span> { it.<span class="fn">init</span>(keyGenSpec) }
+    .<span class="fn">generateKey</span>()</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Data Flow</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 Trade-offs & Failure -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Trade-offs &amp; Failure Handling</div>
+    <h3>Trade-offs</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Reason</th></tr>
+      <tr><td>Token storage</td><td>EncryptedSharedPreferences</td><td>Plain SharedPreferences, DataStore</td><td>AES-256 Keystore-backed, easy API</td></tr>
+      <tr><td>Refresh mechanism</td><td>OkHttp Authenticator</td><td>Manual expiry check before each call</td><td>Transparent to callers, handles concurrent requests</td></tr>
+      <tr><td>Access token location</td><td>EncryptedSharedPreferences</td><td>In-memory only</td><td>Survives process death; in-memory needs refresh on every cold start</td></tr>
+      <tr><td>Biometric binding</td><td>Keystore + setInvalidatedByBiometricEnrollment</td><td>Store biometric hash</td><td>Hardware-backed, cryptographically tied to enrollment</td></tr>
+    </table></div>
+
+    <h3>Failure Scenarios</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Failure</th><th>Handling</th></tr>
+      <tr><td>Login API fails</td><td>Show specific error message (wrong password vs network); never log credentials</td></tr>
+      <tr><td>Refresh token expired</td><td>Clear all tokens, emit SessionExpired event, navigate to login with message</td></tr>
+      <tr><td>Biometric key invalidated</td><td>Catch KeyPermanentlyInvalidatedException, delete key, prompt re-enrollment</td></tr>
+      <tr><td>Concurrent 401s during token refresh</td><td>Mutex ensures only one refresh — others wait and use the new token</td></tr>
+      <tr><td>Device compromised (root)</td><td>EncryptedSharedPreferences relies on Keystore — hardware-backed keys resist extraction</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Key Decisions</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
+    </div>
+  </div>
+
+  <!-- S6 Scalability -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128200;</div>6. Scalability</div>
+    <h3>OAuth Integration</h3>
+    <pre><code><span class="cm">// Use AppAuth library for OAuth 2.0 / PKCE</span>
+<span class="cm">// Never implement OAuth manually</span>
+<span class="kw">val</span> authRequest = <span class="cl">AuthorizationRequest</span>.<span class="cl">Builder</span>(
+    serviceConfig,
+    clientId,
+    <span class="cl">ResponseTypeValues</span>.CODE,
+    Uri.<span class="fn">parse</span>(<span class="str">"com.example:/oauth2callback"</span>)
+).<span class="fn">setScope</span>(<span class="str">"openid profile email"</span>)
+ .<span class="fn">setCodeVerifier</span>(<span class="cl">CodeVerifierUtil</span>.<span class="fn">generateRandomCodeVerifier</span>()) <span class="cm">// PKCE</span>
+ .<span class="fn">build</span>()
+<span class="cm">// Exchange code for tokens via AppAuth AuthorizationService</span></code></pre>
+
+    <h3>Multi-Account Support</h3>
+    <p>For apps supporting multiple accounts: store tokens keyed by userId in EncryptedSharedPreferences. AuthRepository accepts userId as a parameter. SessionManager tracks the active userId and switches context on account switch.</p>
+
+    <h3>Session Expiry Detection</h3>
+    <pre><code><span class="cm">// Expose session expiry as a Flow from AuthRepository</span>
+<span class="kw">private val</span> _sessionExpiredFlow = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">Unit</span>&gt;()
+<span class="kw">val</span> sessionExpiredFlow: <span class="cl">SharedFlow</span>&lt;<span class="cl">Unit</span>&gt; = _sessionExpiredFlow
+
+<span class="cm">// In TokenRefreshAuthenticator on refresh failure:</span>
+<span class="cm">// _sessionExpiredFlow.tryEmit(Unit)</span>
+
+<span class="cm">// In MainActivity/RootComposable:</span>
+<span class="cm">// Collect sessionExpiredFlow → navigate to LoginScreen</span></code></pre>
+
+    <h3>Testing Auth</h3>
+    <ul>
+      <li><strong>Unit tests</strong>: Mock AuthApi, verify token storage and refresh logic</li>
+      <li><strong>Authenticator tests</strong>: Verify Mutex prevents concurrent refreshes, verify new token used on retry</li>
+      <li><strong>Biometric tests</strong>: BiometricManager mock — test KeyInvalidatedException handling</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Trade-offs</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"The auth system has three layers: a LoginScreen with AuthViewModel, AuthRepository handling API calls, and TokenStorage using EncryptedSharedPreferences for secure persistence. Access tokens are short-lived (15 min), refresh tokens long-lived (30 days). An OkHttp Authenticator handles silent refresh on 401 — thread-safe via Mutex so concurrent requests don't each trigger their own refresh. Biometrics use a Keystore key with setInvalidatedByBiometricEnrollment — re-enrollment required if fingerprints change."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"Login flow: email/password → AuthRepository.login() → Retrofit POST /auth/login → tokens stored in EncryptedSharedPreferences (AES-256, Keystore-backed). JWT strategy: access token is short-lived (15 min), refresh token is long-lived (30 days) and rotated on use. Token refresh is completely transparent via OkHttp Authenticator: on 401, it calls /auth/refresh synchronously, saves new tokens, and retries the original request. Mutex ensures only one refresh runs — if 5 concurrent requests all get 401, only one refresh happens and the others reuse the result. Biometric: the Keystore key has setInvalidatedByBiometricEnrollment(true) — if the user adds a new fingerprint, the key is invalidated and we catch KeyPermanentlyInvalidatedException to force re-enrollment. Logout clears all tokens and navigates with FLAG_ACTIVITY_CLEAR_TASK so the back stack contains only the login screen. For OAuth, use AppAuth library with PKCE — never implement OAuth manually."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>EncryptedSharedPreferences for tokens — never plain SharedPreferences</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>OkHttp Authenticator for silent token refresh on 401 — transparent to all callers</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Mutex in Authenticator — prevents 5 concurrent 401s each triggering independent refreshes</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>setInvalidatedByBiometricEnrollment(true) — biometric key invalidated if enrollment changes</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Logout: clear tokens + FLAG_ACTIVITY_CLEAR_TASK — back button cannot return to authenticated screens</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      The concurrent token refresh problem is a classic. Without Mutex: 5 simultaneous API calls all get 401, all call refreshToken() concurrently, the server issues 5 new tokens but only one is stored. The other 4 refresh tokens are now invalid — user gets logged out unnecessarily. The fix: check whether the token has already changed before using your result (another thread may have already refreshed). This "check-after-lock" pattern is the correct solution.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Scalability</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Token Strategy</h4>
+        <pre><code>Access: 15 min, EncryptedSP
+Refresh: 30 days, EncryptedSP
+  rotated on each use
+Refresh fails → force login</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Secure Storage</h4>
+        <pre><code>EncryptedSharedPreferences
+  → AES-256-GCM / Keystore key
+Biometric key in AndroidKeystore
+  → setInvalidatedByBiometricEnrollment</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Concurrent Refresh</h4>
+        <pre><code>OkHttp Authenticator
+Mutex for thread safety
+Check if token already refreshed
+  before using result</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Logout</h4>
+        <pre><code>Clear EncryptedSP tokens
+Call /auth/logout (server)
+Navigate: FLAG_ACTIVITY_CLEAR_TASK
+No back-stack to auth screens</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. Where should you store JWT tokens on Android?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">EncryptedSharedPreferences backed by Android Keystore. It uses AES-256-GCM encryption with the key stored in the hardware-backed Keystore — the key cannot be extracted from the device. Never use plain SharedPreferences (plaintext on rooted devices), DataStore (not designed for tokens), or external storage. For extra security: keep access token in memory only (wiped on process kill) and only persist refresh token in EncryptedSharedPreferences.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. How does OkHttp Authenticator differ from an Interceptor for token refresh?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Interceptor runs before every request — you'd need to check token expiry time and refresh proactively. This can miss edge cases (clock skew, server-side revocation). Authenticator is triggered reactively by the server's 401 response — always accurate. OkHttp calls authenticate() exactly when authentication is needed, passes the failed response, and returns a new Request with updated credentials. Much cleaner and accurate than timestamp-based proactive refresh.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What is the "concurrent token refresh" problem and how do you solve it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Problem: 5 simultaneous API calls all get 401. All 5 call refreshToken() concurrently. Server issues 5 tokens — but each refresh token can only be used once (server rotates them). 4 of the 5 refresh attempts fail → user force-logged-out. Solution: Mutex in the Authenticator. Only one thread refreshes at a time. Threads 2-5 wait for the Mutex. When they get the lock, they check: is the current stored token different from what was in our failed request? If yes, another thread already refreshed — just retry with the new token without calling refresh again.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. How does setInvalidatedByBiometricEnrollment(true) work?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When creating a Keystore key with setInvalidatedByBiometricEnrollment(true), Android invalidates the key if the device's biometric enrollment changes — e.g., a new fingerprint is added. The next time the app tries to use the key, it gets KeyPermanentlyInvalidatedException. This prevents an attacker from adding their fingerprint and accessing the app's biometric-locked data. On exception: catch it, delete the key, show "biometric re-enrollment required" dialog, and generate a new key after re-authentication.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. Walk through the biometric authentication flow.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Setup (once): Generate Keystore key. Encrypt refresh_token with the key. Store encrypted token in EncryptedSharedPreferences. Login flow: Get Cipher from Keystore key in DECRYPT mode. Wrap in CryptoObject. Call BiometricPrompt.authenticate(cryptoObject). User authenticates. onAuthenticationSucceeded provides authenticated CryptoObject. Use Cipher to decrypt refresh_token. Call AuthRepository.refreshToken(decryptedToken). Navigate to home on success. The private key never leaves the Keystore — biometric authentication unlocks the hardware key operation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. How do you implement "remember me" functionality securely?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Store the refresh_token in EncryptedSharedPreferences on successful login. On next app launch: check if refresh_token exists → call /auth/refresh → if successful, user is silently logged in. If refresh fails (token expired): clear tokens, show login screen. For "remember me" toggle: if unchecked, only store tokens in memory — they're lost on process kill. If checked, persist in EncryptedSharedPreferences. Distinguish between session timeout (acceptable UX warning) vs force logout (security event requiring re-auth).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you ensure the back stack is clean after logout?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Two approaches: (1) Activity-based: startActivity(loginIntent.apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }) — clears entire back stack, makes login the only activity. (2) Navigation Component: navController.navigate(loginRoute) { popUpTo(navGraph.startDestinationId) { inclusive = true } } — clears entire nav back stack to root. After this, pressing back exits the app rather than returning to authenticated screens. Also check AuthState on every screen's onResume to catch token expiry across deep links.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. How would you implement OAuth 2.0 login (Google Sign-In) securely?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use AppAuth-Android library with PKCE (Proof Key for Code Exchange). Never implement OAuth manually. Flow: (1) Create AuthorizationRequest with code_verifier (random). Send authorization_code request to provider. (2) Receive authorization code via custom URI scheme or App Link callback. (3) Exchange code for tokens using code_verifier (server-side PKCE validation). (4) Send ID token to your backend for validation → your backend issues your app's JWT pair. Never use the OAuth provider's access token directly with your backend — always exchange for your own tokens.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. How do you detect and handle session expiry across different app states?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Multiple detection points: (1) Foreground API call gets 401 and refresh fails → Authenticator emits sessionExpiredFlow. (2) App resumes from background → check token expiry timestamp in EncryptedSharedPreferences — if expired, trigger refresh or show re-auth. (3) WorkManager background task gets 401 → emit session event. Handle via: a SharedFlow&lt;Unit&gt; sessionExpiredFlow in AuthRepository. Collect in RootComposable or Application.onCreate with a ProcessLifecycleOwner. On emission: clear tokens, navigate to login. UX: show "Your session expired. Please log in again." — don't silently lose user state.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. What security risks exist in mobile auth and how do you mitigate them?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Risks: (1) Token in plaintext storage → Mitigation: EncryptedSharedPreferences. (2) Token in logs → Mitigation: never log auth headers; okhttp.log level = BASIC not HEADERS. (3) SSL stripping → Mitigation: Certificate pinning (OkHttp CertificatePinner). (4) Biometric bypass → Mitigation: setInvalidatedByBiometricEnrollment + CryptoObject binding — biometric without crypto is weaker. (5) Refresh token reuse attack → Mitigation: refresh token rotation — server invalidates old refresh token on use. (6) Backup/restore exposes tokens → Mitigation: android:allowBackup="false" or exclude EncryptedSharedPreferences file from backup rules.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>24A — Modularization | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">24A · Modularization</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Module Types</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Dependency Rules</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Build Performance</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Dynamic Feature Modules</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Module Communication</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>24A</span> — Modularization</h1>
+    <p class="hero-desc">Why to modularize, module types and responsibilities, dependency rules, api vs implementation, dynamic feature modules, build performance benefits, and inter-module communication patterns.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 24A</span>
+      <span class="badge badge-tier2">&#9733;&#9733; Tier 2</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Why Modularize?</h3>
+    <ul>
+      <li><strong>Build speed</strong>: Gradle can compile modules in parallel; unchanged modules are skipped (build cache)</li>
+      <li><strong>Feature isolation</strong>: each feature module owns its own code, resources, and tests</li>
+      <li><strong>Team scalability</strong>: teams own their modules independently — fewer merge conflicts</li>
+      <li><strong>Reusability</strong>: <code>:core:ui</code> shared across all features; <code>:core:network</code> shared across all data layers</li>
+      <li><strong>Dynamic delivery</strong>: Dynamic Feature Modules downloaded on demand — reduces initial APK size</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Modularization is primarily a <strong>build-time and team-scale</strong> concern, not a runtime concern. The main benefit is faster incremental builds and the ability for teams to work in parallel without blocking each other. For a 2-person team on a small app, modularization is overhead. For 20+ engineers on a large app, it's essential.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Module Types →</button></div>
+  </div>
+
+  <!-- S2 Module Types -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128194;</div>2. Module Types</div>
+    <h3>Recommended Module Structure</h3>
+    <pre><code>MyApp/
+├── app/                      <span class="cm"># Entry point — thin, just wires things together</span>
+├── feature/
+│   ├── home/                 <span class="cm"># Vertical feature slice — UI + ViewModel + UseCase</span>
+│   ├── product/
+│   ├── cart/
+│   └── checkout/
+└── core/
+    ├── network/              <span class="cm"># Retrofit, OkHttp, interceptors</span>
+    ├── database/             <span class="cm"># Room, DAOs</span>
+    ├── ui/                   <span class="cm"># Shared composables, themes, design tokens</span>
+    ├── common/               <span class="cm"># Utility extensions, base classes</span>
+    └── domain/               <span class="cm"># Entities, repository interfaces, use case base</span></code></pre>
+
+    <div class="table-wrap"><table>
+      <tr><th>Module</th><th>Plugin</th><th>Responsibility</th></tr>
+      <tr><td><code>:app</code></td><td>com.android.application</td><td>Single entry point, DI graph root, navigation host</td></tr>
+      <tr><td><code>:feature:X</code></td><td>com.android.library</td><td>Vertical slice: Screen + ViewModel + UseCase for feature X</td></tr>
+      <tr><td><code>:core:network</code></td><td>com.android.library</td><td>Retrofit, OkHttp, interceptors, token refresh</td></tr>
+      <tr><td><code>:core:database</code></td><td>com.android.library</td><td>Room database, DAOs, migrations</td></tr>
+      <tr><td><code>:core:ui</code></td><td>com.android.library</td><td>Shared Composables, themes, Material tokens</td></tr>
+      <tr><td><code>:core:common</code></td><td>kotlin (pure JVM)</td><td>Extensions, utils, no Android deps</td></tr>
+    </table></div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Tip</div>
+      <code>:core:common</code> should ideally be a pure Kotlin module (<code>kotlin("jvm")</code> plugin) — no Android dependencies. This makes it fastest to compile and testable on the JVM without an emulator.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Dependency Rules →</button>
+    </div>
+  </div>
+
+  <!-- S3 Dependency Rules -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#10139;</div>3. Dependency Rules</div>
+    <h3>Dependency Direction</h3>
+    <pre><code><span class="cm">// Allowed dependency directions:</span>
+<span class="cm">//   :app → :feature:home → :core:network</span>
+<span class="cm">//   :app → :feature:cart → :core:database</span>
+<span class="cm">//   :feature:X → :core:ui, :core:common, :core:domain</span>
+<span class="cm">//</span>
+<span class="cm">// FORBIDDEN:</span>
+<span class="cm">//   :feature:home → :feature:cart   (features must NOT depend on each other)</span>
+<span class="cm">//   :core:network → :feature:X       (core must NOT depend on features)</span>
+<span class="cm">//   Circular dependencies            (Gradle will fail)</span></code></pre>
+
+    <h3>api vs implementation in Library Modules</h3>
+    <pre><code><span class="cm">// :core:network/build.gradle.kts</span>
+dependencies {
+    <span class="cm">// implementation — hidden from consumers of :core:network</span>
+    <span class="fn">implementation</span>(libs.retrofit)          <span class="cm">// OK: internal detail</span>
+    <span class="fn">implementation</span>(libs.okhttp.logging)    <span class="cm">// OK: internal</span>
+
+    <span class="cm">// api — exposed on compile classpath of consumers</span>
+    <span class="fn">api</span>(libs.retrofit.converter.gson)      <span class="cm">// Only if consumers use Gson types directly</span>
+}
+<span class="cm">// Prefer implementation — reduces recompilation scope</span>
+<span class="cm">// When :core:network's implementation dep changes, only :core:network recompiles</span>
+<span class="cm">// If api dep changes, ALL modules depending on :core:network must recompile</span></code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Key Rule</div>
+      Use <code>api()</code> only when the dependency's types appear in the module's <strong>public API</strong> (function signatures, return types). Everything else uses <code>implementation()</code>. Incorrect <code>api()</code> usage is the #1 cause of unnecessarily slow incremental builds in modularized projects.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Module Types</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Build Performance →</button>
+    </div>
+  </div>
+
+  <!-- S4 Build Performance -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9889;</div>4. Build Performance Benefits</div>
+    <h3>Parallel Compilation</h3>
+    <p>With <code>org.gradle.parallel=true</code>, Gradle compiles independent modules concurrently. In a monolith, everything is sequential. In a modular app with 10 feature modules all depending on shared cores, the features can all compile in parallel after the cores finish.</p>
+    <pre><code><span class="cm"># Monolith build (sequential):          Modular build (parallel):</span>
+<span class="cm"># compile → 8 minutes                   :core:* → 2 min</span>
+<span class="cm">#                                        :feature:* (parallel) → +2 min</span>
+<span class="cm">#                                        :app link → +30 sec</span>
+<span class="cm">#                                        Total: ~4.5 minutes</span></code></pre>
+
+    <h3>Build Cache Per Module</h3>
+    <p>Gradle caches task outputs per module based on a hash of inputs. If you change only <code>:feature:cart</code>, only that module recompiles. All other module caches are valid. In a monolith, any change recompiles everything.</p>
+
+    <h3>ABI Changes</h3>
+    <p>An <strong>ABI (Application Binary Interface) change</strong> is when a module's public API changes (adding/removing/changing a public method). This forces all dependent modules to recompile. Internal (<code>private</code>/<code>internal</code>) changes are non-ABI and don't trigger downstream recompilation. This is why good encapsulation in Kotlin (using <code>internal</code>) directly improves build speed.</p>
+
+    <div class="callout callout-green">
+      <div class="callout-label">Build Speed Rule of Thumb</div>
+      Changing a <code>private</code> or <code>internal</code> function → only that module recompiles. Changing a <code>public</code> function → all dependent modules recompile. Maximize use of <code>internal</code> in library modules.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Dependency Rules</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Dynamic Feature Modules →</button>
+    </div>
+  </div>
+
+  <!-- S5 Dynamic Feature Modules -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128640;</div>5. Dynamic Feature Modules</div>
+    <h3>What Are They?</h3>
+    <p>Dynamic Feature Modules (DFM) are Android library modules whose code and resources are <strong>not included in the base APK</strong>. They are downloaded on demand from the Play Store using the Play Core library. This reduces initial install size.</p>
+    <pre><code><span class="cm">// :feature:ar-scanner/build.gradle.kts (Dynamic Feature Module)</span>
+plugins {
+    id(<span class="str">"com.android.dynamic-feature"</span>)
+}
+android {
+    <span class="cm">// No applicationId — inherits from :app</span>
+    <span class="cm">// minSdk must match :app's minSdk</span>
+}
+dependencies {
+    implementation(project(<span class="str">":app"</span>))  <span class="cm">// DFM depends on :app, not the other way</span>
+}</code></pre>
+
+    <pre><code><span class="cm">// Requesting a Dynamic Feature at runtime</span>
+<span class="kw">val</span> splitInstallManager = <span class="cl">SplitInstallManagerFactory</span>.<span class="fn">create</span>(context)
+<span class="kw">val</span> request = <span class="cl">SplitInstallRequest</span>.newBuilder()
+    .<span class="fn">addModule</span>(<span class="str">"ar_scanner"</span>)
+    .<span class="fn">build</span>()
+splitInstallManager.<span class="fn">startInstall</span>(request)
+    .<span class="fn">addOnSuccessListener</span> { <span class="cm">/* navigate to AR scanner */</span> }
+    .<span class="fn">addOnFailureListener</span> { e -> <span class="cm">/* handle error */</span> }</code></pre>
+
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>Detail</th></tr>
+      <tr><td>On-demand delivery</td><td>Downloaded when user first accesses the feature</td></tr>
+      <tr><td>Install-time delivery</td><td>Downloaded at install but packaged separately (faster update)</td></tr>
+      <tr><td>Conditional delivery</td><td>Only on devices meeting criteria (country, API level, hardware)</td></tr>
+      <tr><td>Dependency direction</td><td>DFM → :app (reversed from regular modules)</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Build Performance</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Module Communication →</button>
+    </div>
+  </div>
+
+  <!-- S6 Module Communication -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128257;</div>6. Module Communication Patterns</div>
+    <h3>The Problem</h3>
+    <p>Feature modules cannot depend on each other. But they often need to communicate — e.g., <code>:feature:cart</code> needs to know the user logged in (event from <code>:feature:auth</code>). Three patterns solve this:</p>
+
+    <h4>1. Shared ViewModel via NavBackStackEntry</h4>
+    <pre><code><span class="cm">// Scoped ViewModel shared across feature screens via the nav graph</span>
+<span class="cm">// Both features define the nav graph in :app — they share a parent entry</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CheckoutScreen</span>(navController: <span class="cl">NavController</span>) {
+    <span class="kw">val</span> parentEntry = <span class="fn">remember</span>(navController) {
+        navController.<span class="fn">getBackStackEntry</span>(<span class="str">"checkout_graph"</span>)
+    }
+    <span class="kw">val</span> sharedVm: <span class="cl">SharedCartViewModel</span> = <span class="fn">hiltViewModel</span>(parentEntry)
+}</code></pre>
+
+    <h4>2. SharedFlow Event Bus via :core:common</h4>
+    <pre><code><span class="cm">// :core:common — defines the event contract (no feature dependencies)</span>
+<span class="kw">sealed class</span> <span class="cl">AppEvent</span> {
+    <span class="kw">data class</span> <span class="cl">UserLoggedIn</span>(<span class="kw">val</span> userId: <span class="cl">String</span>) : <span class="cl">AppEvent</span>()
+    <span class="kw">object</span> <span class="cl">CartCleared</span> : <span class="cl">AppEvent</span>()
+}
+
+<span class="cm">// :core:common — EventBus singleton</span>
+<span class="kw">object</span> <span class="cl">AppEventBus</span> {
+    <span class="kw">private val</span> _events = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">AppEvent</span>&gt;()
+    <span class="kw">val</span> events: <span class="cl">SharedFlow</span>&lt;<span class="cl">AppEvent</span>&gt; = _events.<span class="fn">asSharedFlow</span>()
+    <span class="kw">suspend fun</span> <span class="fn">emit</span>(event: <span class="cl">AppEvent</span>) = _events.<span class="fn">emit</span>(event)
+}</code></pre>
+
+    <h4>3. Service Interface via Hilt (Preferred)</h4>
+    <pre><code><span class="cm">// :core:domain — interface (no feature deps)</span>
+<span class="kw">interface</span> <span class="cl">CartRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">addItem</span>(item: <span class="cl">CartItem</span>)
+    <span class="kw">fun</span> <span class="fn">getCartFlow</span>(): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">CartItem</span>&gt;&gt;
+}
+
+<span class="cm">// :feature:cart — implementation (depends on :core:domain, :core:database)</span>
+<span class="kw">class</span> <span class="cl">CartRepositoryImpl</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> cartDao: <span class="cl">CartDao</span>
+) : <span class="cl">CartRepository</span> { ... }
+
+<span class="cm">// :app — Hilt binding wires interface to implementation</span>
+<span class="an">@Binds</span> <span class="kw">abstract fun</span> <span class="fn">bindCartRepo</span>(impl: <span class="cl">CartRepositoryImpl</span>): <span class="cl">CartRepository</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Dynamic Features</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Modularization splits the app into :app, :feature:X vertical slices, and :core:* shared layers. The main benefits are faster incremental builds through parallel compilation and Gradle's build cache, plus team scalability. Features depend on core modules but never on each other — this enforces isolation. I use implementation() not api() for dependencies to minimize recompilation scope."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"The standard structure is :app as the thin entry point, feature modules as vertical slices owning their own UI, ViewModels, and use cases, and core modules for shared infrastructure like :core:network, :core:database, :core:ui. The dependency rule is strict: app → features → core, and features never depend on each other. For build performance, parallel compilation means independent modules build concurrently, and Gradle's build cache means unchanged modules are skipped. Using implementation() instead of api() minimizes ABI surface — only ABI changes trigger downstream recompilation. For inter-module communication, I use shared ViewModels via NavBackStackEntry for co-located screens, SharedFlow event bus in core:common for cross-feature events, or best of all — define repository interfaces in :core:domain and bind implementations in :app via Hilt, so features depend only on contracts."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Dependency direction: :app → :feature → :core — features NEVER depend on each other</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>api() vs implementation(): implementation hides transitives, prevents unnecessary recompilation</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Build performance: parallel compilation + cache — changing one feature only recompiles that feature</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Communication: interface in :core:domain, implementation in feature, binding in :app via Hilt</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Dynamic Feature Modules: downloaded on demand, DFM depends on :app (reversed dependency)</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Navigation deep links between DFMs (complex, mention it exists)</li>
+      <li>Gradle composite builds (advanced, separate topic)</li>
+      <li>Specific module counts — it depends on team/app size</li>
+    </ul>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      The real value of modularization shows at scale. In a monolith, every developer touching any file triggers full recompilation for everyone. In a well-modularized app, a developer on the :feature:checkout module can iterate in seconds because only that module recompiles. The architecture discipline (features not depending on each other) is what enables this — and it's enforced by Gradle, not just convention.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Module Communication</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Module Structure</h4>
+        <pre><code>:app (entry point)
+:feature:home, :cart, :checkout
+:core:network, :database
+:core:ui, :common, :domain</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Dependency Direction</h4>
+        <pre><code>:app → :feature:X → :core:*
+Features NEVER depend on each other
+:core:common = pure Kotlin (JVM)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>api vs implementation</h4>
+        <pre><code>implementation → hidden, faster
+api → leaks to consumers
+Rule: use implementation by default</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Communication Patterns</h4>
+        <pre><code>1. NavBackStackEntry ViewModel
+2. SharedFlow event bus
+3. Hilt interface binding (best)</code></pre>
+      </div>
+    </div>
+    <h3>Key Terms</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Vertical slice</td><td>Feature module containing all layers (UI, domain, data) for one feature</td></tr>
+      <tr><td>ABI change</td><td>Public API change that forces dependent modules to recompile</td></tr>
+      <tr><td>DFM</td><td>Dynamic Feature Module — downloaded on demand at runtime</td></tr>
+      <tr><td>api()</td><td>Exposes dependency transitively to module consumers</td></tr>
+      <tr><td>implementation()</td><td>Hides dependency from consumers — preferred default</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What are the main reasons to modularize an Android app?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Build speed (parallel compilation, build cache), feature isolation (each feature owns its code), team scalability (teams work in independent modules), reusability (core modules shared), and dynamic delivery (Dynamic Feature Modules reduce install size).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What dependency direction rule must modules follow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">:app → :feature:X → :core:*. Feature modules must NEVER depend on other feature modules. Core modules must never depend on feature modules. This one-way flow ensures isolation and allows parallel compilation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What is an ABI change and why does it matter for build speed?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">An ABI (Application Binary Interface) change is a modification to a module's public API — adding, removing, or changing a public function or class. ABI changes force all dependent modules to recompile. Non-ABI changes (private/internal modifications) only recompile the changed module. Maximizing use of internal visibility directly improves build speed.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. When would you use api() instead of implementation() in a module's dependency?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Only when the dependency's types appear in the module's public API surface — function parameters, return types, or properties that consumers need to interact with. Example: if :core:network exposes a function returning a Retrofit Response&lt;T&gt;, then Retrofit needs to be api(). Everything else (OkHttp internals, logging interceptors) stays implementation(). Using api() unnecessarily increases the compilation scope for all consumers.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. How do feature modules communicate without depending on each other?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Three patterns: (1) Shared ViewModel scoped to a navigation graph entry — both features access the same ViewModel via NavBackStackEntry. (2) SharedFlow event bus defined in :core:common — features emit and collect events without knowing about each other. (3) Best: define interface contracts in :core:domain, implement them in feature/data modules, and bind them in :app via Hilt — features depend only on the interface, never the implementation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. What is a Dynamic Feature Module and when would you use one?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">A DFM is a module whose code/resources are NOT in the base APK. They're downloaded on demand via Play Store using SplitInstallManager. Use them for optional features (AR scanner, premium features, rarely-used tools) to reduce the initial install size. Note the reversed dependency: DFM depends on :app, not the other way. Requires app to be an AAB distributed via Play Store.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How does parallel Gradle build work with modules?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">With org.gradle.parallel=true, Gradle compiles modules concurrently as long as they have no dependency relationship between them. All :feature:* modules can compile in parallel once :core:* modules finish. In a monolith, compilation is sequential. A well-modularized app with 10 feature modules effectively parallelizes across CPU cores, cutting build time proportionally.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. You inherit a monolith Android app with 300K LOC. How do you start modularizing it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Start bottom-up: (1) Extract :core:common first (utilities, extensions — lowest coupling). (2) Extract :core:network (Retrofit setup). (3) Extract :core:database (Room). (4) Extract :core:domain (entities, repository interfaces). (5) Then extract feature modules one at a time, starting with the most isolated feature. Never try to extract a feature before its dependencies are modularized. Use Dependency Analysis Gradle Plugin to detect illegal dependencies before they block extraction.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. What is the role of :app in a modularized architecture?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">:app should be a thin orchestration layer — it declares the main Application class, the root Hilt component, the root NavHost, and Hilt module bindings that wire interface to implementation across modules. It doesn't contain business logic. Its build.gradle.kts is the only place that depends on all feature modules. This makes :app the most frequently recompiled module, so keep it minimal.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. How does modularization affect Hilt dependency injection?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Each module can have its own @InstallIn Hilt modules. Feature modules install their bindings in the appropriate component (SingletonComponent for singletons, ViewModelComponent for VMs). The Hilt annotation processor in :app aggregates all @HiltAndroidApp, @InstallIn, and @AndroidEntryPoint components from all modules at compile time. Interfaces are typically defined in :core:domain, implemented in the feature module, and bound via @Binds in the feature's Hilt module.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

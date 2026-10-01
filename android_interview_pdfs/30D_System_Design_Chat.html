@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30D — System Design: Chat Application | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">30D · Chat Application</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem Statement</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture &amp; Components</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Design Decisions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs &amp; Failure</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep · Senior System Design</div>
+    <h1><span>30D</span> — Chat Application</h1>
+    <p class="hero-desc">Design a real-time chat app: WebSocket connection management, message delivery states, offline message queue, cursor-based pagination for history, push notifications, and media sharing.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 30D</span>
+      <span class="badge badge-senior">&#9733; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
+    <h3>Requirements</h3>
+    <h4>Functional</h4>
+    <ul>
+      <li>Real-time messaging between users (1:1 and group)</li>
+      <li>Offline support: compose and queue messages when disconnected</li>
+      <li>Read receipts: sent → delivered → read indicators</li>
+      <li>Typing indicators</li>
+      <li>Message history pagination (load older messages)</li>
+      <li>Push notifications for new messages when app is in background</li>
+      <li>Media sharing (images, files)</li>
+    </ul>
+    <h4>Non-Functional</h4>
+    <ul>
+      <li>Sub-second message delivery when connected</li>
+      <li>Message ordering guaranteed (no out-of-order display)</li>
+      <li>No duplicate messages on reconnect</li>
+      <li>Battery-efficient connection management</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2 Architecture -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#127963;</div>2. Architecture &amp; Components</div>
+    <h3>ASCII Architecture Diagram</h3>
+    <pre><code>┌─────────────────────────────────────────────────────────────┐
+│                       UI LAYER                              │
+│  ConversationListScreen   ChatScreen                        │
+│  (Compose)                (Compose)                         │
+│   LazyColumn of chats      LazyColumn (reversed) messages   │
+│                            Typing indicator                 │
+│                            Message input + send button      │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   VIEWMODEL LAYER                           │
+│  ChatViewModel                                              │
+│   • messages: StateFlow&lt;List&lt;Message&gt;&gt;                     │
+│   • connectionState: StateFlow&lt;ConnectionState&gt;             │
+│   • typingUsers: StateFlow&lt;Set&lt;String&gt;&gt;                     │
+│   • onSendMessage(text) / onLoadMore()                      │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   DATA LAYER                                │
+│  MessageRepository                                          │
+│   ┌─────────────────────────────────────────────────────┐  │
+│   │  Room (Local Cache)                                 │  │
+│   │  MessageEntity (id, chatId, text, senderId,         │  │
+│   │    timestamp, status: SENDING/SENT/DELIVERED/READ,  │  │
+│   │    localOnly: Boolean)                              │  │
+│   └─────────────────────────────────────────────────────┘  │
+│       │                          │                          │
+│       ▼                          ▼                          │
+│  WebSocketManager            Retrofit (REST)                │
+│   • OkHttp WebSocket          GET /messages?before={cursor} │
+│   • callbackFlow              POST /media/upload            │
+│   • reconnection logic        GET /conversations            │
+│   • heartbeat ping                                          │
+│       │                                                     │
+│       ▼                                                     │
+│  FCM Service (background notifications)                     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Problem</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3 Data Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#8594;</div>3. Data Flow</div>
+    <h3>Send Message Flow</h3>
+    <pre><code>User types message → taps Send
+  → ChatViewModel.onSendMessage(text)
+  → Create Message(id=UUID, status=SENDING)
+  → Insert into Room immediately (optimistic)
+    → UI shows message with "sending" indicator
+  → WebSocket.send(message JSON)
+  → Server ACK: { message_id, status: "SENT", timestamp }
+  → Update Room: status=SENT, serverId=message_id
+    → UI shows single checkmark (sent)
+  → Recipient receives message
+  → Server pushes: { type: "DELIVERED", message_id }
+  → Update Room: status=DELIVERED
+    → UI shows double checkmark (delivered)
+  → Recipient opens chat
+  → Server pushes: { type: "READ", message_id }
+  → Update Room: status=READ
+    → UI shows blue double checkmark (read)</code></pre>
+
+    <h3>Offline Message Queue</h3>
+    <pre><code>User sends message while offline
+  → Create Message(status=SENDING, localOnly=true)
+  → Save to Room
+  → WebSocket send fails (not connected)
+  → Message stays in Room with status=SENDING
+  → NetworkConnectivityObserver detects online
+  → WebSocketManager reconnects
+  → MessageRepository.flushPendingMessages()
+      → Query Room: messages WHERE localOnly=true ORDER BY timestamp
+      → Send each via WebSocket in order
+      → On ACK: update status=SENT, localOnly=false</code></pre>
+
+    <h3>Load Message History</h3>
+    <pre><code>User scrolls to top of chat
+  → ChatViewModel.onLoadMore()
+  → Fetch oldest message timestamp in Room
+  → GET /messages?chatId={id}&amp;before={timestamp}&amp;limit=30
+  → Insert into Room (don't clear existing)
+  → Room Flow auto-updates — messages appear above
+  → Cursor-based ensures no duplicates or gaps</code></pre>
+
+    <h3>Typing Indicator</h3>
+    <pre><code><span class="cm">// Typing: lightweight WebSocket events (NOT stored in Room)</span>
+User starts typing
+  → debounce 1s → send { type: "TYPING", chatId }
+  → WebSocket broadcasts to conversation participants
+  → Received by other device: show "{name} is typing..."
+  → Auto-clear after 3s of no new TYPING event from that user
+
+<span class="cm">// Implementation in ViewModel:</span>
+<span class="kw">private val</span> typingFlow = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">Unit</span>&gt;()
+<span class="kw">init</span> {
+    typingFlow.<span class="fn">debounce</span>(<span class="nu">1000</span>)
+        .<span class="fn">onEach</span> { webSocket.<span class="fn">sendTypingEvent</span>(chatId) }
+        .<span class="fn">launchIn</span>(viewModelScope)
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Architecture</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
+    </div>
+  </div>
+
+  <!-- S4 Key Design Decisions -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9881;</div>4. Key Design Decisions</div>
+
+    <h3>1. WebSocket Connection Management</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">WebSocketManager</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> okHttpClient: <span class="cl">OkHttpClient</span>
+) {
+    <span class="kw">private var</span> webSocket: <span class="cl">WebSocket</span>? = <span class="kw">null</span>
+    <span class="kw">private val</span> reconnectDelay = <span class="fn">listOf</span>(<span class="nu">1</span>, <span class="nu">2</span>, <span class="nu">4</span>, <span class="nu">8</span>, <span class="nu">16</span>)  <span class="cm">// exponential backoff in seconds</span>
+
+    <span class="kw">val</span> messageFlow: <span class="cl">SharedFlow</span>&lt;<span class="cl">ChatEvent</span>&gt; = <span class="fn">callbackFlow</span> {
+        <span class="kw">val</span> request = <span class="cl">Request</span>.<span class="cl">Builder</span>().<span class="fn">url</span>(<span class="str">"wss://api.example.com/ws"</span>).<span class="fn">build</span>()
+        webSocket = okHttpClient.<span class="fn">newWebSocket</span>(request, <span class="kw">object</span> : <span class="cl">WebSocketListener</span>() {
+            <span class="kw">override fun</span> <span class="fn">onMessage</span>(ws: <span class="cl">WebSocket</span>, text: <span class="cl">String</span>) {
+                <span class="fn">trySend</span>(<span class="fn">parseChatEvent</span>(text))
+            }
+            <span class="kw">override fun</span> <span class="fn">onFailure</span>(ws: <span class="cl">WebSocket</span>, t: <span class="cl">Throwable</span>, r: <span class="cl">Response</span>?) {
+                <span class="cm">// Reconnect with backoff</span>
+            }
+            <span class="kw">override fun</span> <span class="fn">onClosed</span>(ws: <span class="cl">WebSocket</span>, code: <span class="cl">Int</span>, reason: <span class="cl">String</span>) {
+                <span class="fn">close</span>()
+            }
+        })
+        <span class="fn">awaitClose</span> { webSocket?.<span class="fn">close</span>(<span class="nu">1000</span>, <span class="str">"Client closing"</span>) }
+    }.<span class="fn">shareIn</span>(scope, <span class="cl">SharingStarted</span>.WhileSubscribed())
+
+    <span class="cm">// Heartbeat — keep connection alive, detect silent failures</span>
+    <span class="kw">private fun</span> <span class="fn">startHeartbeat</span>() {
+        scope.<span class="fn">launch</span> {
+            <span class="kw">while</span> (<span class="kw">true</span>) {
+                <span class="fn">delay</span>(<span class="nu">30_000</span>)  <span class="cm">// ping every 30 seconds</span>
+                webSocket?.<span class="fn">send</span>(<span class="str">"""{"type":"ping"}"""</span>)
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>2. Message Delivery States</h3>
+    <div class="table-wrap"><table>
+      <tr><th>State</th><th>Icon</th><th>Meaning</th><th>When set</th></tr>
+      <tr><td>SENDING</td><td>Clock</td><td>Saved locally, WebSocket not yet ACKed</td><td>Immediately on send</td></tr>
+      <tr><td>SENT</td><td>Single check</td><td>Server received and stored</td><td>Server ACK via WebSocket</td></tr>
+      <tr><td>DELIVERED</td><td>Double check</td><td>Recipient's device received</td><td>Server push when recipient online</td></tr>
+      <tr><td>READ</td><td>Blue double check</td><td>Recipient opened the conversation</td><td>Server push when recipient reads</td></tr>
+      <tr><td>FAILED</td><td>Red exclamation</td><td>Send failed — tap to retry</td><td>WebSocket error + retries exhausted</td></tr>
+    </table></div>
+
+    <h3>3. Preventing Duplicate Messages on Reconnect</h3>
+    <pre><code><span class="cm">// Client-generated UUID for each message</span>
+<span class="cm">// Server deduplicates by UUID — idempotent</span>
+<span class="cm">// On reconnect: server sends last N missed events</span>
+<span class="cm">// Client checks Room: if message UUID exists, skip insert</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Data Flow</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 Trade-offs & Failure -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Trade-offs &amp; Failure Handling</div>
+    <h3>Trade-offs</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Reason</th></tr>
+      <tr><td>Transport</td><td>WebSocket</td><td>HTTP polling, SSE</td><td>Bidirectional, low latency for real-time</td></tr>
+      <tr><td>History pagination</td><td>Cursor-based (timestamp)</td><td>Offset-based</td><td>New messages during scroll don't shift pages</td></tr>
+      <tr><td>Local storage</td><td>Room for messages</td><td>In-memory only</td><td>Offline support, fast history render</td></tr>
+      <tr><td>Typing indicators</td><td>Transient WebSocket events (not Room)</td><td>Stored in Room</td><td>Ephemeral data doesn't need persistence</td></tr>
+      <tr><td>Media sharing</td><td>Upload to CDN → send URL in message</td><td>Send binary in WebSocket</td><td>WebSocket not designed for large binary payloads</td></tr>
+    </table></div>
+
+    <h3>Failure Scenarios</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Failure</th><th>Handling</th></tr>
+      <tr><td>WebSocket disconnects mid-chat</td><td>Exponential backoff reconnection; show "Reconnecting..." banner; queue outgoing messages</td></tr>
+      <tr><td>Message send fails</td><td>Mark FAILED in Room; show red error icon with "Tap to retry"</td></tr>
+      <tr><td>Duplicate messages on reconnect</td><td>Client UUID deduplication in Room INSERT OR IGNORE</td></tr>
+      <tr><td>Out-of-order messages</td><td>Sort by server timestamp (not local time) for display</td></tr>
+      <tr><td>Media upload fails</td><td>Keep message as FAILED; offer retry for the upload separately</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Key Decisions</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
+    </div>
+  </div>
+
+  <!-- S6 Scalability -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128200;</div>6. Scalability</div>
+    <h3>Push Notifications for Background Messages</h3>
+    <pre><code><span class="cm">// When app is in background: WebSocket is closed</span>
+<span class="cm">// Server sends FCM data message (not notification message)</span>
+<span class="cm">// App's FirebaseMessagingService.onMessageReceived() handles it:</span>
+<span class="kw">override fun</span> <span class="fn">onMessageReceived</span>(message: <span class="cl">RemoteMessage</span>) {
+    <span class="kw">val</span> chatMessage = <span class="fn">parseChatMessage</span>(message.data)
+    <span class="cm">// Save to Room</span>
+    CoroutineScope(Dispatchers.IO).<span class="fn">launch</span> {
+        messageDao.<span class="fn">insert</span>(chatMessage.<span class="fn">toEntity</span>())
+    }
+    <span class="cm">// Show notification</span>
+    <span class="fn">showMessageNotification</span>(chatMessage)
+}</code></pre>
+
+    <h3>Media Sharing Flow</h3>
+    <pre><code>User picks image
+  → Compress image (max 1MB) using Compressor library
+  → Upload to CDN: POST /media/upload (multipart)
+  → Response: { cdn_url, thumbnail_url }
+  → Send message via WebSocket: { type: "IMAGE", url: cdn_url }
+  → Store in Room with cdn_url
+  → UI shows: image thumbnail (loaded via Coil)
+  → While uploading: show progress indicator on message bubble</code></pre>
+
+    <h3>Group Chats and Channels</h3>
+    <ul>
+      <li>ConversationEntity with participants list and metadata</li>
+      <li>WebSocket subscribes to conversation channels by ID</li>
+      <li>Message delivery tracking per participant (delivered/read per user in group)</li>
+      <li>Group typing: "Alice, Bob are typing..." (aggregate multiple TYPING events)</li>
+    </ul>
+
+    <h3>App Lifecycle and WebSocket</h3>
+    <pre><code><span class="cm">// Connect when app is foregrounded</span>
+<span class="cm">// Disconnect when app is backgrounded (after grace period)</span>
+<span class="cm">// Use ProcessLifecycleOwner to detect foreground/background</span>
+ProcessLifecycleOwner.get().lifecycle.<span class="fn">addObserver</span>(<span class="kw">object</span> : <span class="cl">DefaultLifecycleObserver</span> {
+    <span class="kw">override fun</span> <span class="fn">onStart</span>(owner: <span class="cl">LifecycleOwner</span>) = webSocketManager.<span class="fn">connect</span>()
+    <span class="kw">override fun</span> <span class="fn">onStop</span>(owner: <span class="cl">LifecycleOwner</span>) = webSocketManager.<span class="fn">disconnect</span>()
+})</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Trade-offs</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"The chat uses OkHttp WebSocket for real-time messaging. Messages are saved to Room immediately on send (SENDING state) for offline support. The WebSocket pipeline is: send → server ACK → SENT → recipient online → DELIVERED → recipient reads → READ. Reconnection uses exponential backoff. Offline messages queue in Room and flush when the WebSocket reconnects. History uses cursor-based pagination to avoid gaps when new messages arrive."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"Architecture: ChatScreen → ChatViewModel → MessageRepository → Room + WebSocketManager. The WebSocket is managed as a callbackFlow — events are emitted and observed reactively. Messages go through four delivery states: SENDING (local only), SENT (server ACKed), DELIVERED (recipient device received), READ (recipient opened). All states stored in Room — the message list is a Flow&lt;List&lt;Message&gt;&gt; from Room, always up-to-date. For offline: messages with localOnly=true wait in Room; when WebSocket reconnects, flushPendingMessages() sends them in order. Duplicate prevention: every message has a client-generated UUID; Room uses INSERT OR IGNORE; server also deduplicates by UUID. Heartbeat pings every 30 seconds detect silent connection failures before users notice. When backgrounded, WebSocket disconnects and FCM data messages handle incoming notifications — onMessageReceived() saves the message to Room and shows a notification. History loads via GET /messages?before={timestamp} — cursor-based so new messages mid-scroll don't shift older pages."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>WebSocket lifecycle: connect on foreground, disconnect on background; heartbeat every 30s</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Message delivery: SENDING → SENT → DELIVERED → READ — all stored in Room</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Offline queue: localOnly messages flushed on reconnect in timestamp order</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Duplicate prevention: client UUID + INSERT OR IGNORE in Room</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Background: FCM data message → onMessageReceived → Room + notification</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      The WebSocket reconnection gap is a classic problem: what happens to messages sent to you while the connection was broken? Solution: on reconnect, send the server your last received message timestamp. Server replies with all events since that timestamp (missed messages, status updates). Client inserts them with INSERT OR IGNORE to deduplicate. This gap-fill pattern is what separates a production chat system from a demo.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Scalability</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Delivery States</h4>
+        <pre><code>SENDING  → local only
+SENT     → server ACK
+DELIVERED→ recipient device
+READ     → recipient opened
+FAILED   → retryable error</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>WebSocket Lifecycle</h4>
+        <pre><code>Foreground: connect
+Background: disconnect (30s grace)
+Heartbeat: ping every 30s
+Reconnect: exponential backoff
+Gap-fill: lastTimestamp on reconnect</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Offline Queue</h4>
+        <pre><code>Messages: localOnly=true in Room
+On reconnect:
+  flushPendingMessages()
+  → send in timestamp order
+  → on ACK: localOnly=false</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Background Messages</h4>
+        <pre><code>FCM data message
+→ onMessageReceived()
+→ insert to Room
+→ show notification
+→ user opens: already in Room</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. Why use WebSocket over HTTP polling for real-time chat?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">WebSocket: persistent bidirectional connection, sub-second delivery, server pushes without client request, minimal overhead (no HTTP headers per message). HTTP polling: client polls every N seconds — higher latency (up to N seconds), higher battery drain, higher server load (N clients × 1/poll_interval requests/second). SSE (Server-Sent Events): server-to-client only, not bidirectional — can't easily send messages. WebSocket is the standard for full-duplex real-time communication like chat.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What are the four message delivery states and when does each apply?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">SENDING: message saved locally, WebSocket send not yet acknowledged. Shows clock icon. SENT: server received and stored — confirmed by server ACK. Single checkmark. DELIVERED: recipient device received (recipient online, device received). Double checkmark. READ: recipient opened the conversation. Blue double checkmark. FAILED: send failed after retries — red error icon with "tap to retry".</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. How do you prevent duplicate messages when the WebSocket reconnects?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Two layers: (1) Every message has a client-generated UUID. Room uses INSERT OR IGNORE (or REPLACE with conflict strategy). If the server replays a message the client already has, the insert is silently ignored. (2) Server-side deduplication: server tracks message UUIDs and ignores duplicate sends from the client (important for the offline flush queue). Also: on reconnect, send lastReceivedTimestamp to server → server sends only events after that timestamp, minimizing the replay set.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. How does the offline message queue work?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Messages sent while offline are saved to Room with localOnly=true and status=SENDING. They display in the chat immediately (optimistic). When NetworkConnectivityObserver emits connected=true AND WebSocket reconnects: call flushPendingMessages() — query Room for messages WHERE localOnly=true ORDER BY timestamp ASC. Send each via WebSocket in timestamp order (critical — messages must arrive in the order they were composed). On ACK per message: set localOnly=false, status=SENT.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. How do you handle messages received while the app is in the background?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When the app is backgrounded, the WebSocket connection is closed. The server sends an FCM data message (not notification message — you want to handle it yourself). FirebaseMessagingService.onMessageReceived() runs in the background: parse the message, insert into Room, build and show a notification. When the user opens the app from the notification: ChatScreen collects from Room's Flow — the message is already there. No additional API call needed. The chat opens showing the new message seamlessly.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. How do you implement typing indicators efficiently?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Typing is ephemeral — never stored in Room. On each keystroke: emit to a SharedFlow → debounce(1000ms) → send {type:"TYPING", chatId} via WebSocket. Debounce prevents N messages for N keystrokes. Receiver side: maintain a typingUsers: Map&lt;userId, Long&gt; where Long is the last TYPING event timestamp. Every second: remove users whose last TYPING was more than 3 seconds ago. UI shows "Alice is typing..." while her userId is in the map. Auto-clear handles the case where the WebSocket drops mid-typing.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you implement WebSocket reconnection with backoff?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">On WebSocketListener.onFailure() or onClosed(): use exponential backoff. delays = [1s, 2s, 4s, 8s, 16s, max 60s]. Increment attempt counter on each failure. If reconnect succeeds: reset counter. If NetworkConnectivityObserver emits offline: stop retrying — restart only when it emits online. Show "Reconnecting..." in the connection status banner. Cap at 60 seconds to prevent 10+ minute gaps. On successful reconnect: send gap-fill request (lastTimestamp) before resuming normal operation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. How do you handle the "gap" in messages during a WebSocket disconnect?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">On reconnect: client sends {type:"SYNC", lastTimestamp: T} where T = max(createdAt) of messages in Room. Server responds with all events from T to now (missed messages + status updates). Client processes each: INSERT OR IGNORE for messages (dedup), UPDATE for status changes. This gap-fill ensures no messages are lost during disconnects. Server should have a reasonable limit (e.g., events from last 24h max) to prevent massive replays. For longer gaps: trigger a full refresh of recent message history.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. Design the media sharing flow for images.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Flow: (1) User picks image. (2) Compress to ≤1MB (Compressor library or Bitmap.compress). (3) Show sending state with progress indicator on the message bubble. (4) POST /media/upload (multipart/form-data) → response {cdn_url, thumbnail_url}. (5) On upload complete: send WebSocket message {type:"IMAGE", cdnUrl, thumbnailUrl, localId}. (6) Insert to Room with cdnUrl. (7) UI loads thumbnail via Coil. Handle upload failures: retry button on the message; don't retry automatically to avoid multiple uploads. Never send binary images via WebSocket — use CDN.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. How do you load older message history without disrupting the current view?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">LazyColumn in reverse order (reverseLayout=true) — newest messages at bottom, user scrolls up for older. On reaching top (first item becomes visible): trigger onLoadMore(). Fetch GET /messages?chatId={id}&amp;before={oldestTimestamp}&amp;limit=30. Insert into Room. Room Flow emits new list — old messages appear above. Maintain scroll position: save the firstVisibleItemIndex and scroll offset before update, restore after. This is the standard pattern for chat — new messages auto-scroll to bottom via LazyListState.scrollToItem(0). Cursor-based ensures no page gaps or duplicates when new messages arrive during history loading.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

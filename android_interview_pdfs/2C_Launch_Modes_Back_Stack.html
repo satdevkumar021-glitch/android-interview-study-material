@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2C – Launch Modes & Back Stack</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>2C · Launch Modes</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>2C — Launch Modes &amp; Back Stack</h1>
+  <div class="meta">
+    <span class="badge t2">Tier 2</span>
+    <span>standard · singleTop · singleTask · singleInstance · Tasks · Back Stack · Intent Flags</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>Android manages Activities in a <strong>task</strong> — a stack of Activities forming a logical user flow. A task has a <strong>back stack</strong>: pressing Back pops the top Activity and returns to the previous one. <strong>Launch modes</strong> control how and whether a new Activity instance is created when it is started.</p>
+  <p><strong>Why it matters:</strong> Without understanding launch modes, apps produce duplicate Activities, broken back navigation, unexpected task switches, and deep-link bugs. Senior engineers are expected to know exactly what happens to the back stack in each mode and when to pick each one.</p>
+  <div class="box info">
+    <strong>Core question launch modes answer:</strong> "When Activity A starts Activity B, should Android create a new instance of B, bring an existing one to the front, or pop everything above B?"
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <h3>Task and Back Stack</h3>
+  <div class="ascii">Task (user flow)
+  ┌────────────────────────────────────────────┐
+  │  [TOP]  CheckoutActivity  (currently shown) │
+  │         CartActivity                        │
+  │         ProductActivity                     │
+  │         HomeActivity            (bottom)    │
+  └────────────────────────────────────────────┘
+   BACK press: CheckoutActivity popped → CartActivity shown
+   Each app launch creates a new Task (unless reusing existing)</div>
+
+  <h3>The Four Launch Modes</h3>
+
+  <h4>standard (default)</h4>
+  <p>A new instance is created every time the Activity is started, pushed onto the top of the current task.</p>
+  <div class="ascii">Stack before: [Home][Product]
+Start ProductActivity again:
+Stack after:  [Home][Product][Product]   ← second instance pushed</div>
+
+  <h4>singleTop</h4>
+  <p>If an instance of this Activity is already at the <strong>top</strong> of the current task, no new instance is created. <code>onNewIntent()</code> is called on the existing instance. If it is NOT at the top, a new instance is created normally.</p>
+  <div class="ascii">Stack before: [Home][Product]  (Product is at top)
+Start ProductActivity:
+Stack after:  [Home][Product]   ← same instance, onNewIntent() called
+
+Stack before: [Home][Product][Cart]  (Product NOT at top)
+Start ProductActivity:
+Stack after:  [Home][Product][Cart][Product]  ← new instance</div>
+
+  <h4>singleTask</h4>
+  <p>Only one instance of this Activity exists in the system at a time (within a task). If an instance exists anywhere in the task, all Activities above it are <strong>popped (destroyed)</strong> and <code>onNewIntent()</code> is called on the existing instance. If no instance exists, a new one is created.</p>
+  <div class="ascii">Stack before: [Home][Dashboard][Profile]
+Start Dashboard (singleTask):
+Stack after:  [Home][Dashboard]  ← Profile popped, onNewIntent() called on Dashboard</div>
+
+  <h4>singleInstance</h4>
+  <p>Like singleTask, but the Activity is the only one in its task — it has its own private task. Any Activity started from it goes into a different task.</p>
+  <div class="ascii">Task 1: [Home][App screens...]
+Task 2: [CallActivity]   ← singleInstance; exclusive task
+User presses Back from CallActivity → returns to Task 1</div>
+
+  <h3>Intent Flags — Programmatic Control</h3>
+  <p>Launch modes can also be set via Intent flags at runtime, overriding the manifest declaration (flags take priority).</p>
+  <table>
+    <tr><th>Flag</th><th>Effect</th><th>Equivalent Mode</th></tr>
+    <tr><td><code>FLAG_ACTIVITY_SINGLE_TOP</code></td><td>singleTop behaviour for this launch</td><td>singleTop</td></tr>
+    <tr><td><code>FLAG_ACTIVITY_CLEAR_TOP</code></td><td>If instance exists in task, pop all above it; onNewIntent called. No manifest equivalent.</td><td>≈ singleTask (within task)</td></tr>
+    <tr><td><code>FLAG_ACTIVITY_NEW_TASK</code></td><td>Start Activity in a new task (or bring existing task to foreground)</td><td>Required when starting from non-Activity context</td></tr>
+    <tr><td><code>FLAG_ACTIVITY_CLEAR_TASK</code></td><td>Clears entire task before starting; always used with NEW_TASK</td><td>Used for logout → login flow</td></tr>
+    <tr><td><code>FLAG_ACTIVITY_NO_HISTORY</code></td><td>Activity not kept in back stack; removed when user leaves</td><td>Splash screen, auth redirect</td></tr>
+    <tr><td><code>FLAG_ACTIVITY_REORDER_TO_FRONT</code></td><td>Bring existing instance to front without destroying others</td><td>—</td></tr>
+  </table>
+
+  <h3>onNewIntent()</h3>
+  <p>Called when an existing Activity instance receives a new Intent (singleTop if at top, or singleTask). The old intent is still accessible via <code>getIntent()</code> until you call <code>setIntent(intent)</code>.</p>
+  <pre><code><span class="kw">override fun</span> <span class="fn">onNewIntent</span>(intent: <span class="type">Intent</span>) {
+    <span class="kw">super</span>.<span class="fn">onNewIntent</span>(intent)
+    <span class="fn">setIntent</span>(intent)               <span class="cm">// Update getIntent() to return new intent</span>
+    <span class="kw">val</span> orderId = intent.<span class="fn">getStringExtra</span>(<span class="str">"orderId"</span>)
+    viewModel.<span class="fn">loadOrder</span>(orderId)   <span class="cm">// Handle new navigation target</span>
+}</code></pre>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE ═══ -->
+<section id="when">
+  <h2>3 · Why and When to Use Each</h2>
+  <table>
+    <tr><th>Mode</th><th>Use when…</th><th>Real example</th></tr>
+    <tr>
+      <td><strong>standard</strong></td>
+      <td>Default for most screens. Multiple independent instances make sense.</td>
+      <td>Product detail screen (user can open multiple products in back stack)</td>
+    </tr>
+    <tr>
+      <td><strong>singleTop</strong></td>
+      <td>Re-triggering the same screen with new data (notification tap, push notification deep link)</td>
+      <td>Notification taps to NewsDetailActivity — don't stack duplicates if already open</td>
+    </tr>
+    <tr>
+      <td><strong>singleTask</strong></td>
+      <td>App's root/home screen that should not be duplicated; deep-link destination that must clear back stack above it</td>
+      <td>HomeActivity (main tab), Login screen after logout, deep link to dashboard</td>
+    </tr>
+    <tr>
+      <td><strong>singleInstance</strong></td>
+      <td>Standalone utility with its own isolated task; must not share task with any other Activity</td>
+      <td>System alarm screen, incoming call screen, floating assistant</td>
+    </tr>
+  </table>
+
+  <h3>When NOT to Use</h3>
+  <ul>
+    <li><strong>singleTask for most screens</strong>: Popping the back stack above it is destructive. Users lose navigation history unexpectedly.</li>
+    <li><strong>singleInstance for regular screens</strong>: Having Activities in separate tasks breaks the expected back navigation and ViewModel sharing.</li>
+    <li><strong>Launch modes at all (modern apps)</strong>: Single-activity with Navigation Component / Compose NavHost — you manage the back stack in NavGraph, not via launch modes. Launch modes matter only for the single root Activity and for cross-app scenarios.</li>
+  </ul>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example (Banking App — Logout + Deep Link)</h2>
+
+  <h3>Scenario 1: Logout — Clear Entire Task</h3>
+  <pre><code><span class="cm">// After successful logout, navigate to LoginActivity and clear everything</span>
+<span class="kw">fun</span> <span class="fn">navigateToLoginAfterLogout</span>() {
+    <span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="kw">this</span>, <span class="type">LoginActivity</span>::<span class="kw">class</span>.java).apply {
+        <span class="cm">// FLAG_ACTIVITY_NEW_TASK: start in the task stack root</span>
+        <span class="cm">// FLAG_ACTIVITY_CLEAR_TASK: destroy all existing Activities in task</span>
+        flags = <span class="type">Intent</span>.<span class="type">FLAG_ACTIVITY_NEW_TASK</span> <span class="fn">or</span> <span class="type">Intent</span>.<span class="type">FLAG_ACTIVITY_CLEAR_TASK</span>
+    }
+    <span class="fn">startActivity</span>(intent)
+    <span class="cm">// User cannot press Back to return to account screens</span>
+}</code></pre>
+
+  <h3>Scenario 2: Notification Deep Link with singleTop</h3>
+  <pre><code><span class="cm">// In AndroidManifest.xml — singleTop prevents stacking notification taps</span>
+<span class="cm">&lt;activity
+    android:name=".ui.transaction.TransactionDetailActivity"
+    android:launchMode="singleTop"
+    android:exported="false" /&gt;</span>
+
+<span class="cm">// Activity handles new intent from FCM notification</span>
+<span class="kw">override fun</span> <span class="fn">onNewIntent</span>(intent: <span class="type">Intent</span>) {
+    <span class="kw">super</span>.<span class="fn">onNewIntent</span>(intent)
+    <span class="fn">setIntent</span>(intent)
+    <span class="kw">val</span> txId = intent.<span class="fn">getStringExtra</span>(<span class="str">"transactionId"</span>) ?: <span class="kw">return</span>
+    viewModel.<span class="fn">loadTransaction</span>(txId)
+    <span class="cm">// If Activity already open at top, just refreshes with new transaction</span>
+}</code></pre>
+
+  <h3>Scenario 3: Home Activity as singleTask Root</h3>
+  <pre><code><span class="cm">&lt;activity
+    android:name=".ui.HomeActivity"
+    android:launchMode="singleTask"
+    android:exported="true"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;</span>
+
+<span class="cm">// Deep link from push notification: go home, clear sub-screens</span>
+<span class="kw">fun</span> <span class="fn">goHome</span>() {
+    <span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="kw">this</span>, <span class="type">HomeActivity</span>::<span class="kw">class</span>.java).apply {
+        <span class="cm">// With singleTask declared, FLAG_ACTIVITY_CLEAR_TOP pops Activities above</span>
+        flags = <span class="type">Intent</span>.<span class="type">FLAG_ACTIVITY_CLEAR_TOP</span>
+    }
+    <span class="fn">startActivity</span>(intent)
+}</code></pre>
+
+  <h3>Modern Approach: Navigation Component (Single Activity)</h3>
+  <pre><code><span class="cm">// In a single-activity + Navigation Compose app, launch modes are mostly irrelevant.
+// Navigation Component handles back stack with popUpTo and launchSingleTop.</span>
+<span class="fn">navController</span>.<span class="fn">navigate</span>(<span class="type">Route</span>.<span class="type">Home</span>) {
+    <span class="fn">popUpTo</span>(<span class="type">Route</span>.<span class="type">Home</span>) {
+        inclusive = <span class="kw">true</span>              <span class="cm">// remove Home itself from back stack before re-adding</span>
+    }
+    launchSingleTop = <span class="kw">true</span>          <span class="cm">// don't stack if already at top</span>
+}
+
+<span class="cm">// Logout in Navigation Compose — equivalent of FLAG_ACTIVITY_CLEAR_TASK</span>
+<span class="fn">navController</span>.<span class="fn">navigate</span>(<span class="type">Route</span>.<span class="type">Login</span>) {
+    <span class="fn">popUpTo</span>(<span class="fn">navController</span>.<span class="fn">graph</span>.<span class="fn">startDestinationId</span>) { inclusive = <span class="kw">true</span> }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+    <tr>
+      <td>Manifest launch modes</td>
+      <td>Declarative, always applied</td>
+      <td>Cannot be overridden per-launch; limited flexibility; can't combine with flags cleanly</td>
+      <td>Simple, stable navigation patterns; single-Activity root screens</td>
+    </tr>
+    <tr>
+      <td>Intent flags</td>
+      <td>Per-launch flexibility; can be combined; usable from non-Activity contexts</td>
+      <td>Verbose; easy to misuse; scatters navigation logic</td>
+      <td>Logout flows, notification deep links, programmatic navigation decisions</td>
+    </tr>
+    <tr>
+      <td>Navigation Component (NavController)</td>
+      <td>Centralized NavGraph; type-safe; handles deep links; launchSingleTop / popUpTo built-in; works with Compose</td>
+      <td>Requires migration; learning curve for complex nested graphs</td>
+      <td>All new projects; preferred over manifest launch modes for single-activity apps</td>
+    </tr>
+    <tr>
+      <td>Single Activity + Compose NavHost</td>
+      <td>Simplest model; no Activity back stack concerns; composable back stack</td>
+      <td>Full migration required; some limitations for very complex multi-module graphs</td>
+      <td>Greenfield projects; modern standard</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+
+  <h3>Forgetting setIntent() in onNewIntent()</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad — stale intent after restart</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onNewIntent</span>(intent: <span class="type">Intent</span>) {
+    <span class="kw">super</span>.<span class="fn">onNewIntent</span>(intent)
+    <span class="cm">// Does NOT call setIntent(intent)</span>
+    <span class="cm">// If Activity is recreated, getIntent() returns OLD intent</span>
+    <span class="kw">val</span> id = <span class="fn">getIntent</span>().<span class="fn">getStringExtra</span>(<span class="str">"id"</span>)
+}</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onNewIntent</span>(intent: <span class="type">Intent</span>) {
+    <span class="kw">super</span>.<span class="fn">onNewIntent</span>(intent)
+    <span class="fn">setIntent</span>(intent)    <span class="cm">// Update so getIntent() returns new one</span>
+    <span class="kw">val</span> id = intent.<span class="fn">getStringExtra</span>(<span class="str">"id"</span>)
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>singleTask Unexpectedly Destroys Back Stack</h3>
+  <div class="box danger">
+    <strong>Gotcha:</strong> Declaring your HomeActivity as singleTask means that whenever it is launched (e.g. from a notification), ALL Activities above it in the task are destroyed. Users lose navigation state. Only use singleTask when popping the back stack is intentional.
+  </div>
+
+  <h3>Other Critical Pitfalls</h3>
+  <ul>
+    <li><strong>Using singleInstance for regular screens</strong>: Activities in separate tasks cannot share ViewModels and have broken Back navigation. Only use for truly isolated system-level screens.</li>
+    <li><strong>Not handling FLAG_ACTIVITY_NEW_TASK correctly</strong>: When starting an Activity from a Service, Application, or BroadcastReceiver (non-Activity context), FLAG_ACTIVITY_NEW_TASK is required. Omitting it causes RuntimeException.</li>
+    <li><strong>Deep links with wrong launch mode</strong>: A deep link to a singleTask Activity destroys the back stack the user had. Prefer Navigation Component's deep link handling with addToBackStack.</li>
+    <li><strong>Duplicate Activities from double-tap</strong>: Users tapping a button twice quickly can start two Activities. Use singleTop or disable the button after first tap + re-enable in onResume.</li>
+    <li><strong>Ignoring task affinity</strong>: <code>android:taskAffinity</code> combined with singleTask can route Activities to unexpected tasks. Default affinity is the package name.</li>
+  </ul>
+
+  <div class="box good">
+    <strong>Modern best practice:</strong> In single-activity apps with Navigation Component, you rarely need launch modes. Use <code>launchSingleTop = true</code> and <code>popUpTo</code> in NavOptions for the equivalent behaviour. Reserve manifest launch modes for the MainActivity and cross-app deep-link scenarios.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW ═══ -->
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "Launch modes control how Android creates Activity instances and manages the back stack. There are four: standard creates a new instance every time; singleTop reuses if already at the top of the stack; singleTask ensures one instance per task and pops everything above it on re-launch; singleInstance is like singleTask but the Activity has its own isolated task. In modern single-activity apps with Navigation Component, I rarely use launch modes — launchSingleTop and popUpTo in NavOptions give the same control in a cleaner way."
+  </div>
+
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>The four modes:</strong> standard (new instance always), singleTop (reuse if at stack top → onNewIntent called), singleTask (one instance, pop above on re-launch → onNewIntent called), singleInstance (own private task).<br/><br/>
+    <strong>Intent flags override manifest:</strong> FLAG_ACTIVITY_CLEAR_TOP pops everything above an existing instance. FLAG_ACTIVITY_NEW_TASK + FLAG_ACTIVITY_CLEAR_TASK is the classic logout pattern — clears the task and starts fresh with LoginActivity so the user cannot press Back into the account screens.<br/><br/>
+    <strong>onNewIntent:</strong> Called on singleTop (at top) and singleTask re-launches. Must call setIntent(intent) to update what getIntent() returns — otherwise after rotation the stale original intent is restored.<br/><br/>
+    <strong>Modern practice:</strong> Single-activity apps use Navigation Component. NavController.navigate with launchSingleTop = true and popUpTo replace singleTop and singleTask respectively. This keeps all navigation logic in one NavGraph rather than scattered across manifests and flag combinations.
+  </div>
+
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Four modes and what each does to the back stack.</li>
+    <li>singleTask pops ALL activities above it — the most dangerous / commonly misused mode.</li>
+    <li>onNewIntent() — when it's called and why setIntent() is necessary.</li>
+    <li>Intent flags: CLEAR_TOP, CLEAR_TASK + NEW_TASK for logout.</li>
+    <li>FLAG_ACTIVITY_NEW_TASK required when starting from non-Activity context.</li>
+    <li>Navigation Component replaces launch modes for in-app navigation.</li>
+    <li>taskAffinity and its interaction with singleTask.</li>
+  </ol>
+
+  <h3>Do Not Go Deeper Unless Asked</h3>
+  <ul>
+    <li>taskAffinity details and multi-task scenarios</li>
+    <li>allowTaskReparenting attribute</li>
+    <li>Recents (Overview) screen task management</li>
+    <li>Navigation Component internals (covered in 18A)</li>
+  </ul>
+
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>What's the difference between singleTask and singleInstance?</td><td>Both allow one instance. singleTask lives in a task that can contain other Activities too. singleInstance lives in its own exclusive task — no other Activity can be in that task.</td></tr>
+    <tr><td>When is onNewIntent() called?</td><td>When an Activity with singleTop launch mode (and it's at the top of the stack) or singleTask (existing instance anywhere in task) receives a new Intent. The existing instance is reused instead of creating a new one.</td></tr>
+    <tr><td>How do you implement logout so the user can't press Back to the dashboard?</td><td>startActivity with FLAG_ACTIVITY_NEW_TASK + FLAG_ACTIVITY_CLEAR_TASK to clear the entire task. Or in Navigation Compose: navController.navigate(login) { popUpTo(graph.startDestination) { inclusive = true } }</td></tr>
+    <tr><td>How does Navigation Component relate to launch modes?</td><td>Navigation Component's NavController handles its own back stack (Fragment back stack or Compose composable back stack). launchSingleTop and popUpTo/inclusive give equivalent control to singleTop/singleTask without needing manifest launch modes.</td></tr>
+  </table>
+
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The real problem with launch modes is that they're a global, declarative contract set in the manifest, but navigation decisions are often context-dependent. A screen may sometimes need to clear the back stack (on logout deep link) and sometimes not (regular navigation). Intent flags give per-launch control, but scatter navigation logic. Navigation Component solves this by centralising all back-stack decisions in one NavGraph with per-navigate NavOptions — and in Compose, there's no Activity back stack at all, only a Composable call back stack managed by NavHost. For any new project I treat manifest launch modes as a last resort, used only for the root MainActivity (often singleTask for deep-link correctness) and cross-app Activities."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+  <table>
+    <tr><th>Mode</th><th>New instance?</th><th>Stack effect</th><th>onNewIntent?</th><th>Use case</th></tr>
+    <tr><td>standard</td><td>Always</td><td>Pushed on current task</td><td>No</td><td>Most screens</td></tr>
+    <tr><td>singleTop</td><td>Only if not at top</td><td>Reuses top instance</td><td>Yes (if reused)</td><td>Notification deep links</td></tr>
+    <tr><td>singleTask</td><td>Only if none exists</td><td>Pops all above existing instance</td><td>Yes (if reused)</td><td>Home/root screen, logout target</td></tr>
+    <tr><td>singleInstance</td><td>Only if none exists</td><td>Exclusive private task</td><td>Yes (if reused)</td><td>Alarm/call screen, standalone tool</td></tr>
+  </table>
+
+  <h3>Key Intent Flags</h3>
+  <table>
+    <tr><th>Flag</th><th>Effect</th></tr>
+    <tr><td>FLAG_ACTIVITY_SINGLE_TOP</td><td>singleTop for this launch</td></tr>
+    <tr><td>FLAG_ACTIVITY_CLEAR_TOP</td><td>Pop everything above existing instance in task</td></tr>
+    <tr><td>FLAG_ACTIVITY_NEW_TASK</td><td>Start in new task; required from non-Activity context</td></tr>
+    <tr><td>FLAG_ACTIVITY_CLEAR_TASK</td><td>Clear entire task (use with NEW_TASK); logout pattern</td></tr>
+    <tr><td>FLAG_ACTIVITY_NO_HISTORY</td><td>Not added to back stack; gone when user navigates away</td></tr>
+  </table>
+
+  <h3>Navigation Component Equivalents</h3>
+  <table>
+    <tr><th>Launch Mode / Flag</th><th>NavOptions equivalent</th></tr>
+    <tr><td>singleTop</td><td><code>launchSingleTop = true</code></td></tr>
+    <tr><td>singleTask / CLEAR_TOP</td><td><code>popUpTo(dest) { inclusive = false }</code></td></tr>
+    <tr><td>CLEAR_TASK + NEW_TASK (logout)</td><td><code>popUpTo(graph.startDestination) { inclusive = true }</code></td></tr>
+  </table>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What are the four Activity launch modes?</summary>
+    <div class="ans">standard, singleTop, singleTask, singleInstance.<br/>• standard: new instance every launch<br/>• singleTop: reuse if at stack top (onNewIntent called), else new instance<br/>• singleTask: one instance per task; pops all above it on re-launch (onNewIntent called)<br/>• singleInstance: one instance, own exclusive task</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is onNewIntent() and when is it called?</summary>
+    <div class="ans">onNewIntent() is called when a new Intent arrives for an existing Activity instance (instead of creating a new one). Called for singleTop if the Activity is at the top of the stack, and for singleTask/singleInstance when the instance already exists. Always call setIntent(intent) inside onNewIntent() to keep getIntent() up-to-date after potential future recreations.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What Intent flags would you use to implement a logout flow where the user cannot go Back to the account screens?</summary>
+    <div class="ans">FLAG_ACTIVITY_NEW_TASK combined with FLAG_ACTIVITY_CLEAR_TASK:<br/><pre><code>intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK</code></pre>This clears all Activities in the task before starting LoginActivity, so Back press exits the app rather than returning to any account screen.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the difference between singleTask and FLAG_ACTIVITY_CLEAR_TOP?</summary>
+    <div class="ans">singleTask is a manifest property — it applies every time the Activity is started and ensures one instance in the system. FLAG_ACTIVITY_CLEAR_TOP is a per-launch flag that pops everything above an existing instance in the current task. CLEAR_TOP does not enforce one global instance; it only affects the current task and the current launch. singleTask implies CLEAR_TOP behaviour plus the one-instance guarantee. For in-task navigation, CLEAR_TOP is often preferred as it's less aggressive.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> When is FLAG_ACTIVITY_NEW_TASK required?</summary>
+    <div class="ans">When starting an Activity from a context that is not an Activity — a Service, BroadcastReceiver, Application class, or any non-Activity Context. Omitting it in these scenarios throws: "Calling startActivity() from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag."</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How does singleTop differ from singleTask when the target Activity is NOT at the top of the stack?</summary>
+    <div class="ans">singleTop: if the Activity is NOT at the stack top, a new instance is created and pushed normally — no special back-stack manipulation. singleTask: if an instance exists ANYWHERE in the task (even buried), all Activities above it are popped and onNewIntent() is called on the existing instance. If no instance exists, a new one is created. singleTop is the "gentle" version; singleTask is "destructive."</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> In Navigation Compose, how do you achieve singleTop behaviour when navigating?</summary>
+    <div class="ans"><pre><code>navController.navigate(Route.Home) {
+    launchSingleTop = true  // Don't create duplicate if already at top
+}</code></pre>For singleTask-like clearing (e.g. going to Home from deep stack):<pre><code>navController.navigate(Route.Home) {
+    popUpTo(Route.Home) { inclusive = false }  // pop above Home, keep Home
+    launchSingleTop = true
+}</code></pre></div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] A user taps a push notification for Order #123 while they already have the OrderDetailActivity open showing Order #456. What launch mode/flag strategy ensures Order #123 loads without stacking a duplicate Activity?</summary>
+    <div class="ans">Declare OrderDetailActivity as singleTop in the manifest. When the notification PendingIntent fires with the new orderId, Android calls onNewIntent() on the existing instance instead of creating a new one (if it's at the top of the stack). In onNewIntent(), call setIntent(intent) and then viewModel.loadOrder(newOrderId). If OrderDetailActivity is NOT at the top (other screens stacked above), you might also add FLAG_ACTIVITY_CLEAR_TOP to pop those and reach the existing instance. In Navigation Compose with a single Activity, handle this in the notification tap by navigating with launchSingleTop = true and popUpTo to ensure clean state.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] After the user taps a notification, they see the correct screen, but pressing Back takes them to the wrong screen (an unrelated Activity from a different flow). What's the problem?</summary>
+    <div class="ans">The PendingIntent is launching the Activity with FLAG_ACTIVITY_NEW_TASK into a task that already has a different activity history. When the user presses Back, they're navigating through that existing task's back stack, not the expected flow. Fix: Use TaskStackBuilder to construct a synthetic back stack that matches the expected navigation hierarchy. Example:<pre><code>val stackBuilder = TaskStackBuilder.create(context).apply {
+    addNextIntentWithParentStack(orderDetailIntent)  // auto-adds HomeActivity → OrderListActivity → OrderDetailActivity
+}
+val pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)</code></pre>This ensures a proper back stack even when the app was killed.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Write the logout navigation code for both a multi-Activity app and a single-Activity Compose app.</summary>
+    <div class="ans"><strong>Multi-Activity:</strong><pre><code>fun logout() {
+    authRepository.clearSession()
+    val intent = Intent(this, LoginActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    startActivity(intent)
+    // No finish() needed — CLEAR_TASK destroys all Activities
+}</code></pre><strong>Single Activity + Compose NavHost:</strong><pre><code>// In ViewModel
+fun logout() {
+    viewModelScope.launch {
+        authRepository.clearSession()
+        _navigationEvent.emit(NavigationEvent.LoggedOut)
+    }
+}
+
+// In Composable / NavHost
+LaunchedEffect(Unit) {
+    viewModel.navigationEvent.collect { event ->
+        if (event is NavigationEvent.LoggedOut) {
+            navController.navigate(Route.Login) {
+                popUpTo(0) { inclusive = true }  // pop entire graph
+            }
+        }
+    }
+}</code></pre></div>
+  </details>
+
+  <hr style="border-color:var(--border);margin:32px 0;"/>
+  <h3 style="color:var(--warn);">Answer Key Summary</h3>
+  <ul>
+    <li>Can you describe all 4 launch modes and their back-stack effects without hesitation?</li>
+    <li>Can you explain singleTask vs CLEAR_TOP precisely?</li>
+    <li>Can you write a logout flow with correct flags from memory?</li>
+    <li>Can you write onNewIntent with setIntent correctly?</li>
+    <li>Do you know the TaskStackBuilder pattern for notification back stacks?</li>
+  </ul>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

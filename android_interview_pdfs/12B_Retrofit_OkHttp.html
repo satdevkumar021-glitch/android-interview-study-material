@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>12B – Retrofit &amp; OkHttp | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .ascii{font-family:"JetBrains Mono","Fira Code",monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;font-size:12.5px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:14px 0;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">12B · Retrofit &amp; OkHttp</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>12B</span> — Retrofit &amp; OkHttp</h1>
+    <p class="hero-desc">Retrofit annotations, suspend vs Call, Moshi/Gson/kotlinx.serialization, OkHttp interceptors, Application vs Network interceptors, and how Retrofit wraps OkHttp.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 12B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>How Retrofit and OkHttp Compose</h3>
+    <div class="ascii">
+Your code                  Retrofit layer            OkHttp layer
+─────────────────────────────────────────────────────────────────
+suspend fun getProduct()
+  → Retrofit processes      AnnotationProcessor       
+    annotations, builds     reads @GET, @Path, etc.   
+    HTTP request            creates OkHttp Request    
+                            calls OkHttpClient.newCall()
+                                                      ApplicationInterceptors
+                                                      ↓
+                                                      Cache check
+                                                      ↓
+                                                      NetworkInterceptors
+                                                      ↓
+                                                      TCP connection
+                                                      ↓
+                                                      Server
+                                                      ↑ (response)
+    ConverterFactory        parses response body
+    (Moshi/Gson)           maps JSON to data class
+Returns typed object ◄──────────────────────────────────────────
+    </div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Retrofit is a type-safe HTTP client — it turns your interface into a working implementation at runtime using dynamic proxies. OkHttp is the actual HTTP engine. Retrofit handles the annotation processing and serialisation; OkHttp handles the connection pool, caching, and interceptors. They're designed to be used together but are independently useful.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Retrofit API Interface</h3>
+    <pre><code><span class="kw">interface</span> <span class="cl">OrderApi</span> {
+    <span class="cm">// @GET + @Path — GET /orders/{orderId}</span>
+    <span class="an">@GET</span>(<span class="str">"orders/{orderId}"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">getOrder</span>(
+        <span class="an">@Path</span>(<span class="str">"orderId"</span>) orderId: <span class="cl">String</span>
+    ): <span class="cl">OrderDto</span>
+
+    <span class="cm">// @GET + @Query — GET /orders?status=PENDING&page=1&pageSize=20</span>
+    <span class="an">@GET</span>(<span class="str">"orders"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">getOrders</span>(
+        <span class="an">@Query</span>(<span class="str">"status"</span>) status: <span class="cl">String</span>? = <span class="kw">null</span>,
+        <span class="an">@Query</span>(<span class="str">"page"</span>) page: <span class="cl">Int</span> = <span class="nu">1</span>,
+        <span class="an">@Query</span>(<span class="str">"pageSize"</span>) pageSize: <span class="cl">Int</span> = <span class="nu">20</span>
+    ): <span class="cl">PagedResponse</span>&lt;<span class="cl">OrderDto</span>&gt;
+
+    <span class="cm">// @POST + @Body — POST /orders with JSON body</span>
+    <span class="an">@POST</span>(<span class="str">"orders"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">createOrder</span>(
+        <span class="an">@Body</span> request: <span class="cl">CreateOrderRequest</span>,
+        <span class="an">@Header</span>(<span class="str">"Idempotency-Key"</span>) idempotencyKey: <span class="cl">String</span>
+    ): <span class="cl">OrderDto</span>
+
+    <span class="cm">// @PUT — full update</span>
+    <span class="an">@PUT</span>(<span class="str">"orders/{orderId}"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">updateOrder</span>(
+        <span class="an">@Path</span>(<span class="str">"orderId"</span>) orderId: <span class="cl">String</span>,
+        <span class="an">@Body</span> request: <span class="cl">UpdateOrderRequest</span>
+    ): <span class="cl">OrderDto</span>
+
+    <span class="cm">// @DELETE</span>
+    <span class="an">@DELETE</span>(<span class="str">"orders/{orderId}"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">cancelOrder</span>(
+        <span class="an">@Path</span>(<span class="str">"orderId"</span>) orderId: <span class="cl">String</span>
+    ): <span class="cl">Unit</span>  <span class="cm">// 204 No Content</span>
+
+    <span class="cm">// Response&lt;T&gt; — access the full HTTP response (headers, code, etc.)</span>
+    <span class="an">@POST</span>(<span class="str">"payments"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">processPayment</span>(<span class="an">@Body</span> body: <span class="cl">PaymentRequest</span>): <span class="cl">Response</span>&lt;<span class="cl">PaymentDto</span>&gt;
+}</code></pre>
+
+    <h3>suspend fun vs Call&lt;T&gt;</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Return type</th><th>Usage</th><th>Threading</th></tr>
+      <tr><td><code>suspend fun getX(): T</code></td><td>Coroutines — preferred in new code</td><td>Runs on OkHttp thread pool, coroutine dispatcher handles switching</td></tr>
+      <tr><td><code>fun getX(): Call&lt;T&gt;</code></td><td>Old code or if you need to cancel manually</td><td>You must call <code>enqueue()</code> on the right thread</td></tr>
+      <tr><td><code>suspend fun getX(): Response&lt;T&gt;</code></td><td>When you need headers, error body, or status code</td><td>Same as suspend fun</td></tr>
+    </table></div>
+
+    <h3>Converter Factories</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Library</th><th>Factory</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Gson</td><td>GsonConverterFactory.create()</td><td>Widely used, simple</td><td>Reflection-based, no null safety, no default values</td></tr>
+      <tr><td>Moshi</td><td>MoshiConverterFactory.create()</td><td>Kotlin-aware, null safety, codegen option</td><td>Requires adapters for custom types</td></tr>
+      <tr><td>kotlinx.serialization</td><td>serializationConverterFactory()</td><td>Multiplatform, KSP-based codegen, fast</td><td>Content-type negotiation can be tricky</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// Moshi with KSP codegen (preferred)</span>
+<span class="kw">val</span> moshi = <span class="cl">Moshi</span>.<span class="cl">Builder</span>()
+    .<span class="fn">add</span>(<span class="cl">KotlinJsonAdapterFactory</span>())  <span class="cm">// reflection fallback for classes without @JsonClass</span>
+    .<span class="fn">add</span>(<span class="cl">BigDecimalAdapter</span>())           <span class="cm">// custom adapter</span>
+    .<span class="fn">build</span>()
+
+<span class="kw">val</span> retrofit = <span class="cl">Retrofit</span>.<span class="cl">Builder</span>()
+    .<span class="fn">baseUrl</span>(<span class="str">"https://api.commerce.com/"</span>)
+    .<span class="fn">addConverterFactory</span>(<span class="cl">MoshiConverterFactory</span>.<span class="fn">create</span>(moshi))
+    .<span class="fn">client</span>(okHttpClient)
+    .<span class="fn">build</span>()</code></pre>
+
+    <h3>OkHttp Interceptors</h3>
+    <pre><code><span class="cm">// Application Interceptor — runs before cache, for every call</span>
+<span class="kw">class</span> <span class="cl">AuthInterceptor</span>(<span class="kw">private val</span> tokenStore: <span class="cl">TokenStore</span>) : <span class="cl">Interceptor</span> {
+    <span class="kw">override fun</span> <span class="fn">intercept</span>(chain: <span class="cl">Interceptor</span>.<span class="cl">Chain</span>): <span class="cl">Response</span> {
+        <span class="kw">val</span> token = tokenStore.<span class="fn">getAccessToken</span>() ?: <span class="kw">return</span> chain.<span class="fn">proceed</span>(chain.request())
+        <span class="kw">val</span> newRequest = chain.request().<span class="fn">newBuilder</span>()
+            .<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $token"</span>)
+            .<span class="fn">build</span>()
+        <span class="kw">return</span> chain.<span class="fn">proceed</span>(newRequest)
+    }
+}
+
+<span class="cm">// Logging Interceptor — debug only</span>
+<span class="kw">val</span> loggingInterceptor = <span class="cl">HttpLoggingInterceptor</span> { message ->
+    <span class="kw">if</span> (<span class="cl">BuildConfig</span>.<span class="cl">DEBUG</span>) <span class="cl">Timber</span>.<span class="fn">d</span>(message)
+}.<span class="fn">apply</span> {
+    level = <span class="kw">if</span> (<span class="cl">BuildConfig</span>.<span class="cl">DEBUG</span>) <span class="cl">HttpLoggingInterceptor</span>.<span class="cl">Level</span>.<span class="cl">BODY</span>
+            <span class="kw">else</span> <span class="cl">HttpLoggingInterceptor</span>.<span class="cl">Level</span>.<span class="cl">NONE</span>
+}</code></pre>
+
+    <h3>Application vs Network Interceptors</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>Runs when</th><th>Cache hit?</th><th>Best for</th></tr>
+      <tr><td>Application interceptor (<code>addInterceptor</code>)</td><td>Before OkHttp's core logic, for every call</td><td>Yes — even for cached responses</td><td>Auth header, retry logic, business-level logging</td></tr>
+      <tr><td>Network interceptor (<code>addNetworkInterceptor</code>)</td><td>After OkHttp decides a network request is needed</td><td>No — skipped for cache hits</td><td>Gzip, low-level wire tracing, adding Cache-Control</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Use suspend fun — Always in new code</h3>
+    <p>Retrofit 2.6+ natively supports Kotlin coroutines with <code>suspend fun</code>. This integrates naturally with coroutine scopes, structured concurrency, and cancellation. Prefer it over <code>Call&lt;T&gt;</code> in all new code.</p>
+    <h3>Use Response&lt;T&gt; when you need HTTP metadata</h3>
+    <pre><code><span class="cm">// Use Response&lt;T&gt; when you need the status code, headers, or error body</span>
+<span class="an">@POST</span>(<span class="str">"payments"</span>)
+<span class="kw">suspend fun</span> <span class="fn">createPayment</span>(<span class="an">@Body</span> body: <span class="cl">PaymentRequest</span>): <span class="cl">Response</span>&lt;<span class="cl">PaymentDto</span>&gt;
+
+<span class="cm">// In repository:</span>
+<span class="kw">val</span> response = api.<span class="fn">createPayment</span>(request)
+<span class="kw">if</span> (response.<span class="fn">isSuccessful</span>()) {
+    <span class="kw">val</span> locationHeader = response.headers()[<span class="str">"Location"</span>]  <span class="cm">// e.g. /payments/PAY-123</span>
+    <span class="kw">val</span> dto = response.<span class="fn">body</span>()!!
+} <span class="kw">else</span> {
+    <span class="kw">val</span> errorJson = response.<span class="fn">errorBody</span>()?.<span class="fn">string</span>()
+}</code></pre>
+    <h3>Converter Factory Selection</h3>
+    <p>For new projects: <strong>Moshi with KSP codegen</strong> (<code>@JsonClass(generateAdapter = true)</code>) or <strong>kotlinx.serialization</strong>. Both avoid reflection, support Kotlin null safety, and generate adapters at compile time. Avoid Gson for new code — it doesn't understand Kotlin nullable types correctly.</p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Full Retrofit + OkHttp Setup</h3>
+    <pre><code><span class="cm">// ── Retrofit interface ───────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cl">CommerceApi</span> {
+    <span class="an">@GET</span>(<span class="str">"v1/products"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">getProducts</span>(
+        <span class="an">@Query</span>(<span class="str">"categoryId"</span>) categoryId: <span class="cl">String</span>?,
+        <span class="an">@Query</span>(<span class="str">"cursor"</span>) cursor: <span class="cl">String</span>? = <span class="kw">null</span>,
+        <span class="an">@Query</span>(<span class="str">"limit"</span>) limit: <span class="cl">Int</span> = <span class="nu">20</span>
+    ): <span class="cl">CursorPageResponse</span>&lt;<span class="cl">ProductDto</span>&gt;
+
+    <span class="an">@POST</span>(<span class="str">"v1/cart/items"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">addToCart</span>(
+        <span class="an">@Body</span> item: <span class="cl">AddToCartRequest</span>,
+        <span class="an">@Header</span>(<span class="str">"Idempotency-Key"</span>) key: <span class="cl">String</span>
+    ): <span class="cl">CartItemDto</span>
+}
+
+<span class="cm">// ── Full OkHttp + Retrofit setup in Hilt module ──────────────</span>
+<span class="an">@Module</span>
+<span class="an">@InstallIn</span>(<span class="cl">SingletonComponent</span>::<span class="kw">class</span>)
+<span class="kw">object</span> <span class="cl">NetworkModule</span> {
+
+    <span class="an">@Singleton</span>
+    <span class="an">@Provides</span>
+    <span class="kw">fun</span> <span class="fn">provideOkHttpClient</span>(
+        tokenStore: <span class="cl">TokenStore</span>,
+        <span class="an">@ApplicationContext</span> context: <span class="cl">Context</span>
+    ): <span class="cl">OkHttpClient</span> {
+        <span class="kw">val</span> cache = <span class="cl">Cache</span>(<span class="cl">File</span>(context.cacheDir, <span class="str">"http"</span>), <span class="nu">10L</span> * <span class="nu">1024</span> * <span class="nu">1024</span>)
+        <span class="kw">return</span> <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+            .<span class="fn">cache</span>(cache)
+            .<span class="fn">connectTimeout</span>(<span class="nu">15</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+            .<span class="fn">readTimeout</span>(<span class="nu">30</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+            .<span class="fn">writeTimeout</span>(<span class="nu">30</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+            .<span class="fn">addInterceptor</span>(<span class="cl">AuthInterceptor</span>(tokenStore))          <span class="cm">// auth first</span>
+            .<span class="fn">addInterceptor</span>(<span class="fn">buildLoggingInterceptor</span>())             <span class="cm">// logging after auth</span>
+            .<span class="fn">build</span>()
+    }
+
+    <span class="an">@Singleton</span>
+    <span class="an">@Provides</span>
+    <span class="kw">fun</span> <span class="fn">provideCommerceApi</span>(client: <span class="cl">OkHttpClient</span>): <span class="cl">CommerceApi</span> =
+        <span class="cl">Retrofit</span>.<span class="cl">Builder</span>()
+            .<span class="fn">baseUrl</span>(<span class="str">"https://api.commerce.com/"</span>)
+            .<span class="fn">client</span>(client)
+            .<span class="fn">addConverterFactory</span>(<span class="cl">MoshiConverterFactory</span>.<span class="fn">create</span>(<span class="fn">buildMoshi</span>()))
+            .<span class="fn">build</span>()
+            .<span class="fn">create</span>(<span class="cl">CommerceApi</span>::<span class="kw">class</span>.java)
+
+    <span class="kw">private fun</span> <span class="fn">buildLoggingInterceptor</span>() = <span class="cl">HttpLoggingInterceptor</span>().<span class="fn">apply</span> {
+        level = <span class="kw">if</span> (<span class="cl">BuildConfig</span>.<span class="cl">DEBUG</span>) <span class="cl">HttpLoggingInterceptor</span>.<span class="cl">Level</span>.<span class="cl">BODY</span>
+                <span class="kw">else</span> <span class="cl">HttpLoggingInterceptor</span>.<span class="cl">Level</span>.<span class="cl">NONE</span>
+    }
+
+    <span class="kw">private fun</span> <span class="fn">buildMoshi</span>() = <span class="cl">Moshi</span>.<span class="cl">Builder</span>()
+        .<span class="fn">addLast</span>(<span class="cl">KotlinJsonAdapterFactory</span>())
+        .<span class="fn">build</span>()
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Retrofit vs Ktor Client vs Manual OkHttp</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Library</th><th>Pros</th><th>Cons</th><th>Use when</th></tr>
+      <tr><td>Retrofit</td><td>Type-safe, annotation-driven, huge ecosystem</td><td>Reflection-based proxy, extra dependency</td><td>Standard Android REST APIs</td></tr>
+      <tr><td>Ktor Client</td><td>KMM-compatible, first-class coroutines, flexible DSL</td><td>Less familiar, more boilerplate for simple APIs</td><td>Kotlin Multiplatform projects</td></tr>
+      <tr><td>Raw OkHttp</td><td>Full control, no abstractions</td><td>No type safety, manual serialisation</td><td>Complex streaming, WebSocket, when Retrofit isn't available</td></tr>
+    </table></div>
+    <h3>Gson vs Moshi vs kotlinx.serialization</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Gson Null Safety Problem</div>
+      Gson ignores Kotlin's null safety — it will happily set a non-nullable Kotlin field to null if the JSON is missing the field, causing NPE at runtime. Always use Moshi or kotlinx.serialization for Kotlin code.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Common Mistakes</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Creating Multiple Retrofit Instances</div>
+      Retrofit and OkHttpClient are expensive to create and should be singletons. Creating a new instance per request or per screen causes multiple connection pools, multiple thread pools, and wasted memory. Always inject via Hilt as <code>@Singleton</code>.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Logging Authorization Headers in Production</div>
+      <code>HttpLoggingInterceptor.Level.BODY</code> logs the full Authorization header and request bodies. Guard with <code>if (BuildConfig.DEBUG)</code> — never ship BODY logging to production users. Sensitive data in logs is a security violation.
+    </div>
+    <h3>@Path Encoding</h3>
+    <pre><code><span class="cm">// By default, @Path URL-encodes the value</span>
+<span class="an">@GET</span>(<span class="str">"users/{userId}/orders"</span>)
+<span class="kw">suspend fun</span> <span class="fn">getOrders</span>(<span class="an">@Path</span>(<span class="str">"userId"</span>) userId: <span class="cl">String</span>)
+<span class="cm">// userId = "user/123" → encodes to "user%2F123" (safe)</span>
+
+<span class="cm">// To allow slashes (when path segment contains a full path):</span>
+<span class="an">@GET</span>(<span class="str">"{fullPath}"</span>)
+<span class="kw">suspend fun</span> <span class="fn">getResource</span>(<span class="an">@Path</span>(<span class="str">"fullPath"</span>, encoded = <span class="kw">true</span>) path: <span class="cl">String</span>)</code></pre>
+    <h3>ConnectionPool</h3>
+    <pre><code><span class="cm">// OkHttp default: 5 connections, 5 min idle timeout — usually fine</span>
+<span class="cm">// For high-throughput: increase maxIdleConnections</span>
+<span class="kw">val</span> connectionPool = <span class="cl">ConnectionPool</span>(maxIdleConnections = <span class="nu">10</span>, keepAliveDuration = <span class="nu">5</span>, <span class="cl">TimeUnit</span>.<span class="cl">MINUTES</span>)
+<span class="kw">val</span> client = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+    .<span class="fn">connectionPool</span>(connectionPool)
+    .<span class="fn">build</span>()</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Retrofit is a type-safe HTTP client that sits on top of OkHttp. You define your API as an interface with Retrofit annotations — <code>@GET</code>, <code>@POST</code>, <code>@Path</code>, <code>@Query</code>, <code>@Body</code>, <code>@Header</code>. Retrofit generates a proxy implementation at runtime, reads annotations to build OkHttp requests, passes them to OkHttp, and converts the response using a converter factory like Moshi. OkHttp handles the actual TCP connection, connection pooling, caching, and interceptor chains."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"The interceptor chain is the key OkHttp concept. Application interceptors run for every call including cache hits — used for auth headers and logging. Network interceptors run only for actual network requests — used for low-level headers. Order matters: I always put auth first, then logging, so the log shows the authenticated request. For serialisation: never use Gson in new Kotlin code — it ignores null safety and can set non-nullable fields to null from JSON, causing NPEs. Use Moshi with <code>@JsonClass(generateAdapter = true)</code> for compile-time adapter generation, or kotlinx.serialization. For suspend vs Call: always use suspend in new code — it integrates with structured concurrency, and cancellation happens automatically when the coroutine scope is cancelled."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Retrofit wraps OkHttp</strong>: Retrofit = annotation processing + converter; OkHttp = HTTP engine + interceptors + pool</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>suspend fun preferred</strong> over <code>Call&lt;T&gt;</code> — integrates with structured concurrency</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Moshi over Gson</strong>: Gson doesn't respect Kotlin null safety; Moshi does with codegen</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Application vs Network Interceptor</strong>: Application = every call; Network = only actual HTTP calls</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Singleton OkHttpClient</strong>: one instance per app — connection pool, thread pool, cache are shared</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Never log in production</strong>: <code>Level.BODY</code> is debug-only — logs full headers including auth tokens</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Retrofit Rx/Java adapters (replaced by coroutines)</li>
+      <li>Full Moshi/Gson annotation reference</li>
+      <li>OkHttp HTTP/2 multiplexing internals</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"How does Retrofit create the API implementation?"</td><td>Via Java's dynamic proxy (<code>Proxy.newProxyInstance()</code>). The InvocationHandler intercepts every method call, reads annotations to build an OkHttp Request, executes it, and converts the response.</td></tr>
+      <tr><td>"What happens if Retrofit has multiple converter factories?"</td><td>Retrofit tries each factory in order, using the first one that claims it can handle the type. Add the most specific factory first, fallback factory last.</td></tr>
+      <tr><td>"How do you handle multipart file uploads?"</td><td>Use <code>@Multipart</code> on the method and <code>@Part</code> on parameters. Wrap files in <code>MultipartBody.Part.createFormData("file", filename, requestBody)</code>.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The most important production concern is that OkHttp's interceptors run synchronously on OkHttp's thread pool. Never do UI work in an interceptor. Also: if you need to make another network call inside an interceptor (e.g., refresh token), use a synchronous <code>execute()</code> call on the new client, not a coroutine — interceptors aren't coroutine-aware and using suspending functions there requires careful handling to avoid deadlocks.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Retrofit Annotations</h4>
+        <pre><code>@GET("products/{id}")
+suspend fun getProduct(
+    @Path("id") id: String,
+    @Query("include") include: String? = null
+): ProductDto
+
+@POST("orders")
+suspend fun createOrder(@Body req: OrderRequest,
+    @Header("Idempotency-Key") key: String
+): OrderDto</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Interceptor Types</h4>
+        <pre><code>// Application interceptor
+.addInterceptor(AuthInterceptor())
+// → runs for EVERY call (incl. cache hits)
+
+// Network interceptor
+.addNetworkInterceptor(CacheHeaderFixer())
+// → runs only for NETWORK calls</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Converter Factory Choice</h4>
+        <pre><code>Gson     → DO NOT USE in Kotlin (no null safety)
+Moshi    → preferred; @JsonClass generates adapters
+kotlinx  → KMM-compatible, @Serializable annotation</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>OkHttp Singleton</h4>
+        <pre><code>@Singleton @Provides
+fun provideOkHttp(token: TokenStore) =
+    OkHttpClient.Builder()
+        .connectTimeout(15, SECONDS)
+        .readTimeout(30, SECONDS)
+        .addInterceptor(AuthInterceptor(token))
+        .build()</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the role of a Retrofit converter factory?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A converter factory serialises your Kotlin objects into a request body (e.g., data class → JSON string) and deserialises the response body into Kotlin objects (JSON string → data class). Without a converter factory, you'd have to handle raw <code>ResponseBody</code> and call <code>body.string()</code> manually. Factories are added to Retrofit.Builder; Retrofit tries each in order until one claims it can handle the type.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the difference between @Path and @Query in Retrofit?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>@Path("id")</code> replaces a placeholder in the URL path: <code>@GET("products/{id}")</code> with <code>@Path("id") productId: String</code> → <code>GET /products/abc123</code>. The value is URL-encoded by default.<br><br>
+        <code>@Query("status")</code> appends a query parameter: <code>@GET("products")</code> with <code>@Query("status") status: String</code> → <code>GET /products?status=ACTIVE</code>. Null values are omitted from the URL.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> Why should you not use Gson with Kotlin?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Gson was designed for Java and doesn't understand Kotlin's type system. If a JSON field is missing, Gson sets the corresponding Kotlin property to null — even if it's declared as non-nullable. This bypasses Kotlin's null safety guarantees and causes <code>NullPointerException</code> at runtime when accessing the property. Moshi and kotlinx.serialization are Kotlin-aware and throw a descriptive exception if a required non-nullable field is missing.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Explain the difference between Application Interceptors and Network Interceptors.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Application Interceptors</strong> (<code>addInterceptor()</code>): added to the application layer, before OkHttp's core. They run for every call — including responses served from cache (no network request is made). They see the final URL after redirects. Best for: adding auth headers (so cached responses also get the header for consistency), retry logic, and request/response logging at the business level.<br><br>
+        <strong>Network Interceptors</strong> (<code>addNetworkInterceptor()</code>): added to the network layer. They only run when an actual network connection is established. They don't run for cache hits. Best for: modifying response headers, adding Cache-Control headers, low-level traffic analysis or compression.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Why should OkHttpClient be a singleton, and what happens if it's not?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Each OkHttpClient instance maintains its own: thread pool (for async calls), connection pool (open TCP connections), DNS cache, and HTTP response cache. Creating a new client per request means: no connection reuse (expensive TCP handshake every call), no shared cache (disk cache opens/closes repeatedly), wasted threads. A Singleton client reuses connections across requests (HTTP keep-alive), shares the thread pool efficiently, and has a single cache. This significantly reduces latency and memory usage.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you access the HTTP status code and error body when using Retrofit?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Change the return type from <code>T</code> to <code>Response&lt;T&gt;</code>: <code>suspend fun getUser(): Response&lt;UserDto&gt;</code>. The <code>Response</code> wrapper provides: <code>response.code()</code> (HTTP status), <code>response.isSuccessful()</code> (200–299), <code>response.body()</code> (parsed body if successful), <code>response.errorBody()</code> (raw error body string for 4xx/5xx), <code>response.headers()</code> (all response headers). Parse the error body with your Moshi instance to get structured error objects.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How would you build a Moshi instance with a custom adapter for BigDecimal?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>class BigDecimalAdapter { @FromJson fun fromJson(value: String) = BigDecimal(value); @ToJson fun toJson(value: BigDecimal) = value.toPlainString() }</code><br><br>
+        <code>val moshi = Moshi.Builder().add(BigDecimalAdapter()).addLast(KotlinJsonAdapterFactory()).build()</code><br><br>
+        Add adapters before <code>KotlinJsonAdapterFactory</code> so they take priority. Use <code>addLast()</code> for <code>KotlinJsonAdapterFactory</code> as a general fallback. Register the Moshi instance with Retrofit: <code>.addConverterFactory(MoshiConverterFactory.create(moshi))</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Describe in detail how Retrofit creates the implementation of your API interface.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        When you call <code>retrofit.create(OrderApi::class.java)</code>:<br><br>
+        1. Retrofit uses <code>Proxy.newProxyInstance(classLoader, arrayOf(OrderApi::class.java), handler)</code> to create a Java dynamic proxy.<br>
+        2. The <code>InvocationHandler</code> intercepts every method call on the proxy.<br>
+        3. On <code>getOrder("123")</code>: Retrofit reads annotations (<code>@GET("orders/{orderId}")</code>, <code>@Path("orderId")</code>) from the method's reflection metadata.<br>
+        4. It builds an OkHttp <code>Request</code> with the resolved URL, headers, and body.<br>
+        5. For <code>suspend fun</code>: Retrofit uses a <code>SuspendCallAdapterFactory</code> that converts <code>Call&lt;T&gt;</code> to a coroutine-compatible execution using <code>suspendCancellableCoroutine</code>.<br>
+        6. The request passes through OkHttp's interceptor chain and returns a <code>Response</code>.<br>
+        7. The configured <code>ConverterFactory</code> deserialises <code>response.body()</code> into the return type.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How would you make a synchronous network call inside an OkHttp interceptor to refresh a token?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Use a separate, unauthenticated <code>OkHttpClient</code> instance and call <code>.execute()</code> (synchronous, not <code>.enqueue()</code>) on a new <code>Call</code>:<br><br>
+        <code>val refreshResponse = unauthClient.newCall(refreshRequest).execute()</code><br><br>
+        Key rules: (1) Use the unauthenticated client — never the same client, or you'll infinite loop. (2) Use <code>execute()</code>, not <code>enqueue()</code> — interceptors run synchronously; <code>enqueue()</code> would require a callback and block the interceptor thread awkwardly. (3) Use a Mutex to ensure only one refresh request happens concurrently when multiple API calls fail with 401 simultaneously. (4) After refreshing, update the token store and retry the original request with <code>chain.proceed(newRequest)</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A production app is making too many connections. What OkHttp settings would you investigate?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        1. <strong>Multiple OkHttpClient instances</strong>: each has its own connection pool. Consolidate to a singleton. Check via profiling — unique pool objects.<br>
+        2. <strong>ConnectionPool configuration</strong>: default is 5 idle connections, 5 min keep-alive. For high traffic, increase <code>maxIdleConnections</code> so connections aren't closed and reopened.<br>
+        3. <strong>HTTP/2 not being used</strong>: HTTP/2 multiplexes multiple requests over one connection. Verify server supports HTTP/2; OkHttp enables it automatically if the server supports ALPN.<br>
+        4. <strong>Aggressive timeouts</strong>: very short timeouts cause premature connection closure. Check if <code>keepAliveDuration</code> aligns with server's connection timeout.<br>
+        5. <strong>retryOnConnectionFailure</strong>: if true, OkHttp opens new connections on failure — can compound connection issues during server outages.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>10A – Creational Patterns | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">10A · Creational Patterns</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>10A</span> — Creational Patterns</h1>
+    <p class="hero-desc">Singleton, Factory Method, Abstract Factory, and Builder — the four creational patterns that govern object construction in production Android apps.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 10A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What are Creational Patterns?</h3>
+    <p>Creational design patterns deal with <strong>object creation mechanisms</strong>. They abstract the instantiation process, making code more flexible and independent of how objects are created, composed, and represented. In Android, you encounter creational patterns constantly — often without realising it.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Problem it solves</th><th>Android example</th></tr>
+      <tr><td>Singleton</td><td>Exactly one instance shared app-wide</td><td>Room database, Retrofit client, SharedPreferences</td></tr>
+      <tr><td>Factory Method</td><td>Create objects without specifying exact class</td><td><code>Fragment.newInstance()</code>, payment method creation</td></tr>
+      <tr><td>Abstract Factory</td><td>Create families of related objects</td><td>Themed UI component factories (light/dark)</td></tr>
+      <tr><td>Builder</td><td>Construct complex objects step by step</td><td>OkHttpClient, Retrofit, NotificationCompat, AlertDialog</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Creational patterns answer: "Who is responsible for creating this object, and how do we control the creation so callers don't need to know the details?" When combined with DI (Hilt), creational patterns shift object lifetime management to the framework — but knowing the underlying patterns is critical for reasoning about Hilt scopes.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>1. Singleton Pattern</h3>
+    <p>Ensures a class has exactly one instance, with a global access point. In Kotlin, the <code>object</code> keyword creates a thread-safe, lazily-initialised singleton by default.</p>
+    <pre><code><span class="cm">// Kotlin object — thread-safe singleton, initialised on first access</span>
+<span class="kw">object</span> <span class="cl">AnalyticsTracker</span> {
+    <span class="kw">private val</span> events = <span class="fn">mutableListOf</span>&lt;<span class="cl">AnalyticsEvent</span>&gt;()
+    <span class="kw">fun</span> <span class="fn">track</span>(event: <span class="cl">AnalyticsEvent</span>) { events.<span class="fn">add</span>(event) }
+}
+
+<span class="cm">// companion object — factory + singleton access on a class</span>
+<span class="kw">class</span> <span class="cl">AppDatabase</span> : <span class="cl">RoomDatabase</span>() {
+    <span class="kw">companion object</span> {
+        <span class="an">@Volatile</span>
+        <span class="kw">private var</span> INSTANCE: <span class="cl">AppDatabase</span>? = <span class="kw">null</span>
+
+        <span class="kw">fun</span> <span class="fn">getInstance</span>(context: <span class="cl">Context</span>): <span class="cl">AppDatabase</span> =
+            INSTANCE ?: <span class="kw">synchronized</span>(<span class="kw">this</span>) {
+                INSTANCE ?: <span class="cl">Room</span>.<span class="fn">databaseBuilder</span>(
+                    context.<span class="fn">applicationContext</span>,
+                    <span class="cl">AppDatabase</span>::<span class="kw">class</span>.java,
+                    <span class="str">"bank_db"</span>
+                ).<span class="fn">build</span>().<span class="fn">also</span> { INSTANCE = it }
+            }
+    }
+}
+
+<span class="cm">// Thread-safe lazy — initialised once, on first access, by the calling thread</span>
+<span class="kw">val</span> httpClient: <span class="cl">OkHttpClient</span> <span class="kw">by</span> <span class="fn">lazy</span> {
+    <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+        .<span class="fn">connectTimeout</span>(<span class="nu">30</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+        .<span class="fn">build</span>()
+}</code></pre>
+    <div class="callout callout-red">
+      <div class="callout-label">Singleton Problems</div>
+      Global mutable state is the enemy of testability. <code>object AnalyticsTracker</code> cannot be replaced with a fake in unit tests — you'd need Hilt or a service locator to swap it. Prefer injecting singleton instances via DI rather than accessing <code>object</code> directly.
+    </div>
+
+    <h3>2. Factory Method Pattern</h3>
+    <p>Defines an interface for creating an object, but lets subclasses or callers decide which class to instantiate. In Android, <code>Fragment.newInstance()</code> is the canonical example.</p>
+    <pre><code><span class="cm">// Factory method for Fragment creation — avoids direct constructor call</span>
+<span class="kw">class</span> <span class="cl">ProductDetailFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">companion object</span> {
+        <span class="kw">private const val</span> ARG_PRODUCT_ID = <span class="str">"product_id"</span>
+
+        <span class="kw">fun</span> <span class="fn">newInstance</span>(productId: <span class="cl">String</span>): <span class="cl">ProductDetailFragment</span> =
+            <span class="cl">ProductDetailFragment</span>().<span class="fn">apply</span> {
+                arguments = <span class="fn">bundleOf</span>(ARG_PRODUCT_ID <span class="kw">to</span> productId)
+            }
+    }
+}
+
+<span class="cm">// Factory method for payment method objects</span>
+<span class="kw">interface</span> <span class="cl">PaymentGateway</span> { <span class="kw">suspend fun</span> <span class="fn">process</span>(amount: <span class="cl">BigDecimal</span>): <span class="cl">PaymentResult</span> }
+
+<span class="kw">object</span> <span class="cl">PaymentGatewayFactory</span> {
+    <span class="kw">fun</span> <span class="fn">create</span>(method: <span class="cl">PaymentMethod</span>): <span class="cl">PaymentGateway</span> = <span class="kw">when</span> (method) {
+        <span class="kw">is</span> <span class="cl">PaymentMethod</span>.<span class="cl">CreditCard</span> -&gt; <span class="cl">StripeGateway</span>(method.token)
+        <span class="kw">is</span> <span class="cl">PaymentMethod</span>.<span class="cl">PayPal</span>      -&gt; <span class="cl">PayPalGateway</span>(method.email)
+        <span class="kw">is</span> <span class="cl">PaymentMethod</span>.<span class="cl">Crypto</span>      -&gt; <span class="cl">CoinbaseGateway</span>(method.address)
+    }
+}</code></pre>
+
+    <h3>3. Abstract Factory Pattern</h3>
+    <p>Creates families of related objects without specifying their concrete classes. Useful when the app must produce different UI components based on configuration (theme, tenant, platform).</p>
+    <pre><code><span class="cm">// Abstract factory for themed UI components (e.g., white-label banking app)</span>
+<span class="kw">interface</span> <span class="cl">UiComponentFactory</span> {
+    <span class="kw">fun</span> <span class="fn">createPrimaryButton</span>(context: <span class="cl">Context</span>): <span class="cl">Button</span>
+    <span class="kw">fun</span> <span class="fn">createInputField</span>(context: <span class="cl">Context</span>): <span class="cl">TextInputLayout</span>
+    <span class="kw">fun</span> <span class="fn">createLoadingIndicator</span>(context: <span class="cl">Context</span>): <span class="cl">View</span>
+}
+
+<span class="kw">class</span> <span class="cl">LightThemeFactory</span> : <span class="cl">UiComponentFactory</span> {
+    <span class="kw">override fun</span> <span class="fn">createPrimaryButton</span>(context: <span class="cl">Context</span>) =
+        <span class="cl">Button</span>(context).<span class="fn">apply</span> { <span class="fn">setBackgroundColor</span>(context.<span class="fn">getColor</span>(<span class="cl">R</span>.color.primary_light)) }
+    <span class="cm">// ...</span>
+}
+
+<span class="kw">class</span> <span class="cl">DarkThemeFactory</span> : <span class="cl">UiComponentFactory</span> {
+    <span class="kw">override fun</span> <span class="fn">createPrimaryButton</span>(context: <span class="cl">Context</span>) =
+        <span class="cl">Button</span>(context).<span class="fn">apply</span> { <span class="fn">setBackgroundColor</span>(context.<span class="fn">getColor</span>(<span class="cl">R</span>.color.primary_dark)) }
+    <span class="cm">// ...</span>
+}
+
+<span class="cm">// Usage: factory is injected — callers never know which theme is active</span>
+<span class="kw">class</span> <span class="cl">CheckoutScreen</span>(<span class="kw">private val</span> factory: <span class="cl">UiComponentFactory</span>) {
+    <span class="kw">fun</span> <span class="fn">buildUi</span>(context: <span class="cl">Context</span>) {
+        <span class="kw">val</span> button = factory.<span class="fn">createPrimaryButton</span>(context)
+    }
+}</code></pre>
+
+    <h3>4. Builder Pattern</h3>
+    <p>Constructs a complex object step by step. The builder separates the construction from the representation. In Android, OkHttp, Retrofit, <code>NotificationCompat.Builder</code>, and <code>AlertDialog.Builder</code> all use this pattern.</p>
+    <pre><code><span class="cm">// Builder pattern — Retrofit + OkHttp composition</span>
+<span class="kw">val</span> okHttpClient = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+    .<span class="fn">connectTimeout</span>(<span class="nu">30</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+    .<span class="fn">readTimeout</span>(<span class="nu">30</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>)
+    .<span class="fn">addInterceptor</span>(<span class="cl">AuthInterceptor</span>(tokenStore))
+    .<span class="fn">addInterceptor</span>(<span class="cl">HttpLoggingInterceptor</span>().<span class="fn">apply</span> { level = <span class="cl">HttpLoggingInterceptor</span>.<span class="cl">Level</span>.<span class="cl">BODY</span> })
+    .<span class="fn">build</span>()
+
+<span class="kw">val</span> retrofit = <span class="cl">Retrofit</span>.<span class="cl">Builder</span>()
+    .<span class="fn">baseUrl</span>(<span class="str">"https://api.bank.com/"</span>)
+    .<span class="fn">client</span>(okHttpClient)
+    .<span class="fn">addConverterFactory</span>(<span class="cl">MoshiConverterFactory</span>.<span class="fn">create</span>())
+    .<span class="fn">build</span>()
+
+<span class="cm">// Custom builder — type-safe, avoids large constructor parameter lists</span>
+<span class="kw">data class</span> <span class="cl">TransferRequest</span> <span class="kw">private constructor</span>(
+    <span class="kw">val</span> fromAccount: <span class="cl">String</span>,
+    <span class="kw">val</span> toAccount: <span class="cl">String</span>,
+    <span class="kw">val</span> amount: <span class="cl">BigDecimal</span>,
+    <span class="kw">val</span> currency: <span class="cl">String</span>,
+    <span class="kw">val</span> reference: <span class="cl">String</span>?
+) {
+    <span class="kw">class</span> <span class="cl">Builder</span> {
+        <span class="kw">private var</span> fromAccount: <span class="cl">String</span>? = <span class="kw">null</span>
+        <span class="kw">private var</span> toAccount: <span class="cl">String</span>? = <span class="kw">null</span>
+        <span class="kw">private var</span> amount: <span class="cl">BigDecimal</span>? = <span class="kw">null</span>
+        <span class="kw">private var</span> currency: <span class="cl">String</span> = <span class="str">"GBP"</span>
+        <span class="kw">private var</span> reference: <span class="cl">String</span>? = <span class="kw">null</span>
+
+        <span class="kw">fun</span> <span class="fn">from</span>(account: <span class="cl">String</span>) = <span class="fn">apply</span> { fromAccount = account }
+        <span class="kw">fun</span> <span class="fn">to</span>(account: <span class="cl">String</span>) = <span class="fn">apply</span> { toAccount = account }
+        <span class="kw">fun</span> <span class="fn">amount</span>(amount: <span class="cl">BigDecimal</span>) = <span class="fn">apply</span> { <span class="kw">this</span>.amount = amount }
+        <span class="kw">fun</span> <span class="fn">currency</span>(currency: <span class="cl">String</span>) = <span class="fn">apply</span> { <span class="kw">this</span>.currency = currency }
+        <span class="kw">fun</span> <span class="fn">reference</span>(ref: <span class="cl">String</span>) = <span class="fn">apply</span> { reference = ref }
+
+        <span class="kw">fun</span> <span class="fn">build</span>() = <span class="cl">TransferRequest</span>(
+            fromAccount = <span class="fn">requireNotNull</span>(fromAccount) { <span class="str">"fromAccount required"</span> },
+            toAccount = <span class="fn">requireNotNull</span>(toAccount) { <span class="str">"toAccount required"</span> },
+            amount = <span class="fn">requireNotNull</span>(amount) { <span class="str">"amount required"</span> },
+            currency = currency, reference = reference
+        )
+    }
+}</code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">Kotlin Builder Alternative</div>
+      In Kotlin, named parameters + default values often replace the Builder pattern for data classes. Use Builders when: (1) object construction requires validation at build time, (2) the object is mutable during construction but immutable after, or (3) you're designing a public API that Java callers will use.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Use when</th><th>Avoid when</th></tr>
+      <tr><td>Singleton</td><td>App-wide shared state: DB connection, HTTP client, analytics session</td><td>State that should be scoped to a screen — use ViewModel instead</td></tr>
+      <tr><td>Factory Method</td><td>Creating objects where the exact type is determined at runtime</td><td>Simple constructors where no decision is needed</td></tr>
+      <tr><td>Abstract Factory</td><td>Families of related objects that must be consistent (themes, tenant branding)</td><td>When only one implementation ever exists</td></tr>
+      <tr><td>Builder</td><td>Many optional parameters, complex construction, required validation before creation</td><td>Simple objects with 2-3 fields — data class with defaults is cleaner</td></tr>
+    </table></div>
+    <h3>Application-Level Singletons in Hilt</h3>
+    <pre><code><span class="an">@Module</span>
+<span class="an">@InstallIn</span>(<span class="cl">SingletonComponent</span>::<span class="kw">class</span>)
+<span class="kw">object</span> <span class="cl">NetworkModule</span> {
+
+    <span class="an">@Singleton</span>  <span class="cm">// ← Hilt manages the singleton lifecycle</span>
+    <span class="an">@Provides</span>
+    <span class="kw">fun</span> <span class="fn">provideOkHttpClient</span>(tokenStore: <span class="cl">TokenStore</span>): <span class="cl">OkHttpClient</span> =
+        <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+            .<span class="fn">addInterceptor</span>(<span class="cl">AuthInterceptor</span>(tokenStore))
+            .<span class="fn">build</span>()
+
+    <span class="an">@Singleton</span>
+    <span class="an">@Provides</span>
+    <span class="kw">fun</span> <span class="fn">provideRetrofit</span>(client: <span class="cl">OkHttpClient</span>): <span class="cl">Retrofit</span> =
+        <span class="cl">Retrofit</span>.<span class="cl">Builder</span>()
+            .<span class="fn">baseUrl</span>(<span class="str">"https://api.commerce.com/"</span>)
+            .<span class="fn">client</span>(client)
+            .<span class="fn">addConverterFactory</span>(<span class="cl">MoshiConverterFactory</span>.<span class="fn">create</span>())
+            .<span class="fn">build</span>()
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Notification Builder + Payment Factory</h3>
+    <pre><code><span class="cm">// ── Builder: NotificationCompat.Builder in production ────────────</span>
+<span class="kw">class</span> <span class="cl">OrderNotificationBuilder</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> context: <span class="cl">Context</span>
+) {
+    <span class="kw">fun</span> <span class="fn">buildOrderShippedNotification</span>(order: <span class="cl">Order</span>): <span class="cl">Notification</span> =
+        <span class="cl">NotificationCompat</span>.<span class="cl">Builder</span>(context, <span class="cl">CHANNEL_ORDERS</span>)
+            .<span class="fn">setSmallIcon</span>(<span class="cl">R</span>.drawable.ic_package)
+            .<span class="fn">setContentTitle</span>(<span class="str">"Order #${order.id} shipped"</span>)
+            .<span class="fn">setContentText</span>(<span class="str">"Expected delivery: ${order.estimatedDelivery}"</span>)
+            .<span class="fn">setPriority</span>(<span class="cl">NotificationCompat</span>.<span class="cl">PRIORITY_HIGH</span>)
+            .<span class="fn">setAutoCancel</span>(<span class="kw">true</span>)
+            .<span class="fn">setContentIntent</span>(
+                <span class="cl">PendingIntent</span>.<span class="fn">getActivity</span>(context, order.id.<span class="fn">hashCode</span>(),
+                    <span class="cl">Intent</span>(context, <span class="cl">OrderDetailActivity</span>::<span class="kw">class</span>.java).<span class="fn">putExtra</span>(<span class="str">"order_id"</span>, order.id),
+                    <span class="cl">PendingIntent</span>.<span class="cl">FLAG_IMMUTABLE</span>)
+            )
+            .<span class="fn">build</span>()
+}
+
+<span class="cm">// ── Factory + Singleton: Payment Processor Factory ───────────────</span>
+<span class="kw">sealed class</span> <span class="cl">PaymentConfig</span> {
+    <span class="kw">data class</span> <span class="cl">Card</span>(<span class="kw">val</span> stripeToken: <span class="cl">String</span>) : <span class="cl">PaymentConfig</span>()
+    <span class="kw">data class</span> <span class="cl">Wallet</span>(<span class="kw">val</span> walletType: <span class="cl">WalletType</span>) : <span class="cl">PaymentConfig</span>()
+    <span class="kw">data class</span> <span class="cl">BankTransfer</span>(<span class="kw">val</span> iban: <span class="cl">String</span>) : <span class="cl">PaymentConfig</span>()
+}
+
+<span class="kw">interface</span> <span class="cl">PaymentProcessor</span> {
+    <span class="kw">suspend fun</span> <span class="fn">charge</span>(amount: <span class="cl">BigDecimal</span>, currency: <span class="cl">String</span>): <span class="cl">ChargeResult</span>
+}
+
+<span class="kw">class</span> <span class="cl">PaymentProcessorFactory</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> stripeClient: <span class="cl">StripeClient</span>,   <span class="cm">// injected singleton</span>
+    <span class="kw">private val</span> googlePayClient: <span class="cl">GooglePayClient</span>
+) {
+    <span class="kw">fun</span> <span class="fn">create</span>(config: <span class="cl">PaymentConfig</span>): <span class="cl">PaymentProcessor</span> = <span class="kw">when</span> (config) {
+        <span class="kw">is</span> <span class="cl">PaymentConfig</span>.<span class="cl">Card</span>         -&gt; <span class="cl">StripeProcessor</span>(stripeClient, config.stripeToken)
+        <span class="kw">is</span> <span class="cl">PaymentConfig</span>.<span class="cl">Wallet</span>       -&gt; <span class="cl">GooglePayProcessor</span>(googlePayClient)
+        <span class="kw">is</span> <span class="cl">PaymentConfig</span>.<span class="cl">BankTransfer</span> -&gt; <span class="cl">BankTransferProcessor</span>(config.iban)
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Singleton vs Hilt @Singleton</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>Testable</th><th>Lifecycle control</th><th>Global access</th></tr>
+      <tr><td>Kotlin <code>object</code></td><td>Hard (can't replace)</td><td>JVM lifetime</td><td>Yes — static access</td></tr>
+      <tr><td>Hilt <code>@Singleton</code></td><td>Yes (mock the interface)</td><td>Application component lifetime</td><td>Via injection only</td></tr>
+      <tr><td>Manual double-check</td><td>Medium</td><td>Manual control</td><td>Yes — static access</td></tr>
+    </table></div>
+    <h3>Builder vs Kotlin Named Parameters</h3>
+    <pre><code><span class="cm">// Kotlin way — often replaces Builder for internal classes</span>
+<span class="kw">data class</span> <span class="cl">NotificationConfig</span>(
+    <span class="kw">val</span> title: <span class="cl">String</span>,
+    <span class="kw">val</span> body: <span class="cl">String</span>,
+    <span class="kw">val</span> priority: <span class="cl">Int</span> = <span class="cl">NotificationCompat</span>.<span class="cl">PRIORITY_DEFAULT</span>,
+    <span class="kw">val</span> autoCancel: <span class="cl">Boolean</span> = <span class="kw">true</span>,
+    <span class="kw">val</span> channelId: <span class="cl">String</span> = <span class="str">"default"</span>
+)
+<span class="cm">// Caller: NotificationConfig(title = "Shipped", body = "Order #123") — no Builder class needed</span></code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Abstract Factory in Practice</div>
+      Abstract Factory is most valuable in white-label or multi-tenant apps where an entire UI skin must be swappable. For single-design apps, it's over-engineering. Compose's <code>MaterialTheme</code> is essentially an Abstract Factory delivered via the composition locals system.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Singleton Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Global Mutable State</div>
+      A Kotlin <code>object</code> with mutable state (e.g., a mutable list, a mutable property) shared across threads is a race condition waiting to happen. Either make it thread-safe (Mutex, AtomicReference, synchronized) or eliminate the mutability by letting DI manage the instance.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Context Leaks</div>
+      Never store a reference to an <code>Activity</code> or <code>Fragment</code> <code>Context</code> in a singleton. It will outlive the Activity and cause a memory leak. Use <code>applicationContext</code> only.
+    </div>
+    <h3>Builder Best Practices</h3>
+    <ul>
+      <li><strong>Validate at build time</strong>: throw descriptive exceptions from <code>build()</code> for required fields — not at usage time</li>
+      <li><strong>Return <code>this</code> from setters</strong> (or use <code>apply</code>) to enable method chaining</li>
+      <li><strong>Make the built object immutable</strong>: the Builder is mutable; the product should be a <code>data class</code> with <code>val</code> properties</li>
+    </ul>
+    <h3>Factory Method vs Direct Construction</h3>
+    <p>Use the factory method when construction has conditions or side effects. <code>Fragment.newInstance()</code> exists because Android reconstructs Fragments from the back stack using the empty constructor — passing data via arguments bundle is the required pattern. A factory method hides this implementation detail from callers.</p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Creational patterns control object creation. The main four in Android: Singleton — one instance app-wide, Kotlin's <code>object</code> keyword handles it. Factory Method — creates objects without coupling callers to concrete types, like <code>Fragment.newInstance()</code>. Abstract Factory — creates families of related objects, useful for theming. Builder — constructs complex objects step-by-step with validation, exactly what OkHttp and Retrofit use."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"For Singleton in production Android: Kotlin's <code>object</code> is thread-safe but not testable — Hilt's <code>@Singleton</code> scope is better because the instance can be replaced with a mock. For Builder: I'd use it when an object has 5+ optional parameters or requires validation before creation — like building an OkHttpClient with optional interceptors, timeouts, and pinning config. For Factory Method: the typical Android pattern is a static factory on the class, like <code>Fragment.newInstance(args)</code>. Abstract Factory is most useful in white-label or multi-tenant apps where an entire set of UI components must be swappable without touching the consuming code."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Kotlin <code>object</code></strong> = thread-safe singleton; <code>companion object</code> = class-level factory + access</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Singleton problems</strong>: global mutable state (hard to test, potential race conditions, context leaks)</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Hilt @Singleton</strong> is preferred over raw <code>object</code> because the instance is injectable and replaceable</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Builder</strong>: OkHttpClient, Retrofit, NotificationCompat.Builder — step-by-step construction, validate at <code>build()</code></div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Factory Method</strong>: decouples creation from usage; <code>Fragment.newInstance()</code> is the Android canonical example</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Kotlin named params</strong> often replace Builder for internal data classes</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Prototype pattern (rarely relevant in Android)</li>
+      <li>Double-checked locking implementation details (just say "use Kotlin <code>object</code> or Hilt")</li>
+      <li>Abstract Factory in depth unless asked about white-labelling</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Is the Room database a Singleton?"</td><td>Yes — it's expensive to create. Always provide it as a <code>@Singleton</code> in a Hilt module.</td></tr>
+      <tr><td>"When would you write a custom Builder in Kotlin?"</td><td>When the object requires mandatory fields validated at build time, or for public APIs that Java callers must use.</td></tr>
+      <tr><td>"What's the difference between Factory Method and Abstract Factory?"</td><td>Factory Method creates one type of object; Abstract Factory creates a family of related objects that must be consistent with each other.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      In a DI world (Hilt/Dagger), creational patterns are often handled by the framework — you describe what you want, and Hilt creates and manages it. But understanding the underlying patterns explains <em>why</em> Hilt is designed the way it is: <code>@Singleton</code> = Singleton pattern, <code>@Provides</code> = Factory Method, <code>@Module</code> = Abstract Factory for a dependency graph.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Singleton</h4>
+        <pre><code>object Tracker { ... }     // simple
+@Singleton @Provides
+fun provideDb(): AppDatabase // Hilt managed</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Factory Method</h4>
+        <pre><code>companion object {
+    fun newInstance(id: String) =
+        MyFragment().apply {
+            arguments = bundleOf("id" to id)
+        }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Abstract Factory</h4>
+        <pre><code>interface UiComponentFactory {
+    fun createButton(ctx: Context): Button
+    fun createInput(ctx: Context): EditText
+}
+// LightThemeFactory / DarkThemeFactory</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Builder</h4>
+        <pre><code>OkHttpClient.Builder()
+    .connectTimeout(30, SECONDS)
+    .addInterceptor(AuthInterceptor())
+    .build()
+// validate at build(), not at use time</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> How does Kotlin's <code>object</code> keyword implement Singleton?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Kotlin's <code>object</code> declaration creates a class with a private constructor and a <code>INSTANCE</code> static field. The JVM guarantees the initialisation is thread-safe via the class loading mechanism (static initialiser). The instance is lazily created on first access. This is equivalent to the "Initialization-on-demand holder" idiom in Java — thread-safe without synchronized blocks.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> Why is <code>Fragment.newInstance()</code> a factory method and why does it exist?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        It's a factory method because it centralises Fragment creation and hides the argument bundle setup from callers. It exists because Android's Fragment system requires a public no-argument constructor — the system recreates Fragments from the back stack using that constructor. Arguments must be passed via <code>setArguments(Bundle)</code>, not via a parameterised constructor. <code>newInstance()</code> encapsulates this requirement so callers can't accidentally use a parameterised constructor.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> Where does Android use the Builder pattern?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Builder pattern is pervasive in Android: <code>OkHttpClient.Builder()</code>, <code>Retrofit.Builder()</code>, <code>NotificationCompat.Builder()</code>, <code>AlertDialog.Builder()</code>, <code>Room.databaseBuilder()</code>, <code>WorkRequest.Builder()</code>, <code>NavOptions.Builder()</code>. All share the same characteristics: many optional parameters, method chaining, and a terminal <code>build()</code> that creates the immutable product.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What are the problems with the Singleton pattern and how does Hilt address them?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Problems</strong>: (1) Global mutable state — any component can modify it, causing unpredictable behaviour. (2) Hard to test — you can't replace a <code>object</code> with a test fake without reflection. (3) Hidden dependencies — callers don't declare dependencies; they reach globally. (4) Context leaks — storing Activity context in a singleton leaks the Activity.<br><br>
+        <strong>Hilt's solution</strong>: <code>@Singleton</code> scope creates one instance per application component, but the instance is provided via injection. Callers declare the dependency in their constructor; in tests, a test module replaces it with a fake. The singleton is managed by Hilt's component, not by static state.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Implement a thread-safe lazy singleton for a Room database.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>@Volatile private var INSTANCE: AppDatabase? = null</code> in a companion object, then double-checked locking: <code>INSTANCE ?: synchronized(this) { INSTANCE ?: Room.databaseBuilder(...).build().also { INSTANCE = it } }</code>. <code>@Volatile</code> ensures the write is immediately visible to other threads. <code>synchronized</code> ensures only one thread creates the instance. In practice, Hilt's <code>@Singleton</code> is preferred over manual double-check locking.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> When would you choose a Builder over Kotlin named parameters?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Choose Builder when: (1) Construction requires validation before the object can exist — <code>build()</code> enforces invariants like required fields. (2) The object is being built across multiple method calls or time steps. (3) The API is consumed by Java callers (named parameters aren't available in Java). (4) You need to reuse a partial configuration — hold a Builder reference and call <code>build()</code> multiple times with different last-step variations. For internal Kotlin-only data classes with defaults, named parameters are almost always cleaner.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Describe Abstract Factory with a white-label banking app example.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A white-label banking app serves 10 banks, each with their own brand colours, fonts, button styles, and icon sets. Define <code>interface BrandComponentFactory</code> with methods: <code>createPrimaryButton()</code>, <code>createHeaderView()</code>, <code>createLogoImage()</code>. Each bank gets its implementation: <code>BarclaysFactory</code>, <code>HSBCFactory</code>, etc. The checkout and home screens receive a <code>BrandComponentFactory</code> via injection — they call <code>factory.createPrimaryButton()</code> and get the bank-correct component without knowing which bank it is. Switching banks only requires changing which factory Hilt provides.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How does Hilt's module system map to the Abstract Factory pattern?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A Hilt <code>@Module</code> is effectively an Abstract Factory for a set of related dependencies. The module interface (<code>@Provides</code>/<code>@Binds</code> methods) defines what the factory creates. Different test/production modules are different factories producing the same interface. For example, a <code>NetworkModule</code> creates <code>OkHttpClient</code>, <code>Retrofit</code>, and API interfaces as a consistent family. A <code>FakeNetworkModule</code> in tests produces fakes for the same interfaces. Hilt selects which module to use at compile time — the client code never changes.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A Singleton holds a reference to a Context. What are the consequences and how do you fix it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Consequences</strong>: If it's an Activity context, the Activity cannot be garbage collected as long as the singleton exists (application lifetime). This leaks all views, Drawables, and resources attached to that Activity — potentially hundreds of MB. The GC can't reclaim them until the process dies.<br><br>
+        <strong>Fix</strong>: (1) Always use <code>context.applicationContext</code> in singletons — it lives as long as the app process. (2) For UI-related resources that require an Activity context, don't store them in singletons — let the Activity own them and pass them as parameters. (3) Use LeakCanary in debug builds to detect these leaks automatically.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design an OkHttpClient builder configuration for a production banking app.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Production banking client builder includes: (1) <code>CertificatePinner</code> — pin the server's certificate to prevent MITM. (2) <code>AuthInterceptor</code> — adds Bearer token from TokenStore, refreshes on 401. (3) <code>HttpLoggingInterceptor</code> — Level.NONE in production, Level.BODY in debug (wrap with BuildConfig check). (4) <code>connectTimeout(15s)</code> / <code>readTimeout(30s)</code> / <code>writeTimeout(30s)</code>. (5) <code>ConnectionPool(5, 5, MINUTES)</code> — reuse connections. (6) <code>Authenticator</code> — for automatic token refresh on 401. (7) <code>retryOnConnectionFailure(false)</code> — let the app handle retries with exponential backoff for payment idempotency.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

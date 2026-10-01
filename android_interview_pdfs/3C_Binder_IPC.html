@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>3C – Binder & IPC</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>3C · Binder & IPC</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>3C — Binder & IPC Internals</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Architecture Core</span>
+    <span>Binder Driver · IPC · AIDL · Parcelable · ServiceManager · Memory Mapping (mmap)</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>Android processes operate in strict Linux sandboxes with isolated virtual memory addresses. A process cannot directly read or write to another process's RAM. <strong>Binder</strong> is Android's high-performance Inter-Process Communication (IPC) mechanism and Remote Procedure Call (RPC) framework.</p>
+  <p><strong>The Core Problem Solved:</strong> Traditional Linux IPC (sockets, pipes, message queues) requires <strong>two memory copies</strong> (User Space Process A → Kernel Space Buffer → User Space Process B) and lacks reliable identity verification. Binder uses Linux <code>mmap()</code> to achieve <strong>single-copy</strong> data transfer while passing verified caller UIDs/PIDs securely at the Linux kernel driver level.</p>
+  <div class="box info">
+    <strong>Key IPC Primitives:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>Binder Driver (<code>/dev/binder</code>):</strong> Kernel-level character device managing memory mappings and transaction routing.</li>
+      <li><strong>ServiceManager:</strong> The "DNS of Android" (handles service registration and lookup).</li>
+      <li><strong>AIDL (Android Interface Definition Language):</strong> Generates Java/Kotlin Proxy and Stub classes for type-safe RPC.</li>
+      <li><strong>Parcel / Parcelable:</strong> High-performance serialization format optimized for Binder transactions.</li>
+      <li><strong>Binder Buffer Limit:</strong> 1MB shared buffer per process for all concurrent Binder transactions.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <div class="ascii">
+[Client Process A]                                      [Server Process B]
+   │                                                           │
+   │ 1. Proxy.method(Parcel data)                              │
+   │    transact(CODE, data, reply)                            │
+   ▼                                                           ▼
+[libbinder / JNI]                                       [libbinder / JNI]
+   │                                                           ▲
+   │ ioctl(BINDER_WRITE_READ)                                  │ Stub.onTransact()
+   ▼                                                           │
+═════════════════════════════════════════════════════════════════════════════
+                       KERNEL SPACE (/dev/binder)
+   │                                                           │
+   ├───► Binder Driver copies data ONCE directly into ─────────┤
+         Server's mmap() read-only buffer!
+═════════════════════════════════════════════════════════════════════════════
+  </div>
+
+  <h3>Single-Copy Memory Architecture</h3>
+  <p>During process initialization, each Android process calls <code>ProcessState::self()</code> which opens <code>/dev/binder</code> and executes <code>mmap()</code> to allocate a virtual memory buffer (typically 1MB - 2 pages, or ~1016 KB). The Binder kernel driver maps this memory directly into the process's address space as read-only. When Process A sends data to Process B, the kernel driver copies the data directly from Process A's user space into Process B's mapped kernel buffer. <strong>Total memory copies: 1</strong>.</p>
+
+  <h3>AIDL Architecture (Proxy and Stub Pattern)</h3>
+  <ul>
+    <li><strong>Interface (e.g. <code>IPaymentService</code>):</strong> Extends <code>IInterface</code>, defining the remote RPC contract.</li>
+    <li><strong>Proxy (Client Side):</strong> Implements <code>IPaymentService</code>. Marshals Kotlin parameters into a <code>Parcel</code>, calls <code>mRemote.transact(CODE, data, reply, flags)</code>, and waits for response.</li>
+    <li><strong>Stub (Server Side):</strong> An abstract <code>Binder</code> class. Overrides <code>onTransact(code, data, reply, flags)</code>, unmarshals parameters, invokes the actual concrete implementation, and marshals results back into the <code>reply</code> parcel.</li>
+  </ul>
+
+  <h3>Service Discovery via ServiceManager</h3>
+  <p>How does a client find a server? <strong>ServiceManager</strong> is a special Binder context manager registered at well-known handle <code>0</code>. System services (like <code>ActivityManager</code>, <code>WindowManager</code>, <code>LocationManager</code>) publish their Binder Stubs to ServiceManager by name. Clients query ServiceManager to retrieve <code>IBinder</code> proxy tokens.</p>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & ARCHITECTURAL IMPACT ═══ -->
+<section id="when">
+  <h2>3 · When to Use AIDL / Binder</h2>
+
+  <table>
+    <tr>
+      <th>Scenario</th>
+      <th>Recommended Approach</th>
+      <th>Why</th>
+    </tr>
+    <tr>
+      <td><strong>Same App, Different Components</strong></td>
+      <td>Flow / Coroutines / Shared ViewModel / In-Memory Repositories.</td>
+      <td>Zero serialization overhead; no Binder IPC boundary crossings.</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Process Architecture (App + Background Process)</strong></td>
+      <td>Bound Service + Messenger or AIDL.</td>
+      <td>Processes cannot share memory; Messenger for simple messages, AIDL for multi-threaded RPCs.</td>
+    </tr>
+    <tr>
+      <td><strong>Inter-App Communication (e.g., POS terminal to Cash Register App)</strong></td>
+      <td>AIDL with Binder Security checks (<code>getCallingUid()</code>).</td>
+      <td>Cross-app contract enforcement and strict caller authentication.</td>
+    </tr>
+    <tr>
+      <td><strong>System Framework Integration</strong></td>
+      <td>System Services via AIDL.</td>
+      <td>Android OS framework standard.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: Cross-App Payment AIDL Service</h2>
+  <p>Production Banking / POS terminal integration with secure caller validation, custom Parcelable data, and death recipient monitoring.</p>
+
+  <p><strong>1. AIDL Definition (<code>IPaymentService.aidl</code>):</strong></p>
+  <pre><code><span class="kw">package</span> com.enterprise.banking.ipc;
+
+<span class="kw">import</span> com.enterprise.banking.ipc.PaymentRequest;
+<span class="kw">import</span> com.enterprise.banking.ipc.PaymentResult;
+
+<span class="kw">interface</span> <span class="type">IPaymentService</span> {
+    <span class="type">PaymentResult</span> <span class="fn">processTransaction</span>(<span class="kw">in</span> <span class="type">PaymentRequest</span> request);
+}</code></pre>
+
+  <p><strong>2. Server Implementation with Strict Security:</strong></p>
+  <pre><code><span class="kw">package</span> com.enterprise.banking.service
+
+<span class="kw">import</span> android.app.Service
+<span class="kw">import</span> android.content.Intent
+<span class="kw">import</span> android.os.Binder
+<span class="kw">import</span> android.os.IBinder
+<span class="kw">import</span> android.os.Process
+<span class="kw">import</span> com.enterprise.banking.ipc.IPaymentService
+<span class="kw">import</span> com.enterprise.banking.ipc.PaymentRequest
+<span class="kw">import</span> com.enterprise.banking.ipc.PaymentResult
+
+<span class="kw">class</span> <span class="type">PaymentGatewayService</span> : <span class="type">Service</span>() {
+
+    <span class="kw">private val</span> binder = <span class="kw">object</span> : <span class="type">IPaymentService</span>.<span class="type">Stub</span>() {
+        <span class="kw">override fun</span> <span class="fn">processTransaction</span>(request: <span class="type">PaymentRequest</span>): <span class="type">PaymentResult</span> {
+            <span class="cm">// 1. VERIFY CALLER IDENTITY VIA KERNEL DRIVER</span>
+            <span class="kw">val</span> callingUid = <span class="type">Binder</span>.<span class="fn">getCallingUid</span>()
+            <span class="kw">val</span> callingPid = <span class="type">Binder</span>.<span class="fn">getCallingPid</span>()
+            
+            <span class="kw">if</span> (!<span class="fn">isAuthorizedCaller</span>(callingUid)) {
+                <span class="kw">throw</span> <span class="type">SecurityException</span>(<span class="str">"UID $callingUid is not authorized to execute transactions."</span>)
+            }
+
+            <span class="cm">// 2. Execute business logic on Binder thread pool</span>
+            <span class="kw">return</span> <span class="type">PaymentResult</span>(
+                transactionId = <span class="str">"TXN-${System.currentTimeMillis()}"</span>,
+                isSuccess = <span class="kw">true</span>,
+                authCode = <span class="str">"AUTH-9876"</span>
+            )
+        }
+    }
+
+    <span class="kw">private fun</span> <span class="fn">isAuthorizedCaller</span>(uid: <span class="type">Int</span>): <span class="type">Boolean</span> {
+        <span class="kw">val</span> packages = packageManager.<span class="fn">getPackagesForUid</span>(uid) ?: <span class="kw">return false</span>
+        <span class="kw">return</span> packages.<span class="fn">any</span> { it == <span class="str">"com.enterprise.pos.terminal"</span> }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onBind</span>(intent: <span class="type">Intent</span>?): <span class="type">IBinder</span> = binder
+}</code></pre>
+
+  <p><strong>3. Client Implementation with DeathRecipient Handling:</strong></p>
+  <pre><code><span class="kw">package</span> com.enterprise.pos.client
+
+<span class="kw">import</span> android.content.ComponentName
+<span class="kw">import</span> android.content.ServiceConnection
+<span class="kw">import</span> android.os.IBinder
+<span class="kw">import</span> com.enterprise.banking.ipc.IPaymentService
+
+<span class="kw">class</span> <span class="type">PaymentClient</span> : <span class="type">ServiceConnection</span> {
+
+    <span class="kw">private var</span> paymentService: <span class="type">IPaymentService</span>? = <span class="kw">null</span>
+
+    <span class="kw">private val</span> deathRecipient = <span class="type">IBinder</span>.<span class="type">DeathRecipient</span> {
+        <span class="cm">// Server process died or was killed by OOM killer</span>
+        paymentService = <span class="kw">null</span>
+        <span class="fn">reconnectToService</span>()
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onServiceConnected</span>(name: <span class="type">ComponentName</span>?, service: <span class="type">IBinder</span>?) {
+        service?.<span class="fn">linkToDeath</span>(deathRecipient, <span class="num">0</span>)
+        paymentService = <span class="type">IPaymentService</span>.<span class="type">Stub</span>.<span class="fn">asInterface</span>(service)
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onServiceDisconnected</span>(name: <span class="type">ComponentName</span>?) {
+        paymentService = <span class="kw">null</span>
+    }
+
+    <span class="kw">private fun</span> <span class="fn">reconnectToService</span>() {
+        <span class="cm">// Re-binding strategy</span>
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · IPC Mechanisms Comparison</h2>
+
+  <table>
+    <tr>
+      <th>Mechanism</th>
+      <th>Memory Copies</th>
+      <th>Thread Safety</th>
+      <th>Security / Identity</th>
+      <th>Use Case</th>
+    </tr>
+    <tr>
+      <td><strong>Binder / AIDL</strong></td>
+      <td>1 copy (via <code>mmap</code>)</td>
+      <td>Multi-threaded (Binder thread pool, 16 threads max).</td>
+      <td>Kernel-verified UID / PID.</td>
+      <td>Standard Android RPC, system services, multi-process apps.</td>
+    </tr>
+    <tr>
+      <td><strong>Messenger</strong></td>
+      <td>1 copy (built on Binder)</td>
+      <td>Single-threaded (dispatches through Handler).</td>
+      <td>Kernel-verified UID.</td>
+      <td>Simple IPC without concurrency complexity.</td>
+    </tr>
+    <tr>
+      <td><strong>Unix Sockets / Sockets</strong></td>
+      <td>2 copies (User → Kernel → User)</td>
+      <td>Socket stream parsing required.</td>
+      <td>Linux peer credentials.</td>
+      <td>Zygote process spawning, native daemons, streaming data.</td>
+    </tr>
+    <tr>
+      <td><strong>Shared Memory (Ashmem / MemoryFile)</strong></td>
+      <td>0 copies (Zero-copy shared RAM)</td>
+      <td>Requires explicit locking/synchronization.</td>
+      <td>File descriptor passing via Binder.</td>
+      <td>Passing large Bitmaps, audio/video frame buffers.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & TransactionTooLargeException</h2>
+  <div class="box danger">
+    <strong>1. TransactionTooLargeException (The 1MB Binder Limit):</strong> The total in-flight Binder buffer across ALL transactions in a process is capped at ~1MB (1016 KB). Passing large Bitmaps, large JSON strings, or large lists through <code>Intent.putExtra()</code> or AIDL will instantly crash with <code>TransactionTooLargeException</code>. Always pass small IDs, URIs, or use <code>SharedMemory</code>/<code>CursorWindow</code>.
+  </div>
+  <div class="box warn">
+    <strong>2. Blocking the UI Thread with Synchronous IPC:</strong> AIDL calls are <strong>synchronous and blocking</strong> by default. If the remote service is busy or deadlocked, the client's calling thread will freeze. Never call AIDL methods on the Main thread.
+  </div>
+  <div class="box info">
+    <strong>3. Forgetting oneway for Fire-and-Forget Calls:</strong> If you don't need a return value, use the <code>oneway</code> AIDL keyword. Oneway transactions are asynchronous and non-blocking.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"Binder is Android's kernel-driven IPC mechanism that enables remote procedure calls with a single memory copy using Linux <code>mmap()</code>. Client and Server communicate using the Proxy-Stub pattern generated by AIDL. The Binder driver validates the caller's UID and PID at the kernel level for security, while transactions share a 1MB buffer limit across the entire process."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Why Binder:</strong> Android is built on Linux process isolation. Binder was chosen over standard Linux IPC (pipes/sockets) because it requires only <strong>one memory copy</strong> instead of two, and guarantees cryptographic caller identity (UID/PID) verified by the kernel driver (<code>/dev/binder</code>).</li>
+    <li><strong>Memory Architecture:</strong> Each process maps a ~1MB read-only memory buffer via <code>mmap()</code>. When a client calls a remote method, the kernel driver writes data directly into the server's mapped space.</li>
+    <li><strong>AIDL, Proxy, and Stub:</strong>
+      <ul>
+        <li><code>Proxy</code> (Client): Marshals arguments into a <code>Parcel</code> and calls <code>transact()</code>.</li>
+        <li><code>Stub</code> (Server): Receives the IPC in <code>onTransact()</code>, unpacks the <code>Parcel</code>, executes the service implementation on a Binder thread pool (up to 16 threads), and returns results.</li>
+      </ul>
+    </li>
+    <li><strong>Lifecycle & Resilience:</strong> Clients use <code>IBinder.linkToDeath()</code> to monitor remote process crashes and re-bind gracefully.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li>Single-copy architecture via <code>mmap()</code> and <code>/dev/binder</code>.</li>
+    <li>The 1MB Binder transaction buffer limit (<code>TransactionTooLargeException</code>).</li>
+    <li><code>Proxy</code> (client-side) vs <code>Stub</code> (server-side) generated by AIDL.</li>
+    <li><code>Binder.getCallingUid()</code> and <code>Binder.getCallingPid()</code> for kernel-level security.</li>
+    <li><code>IBinder.DeathRecipient</code> and <code>linkToDeath()</code>.</li>
+    <li><code>oneway</code> modifier for asynchronous non-blocking IPC.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How does Binder verify the caller's UID securely?</h4>
+    <p>The kernel Binder driver captures the calling process's Linux UID from kernel socket/task credentials when the IPC message is submitted. It injects this UID into the transaction data packet so <code>Binder.getCallingUid()</code> cannot be spoofed by user-space code.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: Why does Binder limit transactions to 1MB?</h4>
+    <p>The 1MB buffer is shared across all concurrent Binder transactions in a process to prevent rogue apps from consuming kernel RAM. It is designed for lightweight control messages and RPCs, not bulk data streaming.</p>
+  </div>
+  <div class="card">
+    <h4>Q: How does Android transfer large Bitmaps between processes without exceeding 1MB?</h4>
+    <p>In modern Android (API 27+), Bitmaps use <strong>Ashmem / SharedMemory (HardwareBitmap)</strong>. The raw pixel buffer resides in anonymous shared memory, and only a file descriptor (<code>ParcelFileDescriptor</code>) is passed across Binder (costing only a few bytes).</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "In high-throughput multi-process architectures, always remember that Binder calls to non-oneway AIDL methods block the calling thread, and the server processes them on a finite Binder thread pool (max 16 threads). Exhausting these 16 threads causes incoming IPC calls to stall across your app."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>Binder:</strong> Single-copy Linux kernel IPC driver using <code>mmap()</code>.</li>
+    <li><strong>Buffer Limit:</strong> ~1MB (1016 KB) shared across all in-flight transactions per process.</li>
+    <li><strong>AIDL:</strong> Generates <code>Proxy</code> (marshals to Parcel, calls <code>transact</code>) and <code>Stub</code> (unmarshals in <code>onTransact</code>).</li>
+    <li><strong>Security:</strong> <code>Binder.getCallingUid()</code> / <code>Binder.getCallingPid()</code> validated at the kernel level.</li>
+    <li><strong>Death Recipient:</strong> <code>IBinder.linkToDeath()</code> notifies client when remote process terminates.</li>
+    <li><strong>Oneway:</strong> Keyword for non-blocking asynchronous calls (no return value, cannot throw remote exceptions).</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. What is Binder in Android?</summary>
+    <div class="ans">
+      Binder is Android's core Inter-Process Communication (IPC) and Remote Procedure Call (RPC) mechanism. It allows sandboxed processes to call methods on remote objects located in other processes as if they were local.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. What is AIDL and why is it used?</summary>
+    <div class="ans">
+      AIDL (Android Interface Definition Language) is an IDL used to define the programming interface that both the client and service agree upon to communicate across processes via IPC. It automatically generates the boilerplate Proxy and Stub code.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. What causes a TransactionTooLargeException?</summary>
+    <div class="ans">
+      It occurs when data passed via Binder (in an Intent or AIDL call) exceeds the 1MB buffer limit shared across all active Binder transactions in that process.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. How does Binder achieve a single memory copy compared to standard Linux IPC?</summary>
+    <div class="ans">
+      Standard Linux IPC copies data twice (User space → Kernel space → User space). Binder uses <code>mmap()</code> during process startup to map a shared read-only buffer between the kernel and the receiving process. The Binder driver copies data directly from the sender's user space into this mapped memory space, achieving single-copy IPC.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. What are the roles of the Proxy and Stub classes in AIDL?</summary>
+    <div class="ans">
+      The <strong>Proxy</strong> lives on the client side, implementing the interface by serializing method parameters into a <code>Parcel</code> and sending it via <code>IBinder.transact()</code>. The <strong>Stub</strong> lives on the server side as a <code>Binder</code> subclass, intercepting calls in <code>onTransact()</code>, deserializing the <code>Parcel</code>, invoking the actual service method, and returning results.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. What does the oneway keyword in an AIDL interface do?</summary>
+    <div class="ans">
+      The <code>oneway</code> keyword modifies remote methods to be asynchronous and non-blocking. The calling thread returns immediately without waiting for the remote process to execute the call. Oneway methods must return <code>void</code> and cannot take <code>out</code> parameters or throw exceptions.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What is ServiceManager in Android framework?</summary>
+    <div class="ans">
+      <code>ServiceManager</code> is the centralized naming registry (DNS) for Android system services. It runs at the reserved Binder handle <code>0</code>. Core services (e.g., <code>activity</code>, <code>window</code>, <code>package</code>) register their Binder tokens with ServiceManager, enabling other processes to look them up by string name.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. What is IBinder.DeathRecipient and why is it essential for IPC resilience?</summary>
+    <div class="ans">
+      <code>DeathRecipient</code> is a callback interface registered via <code>IBinder.linkToDeath()</code>. If the remote host process dies or is killed by the OS Low Memory Killer (LMK), the Binder kernel driver triggers <code>binderDied()</code> on the client, allowing the client to clean up state, invalidate cached proxies, and attempt reconnection.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. How do Binder threads work on the server side?</summary>
+    <div class="ans">
+      Every process running a Binder server has a Binder thread pool spawned by <code>ProcessState::self()-&gt;startThreadPool()</code>. The driver allocates up to <strong>16 concurrent worker threads</strong> (named <code>Binder:pid_x</code>). If all 16 threads are blocked on synchronous tasks, new incoming transactions queue up in the driver, potentially stalling incoming client requests.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. How would you securely transfer a 50MB audio recording between two different applications via IPC?</summary>
+    <div class="ans">
+      Do not send the raw bytes across AIDL or Intent (which will trigger <code>TransactionTooLargeException</code>). Instead, use <strong>Ashmem / SharedMemory</strong> or a <strong>ContentProvider</strong>. In the server app, open the file or allocate a <code>SharedMemory</code> buffer, obtain a <code>ParcelFileDescriptor</code> (PFD), and pass the PFD across AIDL. The client reads directly from the shared file descriptor with zero Binder transaction memory overhead.
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

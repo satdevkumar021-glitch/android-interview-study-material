@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>33A — Debugging Scenarios | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#251a1a 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:var(--red);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,107,107,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .scenario-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:28px;overflow:hidden;}
+  .scenario-header{background:var(--surface2);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+  .scenario-num{background:rgba(255,107,107,.2);color:var(--red);font-size:11px;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .scenario-title{font-size:14px;font-weight:700;color:var(--text);}
+  .scenario-body{padding:18px 18px;}
+  .step-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:16px;}
+  .step-label:first-child{margin-top:0;}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">33A · Debugging Scenarios</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> API Called Twice</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Compose Recomposes</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Prod-only Crash</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Slow Startup</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Flow Collected 2×</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Activity Leak + Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Senior Differentiator</div>
+    <h1><span>33A</span> — Debugging Scenarios</h1>
+    <p class="hero-desc">Six production debugging scenarios with root cause analysis, fixes, and prevention strategies. Each scenario: Problem → Clarifying Questions → Root Cause → Solution → Prevention.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 33A</span>
+      <span class="badge badge-senior">&#11088; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Debugging Framework (use in interviews)</h3>
+    <ol>
+      <li><strong>Clarify:</strong> Ask when does it happen? Always or sometimes? Which devices? Which Android version? After rotation?</li>
+      <li><strong>Hypothesize:</strong> Form 2–3 root cause hypotheses based on symptoms</li>
+      <li><strong>Investigate:</strong> Name the tool you'd use (Logcat, Profiler, Compose metrics, LeakCanary)</li>
+      <li><strong>Root cause:</strong> Identify the exact cause</li>
+      <li><strong>Fix:</strong> Describe the code change</li>
+      <li><strong>Prevent:</strong> What process/pattern prevents this class of bug in future</li>
+    </ol>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      Juniors describe what happened. Seniors diagnose WHY it happened and add a prevention step. Always end your scenario answer with: "To prevent this in future, I would..."
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: API Called Twice →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128257;</div>2. API Called Twice After Rotation</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">1</div><div class="scenario-title">Network call fires twice every time the screen rotates</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Problem</div>
+        <p>User rotates the device. The loading indicator appears briefly, network call is made again, UI flickers. Happens every rotation.</p>
+        <div class="step-label">Clarifying Questions</div>
+        <ul>
+          <li>Is the network call in a ViewModel or in the Fragment/Activity directly?</li>
+          <li>Where exactly is the call triggered — onCreate, onStart, or in init?</li>
+          <li>Is it a Fragment or Activity?</li>
+        </ul>
+        <div class="step-label">Root Cause</div>
+        <p>The API call is made in <code>Activity.onCreate()</code> or <code>Fragment.onViewCreated()</code> directly — not in a ViewModel. On rotation, the Activity/Fragment is destroyed and recreated, so <code>onCreate()</code> runs again, triggering a new network call.</p>
+        <div class="step-label">Solution</div>
+        <pre><code><span class="cm">// ❌ Wrong — call in Activity/Fragment lifecycle</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    viewModel.<span class="fn">loadUser</span>()   <span class="cm">// called AGAIN on every rotation</span>
+}
+
+<span class="cm">// ✅ Correct — call in ViewModel init{} (survives rotation)</span>
+<span class="kw">class</span> <span class="cl">UserViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">UserRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> userState = <span class="fn">MutableStateFlow</span>&lt;<span class="cl">UiState</span>&lt;<span class="cl">User</span>&gt;&gt;(<span class="cl">UiState</span>.<span class="cl">Loading</span>)
+
+    <span class="kw">init</span> {
+        <span class="fn">loadUser</span>()  <span class="cm">// called ONCE; ViewModel survives rotation</span>
+    }
+
+    <span class="kw">private fun</span> <span class="fn">loadUser</span>() = <span class="fn">viewModelScope</span>.<span class="fn">launch</span> {
+        userState.<span class="fn">value</span> = <span class="cl">UiState</span>.<span class="cl">Loading</span>
+        userState.<span class="fn">value</span> = repo.<span class="fn">getUser</span>().<span class="fn">fold</span>(
+            onSuccess = { <span class="cl">UiState</span>.<span class="cl">Success</span>(it) },
+            onFailure = { <span class="cl">UiState</span>.<span class="cl">Error</span>(it.message) }
+        )
+    }
+}
+
+<span class="cm">// Fragment observes — not triggers</span>
+<span class="fn">viewLifecycleOwner</span>.<span class="fn">lifecycleScope</span>.<span class="fn">launch</span> {
+    <span class="fn">repeatOnLifecycle</span>(<span class="cl">Lifecycle</span>.<span class="cl">State</span>.<span class="cl">STARTED</span>) {
+        viewModel.userState.<span class="fn">collect</span> { <span class="fn">renderState</span>(it) }
+    }
+}</code></pre>
+        <div class="step-label">Prevention</div>
+        <ul>
+          <li>Code review rule: no network calls in Fragment/Activity lifecycle methods</li>
+          <li>All data loading happens in ViewModel <code>init{}</code> or in response to user actions</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Compose Recomposes →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9889;</div>3. Compose Screen Continuously Recomposes</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">2</div><div class="scenario-title">Compose screen flickers or Profiler shows constant recompositions</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Problem</div>
+        <p>UI is janky. Compose Profiler shows 60+ recompositions per second even with no user interaction. Frame rate drops under scroll.</p>
+        <div class="step-label">Clarifying Questions</div>
+        <ul>
+          <li>What type is being passed as a parameter to the composable? Is it a List or custom class?</li>
+          <li>Are lambdas captured from the composition scope?</li>
+          <li>Is there a State that is being updated on every frame?</li>
+        </ul>
+        <div class="step-label">Root Cause</div>
+        <p>The composable parameter is an <strong>unstable type</strong> — Compose can't determine if it's changed, so it recomposes every time the parent recomposes. Common causes: passing a plain <code>List&lt;T&gt;</code> (mutable, considered unstable), a class without <code>@Stable</code>/<code>@Immutable</code>, or inline lambdas that are recreated every composition.</p>
+        <div class="step-label">Solution</div>
+        <pre><code><span class="cm">// ❌ Unstable — List is mutable, Compose marks it unstable</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="cl">FeedList</span>(items: <span class="cl">List</span>&lt;<span class="cl">FeedItem</span>&gt;) { ... }
+
+<span class="cm">// ✅ Option 1: Wrap with ImmutableList (kotlinx.collections.immutable)</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="cl">FeedList</span>(items: <span class="cl">ImmutableList</span>&lt;<span class="cl">FeedItem</span>&gt;) { ... }
+
+<span class="cm">// ✅ Option 2: Mark domain class @Immutable</span>
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">FeedItem</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> title: <span class="cl">String</span>)
+
+<span class="cm">// ✅ Option 3: Wrapper class marked @Immutable</span>
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">FeedUiState</span>(<span class="kw">val</span> items: <span class="cl">List</span>&lt;<span class="cl">FeedItem</span>&gt; = <span class="fn">emptyList</span>())
+
+<span class="cm">// For lambdas — hoist out of composition or use remember</span>
+<span class="cm">// ❌ New lambda instance every recomposition</span>
+<span class="cl">FeedItem</span>(onClick = { viewModel.<span class="fn">onItemClick</span>(item.id) })
+
+<span class="cm">// ✅ Stable lambda with rememberUpdatedState or function reference</span>
+<span class="kw">val</span> onClick = <span class="fn">remember</span>(item.id) { { viewModel.<span class="fn">onItemClick</span>(item.id) } }</code></pre>
+        <div class="step-label">Tools</div>
+        <ul>
+          <li><strong>Compose compiler metrics</strong>: <code>freeCompilerArgs += "-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=..."</code> — shows stable/unstable/skippable per class</li>
+          <li><strong>Layout Inspector recomposition counts</strong> in Android Studio</li>
+        </ul>
+        <div class="step-label">Prevention</div>
+        <ul>
+          <li>Mark all domain/UI state classes with <code>@Immutable</code> or use <code>ImmutableList</code></li>
+          <li>Enable Compose compiler metrics in CI to catch unstable types before they merge</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Prod-only Crash →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128201;</div>4. App Crashes Only in Production</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">3</div><div class="scenario-title">ClassNotFoundException or NullPointerException in production, not in debug</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Problem</div>
+        <p>Crashlytics shows a crash affecting 3% of users. Stack trace points to a JSON parsing method. Works perfectly in debug and staging builds.</p>
+        <div class="step-label">Clarifying Questions</div>
+        <ul>
+          <li>Is minifyEnabled=true only in release builds?</li>
+          <li>Are any data classes used with Gson/Moshi for JSON parsing?</li>
+          <li>Was a new model class added recently without corresponding keep rules?</li>
+        </ul>
+        <div class="step-label">Root Cause</div>
+        <p><strong>Missing R8 keep rules</strong>: R8 removed or renamed a data class used for JSON deserialization. Gson uses reflection to map JSON fields to class fields. When R8 renames <code>userAddress</code> to <code>a</code>, Gson can't find the field → NullPointerException or wrong data.</p>
+        <div class="step-label">Solution</div>
+        <pre><code><span class="cm">// Option 1: Add keep rule in proguard-rules.pro</span>
+-keep class com.myapp.data.model.** { *; }
+-keepclassmembers class com.myapp.data.model.** { *; }
+
+<span class="cm">// Option 2: Annotate with @Keep</span>
+<span class="an">@Keep</span>
+<span class="kw">data class</span> <span class="cl">UserDto</span>(
+    <span class="an">@SerializedName("user_address")</span>
+    <span class="kw">val</span> address: <span class="cl">String</span>
+)
+
+<span class="cm">// Option 3: Switch to kotlinx.serialization (works with R8 without keep rules)</span>
+<span class="an">@Serializable</span>
+<span class="kw">data class</span> <span class="cl">UserDto</span>(<span class="kw">val</span> address: <span class="cl">String</span>)
+
+<span class="cm">// Debug the crash in release mode locally:</span>
+<span class="cm">// adb shell setprop debug.viewAttributeInspectionEnabled true</span>
+<span class="cm">// Or build a release APK locally and install via adb install -r app-release.apk</span></code></pre>
+        <div class="step-label">Other Causes of Prod-only Crashes</div>
+        <ul>
+          <li>Different API levels — test against minimum supported API on a real device or emulator</li>
+          <li>Missing exception handling for edge cases that only occur with real data</li>
+          <li>Race conditions that only manifest under production load</li>
+        </ul>
+        <div class="step-label">Prevention</div>
+        <ul>
+          <li>Run a release build smoke test before every production push</li>
+          <li>Add tests that instantiate all model classes via the serialization library</li>
+          <li>Use kotlinx.serialization instead of Gson — no reflection at runtime</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Slow Startup →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128336;</div>5. App Startup Takes 5 Seconds</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">4</div><div class="scenario-title">Cold start time is 5 seconds — users complain about slow launch</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Problem</div>
+        <p>Firebase Performance shows p50 cold start = 5.2s. Target is &lt;2s. App shows blank white screen for 3+ seconds before content appears.</p>
+        <div class="step-label">Clarifying Questions</div>
+        <ul>
+          <li>What SDK initializations happen in Application.onCreate()?</li>
+          <li>Is there any synchronous disk I/O or network call during startup?</li>
+          <li>How large is the database being opened at startup?</li>
+        </ul>
+        <div class="step-label">Root Cause Analysis</div>
+        <p>Common causes: (1) <strong>Heavy SDK init in Application.onCreate()</strong> — each SDK adding 100–300ms; (2) <strong>Blocking I/O on main thread</strong> — database open, SharedPreferences read, file access; (3) <strong>Synchronous network call</strong> before showing UI; (4) <strong>Large Activity/Fragment inflation</strong> with complex view hierarchy.</p>
+        <div class="step-label">Solution</div>
+        <pre><code><span class="cm">// ❌ Blocking Application.onCreate()</span>
+<span class="kw">class</span> <span class="cl">App</span> : <span class="cl">Application</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+        <span class="cl">Firebase</span>.<span class="fn">initializeApp</span>(<span class="kw">this</span>)           <span class="cm">// ok - fast</span>
+        heavyDatabase.<span class="fn">initialize</span>(<span class="kw">this</span>)       <span class="cm">// ❌ blocking, 800ms</span>
+        analyticsLibrary.<span class="fn">init</span>(<span class="kw">this</span>)           <span class="cm">// ❌ blocking, 400ms</span>
+        legacySharedPrefs.<span class="fn">loadAll</span>(<span class="kw">this</span>)      <span class="cm">// ❌ disk I/O on main thread</span>
+    }
+}
+
+<span class="cm">// ✅ App Startup library for lazy, ordered initialization</span>
+<span class="kw">class</span> <span class="cl">AnalyticsInitializer</span> : <span class="cl">Initializer</span>&lt;<span class="cl">Unit</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">create</span>(context: <span class="cl">Context</span>) {
+        <span class="cm">// Runs on background thread via WorkManager startup</span>
+        analyticsLibrary.<span class="fn">init</span>(context)
+    }
+    <span class="kw">override fun</span> <span class="fn">dependencies</span>() = <span class="fn">emptyList</span>&lt;<span class="cl">Class</span>&lt;<span class="kw">out</span> <span class="cl">Initializer</span>&lt;*&gt;&gt;&gt;()
+}
+
+<span class="cm">// ✅ Lazy inject: Room DB not opened until first query</span>
+<span class="kw">val</span> database: <span class="cl">AppDatabase</span> <span class="kw">by lazy</span> {
+    <span class="cl">Room</span>.<span class="fn">databaseBuilder</span>(appContext, <span class="cl">AppDatabase</span>::<span class="kw">class</span>.java, <span class="str">"app.db"</span>).<span class="fn">build</span>()
+}
+
+<span class="cm">// ✅ Baseline Profile — pre-compile critical startup code paths</span>
+<span class="cm">// Generate with Macrobenchmark BaselineProfileRule</span>
+<span class="cm">// Reduces JIT compilation overhead at startup by 30-40%</span></code></pre>
+        <div class="step-label">Measurement Tools</div>
+        <ul>
+          <li><code>adb shell am start-activity -W</code> — measures Time To Initial Display (TTID)</li>
+          <li>Android Studio Profiler → CPU → System Trace</li>
+          <li>Firebase Performance Monitoring — <code>_app_start</code> automatic trace</li>
+          <li>Macrobenchmark library for reliable CI measurement</li>
+        </ul>
+        <div class="step-label">Prevention</div>
+        <ul>
+          <li>Rule: no blocking calls on main thread in Application.onCreate()</li>
+          <li>Macrobenchmark startup test in CI — fails if startup &gt; 2s threshold</li>
+          <li>Baseline Profiles generated and shipped with every release</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Flow Collected 2× →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128167;</div>6. Flow Collected Multiple Times</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">5</div><div class="scenario-title">UI updates are duplicated or Flow emissions trigger actions multiple times</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Problem</div>
+        <p>A toast appears twice for the same event. A navigation action triggers twice. A network request is fired multiple times for one user action.</p>
+        <div class="step-label">Root Cause</div>
+        <p>The Flow is collected without <code>repeatOnLifecycle</code> in a Fragment. When the Fragment goes to background and returns, a new collector is created without cancelling the old one. Two collectors are now active for the same Flow.</p>
+        <div class="step-label">Solution</div>
+        <pre><code><span class="cm">// ❌ Wrong — creates new collector on each onStart(), old one still active</span>
+<span class="kw">override fun</span> <span class="fn">onStart</span>() {
+    <span class="kw">super</span>.<span class="fn">onStart</span>()
+    <span class="fn">lifecycleScope</span>.<span class="fn">launch</span> {
+        viewModel.events.<span class="fn">collect</span> { <span class="fn">handleEvent</span>(it) }
+        <span class="cm">// This coroutine lives as long as lifecycleScope (until onDestroy)</span>
+        <span class="cm">// but collect() is called AGAIN on next onStart()</span>
+    }
+}
+
+<span class="cm">// ✅ Correct — exactly ONE collector active when STARTED, cancelled on STOPPED</span>
+<span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="cl">View</span>, savedInstanceState: <span class="cl">Bundle</span>?) {
+    <span class="fn">viewLifecycleOwner</span>.<span class="fn">lifecycleScope</span>.<span class="fn">launch</span> {
+        <span class="fn">viewLifecycleOwner</span>.<span class="fn">repeatOnLifecycle</span>(<span class="cl">Lifecycle</span>.<span class="cl">State</span>.<span class="cl">STARTED</span>) {
+            viewModel.events.<span class="fn">collect</span> { <span class="fn">handleEvent</span>(it) }
+            <span class="cm">// Automatically cancelled when Fragment STOPPED, re-starts on STARTED</span>
+        }
+    }
+}
+
+<span class="cm">// For one-shot events: use SharedFlow with replay=0</span>
+<span class="kw">val</span> events = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">UiEvent</span>&gt;(replay = <span class="nu">0</span>, extraBufferCapacity = <span class="nu">1</span>)
+<span class="cm">// Emits to currently-active collectors only; no replaying on new collector</span></code></pre>
+        <div class="step-label">Prevention</div>
+        <ul>
+          <li>Team convention: always use <code>repeatOnLifecycle(STARTED)</code> in Fragments — never naked <code>lifecycleScope.launch { flow.collect }</code></li>
+          <li>Lint rule: Android Studio provides a lint check for this exact pattern</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Activity Leak + Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#128293;</div>7. Activity Leak + Interview Framework</div>
+    <div class="scenario-card">
+      <div class="scenario-header"><div class="scenario-num">6</div><div class="scenario-title">Activity is leaking — LeakCanary reports Activity retained after finish()</div></div>
+      <div class="scenario-body">
+        <div class="step-label">Root Causes (Most Common)</div>
+        <div class="table-wrap"><table>
+          <tr><th>Cause</th><th>Pattern</th><th>Fix</th></tr>
+          <tr><td>Static reference</td><td>companion object / object holds Activity reference</td><td>Use WeakReference or remove static reference</td></tr>
+          <tr><td>Anonymous inner class</td><td>Inner Runnable/Listener holds implicit outer class (Activity) reference</td><td>Use named static class or WeakReference</td></tr>
+          <tr><td>Unregistered listener</td><td>registerX() without unregisterX() in onDestroy</td><td>Unregister in onDestroy or use lifecycle-aware components</td></tr>
+          <tr><td>Handler with delay</td><td>handler.postDelayed({ ... }, 5000) — Activity destroyed before delay fires</td><td>Cancel in onDestroy: handler.removeCallbacks(runnable)</td></tr>
+          <tr><td>Application context missing</td><td>Singleton holds Activity context — use applicationContext</td><td>Inject applicationContext in singletons, not activity context</td></tr>
+        </table></div>
+        <pre><code><span class="cm">// ❌ Handler leak</span>
+<span class="kw">private val</span> handler = <span class="cl">Handler</span>(<span class="cl">Looper</span>.<span class="fn">getMainLooper</span>())
+<span class="kw">private val</span> runnable = <span class="cl">Runnable</span> { <span class="fn">updateUI</span>() }  <span class="cm">// holds Activity ref</span>
+handler.<span class="fn">postDelayed</span>(runnable, <span class="nu">5000</span>)
+
+<span class="cm">// ✅ Fix: cancel in onDestroy</span>
+<span class="kw">override fun</span> <span class="fn">onDestroy</span>() {
+    <span class="kw">super</span>.<span class="fn">onDestroy</span>()
+    handler.<span class="fn">removeCallbacks</span>(runnable)
+}
+
+<span class="cm">// ✅ Better: use lifecycle-aware coroutine instead of Handler</span>
+<span class="fn">lifecycleScope</span>.<span class="fn">launch</span> {
+    <span class="fn">delay</span>(<span class="nu">5000</span>)
+    <span class="fn">updateUI</span>()
+    <span class="cm">// Auto-cancelled when lifecycle is destroyed</span>
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Interview Framework: Debugging</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">DRIDE Framework</div>
+      <strong>D</strong>escribe symptoms → <strong>R</strong>eproduce reliably → <strong>I</strong>solate (binary search: which component? which state?) → <strong>D</strong>iagnose root cause → <strong>E</strong>liminate + prevent recurrence
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Scenario</th><th>Root Cause</th><th>Fix</th></tr>
+      <tr><td>API called twice on rotation</td><td>Call in Activity.onCreate instead of ViewModel.init</td><td>Move to ViewModel init{}; use StateFlow</td></tr>
+      <tr><td>Compose recomposes endlessly</td><td>Unstable parameter type (List, unAnnotated class)</td><td>@Immutable, ImmutableList, stable lambdas</td></tr>
+      <tr><td>Prod-only crash</td><td>R8 removed/renamed class used via reflection</td><td>-keep rules or @Keep or kotlinx.serialization</td></tr>
+      <tr><td>Slow startup</td><td>Heavy sync work in Application.onCreate()</td><td>Lazy init, App Startup library, Baseline Profiles</td></tr>
+      <tr><td>Flow collected 2×</td><td>Collecting in onStart without repeatOnLifecycle</td><td>repeatOnLifecycle(STARTED) in Fragment</td></tr>
+      <tr><td>Activity leak</td><td>Static ref, anonymous inner class, unregistered listener, Handler</td><td>WeakReference, lifecycle-aware components, removeCallbacks</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you diagnose why a Compose screen is recomposing too frequently?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Step 1: Enable Layout Inspector in Android Studio → Show Recomposition Counts — this shows how many times each composable recomposed. Step 2: Enable Compose compiler metrics (freeCompilerArgs plugin args) — generates a report showing which classes are stable/unstable/skippable. Step 3: Look for parameters marked as "unstable" — these force recomposition. Fix: @Immutable annotation, ImmutableList, stable lambda references.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A colleague's code causes an Activity leak. How do you detect and fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Detection: Add LeakCanary to the debug build — it automatically detects and reports retained objects with a full path to the leak root. Also check Android Profiler → Memory → Force GC → Heap Dump for Activity instances. Fix: look at the LeakCanary report path (static field → Activity, or anonymous class holding outer Activity), then apply: WeakReference for static refs, removeCallbacks for Handler, unregister listeners in onDestroy.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why does repeatOnLifecycle(STARTED) prevent double-collection in Fragments?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">repeatOnLifecycle(STARTED) creates a new coroutine block when the lifecycle reaches STARTED and cancels it when it drops below STARTED (i.e., STOPPED). This means: (1) Only one collection is active at a time. (2) When the Fragment returns to foreground, the old collection was already cancelled, so a fresh one starts. Without it, each call to launch { flow.collect } adds a permanent collector that survives background/foreground transitions.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you measure and improve cold start time to under 2 seconds?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Measure: adb shell am start-activity -W (TTID/TTFD), Firebase Performance _app_start trace, Macrobenchmark. Improve: (1) Profile Application.onCreate() — move heavy init off main thread via App Startup library; (2) Lazy initialization for Room DB, heavy singletons; (3) Reduce ContentProviders (each adds startup overhead); (4) Generate and ship Baseline Profiles — pre-compiles critical code paths, 30-40% faster startup; (5) Splash screen API to fill perceived wait with branded splash.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is @Immutable in Compose and when is it not safe to use?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">@Immutable is a contract you make to the Compose compiler saying "none of the public properties of this class will change after construction." It enables skippable recomposition. It is NOT safe to use if: the class has mutable properties (var), the class contains a mutable List or Map (even if the field is val), or you might mutate the object after passing it to a composable. Misusing @Immutable causes silent UI bugs where the UI doesn't update when data changes.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Name three patterns that cause Activity memory leaks and their fixes.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">(1) Static reference: companion object holds Activity → use WeakReference or remove. (2) Handler with postDelayed: delayed runnable holds Activity reference → cancel with removeCallbacks in onDestroy, or replace with lifecycle-aware coroutine + delay(). (3) Unregistered listener: registerReceiver without unregister → use lifecycle-aware components (LifecycleObserver) that auto-unregister, or manually unregister in onStop/onDestroy.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you debug a crash that only happens in production and has an obfuscated stack trace?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Step 1: Check Crashlytics dashboard — if the firebase-crashlytics Gradle plugin uploaded the mapping.txt at build time, Crashlytics auto-symbolicated the trace. Step 2: If not, find the mapping.txt file at app/build/outputs/mapping/release/mapping.txt for that build (store in CI artifacts). Step 3: Run retrace mapping.txt obfuscated-trace.txt. Step 4: Reproduce locally with a release build (adb install -r app-release.apk). Step 5: Add missing keep rules for the affected class.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What tool would you use for each: memory leak, slow startup, Compose jank, network call frequency?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Memory leak → LeakCanary (debug) + Android Profiler Heap Dump. Slow startup → adb am start-activity -W + Macrobenchmark + Firebase Performance _app_start + Android Studio CPU System Trace. Compose jank → Layout Inspector Recomposition Counts + Compose compiler metrics report. Network call frequency → Android Studio Profiler Network tab + OkHttp logging interceptor in debug + Firebase Performance HTTP traces in production.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the App Startup library and how does it help?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">The App Startup library provides a single ContentProvider (InitializationProvider) that replaces the pattern of each SDK registering its own ContentProvider. Each ContentProvider adds ~5ms startup overhead — with 10 SDKs that's 50ms. App Startup initializes them all through one ContentProvider. Additionally it supports: ordered initialization (Initializer dependencies), lazy initialization (on first use), and explicit initialization from code (useful for testing).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A user reports that tapping a button sends duplicate API requests. Walk through your debugging approach.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">(1) Check if the Flow is collected multiple times — look for missing repeatOnLifecycle. (2) Check if the button click listener is set multiple times (e.g., in onViewCreated called multiple times without cleanup). (3) Check if the ViewModel launches without deduplication — add a loading guard: if (uiState.value is Loading) return. (4) Check for debounce — rapid taps can trigger multiple launches; add viewModelScope.launch with debounce or a flag. Fix: use a loading/in-progress state flag in the ViewModel to prevent concurrent requests.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

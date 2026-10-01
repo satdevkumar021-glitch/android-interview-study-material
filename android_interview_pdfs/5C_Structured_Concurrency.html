@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5C — Structured Concurrency &amp; Key Differences | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">5C · Structured Concurrency</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Key Differences</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Scope Comparison</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>5C</span> — Structured Concurrency &amp; Key Differences</h1>
+    <p class="hero-desc">The hierarchy: CoroutineScope → CoroutineContext → Job → children. Plus the most-asked comparison questions: launch vs async, coroutineScope vs supervisorScope, Job vs SupervisorJob, delay vs Thread.sleep.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 5C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+      <span class="badge badge-hot">&#128293; Highest Priority</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>The hierarchy</h3>
+    <p>Structured concurrency is the guarantee that <strong>every coroutine belongs to a scope, and no coroutine outlives its scope</strong>. The hierarchy is:</p>
+    <pre><code>CoroutineScope
+  └─ CoroutineContext (immutable set of elements)
+       ├─ Dispatcher    (which thread)
+       ├─ Job           (lifecycle + parent-child links)
+       ├─ CoroutineName (debug only)
+       └─ ExceptionHandler (uncaught errors)
+
+<span class="cm">// When you launch a child coroutine:</span>
+<span class="cm">// - Child gets a NEW Job that is a child of the parent Job</span>
+<span class="cm">// - Child INHERITS everything else (Dispatcher, name, handler)</span>
+<span class="cm">// - Cancelling the parent cancels ALL children</span>
+<span class="cm">// - Parent waits for ALL children to complete before completing itself</span></code></pre>
+    <h3>Three guarantees of structured concurrency</h3>
+    <ul>
+      <li><strong>No leaks</strong> — coroutines auto-cancel when their scope is cancelled</li>
+      <li><strong>Error propagation</strong> — child failures propagate to parent (unless SupervisorJob)</li>
+      <li><strong>Completion guarantee</strong> — parent doesn't complete until all children complete</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Why It Matters</div>
+      Before structured concurrency, async frameworks had "fire and forget" leaks. You'd launch a coroutine in an Activity, the Activity would be destroyed, but the coroutine kept running — holding a reference to the destroyed Activity, causing NPEs and memory leaks. Structured concurrency makes this architecturally impossible.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+    <h3>Job hierarchy in code</h3>
+    <pre><code><span class="kw">val</span> scope = <span class="cl">CoroutineScope</span>(<span class="cl">SupervisorJob</span>() + <span class="cl">Dispatchers</span>.Main)
+
+<span class="kw">val</span> parentJob = scope.<span class="fn">launch</span> {              <span class="cm">// child of scope's SupervisorJob</span>
+    <span class="kw">val</span> child1 = <span class="fn">launch</span> { <span class="fn">doWork1</span>() }       <span class="cm">// child of parentJob</span>
+    <span class="kw">val</span> child2 = <span class="fn">launch</span> { <span class="fn">doWork2</span>() }       <span class="cm">// child of parentJob</span>
+    <span class="cm">// parentJob won't complete until child1 AND child2 complete</span>
+}
+<span class="cm">// Cancelling parentJob → cancels child1 AND child2</span>
+<span class="cm">// Cancelling scope → cancels parentJob → cascades</span></code></pre>
+
+    <h3>coroutineScope vs supervisorScope</h3>
+    <pre><code><span class="cm">// coroutineScope: any child failure cancels ALL siblings + parent</span>
+<span class="kw">suspend fun</span> <span class="fn">loadAll</span>() = coroutineScope {
+    <span class="fn">launch</span> { <span class="fn">fetchA</span>() }   <span class="cm">// if this throws…</span>
+    <span class="fn">launch</span> { <span class="fn">fetchB</span>() }   <span class="cm">// …this is cancelled too</span>
+}                          <span class="cm">// and exception propagates to caller</span>
+
+<span class="cm">// supervisorScope: child failures are independent — siblings survive</span>
+<span class="kw">suspend fun</span> <span class="fn">loadDashboard</span>() = supervisorScope {
+    <span class="fn">launch</span> { <span class="fn">fetchUser</span>() }         <span class="cm">// if this throws…</span>
+    <span class="fn">launch</span> { <span class="fn">fetchRecommend</span>() }    <span class="cm">// …this still completes</span>
+}                                   <span class="cm">// partial results possible</span></code></pre>
+
+    <h3>Job vs SupervisorJob</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Job</th><th>SupervisorJob</th></tr>
+      <tr><td>Child failure propagation</td><td>Cancels all siblings + parent</td><td>Isolated to that child only</td></tr>
+      <tr><td>Used in</td><td>coroutineScope { }</td><td>supervisorScope { }, viewModelScope, lifecycleScope</td></tr>
+      <tr><td>Exception handling</td><td>Exception bubbles up</td><td>Exception needs CoroutineExceptionHandler per-child</td></tr>
+      <tr><td>Use case</td><td>All-or-nothing operations (checkout, transaction)</td><td>Independent parallel loading (dashboard widgets)</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Key Differences →</button>
+    </div>
+  </div>
+
+  <!-- S3 Key Differences -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9878;</div>3. Key Differences (Interview Goldmine)</div>
+
+    <h3>delay() vs Thread.sleep()</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th></th><th>delay()</th><th>Thread.sleep()</th></tr>
+      <tr><td>Type</td><td>Suspend function (coroutine-aware)</td><td>Blocking function</td></tr>
+      <tr><td>Thread</td><td>Frees the thread for other coroutines</td><td>Blocks the OS thread entirely</td></tr>
+      <tr><td>Cancellation</td><td>Respects cooperative cancellation</td><td>Cannot be cancelled cooperatively</td></tr>
+      <tr><td>Testing</td><td>Works with virtual clock in runTest</td><td>Always waits real time</td></tr>
+    </table>
+    </div>
+
+    <h3>suspend vs blocking</h3>
+    <pre><code><span class="cm">// suspend: cooperative, frees thread at suspension points</span>
+<span class="kw">suspend fun</span> <span class="fn">fetchData</span>(): <span class="cl">Data</span> {
+    <span class="kw">return</span> <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.IO) { api.<span class="fn">call</span>() }
+}
+
+<span class="cm">// blocking: holds the thread, must be wrapped in withContext(IO)</span>
+<span class="kw">fun</span> <span class="fn">fetchDataBlocking</span>(): <span class="cl">Data</span> = api.<span class="fn">callBlocking</span>()  <span class="cm">// ❌ on Main</span>
+
+<span class="cm">// Making blocking safe:</span>
+<span class="kw">suspend fun</span> <span class="fn">safeBlocking</span>() = <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.IO) {
+    <span class="fn">fetchDataBlocking</span>()  <span class="cm">// ✅ blocking on IO thread, safe</span>
+}</code></pre>
+
+    <h3>withContext vs async/await</h3>
+    <pre><code><span class="cm">// withContext: sequential, inline switch — use for single result</span>
+<span class="kw">val</span> user = <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.IO) { repo.<span class="fn">getUser</span>() }
+
+<span class="cm">// async/await: concurrent new coroutine — use for parallel work</span>
+<span class="kw">val</span> userDef = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.IO) { repo.<span class="fn">getUser</span>() }
+<span class="kw">val</span> ordersDef = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.IO) { repo.<span class="fn">getOrders</span>() }
+<span class="kw">val</span> user = userDef.<span class="fn">await</span>()
+<span class="kw">val</span> orders = ordersDef.<span class="fn">await</span>()
+<span class="cm">// Both fetched simultaneously!</span></code></pre>
+
+    <h3>launch vs async — exception handling</h3>
+    <pre><code><span class="cm">// launch: exception immediately propagates to parent Job</span>
+viewModelScope.<span class="fn">launch</span> {
+    <span class="kw">throw</span> <span class="cl">IOException</span>(<span class="str">"network error"</span>)
+    <span class="cm">// Crashes the parent scope unless CoroutineExceptionHandler set</span>
+}
+
+<span class="cm">// async: exception stored in Deferred, thrown only on await()</span>
+<span class="kw">val</span> deferred = viewModelScope.<span class="fn">async</span> {
+    <span class="kw">throw</span> <span class="cl">IOException</span>(<span class="str">"network error"</span>)
+}
+<span class="kw">try</span> { deferred.<span class="fn">await</span>() }          <span class="cm">// exception thrown here</span>
+<span class="kw">catch</span> (e: <span class="cl">IOException</span>) { <span class="cm">/* handled */</span> }</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>Banking: funds transfer — all-or-nothing (coroutineScope)</h3>
+    <pre><code><span class="cm">// All steps must succeed together — use coroutineScope (Job semantics)</span>
+<span class="kw">suspend fun</span> <span class="cl">TransferService</span>.<span class="fn">transfer</span>(
+    from: <span class="cl">Account</span>, to: <span class="cl">Account</span>, amount: <span class="cl">BigDecimal</span>
+): <span class="cl">TransferResult</span> = coroutineScope {
+    <span class="cm">// Step 1 + 2 can be parallel: validate both accounts simultaneously</span>
+    <span class="kw">val</span> fromOk = <span class="fn">async</span> { accountRepo.<span class="fn">validateSufficientFunds</span>(from, amount) }
+    <span class="kw">val</span> toOk = <span class="fn">async</span> { accountRepo.<span class="fn">validateAccountActive</span>(to) }
+
+    <span class="kw">if</span> (!fromOk.<span class="fn">await</span>() || !toOk.<span class="fn">await</span>()) {
+        <span class="kw">return</span>@coroutineScope <span class="cl">TransferResult</span>.<span class="cl">Rejected</span>
+    }
+
+    <span class="cm">// Step 3+4 must be sequential — debit before credit</span>
+    <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.IO) {
+        ledgerRepo.<span class="fn">debit</span>(from, amount)   <span class="cm">// if this throws, credit never runs</span>
+        ledgerRepo.<span class="fn">credit</span>(to, amount)    <span class="cm">// safe: debit confirmed</span>
+    }
+    <span class="cl">TransferResult</span>.<span class="cl">Success</span>
+}
+
+<span class="cm">// Dashboard loading — partial failure acceptable (supervisorScope)</span>
+<span class="kw">suspend fun</span> <span class="fn">loadDashboard</span>(): <span class="cl">DashboardState</span> = supervisorScope {
+    <span class="kw">val</span> balanceDef = <span class="fn">async</span> { <span class="kw">runCatching</span> { accountRepo.<span class="fn">getBalance</span>() } }
+    <span class="kw">val</span> txnsDef    = <span class="fn">async</span> { <span class="kw">runCatching</span> { txnRepo.<span class="fn">getRecent</span>() } }
+    <span class="kw">val</span> offersDef  = <span class="fn">async</span> { <span class="kw">runCatching</span> { offersRepo.<span class="fn">getOffers</span>() } }
+
+    <span class="cl">DashboardState</span>(
+        balance = balanceDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>(),
+        transactions = txnsDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>(),
+        offers = offersDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>()
+    )
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Scope Comparison →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Scope Comparison</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Scope / builder</th><th>Job type</th><th>Child failure</th><th>Returns</th><th>Use case</th></tr>
+      <tr><td>coroutineScope { }</td><td>Job (regular)</td><td>Cancels all siblings</td><td>T (suspend)</td><td>All-or-nothing parallel work</td></tr>
+      <tr><td>supervisorScope { }</td><td>SupervisorJob</td><td>Independent</td><td>T (suspend)</td><td>Partial results ok (dashboard)</td></tr>
+      <tr><td>viewModelScope</td><td>SupervisorJob + Main</td><td>Independent</td><td>Job</td><td>ViewModel, UI-bound work</td></tr>
+      <tr><td>lifecycleScope</td><td>SupervisorJob + Main</td><td>Independent</td><td>Job</td><td>Fragment/Activity UI work</td></tr>
+      <tr><td>GlobalScope</td><td>No parent</td><td>No propagation</td><td>Job</td><td>❌ Never in Android</td></tr>
+    </table>
+    </div>
+    <h3>Cancellation vs exception propagation</h3>
+    <div class="callout callout-blue">
+      <div class="callout-label">Key Rule</div>
+      <strong>Cancellation</strong> (via <code>job.cancel()</code>) uses <code>CancellationException</code> — it propagates down to children but NOT up to the parent. The parent continues. <strong>Non-cancellation exceptions</strong> propagate up AND cancel siblings. This asymmetry is by design.
+    </div>
+    <pre><code><span class="cm">// Cancellation: downward only</span>
+<span class="kw">val</span> parent = scope.<span class="fn">launch</span> {
+    <span class="kw">val</span> child = <span class="fn">launch</span> { <span class="fn">longWork</span>() }
+    child.<span class="fn">cancel</span>()           <span class="cm">// only child cancelled, parent continues</span>
+    <span class="fn">doOtherWork</span>()            <span class="cm">// still runs</span>
+}
+
+<span class="cm">// Exception: upward + siblings</span>
+<span class="kw">val</span> parent = scope.<span class="fn">launch</span> {
+    <span class="fn">launch</span> { <span class="kw">throw</span> <span class="cl">IOException</span>() }  <span class="cm">// sibling also cancelled</span>
+    <span class="fn">launch</span> { <span class="fn">otherWork</span>() }           <span class="cm">// CANCELLED due to sibling failure</span>
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Breaking hierarchy with a new Job</div>
+      <code>launch(Job()) { }</code> — adding a new Job as the coroutine context disconnects the child from the parent's job. Cancelling the parent won't cancel this child. Never pass a raw <code>Job()</code> to <code>launch</code> or <code>async</code>.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — SupervisorJob in the wrong place</div>
+      <code>launch(SupervisorJob()) { child1; child2 }</code> — the SupervisorJob here is the parent of the launched coroutine, not of child1/child2. Use <code>supervisorScope { }</code> inside to get the supervisor semantics for children.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — coroutineScope for suspend functions</div>
+      Any <code>suspend fun</code> that launches multiple coroutines should use <code>coroutineScope { }</code> or <code>supervisorScope { }</code> to define a proper boundary. This makes the function's concurrency observable and its lifecycle tied to the call site.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Structured concurrency means every coroutine belongs to a scope, and no coroutine outlives that scope. The hierarchy is CoroutineScope → CoroutineContext → Job → children. Cancelling a parent cancels all children; a parent waits for all children before completing; child failures propagate up unless you use SupervisorJob which isolates failures."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The key distinction between coroutineScope and supervisorScope is failure isolation. coroutineScope uses a regular Job: any child failure cancels all siblings and propagates to the caller. supervisorScope uses a SupervisorJob: each child is independent, so a failure in one doesn't affect others. viewModelScope uses SupervisorJob by default — so one failed launch doesn't crash all others.<br><br>For delay vs Thread.sleep: delay is a suspend function — it frees the thread for other coroutines during the wait and can be cancelled cooperatively. Thread.sleep blocks the OS thread entirely and ignores cancellation.<br><br>For withContext vs async: withContext is sequential — it's an inline context switch, no concurrency. async starts a new concurrent coroutine and returns a Deferred you later await. Use withContext when you need one result from a different dispatcher; use async when you want true parallelism."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>coroutineScope = Job (all-or-nothing)</strong> vs <strong>supervisorScope = SupervisorJob (partial ok)</strong></div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>delay() suspends, Thread.sleep() blocks</strong> — never use sleep in a coroutine</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>launch(Job()) breaks hierarchy</strong> — never add a raw Job to a builder</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Cancellation is downward only</strong>; exceptions propagate upward and cancel siblings</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>viewModelScope = SupervisorJob + Main</strong> — that's why one failed launch doesn't crash others</div></div>
+    </div>
+    <h3>Do NOT go deeper than</h3>
+    <ul>
+      <li>CoroutineScope interface implementation details</li>
+      <li>The exact CancellationException hierarchy unless asked specifically</li>
+    </ul>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "Why does viewModelScope use SupervisorJob?"</h4>
+    <p>A: ViewModels orchestrate multiple parallel UI operations (load user, load orders, load ads). If one fails, the others should still complete. Using a regular Job would mean a single failed network call crashes all coroutines in the ViewModel — terrible UX. SupervisorJob isolates failures so each <code>launch</code> is independent.</p>
+    <h4>Q: "What happens when a supervisorScope child throws?"</h4>
+    <p>A: The exception is NOT propagated to siblings or the parent scope. But it's also not silently swallowed — it must be handled either by a try/catch inside the async block, or via a CoroutineExceptionHandler in the child's context. If unhandled, it may crash the app.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In e-commerce checkout, structured concurrency is your transaction boundary. Wrap all payment steps in <code>coroutineScope</code> — if any step fails, all in-flight work cancels. But wrap the dashboard load in <code>supervisorScope</code> — partial data is better than no data. Choosing correctly between these two scopes is a senior-level architectural decision.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Scope comparison</h4>
+        <pre><code>coroutineScope  → Job (fail = cancel all)
+supervisorScope → SupervisorJob (fail = isolated)
+viewModelScope  → SupervisorJob + Main
+lifecycleScope  → SupervisorJob + Main</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>delay vs Thread.sleep</h4>
+        <pre><code>delay(1000)       // suspend, frees thread
+Thread.sleep(1000)// blocks thread
+                  // use delay() always</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Cancellation flow</h4>
+        <pre><code>cancel() → CancellationException
+         → flows DOWN to children
+         → does NOT flow up to parent
+
+Exception → flows UP to parent
+          → cancels ALL siblings</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>withContext vs async</h4>
+        <pre><code>withContext(IO) { }    // sequential
+                       // no Deferred
+async(IO) { }.await()  // concurrent
+                       // use for parallel</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is structured concurrency and why does it matter?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Structured concurrency is the guarantee that every coroutine belongs to a scope and cannot outlive it. When a scope is cancelled, all coroutines inside are cancelled too. This prevents coroutine leaks — the most common async bug before structured concurrency, where coroutines would hold references to destroyed UI components.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between delay() and Thread.sleep()?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>delay()</code> is a suspend function: it suspends the coroutine, freeing the thread to run other coroutines, and resumes after the specified time. It also respects cancellation — if the coroutine is cancelled during a delay, a CancellationException is thrown. <code>Thread.sleep()</code> blocks the OS thread entirely for the duration — other coroutines on that thread can't run, and it cannot be cancelled cooperatively.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between coroutineScope and supervisorScope?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>coroutineScope</code> uses a regular <code>Job</code>: if any child fails, all siblings are cancelled and the exception propagates to the caller. <code>supervisorScope</code> uses a <code>SupervisorJob</code>: each child is independent; a failure in one does not affect others. Use <code>coroutineScope</code> for all-or-nothing (transactions), <code>supervisorScope</code> for partial-results-ok (dashboard loading).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between launch and async in terms of exception handling?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">With <code>launch</code>, exceptions propagate immediately to the parent Job. With <code>async</code>, the exception is stored in the <code>Deferred</code> and only re-thrown when <code>.await()</code> is called. This means you can use try/catch around <code>await()</code>. However, in a <code>coroutineScope</code>, even async exceptions cancel siblings when the scope is cancelled — the storage is temporary until you await.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why does adding a new Job() to a launch call break structured concurrency?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">When you do <code>scope.launch(Job()) { }</code>, the new Job replaces the parent Job in the context — disconnecting the child from the parent's lifecycle. Cancelling the scope no longer cancels this child. It becomes an orphaned coroutine. The fix is to never pass a raw Job to builders. If you need isolation, use <code>supervisorScope</code> at the scope level instead.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does cancellation propagation differ from exception propagation?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Cancellation (via <code>cancel()</code>) sends a <code>CancellationException</code> <em>downward</em> — it cancels children but not the parent. The parent continues after cancelling a child. Non-cancellation exceptions propagate <em>upward</em> — they cancel the parent and all siblings. This asymmetry is deliberate: cancellation is a normal lifecycle event (user navigated away), while exceptions indicate unexpected failures that should abort the whole operation.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you choose supervisorScope over coroutineScope in a ViewModel?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>supervisorScope</code> when loading multiple independent data sources for the same screen (e.g., user profile + recommendations + ads). If recommendations fail, you still want to show the profile. Use <code>coroutineScope</code> when the data is interdependent (e.g., first get an auth token, then use it to fetch data — token failure should abort the whole flow).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A coroutine throws an unhandled exception inside supervisorScope but there's no CoroutineExceptionHandler. What happens?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">In a <code>supervisorScope</code>, the failed child's exception is not propagated to siblings or the parent scope. However, it still needs to be handled. If the child was created with <code>launch</code> and has no handler, the exception reaches the global uncaught exception handler — on Android this means a crash. With <code>async</code>, the exception is stored in the Deferred until <code>await()</code>. The correct pattern inside supervisorScope: wrap each child's logic in try/catch, or add a CoroutineExceptionHandler to the child's context.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain the 3 guarantees of structured concurrency and how each prevents a common production bug.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">(1) <strong>No leaks</strong>: coroutines auto-cancel with their scope — prevents callbacks firing after Activity destroy, preventing NPEs and outdated UI updates. (2) <strong>Error propagation</strong>: failures are never silently dropped — in <code>coroutineScope</code>, a silent failure in one operation doesn't leave the app in an inconsistent partial state. (3) <strong>Completion guarantee</strong>: parent waits for all children — a function that returns only after all its spawned work is done, preventing data races where callers assume work is complete when it isn't.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design the concurrency model for a banking dashboard that must show balance (critical), recent transactions (important), and promotional offers (optional). Handle failures gracefully.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>supervisorScope</code> for isolation, <code>async</code> with <code>runCatching</code> for each source: <code>val balance = async { runCatching { balanceRepo.get() } }</code> (critical — show error state if fails), <code>val txns = async { runCatching { txnRepo.get() } }</code> (show empty state if fails), <code>val offers = async { runCatching { offerRepo.get() } }</code> (silently omit if fails). All run in parallel. Compose the UI state from the three Results, using fallbacks for non-critical failures. Total latency = max(each call's latency) instead of sum.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5E — Scopes, Concurrency &amp; Testing | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">5E · Scopes, Concurrency &amp; Testing</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Scopes &amp; Lifecycle</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Race Conditions</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Testing Coroutines</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>5E</span> — Scopes, Concurrency &amp; Testing</h1>
+    <p class="hero-desc">lifecycleScope, viewModelScope, custom scopes. Race conditions with Mutex/Semaphore/AtomicInteger. runTest, StandardTestDispatcher vs UnconfinedTestDispatcher, virtual time control.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 5E</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Lifecycle-aware scopes</h3>
+    <ul>
+      <li><strong>viewModelScope</strong> — tied to ViewModel lifecycle; SupervisorJob + Dispatchers.Main.immediate; auto-cancelled on <code>onCleared()</code></li>
+      <li><strong>lifecycleScope</strong> — tied to Lifecycle owner (Activity/Fragment); auto-cancelled on <code>DESTROYED</code> state</li>
+      <li><strong>repeatOnLifecycle(State.STARTED)</strong> — collect flows only when UI is visible; re-launches on STARTED, cancels on STOPPED</li>
+    </ul>
+    <h3>Concurrency primitives</h3>
+    <ul>
+      <li><strong>Mutex</strong> — coroutine-aware lock; <code>mutex.withLock { }</code>; suspends instead of blocks</li>
+      <li><strong>Semaphore</strong> — limits concurrent access to N coroutines at a time</li>
+      <li><strong>AtomicInteger / AtomicLong</strong> — lock-free atomic operations for simple counters</li>
+    </ul>
+    <h3>Testing</h3>
+    <ul>
+      <li><strong>runTest</strong> — replaces runBlocking for tests; uses virtual time</li>
+      <li><strong>StandardTestDispatcher</strong> — coroutines don't start until you advance time or call idle</li>
+      <li><strong>UnconfinedTestDispatcher</strong> — coroutines run eagerly (like Unconfined)</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Scopes →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Scopes &amp; Lifecycle</div>
+    <h3>viewModelScope and lifecycleScope</h3>
+    <pre><code><span class="cm">// viewModelScope: auto-cancelled when ViewModel is cleared</span>
+<span class="kw">class</span> <span class="cl">CartViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">fun</span> <span class="fn">addItem</span>(item: <span class="cl">Item</span>) {
+        viewModelScope.<span class="fn">launch</span> {   <span class="cm">// SupervisorJob + Main</span>
+            cartRepo.<span class="fn">add</span>(item)
+        }
+    }
+}
+
+<span class="cm">// lifecycleScope: auto-cancelled on DESTROYED</span>
+<span class="kw">class</span> <span class="cl">CartFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="cl">View</span>, saved: <span class="cl">Bundle</span>?) {
+        <span class="cm">// repeatOnLifecycle: starts on STARTED, cancels on STOPPED</span>
+        <span class="cm">// Re-starts on STARTED again — safe for background/foreground</span>
+        viewLifecycleOwner.lifecycleScope.<span class="fn">launch</span> {
+            viewLifecycleOwner.lifecycle.<span class="fn">repeatOnLifecycle</span>(<span class="cl">Lifecycle</span>.<span class="cl">State</span>.<span class="cl">STARTED</span>) {
+                viewModel.state.<span class="fn">collect</span> { state ->
+                    <span class="fn">render</span>(state)   <span class="cm">// only runs when UI is visible</span>
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Custom CoroutineScope</h3>
+    <pre><code><span class="cm">// For Repositories or Services not tied to ViewModel</span>
+<span class="kw">class</span> <span class="cl">SyncService</span>(
+    <span class="kw">private val</span> ioDispatcher: <span class="cl">CoroutineDispatcher</span> = <span class="cl">Dispatchers</span>.IO
+) {
+    <span class="kw">private val</span> job = <span class="cl">SupervisorJob</span>()
+    <span class="kw">private val</span> scope = <span class="cl">CoroutineScope</span>(job + ioDispatcher)
+
+    <span class="kw">fun</span> <span class="fn">startSync</span>() { scope.<span class="fn">launch</span> { <span class="fn">doSync</span>() } }
+    <span class="kw">fun</span> <span class="fn">stop</span>() { job.<span class="fn">cancel</span>() }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Race Conditions →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9888;</div>3. Race Conditions &amp; Synchronisation</div>
+    <h3>The problem: concurrent state mutation</h3>
+    <pre><code><span class="cm">// ❌ Race condition: multiple coroutines updating shared state</span>
+<span class="kw">var</span> counter = <span class="nu">0</span>
+<span class="fn">repeat</span>(<span class="nu">1000</span>) {
+    viewModelScope.<span class="fn">launch</span>(<span class="cl">Dispatchers</span>.Default) {
+        counter++  <span class="cm">// NOT atomic! Result: &lt; 1000</span>
+    }
+}</code></pre>
+
+    <h3>Mutex — coroutine-aware lock</h3>
+    <pre><code><span class="kw">private val</span> mutex = <span class="cl">Mutex</span>()
+<span class="kw">var</span> counter = <span class="nu">0</span>
+
+<span class="fn">repeat</span>(<span class="nu">1000</span>) {
+    viewModelScope.<span class="fn">launch</span>(<span class="cl">Dispatchers</span>.Default) {
+        mutex.<span class="fn">withLock</span> {   <span class="cm">// suspends other coroutines waiting for lock</span>
+            counter++       <span class="cm">// safe: only one coroutine at a time</span>
+        }
+    }
+}
+<span class="cm">// Result: exactly 1000 — guaranteed</span></code></pre>
+
+    <h3>Semaphore — limit concurrent access</h3>
+    <pre><code><span class="cm">// Limit concurrent API calls to 3 (rate limiting)</span>
+<span class="kw">val</span> semaphore = <span class="cl">Semaphore</span>(<span class="nu">3</span>)
+
+<span class="kw">suspend fun</span> <span class="fn">fetchWithRateLimit</span>(id: <span class="cl">String</span>) {
+    semaphore.<span class="fn">withPermit</span> {   <span class="cm">// blocks if 3 already active</span>
+        api.<span class="fn">fetch</span>(id)
+    }
+}</code></pre>
+
+    <h3>AtomicInteger — lock-free counter</h3>
+    <pre><code><span class="cm">// For simple increment/decrement without lock overhead</span>
+<span class="kw">private val</span> requestCount = <span class="cl">AtomicInteger</span>(<span class="nu">0</span>)
+
+<span class="kw">suspend fun</span> <span class="fn">trackRequest</span>() {
+    requestCount.<span class="fn">incrementAndGet</span>()  <span class="cm">// lock-free, thread-safe</span>
+    <span class="kw">try</span> { <span class="fn">makeRequest</span>() }
+    <span class="kw">finally</span> { requestCount.<span class="fn">decrementAndGet</span>() }
+}</code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Tool</th><th>Use case</th><th>Suspends?</th><th>Lock-free?</th></tr>
+      <tr><td>Mutex</td><td>Exclusive access to shared state</td><td>Yes</td><td>No</td></tr>
+      <tr><td>Semaphore(n)</td><td>Limit concurrent access to N</td><td>Yes</td><td>No</td></tr>
+      <tr><td>AtomicInteger</td><td>Simple counter, flag</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Single-thread dispatcher</td><td>Confine state to one thread</td><td>No</td><td>Yes</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Testing →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128203;</div>4. Testing Coroutines</div>
+    <h3>runTest — virtual time</h3>
+    <pre><code><span class="kw">import</span> kotlinx.coroutines.test.*
+
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">`retry after delay works`</span>() = <span class="fn">runTest</span> {
+    <span class="cm">// runTest uses TestCoroutineScheduler — virtual time</span>
+    <span class="cm">// delay(5000) completes instantly in runTest!</span>
+    <span class="kw">val</span> result = <span class="fn">withTimeout</span>(<span class="nu">6000</span>) {
+        <span class="fn">fetchWithRetry</span>()  <span class="cm">// internally delay(5000) on each retry</span>
+    }
+    <span class="fn">assertEquals</span>(<span class="str">"success"</span>, result)
+    <span class="cm">// Real time elapsed: &lt; 10ms</span>
+}</code></pre>
+
+    <h3>StandardTestDispatcher — manual time control</h3>
+    <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">`loading state transitions`</span>() = <span class="fn">runTest</span> {
+    <span class="kw">val</span> testDispatcher = <span class="cl">StandardTestDispatcher</span>(testScheduler)
+    <span class="kw">val</span> viewModel = <span class="cl">MyViewModel</span>(testDispatcher)
+
+    viewModel.<span class="fn">load</span>()
+    <span class="cm">// Coroutine queued but NOT yet started (StandardTestDispatcher)</span>
+    <span class="fn">assertEquals</span>(<span class="cl">UiState</span>.<span class="cl">Loading</span>, viewModel.state.<span class="fn">value</span>)
+
+    <span class="fn">advanceUntilIdle</span>()   <span class="cm">// run all pending coroutines to completion</span>
+    <span class="fn">assertEquals</span>(<span class="cl">UiState</span>.<span class="cl">Success</span>(<span class="fn">mockData</span>()), viewModel.state.<span class="fn">value</span>)
+}</code></pre>
+
+    <h3>UnconfinedTestDispatcher — eager execution</h3>
+    <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">`flow collection`</span>() = <span class="fn">runTest</span>(<span class="cl">UnconfinedTestDispatcher</span>()) {
+    <span class="cm">// UnconfinedTestDispatcher: coroutines run eagerly on current thread</span>
+    <span class="cm">// Great for testing flows — collection starts immediately</span>
+    <span class="kw">val</span> results = <span class="fn">mutableListOf</span>&lt;<span class="cl">Int</span>&gt;()
+    <span class="kw">val</span> job = <span class="fn">launch</span> {
+        viewModel.countFlow.<span class="fn">collect</span> { results.<span class="fn">add</span>(it) }
+    }
+    viewModel.<span class="fn">increment</span>()
+    viewModel.<span class="fn">increment</span>()
+    <span class="fn">assertEquals</span>(<span class="fn">listOf</span>(<span class="nu">0</span>, <span class="nu">1</span>, <span class="nu">2</span>), results)
+    job.<span class="fn">cancel</span>()
+}</code></pre>
+
+    <h3>advanceTimeBy vs advanceUntilIdle</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Function</th><th>Effect</th><th>Use when</th></tr>
+      <tr><td>advanceUntilIdle()</td><td>Runs all pending coroutines + delays</td><td>Final assertion — all work done</td></tr>
+      <tr><td>advanceTimeBy(ms)</td><td>Fast-forwards virtual clock by ms</td><td>Testing time-sensitive delays</td></tr>
+      <tr><td>runCurrent()</td><td>Runs pending coroutines without advancing time</td><td>Checking intermediate states</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>Banking: rate-limited concurrent transfers with testing</h3>
+    <pre><code><span class="cm">// Production code</span>
+<span class="kw">class</span> <span class="cl">TransferQueue</span>(
+    <span class="kw">private val</span> ioDispatcher: <span class="cl">CoroutineDispatcher</span> = <span class="cl">Dispatchers</span>.IO
+) {
+    <span class="kw">private val</span> semaphore = <span class="cl">Semaphore</span>(<span class="nu">5</span>)  <span class="cm">// max 5 concurrent transfers</span>
+    <span class="kw">private val</span> completedCount = <span class="cl">AtomicInteger</span>(<span class="nu">0</span>)
+    <span class="kw">private val</span> stateMutex = <span class="cl">Mutex</span>()
+    <span class="kw">private val</span> pendingTransfers = <span class="fn">mutableListOf</span>&lt;<span class="cl">Transfer</span>&gt;()
+
+    <span class="kw">suspend fun</span> <span class="fn">enqueue</span>(transfer: <span class="cl">Transfer</span>) {
+        stateMutex.<span class="fn">withLock</span> { pendingTransfers.<span class="fn">add</span>(transfer) }
+    }
+
+    <span class="kw">suspend fun</span> <span class="fn">processAll</span>() = coroutineScope {
+        <span class="kw">val</span> snapshot = stateMutex.<span class="fn">withLock</span> { pendingTransfers.<span class="fn">toList</span>() }
+        snapshot.<span class="fn">forEach</span> { transfer ->
+            <span class="fn">launch</span>(ioDispatcher) {
+                semaphore.<span class="fn">withPermit</span> {       <span class="cm">// limit concurrency</span>
+                    <span class="fn">executeTransfer</span>(transfer)
+                    completedCount.<span class="fn">incrementAndGet</span>()
+                }
+            }
+        }
+    }
+}
+
+<span class="cm">// Test</span>
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">`processAll completes all transfers`</span>() = <span class="fn">runTest</span> {
+    <span class="kw">val</span> testDispatcher = <span class="cl">StandardTestDispatcher</span>(testScheduler)
+    <span class="kw">val</span> queue = <span class="cl">TransferQueue</span>(testDispatcher)
+    <span class="kw">val</span> fakeApi = <span class="cl">FakeTransferApi</span>()  <span class="cm">// delays 100ms per transfer</span>
+
+    <span class="fn">repeat</span>(<span class="nu">10</span>) { queue.<span class="fn">enqueue</span>(<span class="cl">Transfer</span>(it)) }
+    <span class="kw">val</span> job = <span class="fn">launch</span> { queue.<span class="fn">processAll</span>() }
+
+    <span class="fn">advanceTimeBy</span>(<span class="nu">100</span>)    <span class="cm">// first batch of 5 complete (semaphore)</span>
+    <span class="fn">assertEquals</span>(<span class="nu">5</span>, queue.completedCount.<span class="fn">get</span>())
+
+    <span class="fn">advanceUntilIdle</span>()   <span class="cm">// remaining 5 complete</span>
+    <span class="fn">assertEquals</span>(<span class="nu">10</span>, queue.completedCount.<span class="fn">get</span>())
+    job.<span class="fn">join</span>()
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Mutex deadlock</div>
+      Never call <code>mutex.withLock</code> from inside another <code>mutex.withLock</code> on the same Mutex. Unlike Java's reentrant locks, Kotlin's Mutex is NOT reentrant — it will deadlock.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — repeatOnLifecycle vs launchWhenStarted</div>
+      <code>launchWhenStarted</code> (deprecated) pauses collection but does NOT cancel the upstream flow — the producer keeps emitting. <code>repeatOnLifecycle</code> cancels and re-starts the entire collector, stopping the upstream producer. Always use <code>repeatOnLifecycle</code>.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — runTest vs runBlocking in tests</div>
+      Using <code>runBlocking</code> in tests runs coroutines with real time — <code>delay(5000)</code> waits 5 real seconds. Use <code>runTest</code> which uses virtual time — all delays are skipped unless you explicitly advance.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — Prefer single-thread confinement over Mutex for state</div>
+      Instead of Mutex, confine mutable state to a single-threaded dispatcher: <code>val stateDispatcher = Dispatchers.IO.limitedParallelism(1)</code>. All reads/writes happen on one thread — no locks needed, no deadlock risk.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "For lifecycle-aware coroutines, viewModelScope ties to ViewModel.onCleared() and lifecycleScope ties to the Lifecycle DESTROYED state. For race conditions, coroutines have Mutex for exclusive access, Semaphore for rate limiting, and AtomicInteger for lock-free counters. For tests, runTest uses virtual time so delays are free, and you control execution with advanceUntilIdle() or advanceTimeBy()."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "viewModelScope uses SupervisorJob + Dispatchers.Main.immediate, so it starts immediately on the main thread. lifecycleScope tied to a Fragment should use viewLifecycleOwner, not the Fragment itself — the Fragment outlives its view. For flow collection in Fragments, always use repeatOnLifecycle(STARTED), which cancels and re-creates the collector as the app goes to background/foreground. launchWhenStarted is deprecated because it doesn't cancel the upstream.<br><br>For concurrency safety: Mutex is the coroutine-native lock — it suspends instead of blocking. For simple counters, AtomicInteger is lock-free and more efficient. For rate limiting concurrent API calls, Semaphore(n) is the clean solution.<br><br>For testing: runTest gives a virtual clock, StandardTestDispatcher queues coroutines without running them (so you can assert Loading state), UnconfinedTestDispatcher runs eagerly for flow tests."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>viewLifecycleOwner.lifecycleScope</strong> in Fragments — not <code>this</code></div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>repeatOnLifecycle(STARTED)</strong> cancels upstream; <code>launchWhenStarted</code> does not</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Mutex is NOT reentrant</strong> — deadlock if called twice on same lock</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>runTest = virtual time</strong>; StandardTestDispatcher = manual; UnconfinedTestDispatcher = eager</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Inject dispatchers</strong> — use TestDispatcher in tests</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "Why use viewLifecycleOwner.lifecycleScope instead of lifecycleScope in a Fragment?"</h4>
+    <p>A: Fragments can be detached and re-attached without being destroyed. The Fragment's own <code>lifecycleScope</code> lives until the Fragment is destroyed. But the view is destroyed on back-stack. If you use <code>this.lifecycleScope</code> (the Fragment), view-accessing coroutines survive the view destruction, causing NullPointerExceptions. <code>viewLifecycleOwner.lifecycleScope</code> is cancelled when the view is destroyed — the safe choice.</p>
+    <h4>Q: "StandardTestDispatcher vs UnconfinedTestDispatcher?"</h4>
+    <p>A: StandardTestDispatcher queues coroutines and doesn't start them until you advance time. This lets you assert intermediate states like Loading before the data arrives. UnconfinedTestDispatcher runs coroutines eagerly on the current thread — good for flow collection tests where you just want to verify emissions.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In production, prefer state confinement over Mutex wherever possible. If all mutations to shared state go through a <code>Dispatchers.IO.limitedParallelism(1)</code> dispatcher, you get thread-safety without locks, no deadlock risk, and better performance. Mutex should be reserved for cases where you need to atomically read+modify+write across suspension points.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Scope summary</h4>
+        <pre><code>viewModelScope: SupervisorJob+Main
+              cancelled in onCleared()
+lifecycleScope: cancelled in DESTROYED
+  → always use viewLifecycleOwner
+repeatOnLifecycle(STARTED) for flows</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Sync primitives</h4>
+        <pre><code>Mutex()          // exclusive lock (not reentrant)
+Semaphore(n)     // limit to N concurrent
+AtomicInteger()  // lock-free counter
+limitedParallelism(1) // confinement</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Test dispatchers</h4>
+        <pre><code>StandardTest  → manual, queued
+UnconfinedTest→ eager, runs inline
+advanceUntilIdle() // drain all
+advanceTimeBy(ms)  // virtual clock</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Test template</h4>
+        <pre><code>@Test fun test() = runTest {
+  val vm = ViewModel(
+    StandardTestDispatcher(testScheduler))
+  vm.load()
+  assertEquals(Loading, vm.state.value)
+  advanceUntilIdle()
+  assertEquals(Success, vm.state.value)
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is viewModelScope and when is it cancelled?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>viewModelScope</code> is a CoroutineScope provided by the ViewModel Kotlin extension. It uses <code>SupervisorJob() + Dispatchers.Main.immediate</code>. It's automatically cancelled when <code>ViewModel.onCleared()</code> is called — which happens when the ViewModel is no longer needed (e.g., the associated Fragment/Activity is permanently destroyed). This means all coroutines are cancelled automatically, preventing leaks.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why should you use repeatOnLifecycle instead of launchWhenStarted?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>launchWhenStarted</code> only pauses collection when the lifecycle goes below STARTED — the upstream flow still runs and produces values (wasting resources, potential memory buildup). <code>repeatOnLifecycle(STARTED)</code> cancels the entire collection block when STOPPED and re-launches it when STARTED — fully stopping the producer. This is the correct pattern for lifecycle-aware collection.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is a Mutex and how does it differ from Java's synchronized?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Kotlin's <code>Mutex</code> is coroutine-aware — it suspends the waiting coroutine instead of blocking the thread. Java's <code>synchronized</code> blocks the OS thread. This means with Mutex, a waiting coroutine frees the thread for other coroutines to run. Important: Mutex is NOT reentrant — a coroutine that already holds the lock and tries to acquire it again will deadlock. Java's synchronized is reentrant by default.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between StandardTestDispatcher and UnconfinedTestDispatcher?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>StandardTestDispatcher</code>: coroutines are queued but don't execute until you explicitly advance time (<code>advanceUntilIdle()</code>, <code>advanceTimeBy()</code>, <code>runCurrent()</code>). This lets you assert intermediate states (e.g., Loading before data arrives). <code>UnconfinedTestDispatcher</code>: coroutines run eagerly on the current thread as soon as launched. Better for flow collection tests where you want emissions to be immediately available.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you limit concurrent API calls to a maximum of 5 at a time?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>Semaphore(5)</code>: <code>val semaphore = Semaphore(5)</code>. Wrap each API call: <code>semaphore.withPermit { api.call() }</code>. When 5 calls are active, additional coroutines suspend at <code>withPermit</code> until a permit is released. This is cleaner than managing a custom counter and doesn't block threads — suspended coroutines free the thread while waiting.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you test a ViewModel that has a 3-second loading delay?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Inject a test dispatcher: <code>class MyViewModel(private val dispatcher: CoroutineDispatcher = Dispatchers.IO)</code>. In the test: <code>runTest { val vm = MyViewModel(StandardTestDispatcher(testScheduler)); vm.load(); assertEquals(Loading, vm.state.value); advanceUntilIdle(); assertEquals(Success(...), vm.state.value) }</code>. The 3-second <code>delay</code> is skipped by the virtual clock — test runs instantly.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Two coroutines are simultaneously trying to update a list. What is the safest approach?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Three options, ordered by preference: (1) <strong>State confinement</strong>: use <code>Dispatchers.IO.limitedParallelism(1)</code> — all mutations go through a single-threaded dispatcher, no locks needed. (2) <strong>Mutex</strong>: <code>mutex.withLock { list.add(item) }</code> — suspends waiting coroutines without blocking threads. (3) <strong>Use StateFlow/Channel</strong>: emit updates through a single-writer flow, never mutate shared state directly. Option 1 is usually preferred for simplicity.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design a test that verifies a ViewModel shows Loading → Error states when an API throws after 2 seconds.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>runTest { val dispatcher = StandardTestDispatcher(testScheduler); val fakeRepo = FakeRepo { delay(2000); throw IOException() }; val vm = MyViewModel(fakeRepo, dispatcher); vm.load(); assertEquals(Loading, vm.state.value); advanceTimeBy(2000); runCurrent(); // process exception; assertEquals(Error("network"), vm.state.value) }</code>. Key: <code>advanceTimeBy(2000)</code> moves the virtual clock forward, then <code>runCurrent()</code> processes the resulting exception handling. StandardTestDispatcher gives precise control over state transitions.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between collectAsStateWithLifecycle() and collectAsState() in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>collectAsState()</code> collects the flow as long as the Composition is active — it doesn't respect Android lifecycle. If the app goes to background, collection continues (wasting resources, potentially processing stale data). <code>collectAsStateWithLifecycle()</code> (from lifecycle-compose library) uses <code>repeatOnLifecycle(STARTED)</code> semantics — collection pauses when the app goes to background and resumes when it returns. Always prefer <code>collectAsStateWithLifecycle()</code> in production Android apps.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">You notice that your Mutex-protected code sometimes deadlocks in production. What are the root causes and how do you diagnose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Root causes: (1) Non-reentrant deadlock — a coroutine holding the mutex calls a function that also tries to acquire the same mutex. (2) Nested Mutex acquisition in wrong order across two mutexes (classic ABBA deadlock). (3) withLock block suspends (via suspend call) and another coroutine holding a different lock tries to acquire this one. Diagnosis: enable coroutine debug mode (<code>-Dkotlinx.coroutines.debug</code>), check thread dumps, look for coroutines in Waiting state at <code>Mutex.lock()</code>. Prevention: never call unknown suspend functions inside a locked block; prefer state confinement over Mutex.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

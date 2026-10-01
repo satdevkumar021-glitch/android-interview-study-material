@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>11B – Hilt Components | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .ascii{font-family:"JetBrains Mono","Fira Code",monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;font-size:12.5px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:14px 0;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">11B · Hilt Components</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>11B</span> — Hilt Components &amp; Dagger Internals</h1>
+    <p class="hero-desc">Component hierarchy and lifetimes, Dagger code generation, <code>@HiltViewModel</code> internals, compile-time graph validation, and SubComponents vs Component dependencies.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 11B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>The Hilt Component Hierarchy</h3>
+    <p>Hilt generates a hierarchy of Dagger components that mirror the Android lifecycle. Each component can access bindings from its parent (they form a parent-child tree). A component is created when its corresponding Android object is created and destroyed when that object is destroyed.</p>
+    <div class="ascii">
+SingletonComponent         (Application lifetime)
+  └── ActivityRetainedComponent  (survives config changes)
+        ├── ViewModelComponent       (ViewModel lifetime)
+        └── ActivityComponent        (Activity instance)
+              ├── FragmentComponent      (Fragment instance)
+              │     └── ViewComponent (Fragment)
+              └── ViewComponent (Activity)
+
+ServiceComponent           (Service lifetime, parallel to Activity)
+    </div>
+    <div class="table-wrap"><table>
+      <tr><th>Component</th><th>Scope Annotation</th><th>Created When</th><th>Destroyed When</th></tr>
+      <tr><td>SingletonComponent</td><td><code>@Singleton</code></td><td>Application.onCreate()</td><td>Application destroyed</td></tr>
+      <tr><td>ActivityRetainedComponent</td><td><code>@ActivityRetainedScoped</code></td><td>Activity.onCreate()</td><td>Activity.onDestroy() (NOT on rotation)</td></tr>
+      <tr><td>ViewModelComponent</td><td><code>@ViewModelScoped</code></td><td>ViewModel created</td><td>ViewModel.onCleared()</td></tr>
+      <tr><td>ActivityComponent</td><td><code>@ActivityScoped</code></td><td>Activity.onCreate()</td><td>Activity.onDestroy() (INCLUDING rotation)</td></tr>
+      <tr><td>FragmentComponent</td><td><code>@FragmentScoped</code></td><td>Fragment.onAttach()</td><td>Fragment.onDestroy()</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      ActivityRetainedComponent survives configuration changes — it's the component backing the ViewModel lifecycle. That's why <code>@ViewModelScoped</code> dependencies don't re-create on rotation. ActivityComponent does NOT survive rotation — never inject something that holds a reference to an Activity View into ActivityRetainedComponent.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Dagger Code Generation</h3>
+    <p>Dagger is an <strong>annotation processor</strong> that runs at compile time. It reads your <code>@Inject</code>, <code>@Module</code>, <code>@Provides</code>, <code>@Binds</code> annotations and generates concrete Java/Kotlin classes: a <strong>Factory</strong> for each injectable class, and a <strong>Component implementation</strong> for each component.</p>
+    <pre><code><span class="cm">// Your code</span>
+<span class="kw">class</span> <span class="cl">GetOrdersUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">val</span> repo: <span class="cl">OrderRepository</span>
+)
+
+<span class="cm">// Dagger generates (simplified):</span>
+<span class="kw">class</span> <span class="cl">GetOrdersUseCase_Factory</span>(<span class="kw">val</span> repoProvider: <span class="cl">Provider</span>&lt;<span class="cl">OrderRepository</span>&gt;) : <span class="cl">Factory</span>&lt;<span class="cl">GetOrdersUseCase</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">get</span>() = <span class="cl">GetOrdersUseCase</span>(repoProvider.<span class="fn">get</span>())
+    <span class="kw">companion object</span> { <span class="kw">fun</span> <span class="fn">create</span>(repoProvider: <span class="cl">Provider</span>&lt;<span class="cl">OrderRepository</span>&gt;) = <span class="cl">GetOrdersUseCase_Factory</span>(repoProvider) }
+}</code></pre>
+
+    <h3>@HiltViewModel — What Dagger Generates</h3>
+    <pre><code><span class="cm">// Your code</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">OrderViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">val</span> getOrders: <span class="cl">GetOrdersUseCase</span>
+) : <span class="cl">ViewModel</span>()
+
+<span class="cm">// Dagger generates a Factory class:</span>
+<span class="kw">class</span> <span class="cl">OrderViewModel_HiltModules_KeyModule_ProvideFactory</span>
+<span class="cm">// + registers it in the ViewModelComponent</span>
+<span class="cm">// Hilt's DefaultViewModelFactories uses the generated factory to create ViewModel instances</span></code></pre>
+
+    <h3>Compile-Time Graph Validation</h3>
+    <p>When Dagger processes annotations, it builds a complete dependency graph. It performs several compile-time checks:</p>
+    <ul>
+      <li><strong>Missing binding</strong>: A type is requested but no <code>@Provides</code>/<code>@Binds</code>/injectable constructor provides it → <code>"cannot be provided without an @Provides-annotated method"</code></li>
+      <li><strong>Scope mismatch</strong>: A shorter-lived dependency injected into a longer-lived component → compile error</li>
+      <li><strong>Circular dependency</strong>: A depends on B, B depends on A → compile error (can be broken with <code>Provider&lt;T&gt;</code> lazy injection)</li>
+      <li><strong>Duplicate bindings</strong>: Two <code>@Provides</code> methods return the same type without qualifiers</li>
+    </ul>
+    <pre><code><span class="cm">// Example compile error: AnalyticsService is not provided anywhere</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">DashboardViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">val</span> analytics: <span class="cl">AnalyticsService</span>  <span class="cm">// ← no @Inject on AnalyticsService, no @Provides</span>
+) : <span class="cl">ViewModel</span>()
+<span class="cm">// Build error: AnalyticsService cannot be provided without an @Provides-annotated method</span></code></pre>
+
+    <h3>SubComponents vs Component Dependencies</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>Access to parent bindings</th><th>How specified</th><th>Hilt equivalent</th></tr>
+      <tr><td>SubComponent</td><td>Full access to all parent bindings</td><td><code>@Subcomponent</code> declared inside parent</td><td>All Hilt components are subcomponents of their parent</td></tr>
+      <tr><td>Component dependency</td><td>Only explicitly exposed bindings</td><td><code>@Component(dependencies=[ParentComponent::class])</code></td><td>Not used in standard Hilt (Hilt uses subcomponents)</td></tr>
+    </table></div>
+    <p>In Hilt's hierarchy, all components are SubComponents — each child has full access to the bindings of its parent (e.g., ActivityComponent can use Singleton-scoped bindings). This is why a <code>@Singleton</code>-scoped dependency can be injected into an Activity-scoped class.</p>
+
+    <h3>Provider&lt;T&gt; — Breaking Circular Dependencies and Deferring Creation</h3>
+    <pre><code><span class="cm">// Provider&lt;T&gt; defers creation — the dependency is retrieved lazily on each get() call</span>
+<span class="kw">class</span> <span class="cl">LoginFlowCoordinator</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> authViewModelProvider: <span class="cl">Provider</span>&lt;<span class="cl">AuthViewModel</span>&gt;  <span class="cm">// lazy + fresh instance each call</span>
+) {
+    <span class="kw">fun</span> <span class="fn">createAuthViewModel</span>() = authViewModelProvider.<span class="fn">get</span>()
+}
+
+<span class="cm">// Lazy&lt;T&gt; — like Provider but caches the first result</span>
+<span class="kw">class</span> <span class="cl">FeatureFlagService</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> remoteConfig: <span class="cl">Lazy</span>&lt;<span class="cl">FirebaseRemoteConfig</span>&gt;  <span class="cm">// first access initialises, then cached</span>
+)</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Choosing the Right Component Scope</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Scenario</th><th>Component</th><th>Scope</th></tr>
+      <tr><td>HTTP client, Room database, token store</td><td>SingletonComponent</td><td>@Singleton</td></tr>
+      <tr><td>Shared state that must survive rotation</td><td>ActivityRetainedComponent</td><td>@ActivityRetainedScoped</td></tr>
+      <tr><td>Dependency used by one ViewModel only</td><td>ViewModelComponent</td><td>@ViewModelScoped</td></tr>
+      <tr><td>Navigator that needs Activity context</td><td>ActivityComponent</td><td>@ActivityScoped</td></tr>
+      <tr><td>Screen-specific analytics tracker</td><td>FragmentComponent</td><td>@FragmentScoped</td></tr>
+    </table></div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Key Decision Criterion</div>
+      Ask: "What is the shortest lifecycle that ALL consumers of this dependency have in common?" Use that component's scope. When in doubt, scope to <code>@Singleton</code> for stateless services (they're cheap to share) and <code>@ViewModelScoped</code> for stateful per-screen state.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Scoped Dependencies Across Components</h3>
+    <pre><code><span class="cm">// ── Singleton (app-wide) ───────────────────────────────────────</span>
+<span class="an">@Singleton</span>
+<span class="kw">class</span> <span class="cl">ProductCatalogCache</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> clock: <span class="cl">Clock</span>
+) {
+    <span class="kw">private val</span> cache = <span class="cl">LruCache</span>&lt;<span class="cl">String</span>, <span class="cl">Product</span>&gt;(<span class="nu">200</span>)
+    <span class="cm">// Shared across the entire app — cache is populated once, used everywhere</span>
+}
+
+<span class="cm">// ── ActivityRetained (survives rotation, not Activity death) ──</span>
+<span class="an">@ActivityRetainedScoped</span>
+<span class="kw">class</span> <span class="cl">CheckoutSessionManager</span> <span class="kw">@Inject constructor</span>() {
+    <span class="kw">var</span> selectedAddress: <span class="cl">Address</span>? = <span class="kw">null</span>
+    <span class="kw">var</span> paymentMethod: <span class="cl">PaymentMethod</span>? = <span class="kw">null</span>
+    <span class="cm">// Survives screen rotation — user's checkout state is preserved</span>
+}
+
+<span class="cm">// ── ViewModelScoped (lives with one ViewModel) ─────────────────</span>
+<span class="an">@ViewModelScoped</span>
+<span class="kw">class</span> <span class="cl">CartPagingSourceFactory</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> dao: <span class="cl">CartDao</span>
+) {
+    <span class="kw">fun</span> <span class="fn">create</span>() = <span class="cl">CartPagingSource</span>(dao)
+    <span class="cm">// New factory per ViewModel instance — scoped to avoid stale sources</span>
+}
+
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">CheckoutViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> session: <span class="cl">CheckoutSessionManager</span>,    <span class="cm">// ActivityRetainedScoped</span>
+    <span class="kw">private val</span> cache: <span class="cl">ProductCatalogCache</span>,          <span class="cm">// Singleton</span>
+    <span class="kw">private val</span> pagingFactory: <span class="cl">CartPagingSourceFactory</span> <span class="cm">// ViewModelScoped</span>
+) : <span class="cl">ViewModel</span>() {
+    <span class="cm">// Hilt injects the correct scoped instance for each dependency</span>
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>SubComponents vs Component Dependencies</h3>
+    <p>Hilt uses SubComponents exclusively. Raw Dagger offers both: SubComponents have full access to the parent's bindings (tighter coupling, simpler configuration). Component dependencies are explicit — the child only sees what the parent exposes (looser coupling, better for library modules or multi-project setups). Hilt's choice of SubComponents simplifies usage at the cost of slightly less control over what's visible.</p>
+    <h3>Eager vs Lazy Injection</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>Syntax</th><th>Behaviour</th></tr>
+      <tr><td>Regular injection</td><td><code>@Inject val dep: Dep</code></td><td>Dep is created when the parent is created</td></tr>
+      <tr><td>Provider&lt;T&gt;</td><td><code>@Inject val depProvider: Provider&lt;Dep&gt;</code></td><td>Dep is created on each call to <code>get()</code></td></tr>
+      <tr><td>Lazy&lt;T&gt;</td><td><code>@Inject val dep: Lazy&lt;Dep&gt;</code></td><td>Dep is created once, on first <code>get()</code> call</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>ActivityRetainedScoped vs ActivityScoped Confusion</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Most Common Scope Confusion</div>
+      <code>@ActivityRetainedScoped</code> survives rotation — it's the scope backing the ViewModel. <code>@ActivityScoped</code> does NOT survive rotation — it's a new instance every time the Activity is recreated. Never put something that holds a View reference into ActivityRetainedScoped; Views don't survive rotation and you'll leak the old Activity.
+    </div>
+    <h3>Build Errors — Common Dagger Error Messages</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Error message</th><th>Root cause</th><th>Fix</th></tr>
+      <tr><td>"cannot be provided without an @Provides"</td><td>Type has no binding in the graph</td><td>Add <code>@Inject constructor</code> or <code>@Provides</code> method</td></tr>
+      <tr><td>"is bound multiple times"</td><td>Two modules provide the same type</td><td>Add qualifiers or remove duplicate binding</td></tr>
+      <tr><td>"depends on scoped components"</td><td>Scope mismatch</td><td>Match scope to the shortest-lived consumer</td></tr>
+      <tr><td>"found a dependency cycle"</td><td>A → B → A circular dependency</td><td>Use <code>Provider&lt;T&gt;</code> to break the cycle</td></tr>
+    </table></div>
+    <h3>@HiltViewModel vs SavedStateHandle</h3>
+    <pre><code><span class="cm">// SavedStateHandle is automatically available in @HiltViewModel constructors</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ProductDetailViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> savedStateHandle: <span class="cl">SavedStateHandle</span>,  <span class="cm">// injected by Hilt — no @Provides needed</span>
+    <span class="kw">private val</span> getProduct: <span class="cl">GetProductUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+    <span class="kw">private val</span> productId = <span class="fn">requireNotNull</span>(savedStateHandle.get&lt;<span class="cl">String</span>&gt;(<span class="str">"product_id"</span>))
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Hilt has a predefined component hierarchy that mirrors the Android lifecycle: SingletonComponent (app lifetime), ActivityRetainedComponent (survives rotation), ViewModelComponent (ViewModel lifetime), ActivityComponent (Activity instance), FragmentComponent. Dagger generates Factory classes at compile time for each injectable type, validates the entire graph, and catches missing bindings as build errors. When you annotate a ViewModel with <code>@HiltViewModel</code>, Dagger generates a Factory for it that the ViewModelProvider uses to create instances with injected dependencies."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"The key lifecycle insight: ActivityRetainedComponent survives configuration changes — that's the component behind ViewModel's survival. ActivityComponent does not survive rotation. So <code>@ActivityRetainedScoped</code> dependencies persist through rotation; <code>@ActivityScoped</code> ones don't. A scope mismatch — injecting an ActivityScoped dependency into an ActivityRetainedScoped class — is a compile-time error, not a runtime bug. Under the hood, Dagger runs as an annotation processor (kapt or KSP), reads all the annotations, and emits Java classes: a Factory per injectable class, an implementation class for each component. The factory pattern means every instantiation is explicit and traceable. For ViewModel injection specifically, Dagger generates a <code>ViewModelFactory</code> entry into the ViewModelComponent, and Hilt's <code>DefaultViewModelFactories</code> bridges that to Android's ViewModelProvider."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Component hierarchy</strong>: Singleton → ActivityRetained → ViewModel → Activity → Fragment — child can access parent bindings</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>ActivityRetained ≠ Activity</strong>: survives rotation; ActivityScoped does not</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Compile-time generation</strong>: Dagger (kapt/KSP) generates Factory classes and Component impls at build time</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>@HiltViewModel generates a Factory</strong>: registered in ViewModelComponent, used by Hilt's DefaultViewModelFactories</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Graph validation at compile time</strong>: missing bindings, scope mismatches, circular deps = build errors</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>All Hilt components are SubComponents</strong>: full parent binding access — no explicit exposure needed</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Raw Dagger SubComponent annotation syntax (Hilt abstracts it away)</li>
+      <li>kapt vs KSP implementation details (just say "annotation processing")</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Why does Hilt use SubComponents instead of Component dependencies?"</td><td>SubComponents have full access to parent bindings — simpler for Android where components naturally nest (Fragment inside Activity inside Application). Component dependencies require explicit exposure of each binding, which is more verbose for the standard hierarchy.</td></tr>
+      <tr><td>"How does SavedStateHandle work with Hilt?"</td><td>Hilt automatically provides <code>SavedStateHandle</code> in the ViewModelComponent — no <code>@Provides</code> needed. It's created from the Activity's or Fragment's saved state bundle.</td></tr>
+      <tr><td>"What's the difference between Provider&lt;T&gt; and Lazy&lt;T&gt;?"</td><td><code>Provider&lt;T&gt;</code>: new instance on each <code>get()</code> call. <code>Lazy&lt;T&gt;</code>: first <code>get()</code> creates the instance and caches it — same instance on subsequent calls.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      Understanding what Dagger generates is what separates Hilt users from Hilt practitioners. When you add <code>@Singleton</code> to a class, you're not adding concurrency safety — you're telling Dagger to reuse one instance in the SingletonComponent. If the class has mutable state, you still need synchronisation. The scope only controls how many instances Dagger creates; you're responsible for thread safety inside the instance.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Component Lifetimes</h4>
+        <pre><code>Singleton       → App process
+ActivityRetained→ Survives rotation
+ViewModel       → onCleared()
+Activity        → onDestroy() (incl. rotation)
+Fragment        → Fragment.onDestroy()</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Dagger Code Generation</h4>
+        <pre><code>@Inject constructor
+  → generates Foo_Factory
+
+@HiltViewModel
+  → generates ViewModel factory
+  → registered in ViewModelComponent
+
+Build fails if binding is missing!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Common Build Errors</h4>
+        <pre><code>"cannot be provided without @Provides"
+  → add @Inject or @Provides
+"depends on scoped components"
+  → scope mismatch — fix scope
+"found a dependency cycle"
+  → use Provider&lt;T&gt; to break it</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Provider vs Lazy</h4>
+        <pre><code>Provider&lt;T&gt;
+  → new instance per get() call
+Lazy&lt;T&gt;
+  → one instance, created on first get()
+  → cached for subsequent calls</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> List the Hilt component hierarchy from outermost to innermost.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        SingletonComponent (Application) → ActivityRetainedComponent → ViewModelComponent and ActivityComponent (siblings) → FragmentComponent (child of Activity) → ViewComponent. ServiceComponent runs parallel to the Activity hierarchy, created/destroyed with a Service.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What does Dagger generate when you annotate a class with <code>@Inject constructor</code>?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Dagger generates a <code>Foo_Factory</code> class that implements <code>Factory&lt;Foo&gt;</code>. The factory has a <code>get()</code> method that creates an instance of <code>Foo</code> by calling its constructor with the required dependencies (obtained from their own Providers). The factory is also used by Dagger to respect scope — if <code>Foo</code> is <code>@Singleton</code>, the component wraps the factory with a <code>DoubleCheck</code> to create only one instance.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the difference between <code>@ActivityScoped</code> and <code>@ActivityRetainedScoped</code>?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>@ActivityRetainedScoped</code>: the instance lives inside ActivityRetainedComponent, which is preserved across configuration changes (rotation). One instance per Activity "logical session".<br><br>
+        <code>@ActivityScoped</code>: the instance lives inside ActivityComponent, which is destroyed and recreated on rotation. A new instance is created every time the Activity is recreated. Use ActivityScoped for things that depend on the specific Activity instance (e.g., a Navigator using <code>startActivity()</code>).
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What does Dagger generate for a <code>@HiltViewModel</code>-annotated ViewModel?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Dagger generates: (1) A <code>ViewModel_Factory</code> that creates the ViewModel with all its injected constructor parameters. (2) A module that provides this factory, installed in the ViewModelComponent. (3) An entry point that Hilt's <code>DefaultViewModelFactories</code> can query to obtain the factory for a specific ViewModel class. When you call <code>viewModels()</code>, Android's ViewModelProvider asks Hilt's factory for the ViewModel type; Hilt looks up the generated factory and creates the ViewModel with injected dependencies.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Explain how a child component accesses parent bindings.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        In Hilt, all components are SubComponents. A SubComponent holds a reference to its parent component instance. When a binding is requested in a child component, Dagger first looks in the child's own modules. If not found, it looks in the parent's modules, then the grandparent's, up the hierarchy. This is why a FragmentComponent can inject a <code>@Singleton</code>-scoped OkHttpClient defined in the SingletonComponent — the request propagates up until it's satisfied. This is implicit in Hilt; with raw Dagger Component dependencies, you'd need to explicitly expose each binding.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How does Hilt validate the dependency graph at compile time?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Dagger runs as an annotation processor (kapt or KSP). During the processing phase, it reads all <code>@Module</code>, <code>@Provides</code>, <code>@Binds</code>, <code>@Inject</code> annotations and builds an in-memory graph. Before generating any code, it validates: (1) every requested type has exactly one binding, (2) scope annotations are consistent (no parent-scope type in child component), (3) no cycles, (4) no duplicate bindings. Any violation produces a compiler error with a clear message pointing to the offending class. This happens before <code>.class</code> files are generated, so no runtime overhead.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> When would you use <code>Provider&lt;T&gt;</code> vs regular injection?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Use <code>Provider&lt;T&gt;</code> when: (1) You need a fresh instance on each call (not a singleton). (2) The dependency is expensive and may not always be needed — defer creation until first use. (3) You have a circular dependency — <code>Provider&lt;T&gt;</code> breaks the cycle because Dagger doesn't resolve T immediately on component creation. (4) The dependency comes from a child scope and you need to access the current instance at call time (e.g., getting the current Activity's Navigator from a longer-lived class).
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How does <code>@Singleton</code> scope work at the Dagger level — what code is generated?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        When you scope a binding with <code>@Singleton</code>, Dagger wraps the generated Factory with a <code>DoubleCheck</code> wrapper in the component implementation. The simplified generated code:<br><br>
+        <code>private volatile Object myService = UNINITIALIZED;</code><br>
+        On <code>get()</code>: checks if <code>myService == UNINITIALIZED</code>. If so, <code>synchronized(this)</code> check again, then create and store. Otherwise return the cached instance. This is the classic double-checked locking pattern.<br><br>
+        Important: <code>@Singleton</code> does NOT make the class thread-safe internally. It only guarantees that Dagger creates one instance. If the class has mutable state accessed from multiple threads, you still need synchronisation inside the class.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A Hilt build fails with "cannot be provided without an @Provides-annotated method" for a class that does have <code>@Inject constructor</code>. What are the possible causes?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        1. <strong>One of the constructor's parameters</strong> is the missing binding — not the annotated class itself. Read the full error: Dagger traces the chain from the requesting site down to the unresolved leaf.<br>
+        2. <strong>The class is in a Gradle module that isn't visible</strong> to the Hilt component module — transitive dependency not configured.<br>
+        3. <strong>The class is abstract or an interface</strong> — <code>@Inject constructor</code> doesn't work on interfaces; you need <code>@Binds</code>.<br>
+        4. <strong>Module is not installed</strong> — the <code>@Module</code> class exists but <code>@InstallIn</code> is missing or uses the wrong component.<br>
+        5. <strong>Qualifier mismatch</strong> — the requesting site has a qualifier annotation but no binding with that qualifier exists.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design a multi-module Hilt setup for a feature module that needs to register its own bindings.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        In a multi-module app, each feature module can define its own Hilt modules. Hilt aggregates them automatically at compile time via the app module's Hilt component:<br><br>
+        <strong>:feature:payments</strong> module: <code>@Module @InstallIn(SingletonComponent::class) abstract class PaymentModule { @Binds abstract fun bindPaymentRepo(impl: PaymentRepositoryImpl): PaymentRepository }</code><br><br>
+        <strong>:app</strong> module: just needs <code>@HiltAndroidApp</code> on the Application class. Hilt's annotation processing scans all included modules and their transitive dependencies, finds all <code>@InstallIn</code> modules, and includes them in the generated component.<br><br>
+        Key rule: the feature module must be on the compile-time classpath of the app module. Dynamic feature modules (DFM) require a separate Hilt component since they're loaded at runtime — use <code>@DefineComponent</code> for custom components in DFMs.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

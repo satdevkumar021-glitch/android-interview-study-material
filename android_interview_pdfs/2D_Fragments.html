@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2D – Fragments</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>2D · Fragments</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>2D — Fragments</h1>
+  <div class="meta">
+    <span class="badge t2">Tier 2</span>
+    <span>Fragment lifecycle · View lifecycle · FragmentManager · transactions · back stack · communication · Navigation Component</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>A <strong>Fragment</strong> is a reusable UI component hosted inside an Activity. It has its own lifecycle, view hierarchy, and can be added/removed/replaced dynamically. Fragments enable modular, adaptive UI — the same Fragment can be used on phone (one at a time) and tablet (dual-pane side by side).</p>
+  <p><strong>Why Fragments exist:</strong> Before Fragments (introduced API 11), building adaptive UIs required multiple Activities with duplicated logic. Fragments allow one codebase, one Activity, multiple interchangeable screen segments.</p>
+  <div class="box info">
+    <strong>Two separate lifecycles:</strong> Fragments have a <em>Fragment lifecycle</em> (the Fragment object) and a <em>View lifecycle</em> (the View tree). This distinction is the source of the most common Fragment bugs. Observers should be tied to <strong>viewLifecycleOwner</strong>, not the Fragment itself.
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <h3>Fragment Lifecycle (Fragment object)</h3>
+  <div class="ascii">onAttach()        ← Fragment attached to Activity; context available
+onCreate()        ← Fragment created; init non-UI state, args
+onCreateView()    ← Inflate layout, return View
+onViewCreated()   ← View ready; set up UI, observers, listeners
+onStart()         ← Fragment visible
+onResume()        ← Fragment interactive
+  --- USER INTERACTION ---
+onPause()         ← Fragment partially hidden
+onStop()          ← Fragment hidden
+onDestroyView()   ← View destroyed (but Fragment object still exists in back stack)
+onDestroy()       ← Fragment object destroyed
+onDetach()        ← Fragment detached from Activity</div>
+
+  <h3>Fragment View Lifecycle (viewLifecycleOwner)</h3>
+  <div class="ascii">Fragment back-stacked:
+  onDestroyView() called — View destroyed
+  Fragment object STAYS ALIVE (in back stack)
+  onCreateView() called again when Fragment returns to foreground
+
+Activity rotation:
+  Fragment onDestroyView() → onDestroy() → onCreate() → onCreateView() → onViewCreated()
+  (But Fragment TAG matches — FragmentManager restores it automatically)</div>
+
+  <h3>Fragment vs Activity Lifecycle Comparison</h3>
+  <table>
+    <tr><th>Activity</th><th>Fragment equivalent</th><th>Notes</th></tr>
+    <tr><td>onCreate</td><td>onCreate</td><td>Fragment: no view yet</td></tr>
+    <tr><td>—</td><td>onCreateView</td><td>Inflate layout; return view</td></tr>
+    <tr><td>—</td><td>onViewCreated</td><td>View available; setup UI here</td></tr>
+    <tr><td>onStart</td><td>onStart</td><td>Fragment visible</td></tr>
+    <tr><td>onResume</td><td>onResume</td><td>Fragment interactive</td></tr>
+    <tr><td>onPause</td><td>onPause</td><td>—</td></tr>
+    <tr><td>onStop</td><td>onStop</td><td>—</td></tr>
+    <tr><td>onDestroy</td><td>onDestroyView + onDestroy</td><td>TWO steps in Fragment</td></tr>
+    <tr><td>—</td><td>onDetach</td><td>No Activity equivalent</td></tr>
+  </table>
+
+  <h3>FragmentManager and Transactions</h3>
+  <pre><code><span class="cm">// Get FragmentManager</span>
+<span class="kw">val</span> fm = <span class="fn">supportFragmentManager</span>           <span class="cm">// from Activity</span>
+<span class="kw">val</span> fm = <span class="fn">childFragmentManager</span>             <span class="cm">// from Fragment (for nested fragments)</span>
+<span class="kw">val</span> fm = <span class="fn">parentFragmentManager</span>            <span class="cm">// from Fragment (host's FM)</span>
+
+<span class="cm">// Transaction — atomic set of operations</span>
+fm.<span class="fn">beginTransaction</span>()
+    .<span class="fn">replace</span>(<span class="type">R</span>.id.container, <span class="type">HomeFragment</span>(), <span class="str">"home"</span>)  <span class="cm">// replace with tag</span>
+    .<span class="fn">addToBackStack</span>(<span class="str">"home"</span>)                              <span class="cm">// add to back stack</span>
+    .<span class="fn">commit</span>()                                             <span class="cm">// async commit</span>
+
+<span class="cm">// commitNow() — synchronous; cannot be used with addToBackStack</span>
+<span class="cm">// commitAllowingStateLoss() — use when state may be lost (risky)</span></code></pre>
+
+  <h3>add() vs replace()</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>add()</h4>
+      <p>Adds Fragment on top of existing ones. Both are alive simultaneously. Used for overlapping UIs (bottom sheets, dialogs).</p>
+    </div>
+    <div class="card">
+      <h4>replace()</h4>
+      <p>Removes existing Fragment in container and replaces with new one. Used for full-screen navigation. Previous Fragment's view is destroyed (onDestroyView called).</p>
+    </div>
+  </div>
+
+  <h3>Fragment Communication Patterns</h3>
+  <table>
+    <tr><th>Pattern</th><th>How</th><th>When to use</th></tr>
+    <tr><td>Shared ViewModel</td><td>Both Fragments use <code>activityViewModels()</code> to share one ViewModel scoped to Activity</td><td>Sibling Fragments needing shared state — preferred modern pattern</td></tr>
+    <tr><td>Fragment Result API</td><td><code>setFragmentResult()</code> + <code>setFragmentResultListener()</code></td><td>One-shot result passing (like startActivityForResult replacement)</td></tr>
+    <tr><td>Interface callback</td><td>Fragment defines interface; Activity implements it</td><td>Legacy; avoid in new code</td></tr>
+    <tr><td>Navigation Component + args</td><td>Safe Args pass typed arguments via NavBackStackEntry or navigate()</td><td>Navigation-driven data passing</td></tr>
+  </table>
+
+  <h3>Navigation Component with Fragments</h3>
+  <pre><code><span class="cm">// nav_graph.xml — declare navigation in one place</span>
+<span class="cm">&lt;navigation ...&gt;
+    &lt;fragment android:id="@+id/homeFragment" android:name=".HomeFragment"&gt;
+        &lt;action android:id="@+id/action_home_to_detail"
+                app:destination="@id/productDetailFragment" /&gt;
+    &lt;/fragment&gt;
+    &lt;fragment android:id="@+id/productDetailFragment" ...&gt;
+        &lt;argument android:name="productId" app:argType="string" /&gt;
+    &lt;/fragment&gt;
+&lt;/navigation&gt;</span>
+
+<span class="cm">// Navigate with Safe Args</span>
+<span class="kw">val</span> action = <span class="type">HomeFragmentDirections</span>.<span class="fn">actionHomeToproductDetail</span>(productId = <span class="str">"abc123"</span>)
+<span class="fn">findNavController</span>().<span class="fn">navigate</span>(action)</code></pre>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE ═══ -->
+<section id="when">
+  <h2>3 · Why and When to Use Fragments</h2>
+  <table>
+    <tr><th>Use case</th><th>Fragment approach</th></tr>
+    <tr><td>Adaptive tablet/phone layouts</td><td>Same Fragment shown in single-pane (phone) or dual-pane (tablet)</td></tr>
+    <tr><td>Tab-based navigation</td><td>Each tab is a Fragment; ViewPager2 + FragmentStateAdapter</td></tr>
+    <tr><td>Bottom sheet dialogs</td><td>BottomSheetDialogFragment</td></tr>
+    <tr><td>Single-activity navigation (pre-Compose)</td><td>Navigation Component + Fragment destinations</td></tr>
+    <tr><td>Reusable complex UI component with lifecycle</td><td>Fragment with its own ViewModel</td></tr>
+  </table>
+
+  <h3>When NOT to Use Fragments</h3>
+  <ul>
+    <li><strong>Logic-only modules</strong>: Use ViewModel / UseCase instead — no need for Fragment lifecycle.</li>
+    <li><strong>New Compose-only projects</strong>: Composable functions replace Fragments entirely. A Composable has no lifecycle complexity.</li>
+    <li><strong>Simple UI elements</strong>: If you just need a reusable view, use a custom View or Composable, not a Fragment.</li>
+  </ul>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example (E-Commerce App)</h2>
+  <p>Single-activity e-commerce app with Navigation Component: Home → Product List → Product Detail, plus a Cart bottom sheet.</p>
+
+  <h3>Fragment with viewLifecycleOwner (critical pattern)</h3>
+  <pre><code><span class="ann">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="type">ProductListFragment</span> : <span class="type">Fragment</span>(<span class="type">R</span>.layout.fragment_product_list) {
+
+    <span class="kw">private val</span> viewModel: <span class="type">ProductListViewModel</span> <span class="kw">by</span> <span class="fn">viewModels</span>()
+    <span class="kw">private var</span> _binding: <span class="type">FragmentProductListBinding</span>? = <span class="kw">null</span>
+    <span class="kw">private val</span> binding <span class="kw">get</span>() = _binding!!
+
+    <span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="type">View</span>, savedInstanceState: <span class="type">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onViewCreated</span>(view, savedInstanceState)
+        _binding = <span class="type">FragmentProductListBinding</span>.<span class="fn">bind</span>(view)
+
+        <span class="cm">// ✅ Use viewLifecycleOwner — NOT 'this' (Fragment) — for observe/collect</span>
+        viewLifecycleOwner.lifecycleScope.<span class="fn">launch</span> {
+            <span class="fn">repeatOnLifecycle</span>(<span class="type">Lifecycle</span>.<span class="type">State</span>.<span class="type">STARTED</span>) {
+                viewModel.products.<span class="fn">collect</span> { products -&gt;
+                    adapter.<span class="fn">submitList</span>(products)
+                }
+            }
+        }
+
+        binding.cartFab.<span class="fn">setOnClickListener</span> {
+            <span class="fn">findNavController</span>().<span class="fn">navigate</span>(<span class="type">R</span>.id.action_products_to_cart)
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onDestroyView</span>() {
+        <span class="kw">super</span>.<span class="fn">onDestroyView</span>()
+        _binding = <span class="kw">null</span>   <span class="cm">// ✅ Null binding to avoid view memory leak in back stack</span>
+    }
+}</code></pre>
+
+  <h3>Shared ViewModel Between Fragments</h3>
+  <pre><code><span class="cm">// Both fragments share one CartViewModel scoped to the Activity</span>
+<span class="ann">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="type">ProductDetailFragment</span> : <span class="type">Fragment</span>() {
+    <span class="cm">// activityViewModels() — same instance as CartFragment's ViewModel</span>
+    <span class="kw">private val</span> cartViewModel: <span class="type">CartViewModel</span> <span class="kw">by</span> <span class="fn">activityViewModels</span>()
+
+    <span class="kw">fun</span> <span class="fn">onAddToCart</span>(product: <span class="type">Product</span>) {
+        cartViewModel.<span class="fn">addItem</span>(product)
+    }
+}
+
+<span class="ann">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="type">CartFragment</span> : <span class="type">Fragment</span>() {
+    <span class="kw">private val</span> cartViewModel: <span class="type">CartViewModel</span> <span class="kw">by</span> <span class="fn">activityViewModels</span>()
+    <span class="cm">// Observes same CartViewModel instance</span>
+}</code></pre>
+
+  <h3>Fragment Result API — Confirmation Dialog</h3>
+  <pre><code><span class="cm">// Dialog Fragment sets result</span>
+<span class="kw">class</span> <span class="type">ConfirmDeleteDialog</span> : <span class="type">DialogFragment</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreateDialog</span>(...): <span class="type">Dialog</span> =
+        <span class="type">AlertDialog</span>.<span class="type">Builder</span>(<span class="fn">requireContext</span>())
+            .<span class="fn">setTitle</span>(<span class="str">"Delete item?"</span>)
+            .<span class="fn">setPositiveButton</span>(<span class="str">"Delete"</span>) { _, _ ->
+                <span class="fn">setFragmentResult</span>(<span class="str">"deleteConfirmed"</span>, <span class="type">Bundle</span>())
+            }
+            .<span class="fn">create</span>()
+}
+
+<span class="cm">// Parent Fragment listens for result</span>
+<span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="type">View</span>, savedInstanceState: <span class="type">Bundle</span>?) {
+    <span class="fn">setFragmentResultListener</span>(<span class="str">"deleteConfirmed"</span>) { _, _ ->
+        viewModel.<span class="fn">deleteSelectedItem</span>()
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+    <tr>
+      <td>Fragments + Navigation Component</td>
+      <td>Mature tooling, SafeArgs, deep links, ViewPager2 support</td>
+      <td>View lifecycle complexity; onDestroyView/onCreateView pattern; boilerplate</td>
+      <td>Standard modern Android pre-full-Compose migration</td>
+    </tr>
+    <tr>
+      <td>Jetpack Compose (no Fragments)</td>
+      <td>No lifecycle complexity; composable = function; simpler state</td>
+      <td>Less mature for very complex multi-module graphs; requires full investment</td>
+      <td>New projects; greenfield; full Compose adoption</td>
+    </tr>
+    <tr>
+      <td>Multiple Activities</td>
+      <td>Total isolation; independent back stacks</td>
+      <td>Hard to share state; complex deep linking; more boilerplate</td>
+      <td>Legacy; or when truly distinct independent user flows needed</td>
+    </tr>
+    <tr>
+      <td>Custom Views</td>
+      <td>Simpler for self-contained UI components; no lifecycle overhead</td>
+      <td>No built-in ViewModel, no back stack, no nav graph</td>
+      <td>Reusable UI widgets (chart, custom button); not full screens</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+
+  <h3>Pitfall 1: Observing with 'this' Instead of viewLifecycleOwner</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad — potential duplicate observers</h4>
+      <pre><code><span class="cm">// 'this' is the Fragment object lifecycle</span>
+<span class="cm">// When Fragment goes to back stack: View destroyed but Fragment lives</span>
+<span class="cm">// When returning: onCreateView() called again — new observer added</span>
+<span class="cm">// Now TWO observers active — duplicate updates</span>
+viewModel.products.<span class="fn">observe</span>(<span class="kw">this</span>) { ... }</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good — tied to View lifecycle</h4>
+      <pre><code><span class="cm">// viewLifecycleOwner starts fresh each onCreateView</span>
+<span class="cm">// Auto-removed in onDestroyView — no duplicates</span>
+viewModel.products.<span class="fn">observe</span>(<span class="fn">viewLifecycleOwner</span>) { ... }</code></pre>
+    </div>
+  </div>
+
+  <h3>Pitfall 2: ViewBinding Memory Leak</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad — binding holds View reference</h4>
+      <pre><code><span class="kw">private lateinit var</span> binding: <span class="type">FragmentBinding</span>
+
+<span class="kw">override fun</span> <span class="fn">onCreateView</span>(...): <span class="type">View</span> {
+    binding = <span class="type">FragmentBinding</span>.<span class="fn">inflate</span>(inflater)
+    <span class="kw">return</span> binding.root
+    <span class="cm">// binding never nulled — leaks View after back stack</span>
+}</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good — null in onDestroyView</h4>
+      <pre><code><span class="kw">private var</span> _binding: <span class="type">FragmentBinding</span>? = <span class="kw">null</span>
+<span class="kw">private val</span> binding <span class="kw">get</span>() = _binding!!
+
+<span class="kw">override fun</span> <span class="fn">onDestroyView</span>() {
+    <span class="kw">super</span>.<span class="fn">onDestroyView</span>()
+    _binding = <span class="kw">null</span>   <span class="cm">// releases View reference</span>
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>Other Critical Pitfalls</h3>
+  <ul>
+    <li><strong>Accessing view in onCreate()</strong>: View is not created yet — always use onViewCreated().</li>
+    <li><strong>Fragment constructor arguments</strong>: Never pass arguments to Fragment constructors. Use Fragment.newInstance() with a Bundle or Safe Args. On recreation, the framework uses the no-arg constructor — custom constructors cause crashes.</li>
+    <li><strong>commitAllowingStateLoss()</strong>: Called after onSaveInstanceState — state loss means the Fragment transaction may be lost. Use commit() and ensure transactions happen at the right lifecycle moment.</li>
+    <li><strong>Nested fragments with wrong FragmentManager</strong>: Always use childFragmentManager for nested Fragments (inside another Fragment), not parentFragmentManager or supportFragmentManager.</li>
+    <li><strong>Duplicate Fragments after rotation</strong>: Not using tags + findFragmentByTag before add creates duplicates after system-restored Fragments.</li>
+  </ul>
+</section>
+
+<!-- ═══ 7 · INTERVIEW ═══ -->
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "A Fragment is a reusable UI component hosted inside an Activity with its own lifecycle. The critical subtlety is that a Fragment has two separate lifecycles — the Fragment object lifecycle and the View lifecycle. Observers must be tied to viewLifecycleOwner, not the Fragment itself, to avoid duplicate observers when the Fragment returns from the back stack. In modern apps I use single-activity with Navigation Component and Fragments (or Compose for new projects), sharing state between Fragments via activityViewModels() and using Fragment Result API for one-shot communications."
+  </div>
+
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>What a Fragment is:</strong> A modular UI component hosted inside an Activity. It has its own view hierarchy, lifecycle, and can be added/removed at runtime via FragmentManager transactions.<br/><br/>
+    <strong>Two lifecycles:</strong> The Fragment object lifecycle (onAttach → onDetach) and the View lifecycle (onCreateView → onDestroyView). When a Fragment is on the back stack, its View is destroyed (onDestroyView) but the Fragment object stays alive. This is why observers must use <code>viewLifecycleOwner</code> — not <code>this</code> — to avoid duplicate observers.<br/><br/>
+    <strong>Communication:</strong> I share state between Fragments via a ViewModel scoped to the Activity (activityViewModels()). For one-shot results (dialog confirmations, pickers), I use the Fragment Result API — setFragmentResult/setFragmentResultListener. I avoid interface callbacks; they're legacy and create tight coupling.<br/><br/>
+    <strong>ViewBinding leak:</strong> Always null the binding reference in onDestroyView to avoid holding a reference to the destroyed View while the Fragment object is still in the back stack.<br/><br/>
+    <strong>Modern context:</strong> In new projects I prefer Compose which eliminates the dual-lifecycle complexity entirely. For XML-based codebases, Navigation Component manages the Fragment back stack automatically.
+  </div>
+
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Fragment has TWO lifecycles: Fragment object + View lifecycle (viewLifecycleOwner).</li>
+    <li>Use viewLifecycleOwner for observers — not 'this' — to prevent duplicate observers on back-stack return.</li>
+    <li>Null ViewBinding in onDestroyView to prevent View memory leaks.</li>
+    <li>Never pass constructor arguments — use Bundle/newInstance() or Safe Args.</li>
+    <li>childFragmentManager for nested Fragments; parentFragmentManager to reach host.</li>
+    <li>activityViewModels() for shared state between Fragments.</li>
+    <li>Fragment Result API replaces interface callbacks and startActivityForResult.</li>
+    <li>Navigation Component manages Fragment back stack — prefer over manual transactions.</li>
+  </ol>
+
+  <h3>Do Not Go Deeper Unless Asked</h3>
+  <ul>
+    <li>DialogFragment internals</li>
+    <li>ViewPager2 + FragmentStateAdapter details</li>
+    <li>Navigation Component internals (covered in 18A)</li>
+    <li>Compose interop with Fragments (ComposeView in Fragment)</li>
+  </ul>
+
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>What happens to a Fragment when it goes on the back stack?</td><td>onDestroyView() is called — the View is destroyed. The Fragment object stays alive in memory (onCreate was called, but not onDestroy). When the user navigates back, onCreateView() and onViewCreated() are called again.</td></tr>
+    <tr><td>What is the difference between childFragmentManager and supportFragmentManager?</td><td>supportFragmentManager is from the Activity — it manages top-level Fragments. childFragmentManager is from a Fragment — it manages nested Fragments inside that Fragment. Using supportFragmentManager inside a Fragment for nested fragments causes incorrect lifecycle ownership.</td></tr>
+    <tr><td>How do two Fragments communicate without coupling?</td><td>Shared ViewModel via activityViewModels() for ongoing shared state. Fragment Result API for one-shot results. Both avoid direct Fragment-to-Fragment references.</td></tr>
+    <tr><td>Why use viewLifecycleOwner instead of this for observe()?</td><td>The Fragment object can outlive its View (when on back stack). Using 'this' ties the observer to the Fragment lifecycle — when the Fragment returns from the back stack, a new observer is added while the old one is still active, causing duplicate updates.</td></tr>
+  </table>
+
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The dual-lifecycle problem in Fragments is a design flaw that Compose eliminates entirely. In Compose, there is no separate View lifecycle — a Composable is either in composition or not. But in XML Fragment apps, understanding the dual lifecycle is what separates junior from senior: specifically, the pattern of _binding = null in onDestroyView, using viewLifecycleOwner for all observers, and knowing that back-stack Fragments are alive but viewless. Navigation Component's Fragment back stack management encapsulates all of this, which is why I treat direct FragmentManager transaction code as a code smell in new projects — it should almost always be replaced by a NavController.navigate() call."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+
+  <h3>Fragment Lifecycle Order</h3>
+  <table>
+    <tr><th>Callback</th><th>View available?</th><th>Key work</th></tr>
+    <tr><td>onAttach</td><td>No</td><td>Access Activity context</td></tr>
+    <tr><td>onCreate</td><td>No</td><td>Init non-UI, get arguments</td></tr>
+    <tr><td>onCreateView</td><td>Creating</td><td>Inflate layout, return view</td></tr>
+    <tr><td>onViewCreated</td><td>Yes ✅</td><td>Setup UI, observers, listeners</td></tr>
+    <tr><td>onDestroyView</td><td>Destroyed</td><td>Null binding (_binding = null)</td></tr>
+    <tr><td>onDestroy</td><td>No</td><td>Fragment object cleanup</td></tr>
+  </table>
+
+  <h3>Critical Rules</h3>
+  <ul>
+    <li><code>observe(viewLifecycleOwner)</code> — NEVER <code>observe(this)</code> in Fragment</li>
+    <li><code>_binding = null</code> in onDestroyView — ALWAYS for ViewBinding Fragments</li>
+    <li>Arguments via Bundle/Safe Args — NEVER constructor parameters</li>
+    <li><code>childFragmentManager</code> for nested Fragments — NEVER supportFragmentManager</li>
+    <li>Shared state → <code>activityViewModels()</code></li>
+    <li>One-shot results → Fragment Result API</li>
+  </ul>
+
+  <h3>ViewModel Scope</h3>
+  <table>
+    <tr><th>Delegate</th><th>Scope</th><th>Use</th></tr>
+    <tr><td><code>viewModels()</code></td><td>This Fragment</td><td>Fragment-private state</td></tr>
+    <tr><td><code>activityViewModels()</code></td><td>Host Activity</td><td>Shared between sibling Fragments</td></tr>
+    <tr><td><code>viewModels({ requireParentFragment() })</code></td><td>Parent Fragment</td><td>Nested Fragment → parent sharing</td></tr>
+  </table>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is the Fragment lifecycle and how does it differ from Activity lifecycle?</summary>
+    <div class="ans">Fragment lifecycle has extra steps: onAttach (before onCreate), onCreateView (inflate layout), onViewCreated (view ready — most setup goes here), onDestroyView (view destroyed, Fragment may stay alive on back stack), and onDetach (after onDestroy). The key difference from Activity: a Fragment has two separate lifecycles — the Fragment object and its View. The Activity has only one lifecycle. Fragment's View is destroyed when it goes on the back stack, while the Fragment object persists.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is viewLifecycleOwner and why is it important?</summary>
+    <div class="ans">viewLifecycleOwner is the LifecycleOwner tied to the Fragment's View lifecycle (created in onCreateView, destroyed in onDestroyView). It is different from the Fragment itself as a LifecycleOwner (which lives longer). Using viewLifecycleOwner for LiveData/Flow observers ensures the observer is removed in onDestroyView. Using 'this' (the Fragment) keeps observers active between onDestroyView and onCreateView — leading to duplicate observers when the Fragment returns from the back stack.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> How do you pass data to a Fragment correctly?</summary>
+    <div class="ans">Use arguments Bundle with companion object newInstance(), or Safe Args via Navigation Component. Never use constructor arguments — the Fragment framework instantiates Fragments using the no-arg constructor on recreation (rotation, process death), so custom constructors cause InstantiationException.<br/><pre><code>companion object {
+    fun newInstance(productId: String) = ProductDetailFragment().apply {
+        arguments = Bundle().apply { putString("productId", productId) }
+    }
+}
+// In Fragment: val id = requireArguments().getString("productId")</code></pre></div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the difference between add() and replace() in Fragment transactions?</summary>
+    <div class="ans">add(): Adds the new Fragment on top of the existing one. Both Fragments exist simultaneously in the container. Used for overlapping UIs: BottomSheetDialogFragment, overlay Fragments. The previous Fragment's onStop() is NOT called (it's still visible underneath).<br/>replace(): Removes all existing Fragments in the container and adds the new one. Previous Fragment goes through onStop → onDestroyView (if addToBackStack) or full destruction. Used for full-screen navigation between screens.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How do two sibling Fragments communicate without coupling?</summary>
+    <div class="ans">Two patterns: (1) Shared ViewModel — both Fragments use activityViewModels() to get the same ViewModel instance scoped to the Activity. One Fragment writes to it, the other observes it. (2) Fragment Result API — setFragmentResult("key", bundle) in the sender; setFragmentResultListener("key", viewLifecycleOwner) in the receiver. Avoids direct Fragment-to-Fragment references and interface callbacks.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> When would you use childFragmentManager vs parentFragmentManager?</summary>
+    <div class="ans">childFragmentManager: used inside a Fragment to manage Fragments that are children (nested) within that Fragment. E.g., a ViewPager inside a Fragment uses childFragmentManager as the FragmentManager for its page Fragments. parentFragmentManager: used inside a Fragment to access the FragmentManager that owns this Fragment (the parent Fragment's childFragmentManager, or the Activity's supportFragmentManager). Wrong choice leads to lifecycle ownership issues and potential memory leaks.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the Fragment Result API and when was it introduced?</summary>
+    <div class="ans">Fragment Result API (introduced in Fragment 1.3.0, 2020) provides a type-safe, lifecycle-aware way to pass one-shot results between Fragments. It replaces the pattern of interface callbacks and the deprecated targetFragment API. The sender calls setFragmentResult("requestKey", bundle). The receiver registers a listener with setFragmentResultListener("requestKey", viewLifecycleOwner) { key, bundle -> }. The listener is only invoked when the Fragment is at least STARTED, and is automatically removed in onDestroyView.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] After rotation, users report seeing duplicate list items. You suspect the Observer is firing twice. How do you diagnose and fix this?</summary>
+    <div class="ans">Root cause: LiveData/Flow is being observed with 'this' (Fragment lifecycle) instead of viewLifecycleOwner. When the Fragment goes to back stack, its View is destroyed but the Fragment object is alive — observer 1 still active. When it returns, onCreateView is called again and a second observer is added — observer 2 now also active. After rotation (full Fragment recreation), there may be 2+ observers emitting to the same adapter.<br/><br/>Diagnose: Place a log in the observe lambda and count how many times it fires per update.<br/><br/>Fix: Change all observe() calls from this to viewLifecycleOwner. For StateFlow/Flow: use viewLifecycleOwner.lifecycleScope.launch { repeatOnLifecycle(STARTED) { ... } } inside onViewCreated.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Implement a Fragment with ViewBinding that correctly nulls the binding, uses viewLifecycleOwner for observation, and handles arguments safely.</summary>
+    <div class="ans"><pre><code>@AndroidEntryPoint
+class OrderListFragment : Fragment(R.layout.fragment_order_list) {
+
+    private val viewModel: OrderListViewModel by viewModels()
+    private var _binding: FragmentOrderListBinding? = null
+    private val binding get() = _binding!!  // safe non-null accessor
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentOrderListBinding.bind(view)
+
+        // ✅ viewLifecycleOwner — not 'this'
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.orders.collect { binding.recyclerView.adapter?.let { a ->
+                    (a as OrderAdapter).submitList(it)
+                }}
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null  // ✅ prevent View memory leak
+    }
+
+    companion object {
+        fun newInstance(userId: String) = OrderListFragment().apply {
+            arguments = Bundle().apply { putString("userId", userId) }
+        }
+    }
+}</code></pre></div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] "IllegalStateException: Can not perform this action after onSaveInstanceState" — when does this crash occur and how do you fix it?</summary>
+    <div class="ans">This crash occurs when a Fragment transaction (commit()) is called after the Activity has saved its state (post-onSaveInstanceState). Common causes: async callback finishes after the Activity is paused (e.g., network response, dialog dismiss from a background thread).<br/><br/>Fix options:<br/>1. Use commitAllowingStateLoss() — accepts state may be lost (acceptable for non-critical UI).<br/>2. Check lifecycle before committing: if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) { commit() }<br/>3. Better: Don't commit transactions in async callbacks directly. Use a shared ViewModel to emit navigation events, and observe them in the Fragment with viewLifecycleOwner so they only fire when STARTED.<br/>4. In Navigation Component: navController.navigate() is safe to call from lifecycle-aware coroutines — it handles the state check internally.</div>
+  </details>
+
+  <hr style="border-color:var(--border);margin:32px 0;"/>
+  <h3 style="color:var(--warn);">Answer Key Summary</h3>
+  <ul>
+    <li>Can you explain the dual lifecycle (Fragment + View) without prompting?</li>
+    <li>Can you write a correct ViewBinding Fragment with null in onDestroyView?</li>
+    <li>Do you know why viewLifecycleOwner prevents duplicate observers?</li>
+    <li>Can you compare activityViewModels vs viewModels and explain when to use each?</li>
+    <li>Can you fix the "Can not perform this action after onSaveInstanceState" crash?</li>
+  </ul>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

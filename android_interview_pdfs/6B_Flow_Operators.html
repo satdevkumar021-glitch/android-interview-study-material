@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>6B — Flow Operators | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">6B · Flow Operators</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Transform &amp; Filter</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Combining Flows</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> FlatMap Operators</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Timing &amp; Error Handling</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Lifecycle Operators</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>6B</span> — Flow Operators</h1>
+    <p class="hero-desc">Transforming, combining, flatMapping, timing, error handling, and lifecycle operators. Production examples for each. flatMapConcat vs flatMapMerge vs flatMapLatest comparison.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 6B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Operator categories</h3>
+    <ul>
+      <li><strong>Transforming</strong>: map, filter, transform — change the data in the stream</li>
+      <li><strong>Combining</strong>: combine, zip, merge — merge multiple flows into one</li>
+      <li><strong>FlatMapping</strong>: flatMapConcat, flatMapMerge, flatMapLatest — map each value to a new Flow</li>
+      <li><strong>Timing</strong>: debounce, sample, throttle, distinctUntilChanged — control emission rate</li>
+      <li><strong>Error handling</strong>: catch, retry, retryWhen — handle upstream errors</li>
+      <li><strong>Lifecycle</strong>: onStart, onCompletion, onEach — side effects in the chain</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Mental Model</div>
+      Flow operators are lazy — they don't execute until <code>collect()</code> is called. Each operator creates a new Flow that wraps the upstream. Think of the chain as a pipeline declaration, not execution. The entire chain runs when collected.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Transform &amp; Filter →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Transform &amp; Filter</div>
+    <pre><code><span class="cm">// map: transform each value</span>
+repo.<span class="fn">getPrices</span>()                  <span class="cm">// Flow&lt;RawPrice&gt;</span>
+    .<span class="fn">map</span> { raw -> <span class="fn">formatPrice</span>(raw) } <span class="cm">// Flow&lt;String&gt;</span>
+    .<span class="fn">collect</span> { <span class="fn">displayPrice</span>(it) }
+
+<span class="cm">// filter: drop values that don't match predicate</span>
+transactionFlow
+    .<span class="fn">filter</span> { it.amount > <span class="cl">BigDecimal</span>.<span class="cl">ZERO</span> }  <span class="cm">// only positive</span>
+    .<span class="fn">collect</span> { <span class="fn">showTransaction</span>(it) }
+
+<span class="cm">// transform: most flexible — can emit multiple values or skip</span>
+userFlow
+    .<span class="fn">transform</span> { user ->
+        <span class="kw">if</span> (user.isVerified) {
+            <span class="fn">emit</span>(user)                  <span class="cm">// emit the user</span>
+            <span class="fn">emit</span>(user.<span class="fn">copy</span>(cached = <span class="kw">true</span>)) <span class="cm">// emit modified copy</span>
+        }
+        <span class="cm">// if not verified: emit nothing (skip)</span>
+    }
+    .<span class="fn">collect</span> { <span class="fn">handleUser</span>(it) }
+
+<span class="cm">// mapNotNull: map + filter null results</span>
+eventFlow
+    .<span class="fn">mapNotNull</span> { event -> event <span class="kw">as</span>? <span class="cl">PaymentEvent</span> }
+    .<span class="fn">collect</span> { <span class="fn">handlePayment</span>(it) }</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Combining →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128202;</div>3. Combining Flows</div>
+    <h3>combine — emit when any source changes</h3>
+    <pre><code><span class="cm">// combine: re-emits when EITHER source emits (uses latest from other)</span>
+<span class="kw">val</span> searchFlow: <span class="cl">Flow</span>&lt;<span class="cl">String</span>&gt; = searchInput.<span class="fn">asFlow</span>()
+<span class="kw">val</span> filterFlow: <span class="cl">Flow</span>&lt;<span class="cl">FilterOptions</span>&gt; = activeFilters
+
+searchFlow.<span class="fn">combine</span>(filterFlow) { query, filters ->
+    repo.<span class="fn">search</span>(query, filters)
+}.<span class="fn">collect</span> { results -> <span class="fn">showResults</span>(results) }
+<span class="cm">// If user types OR changes filter → new search triggered</span></code></pre>
+
+    <h3>zip — pair values one-to-one</h3>
+    <pre><code><span class="cm">// zip: pairs emissions 1:1, waits for BOTH to emit</span>
+<span class="kw">val</span> namesFlow = <span class="fn">flowOf</span>(<span class="str">"Alice"</span>, <span class="str">"Bob"</span>, <span class="str">"Carol"</span>)
+<span class="kw">val</span> scoresFlow = <span class="fn">flowOf</span>(<span class="nu">95</span>, <span class="nu">87</span>, <span class="nu">92</span>)
+
+namesFlow.<span class="fn">zip</span>(scoresFlow) { name, score ->
+    <span class="str">"$name: $score"</span>
+}.<span class="fn">collect</span> { <span class="fn">println</span>(it) }
+<span class="cm">// Outputs: "Alice: 95", "Bob: 87", "Carol: 92"</span>
+<span class="cm">// Zip ends when shorter flow completes</span></code></pre>
+
+    <h3>merge — interleave emissions</h3>
+    <pre><code><span class="cm">// merge: combines multiple flows, emits as they arrive</span>
+<span class="kw">val</span> uiUpdates = <span class="fn">merge</span>(
+    networkStatusFlow,   <span class="cm">// emits when connectivity changes</span>
+    batteryLevelFlow,    <span class="cm">// emits when battery changes</span>
+    userActionFlow       <span class="cm">// emits on user interaction</span>
+)
+uiUpdates.<span class="fn">collect</span> { update -> <span class="fn">handleUpdate</span>(update) }</code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Operator</th><th>Emits when</th><th>Uses latest from other?</th><th>Use case</th></tr>
+      <tr><td>combine</td><td>Either source emits</td><td>Yes</td><td>Search + filter, form validation</td></tr>
+      <tr><td>zip</td><td>Both sources emit</td><td>No (1:1 pairing)</td><td>Paired data from two sources</td></tr>
+      <tr><td>merge</td><td>Any source emits</td><td>N/A</td><td>Multiple event sources into one</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: FlatMap Operators →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9895;</div>4. FlatMap Operators</div>
+    <p>FlatMap operators transform each emission into a new Flow, then flatten the results. The key difference is <strong>how concurrent inner flows are handled</strong>.</p>
+
+    <h3>flatMapConcat — sequential, in-order</h3>
+    <pre><code><span class="cm">// flatMapConcat: waits for each inner flow to complete before starting next</span>
+<span class="cm">// Preserves order, sequential — like a queue</span>
+orderIds.<span class="fn">flatMapConcat</span> { id ->
+    repo.<span class="fn">getOrderDetails</span>(id)  <span class="cm">// returns Flow&lt;OrderDetail&gt;</span>
+}.<span class="fn">collect</span> { detail -> <span class="fn">showDetail</span>(detail) }
+<span class="cm">// Order 1 fully loaded before Order 2 starts</span></code></pre>
+
+    <h3>flatMapMerge — concurrent</h3>
+    <pre><code><span class="cm">// flatMapMerge: starts all inner flows concurrently, interleaves results</span>
+<span class="cm">// Faster, but order is NOT guaranteed</span>
+productIds.<span class="fn">flatMapMerge</span> { id ->
+    priceApi.<span class="fn">getPriceStream</span>(id)  <span class="cm">// live price updates per product</span>
+}.<span class="fn">collect</span> { price -> <span class="fn">updatePriceDisplay</span>(price) }
+<span class="cm">// All price streams run in parallel — fastest delivery</span></code></pre>
+
+    <h3>flatMapLatest — cancel previous on new emission</h3>
+    <pre><code><span class="cm">// flatMapLatest: cancels the PREVIOUS inner flow when a new source emits</span>
+<span class="cm">// Only the latest inner flow survives</span>
+searchQuery
+    .<span class="fn">debounce</span>(<span class="nu">300</span>)
+    .<span class="fn">flatMapLatest</span> { query ->
+        repo.<span class="fn">search</span>(query)  <span class="cm">// if user types again, this is cancelled</span>
+    }
+    .<span class="fn">collect</span> { results -> <span class="fn">showResults</span>(results) }
+<span class="cm">// ✅ Perfect for search — only the latest query matters</span></code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Operator</th><th>Concurrency</th><th>Order</th><th>On new emission</th><th>Use case</th></tr>
+      <tr><td>flatMapConcat</td><td>Sequential</td><td>Guaranteed</td><td>Queued after current</td><td>Ordered processing (pagination)</td></tr>
+      <tr><td>flatMapMerge</td><td>Concurrent</td><td>Not guaranteed</td><td>Starts immediately</td><td>Parallel fetches (product prices)</td></tr>
+      <tr><td>flatMapLatest</td><td>Cancel + restart</td><td>N/A</td><td>Cancels previous</td><td>Search, live updates</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Timing &amp; Errors →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128337;</div>5. Timing &amp; Error Handling</div>
+    <h3>Timing operators</h3>
+    <pre><code><span class="cm">// debounce: emit only after X ms of silence</span>
+searchInput.<span class="fn">debounce</span>(<span class="nu">300</span>).<span class="fn">collect</span> { query -> <span class="fn">search</span>(query) }
+<span class="cm">// User types "kotlin" — only "kotlin" sent after 300ms pause</span>
+
+<span class="cm">// distinctUntilChanged: skip if value same as previous</span>
+userFlow.<span class="fn">distinctUntilChanged</span>().<span class="fn">collect</span> { render(it) }
+<span class="cm">// Only re-renders when actual user data changes</span>
+
+<span class="cm">// sample: emit most recent value every X ms interval</span>
+sensorFlow.<span class="fn">sample</span>(<span class="nu">1000</span>).<span class="fn">collect</span> { reading -> <span class="fn">updateUI</span>(reading) }
+<span class="cm">// Sensor fires 60fps — sample(1000) → 1 update/second to UI</span></code></pre>
+
+    <h3>Error handling operators</h3>
+    <pre><code><span class="cm">// catch: handle upstream exceptions, emit fallback</span>
+repo.<span class="fn">getBalance</span>()
+    .<span class="fn">catch</span> { e ->
+        <span class="fn">emit</span>(<span class="cl">Balance</span>.<span class="cl">Unavailable</span>)  <span class="cm">// emit fallback value</span>
+        <span class="fn">logError</span>(e)
+    }
+    .<span class="fn">collect</span> { <span class="fn">showBalance</span>(it) }
+
+<span class="cm">// retry: re-subscribe on error</span>
+networkFlow
+    .<span class="fn">retry</span>(<span class="nu">3</span>) { e -> e <span class="kw">is</span> <span class="cl">IOException</span> }  <span class="cm">// retry up to 3 times for IO errors</span>
+    .<span class="fn">collect</span> { <span class="fn">handleData</span>(it) }
+
+<span class="cm">// retryWhen: retry with exponential backoff</span>
+apiFlow
+    .<span class="fn">retryWhen</span> { cause, attempt ->
+        <span class="kw">if</span> (cause <span class="kw">is</span> <span class="cl">IOException</span> && attempt < <span class="nu">3</span>) {
+            <span class="fn">delay</span>(<span class="nu">1000L</span> * (<span class="nu">2</span>.<span class="fn">pow</span>(attempt.<span class="fn">toInt</span>()))) <span class="cm">// 1s, 2s, 4s</span>
+            <span class="kw">true</span>   <span class="cm">// retry</span>
+        } <span class="kw">else</span> <span class="kw">false</span>   <span class="cm">// don't retry</span>
+    }
+    .<span class="fn">collect</span> { <span class="fn">handleData</span>(it) }</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Lifecycle Operators →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128203;</div>6. Lifecycle Operators</div>
+    <h3>onStart, onEach, onCompletion</h3>
+    <pre><code><span class="cm">// onStart: called before flow starts collecting</span>
+repo.<span class="fn">getProducts</span>()
+    .<span class="fn">onStart</span> { _loading.<span class="fn">value</span> = <span class="kw">true</span> }
+    .<span class="fn">onEach</span> { product -> <span class="fn">cacheProduct</span>(product) }  <span class="cm">// side effect per item</span>
+    .<span class="fn">onCompletion</span> { cause ->
+        _loading.<span class="fn">value</span> = <span class="kw">false</span>
+        <span class="kw">if</span> (cause != <span class="kw">null</span>) <span class="fn">logError</span>(cause)
+    }
+    .<span class="fn">collect</span> { <span class="fn">displayProduct</span>(it) }
+
+<span class="cm">// Production: full pipeline with loading, error, completion</span>
+<span class="kw">fun</span> <span class="fn">getTransactionFlow</span>(accountId: <span class="cl">String</span>) =
+    repo.<span class="fn">transactions</span>(accountId)
+        .<span class="fn">onStart</span> { <span class="fn">emit</span>(<span class="cl">Resource</span>.<span class="cl">Loading</span>) }
+        .<span class="fn">map</span> { <span class="cl">Resource</span>.<span class="cl">Success</span>(it) }
+        .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">Resource</span>.<span class="cl">Error</span>(it)) }
+        .<span class="fn">onCompletion</span> { <span class="cm">/* cleanup */</span> }</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Flow operators are lazy — they build a pipeline that executes on collect. Key operators: map/filter for transformation, combine/zip/merge for combining flows, flatMapLatest for search (cancel previous on new query), debounce for typing delays, catch/retry for error handling, and onStart/onCompletion for loading states."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The most important distinction is the three flatMap operators. flatMapConcat is sequential — each inner flow must complete before the next starts, preserving order. flatMapMerge is concurrent — all inner flows run simultaneously, results interleave. flatMapLatest cancels the previous inner flow when a new source emission arrives — essential for search where only the latest query matters.<br><br>For combining flows: combine fires when either source emits using the latest from the other — perfect for search + filter combinations. zip pairs emissions 1:1, waiting for both — good for correlated datasets. merge interleaves from multiple sources — good for event aggregation.<br><br>For error handling: catch handles exceptions and can emit fallback values. retryWhen gives you control over retry timing — exponential backoff for network resilience. debounce with 300ms is the standard search debounce pattern in Android."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>flatMapLatest for search</strong> — cancels previous; flatMapConcat for ordered; flatMapMerge for parallel</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>combine vs zip</strong> — combine = either emits with latest; zip = 1:1 pairing</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>debounce(300)</strong> — standard search debounce</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>catch</strong> — handles upstream errors, can emit fallback; does NOT catch downstream errors</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Operators are lazy</strong> — pipeline executes only on collect</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What's the difference between debounce and sample?"</h4>
+    <p>A: <code>debounce(n)</code> waits until the source has been silent for n ms before emitting — useful for typing (only emit after user stops). <code>sample(n)</code> emits the most recent value every n ms on a fixed schedule — useful for sensor data where you want regular UI updates regardless of how fast the sensor fires.</p>
+    <h4>Q: "Does catch handle errors thrown by the collector?"</h4>
+    <p>A: No. <code>catch</code> only handles exceptions from the upstream (the flow chain above it). Exceptions thrown inside the <code>collect { }</code> lambda are NOT caught by <code>catch</code>. Use a try/catch inside the collect lambda for downstream errors.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking app, combine the search query flow with the account filter flow and the sort preference flow using <code>combine</code>: <code>combine(searchFlow, filterFlow, sortFlow) { q, f, s → Query(q,f,s) }.flatMapLatest { query → repo.search(query) }.catch { emit(Error(it)) }</code>. This creates a reactive search that automatically re-fetches whenever any input changes, with only the latest result kept.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>FlatMap comparison</h4>
+        <pre><code>flatMapConcat  sequential, ordered
+flatMapMerge   concurrent, unordered
+flatMapLatest  cancel prev on new emit</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Combining</h4>
+        <pre><code>combine(a,b) { x,y -> }  either emits
+zip(a) { x, y -> }       1:1 pair
+merge(a, b, c)           interleave all</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Error handling</h4>
+        <pre><code>.catch { e -> emit(fallback) }
+.retry(3) { e -> e is IOException }
+.retryWhen { cause, attempt ->
+  delay(2.pow(attempt) * 1000L)
+  attempt &lt; 3
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Timing</h4>
+        <pre><code>debounce(300)          wait 300ms silence
+distinctUntilChanged() skip duplicates
+sample(1000)           emit every 1s</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between map and transform in Flow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>map</code> transforms each emission 1:1 — one input always produces exactly one output. <code>transform</code> is more flexible — you can call <code>emit()</code> zero or multiple times. Use transform to skip some emissions (like filter) or to expand one value into multiple (like a 1:n mapping).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does debounce do and when would you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>debounce(n)</code> only emits a value after n milliseconds of silence from the upstream. If a new value arrives before n ms, the timer resets. Classic use case: search-as-you-type — don't fire an API call for every keystroke; wait until the user pauses typing for 300ms.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain the difference between combine and zip.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>combine</code>: emits a new combined value whenever either source emits, using the latest value from the other. If flow A emits 3 times and flow B emits 2 times, you can get up to 5 combined emissions. <code>zip</code>: pairs emissions 1:1. Waits for both sources to emit before combining. If A emits 3 times and B emits 2 times, you get 2 paired emissions (stops when the shorter one completes).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between flatMapConcat, flatMapMerge, and flatMapLatest?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>flatMapConcat</code>: sequential — waits for each inner flow to complete before starting the next. Order guaranteed. Use for ordered operations like paginated loading. <code>flatMapMerge</code>: concurrent — starts all inner flows simultaneously. Results arrive in any order. Use for parallel fetches. <code>flatMapLatest</code>: when a new outer emission arrives, the previous inner flow is cancelled and a new one starts. Only the latest matters. Use for search queries.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Does the catch operator handle exceptions thrown inside the collect lambda?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">No. <code>catch</code> is a transparent operator that only catches exceptions thrown by the upstream (the flow chain above it in the pipeline). Exceptions thrown inside the <code>collect { }</code> collector lambda are downstream and are NOT intercepted by <code>catch</code>. To handle collector exceptions, wrap the collect call in a try/catch.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you implement exponential backoff retry in a Flow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>retryWhen</code>: <code>.retryWhen { cause, attempt -> if (cause is IOException && attempt &lt; 3) { delay(1000L * (1 shl attempt.toInt())); true } else false }</code>. The <code>attempt</code> starts at 0. Delays: 1000ms, 2000ms, 4000ms (powers of 2). Only retry IOExceptions, not business logic errors. After 3 attempts, return false to stop retrying and let the exception propagate.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Build a search pipeline that: debounces 300ms, ignores blank input, cancels stale requests, and handles network errors gracefully.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>searchQuery.debounce(300).filter { it.isNotBlank() }.distinctUntilChanged().flatMapLatest { query -> repo.search(query).catch { emit(SearchResult.Error(it)) } }.collect { result -> renderResult(result) }</code>. Explanation: debounce waits for typing pause; filter ignores empty; distinctUntilChanged avoids re-searching same query; flatMapLatest cancels previous request on new keystroke; catch inside the flatMapLatest handles errors per query without breaking the outer flow.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is onEach and how does it differ from map?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>onEach</code> is for side effects — it performs an action on each emission but passes the original value through unchanged. <code>map</code> transforms the value into a different value. Use <code>onEach</code> for logging, caching, analytics tracking, or setting loading states without changing the stream's data type. Example: <code>flow.onEach { cache.save(it) }.map { toUiModel(it) }</code> — cache the raw data, then transform to UI model.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you merge live price updates for 100 products into a single UI-updating stream without overwhelming the main thread?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>flatMapMerge(concurrency = 20)</code> to limit concurrent inner flows: <code>productIds.flatMapMerge(concurrency = 20) { id -> priceSocket.streamPrice(id) }.conflate()</code>. The concurrency parameter prevents 100 simultaneous socket connections. <code>conflate()</code> at the end drops intermediate updates if the UI can't keep up — only the latest price per product matters. Then collect on Main dispatcher for UI updates. The concurrency limit matches realistic socket pool size.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain how you would use the Resource pattern (Loading/Success/Error) with Flow operators.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Wrap the repository flow: <code>fun getDataFlow(id: String): Flow&lt;Resource&lt;Data&gt;&gt; = repo.getStream(id).map&lt;Data, Resource&lt;Data&gt;&gt; { Resource.Success(it) }.onStart { emit(Resource.Loading) }.catch { emit(Resource.Error(it)) }</code>. The <code>onStart</code> emits Loading before any data arrives. <code>map</code> wraps success data. <code>catch</code> catches upstream errors and emits Error. The UI collects a single flow that handles all three states. Important: <code>onStart</code> must come before <code>catch</code> so the Loading emission isn't caught by catch.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

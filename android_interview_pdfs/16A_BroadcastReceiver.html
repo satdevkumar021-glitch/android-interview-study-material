@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>16A — BroadcastReceiver | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">16A · BroadcastReceiver</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>16A</span> — BroadcastReceiver</h1>
+    <p class="hero-desc">Inter-process and system event messaging: Static vs Dynamic receivers, modern API 26+ broadcast limits, receiver security permissions, ordered broadcasts, and goAsync().</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 16A</span>
+      <span class="badge badge-tier3">&#11088; Tier 3 (System Components)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Receiver Types</div>
+    <p>A <strong>BroadcastReceiver</strong> is an Android system component that listens for system-wide broadcast announcements (e.g. battery low, screen on, boot completed) or custom inter-app / intra-app intents.</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Static vs Dynamic Receivers</div>
+      <ul>
+        <li><strong>Static (Manifest-Declared):</strong> Declared in <code>AndroidManifest.xml</code>. The OS will instantiate the app process if needed to deliver the broadcast. Severely restricted since Android 8.0 (API 26) to prevent battery drain.</li>
+        <li><strong>Dynamic (Context-Registered):</strong> Registered at runtime via <code>context.registerReceiver()</code> and tied to the lifecycle of the registering component (Activity, Service, or Application). Required on API 33+ to specify <code>RECEIVER_EXPORTED</code> or <code>RECEIVER_NOT_EXPORTED</code>.</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works Under the Hood</div>
+
+    <h3>1. onReceive() Execution &amp; Threading</h3>
+    <p><code>BroadcastReceiver.onReceive(context, intent)</code> runs synchronously on the <strong>Main Thread</strong>. The Android OS imposes a strict <strong>10-second timeout</strong> before flagging the receiver with an ANR.</p>
+
+    <h3>2. goAsync() for Background Work</h3>
+    <p>If work cannot finish synchronously within milliseconds, call <code>goAsync()</code>:</p>
+    <pre><code><span class="kw">class</span> <span class="cl">HeavyBroadcastReceiver</span> : <span class="cl">BroadcastReceiver</span>() {
+    <span class="kw">override fun</span> <span class="fn">onReceive</span>(context: <span class="cl">Context</span>, intent: <span class="cl">Intent</span>) {
+        <span class="kw">val</span> pendingResult: <span class="cl">PendingResult</span> = <span class="fn">goAsync</span>()
+        <span class="cl">CoroutineScope</span>(<span class="cl">Dispatchers</span>.IO).<span class="fn">launch</span> {
+            <span class="kw">try</span> {
+                <span class="fn">performShortWork</span>()
+            } <span class="kw">finally</span> {
+                pendingResult.<span class="fn">finish</span>() <span class="cm">// Must be called to release the WakeLock/receiver</span>
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>3. Ordered Broadcasts (sendOrderedBroadcast)</h3>
+    <p>Broadcasts sent via <code>sendOrderedBroadcast()</code> are delivered to one receiver at a time in order of <code>android:priority</code>. A higher-priority receiver can:</p>
+    <ul>
+      <li>Mutate broadcast extras via <code>setResultData()</code> or <code>setResultExtras()</code>.</li>
+      <li>Completely terminate propagation via <code>abortBroadcast()</code>.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use &amp; Security →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. Modern Restrictions &amp; Security</div>
+
+    <h3>Android 8.0 (API 26+) Implicit Broadcast Exceptions</h3>
+    <p>Apps targeting API 26+ cannot register manifest receivers for implicit broadcasts, with few exceptions (e.g., <code>ACTION_BOOT_COMPLETED</code>, <code>ACTION_LOCALE_CHANGED</code>, <code>ACTION_MY_PACKAGE_REPLACED</code>). Broadcasts like <code>CONNECTIVITY_ACTION</code> must be registered dynamically or replaced with <code>ConnectivityManager.NetworkCallback</code>.</p>
+
+    <h3>Android 13 (API 33+) Exported Receiver Flag</h3>
+    <p>When calling <code>registerReceiver()</code>, you MUST pass either <code>Context.RECEIVER_EXPORTED</code> or <code>Context.RECEIVER_NOT_EXPORTED</code>. Omitting this flag throws a <code>SecurityException</code>.</p>
+
+    <h3>Securing Broadcasts</h3>
+    <ul>
+      <li><strong>Receiver Permission:</strong> Add <code>android:permission="com.example.MY_PERMISSION"</code> to restrict who can send intents to your receiver.</li>
+      <li><strong>Sender Permission:</strong> Pass a permission string to <code>sendBroadcast(intent, "com.example.MY_PERMISSION")</code> to ensure only authorized apps receive it.</li>
+      <li><strong>Intra-App State:</strong> For purely in-app events, replace broadcasts with Kotlin <code>SharedFlow</code> or <code>Channel</code>.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Example (Dynamic Network / Airplane Mode Listener)</div>
+
+    <pre><code><span class="kw">class</span> <span class="cl">ConnectivityMonitorActivity</span> : <span class="cl">ComponentActivity</span>() {
+
+    <span class="kw">private val</span> airplaneModeReceiver = <span class="kw">object</span> : <span class="cl">BroadcastReceiver</span>() {
+        <span class="kw">override fun</span> <span class="fn">onReceive</span>(context: <span class="cl">Context</span>, intent: <span class="cl">Intent</span>) {
+            <span class="kw">val</span> isAirplaneModeOn = intent.<span class="fn">getBooleanExtra</span>(<span class="str">"state"</span>, <span class="kw">false</span>)
+            <span class="fn">updateAirplaneModeBanner</span>(isAirplaneModeOn)
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStart</span>() {
+        <span class="kw">super</span>.<span class="fn">onStart</span>()
+        <span class="kw">val</span> filter = <span class="cl">IntentFilter</span>(<span class="cl">Intent</span>.ACTION_AIRPLANE_MODE_CHANGED)
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT &gt;= <span class="cl">Build</span>.VERSION_CODES.TIRAMISU) {
+            <span class="fn">registerReceiver</span>(airplaneModeReceiver, filter, <span class="cl">Context</span>.RECEIVER_EXPORTED)
+        } <span class="kw">else</span> {
+            <span class="fn">registerReceiver</span>(airplaneModeReceiver, filter)
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStop</span>() {
+        <span class="kw">super</span>.<span class="fn">onStop</span>()
+        <span class="fn">unregisterReceiver</span>(airplaneModeReceiver)
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mechanism</th><th>Scope</th><th>Security</th><th>Modern Recommendation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Dynamic BroadcastReceiver</strong></td>
+            <td>System / Cross-app</td>
+            <td>Requires flags / permissions</td>
+            <td>Use for OS events (e.g. Battery, USB)</td>
+          </tr>
+          <tr>
+            <td><strong>Static Manifest Receiver</strong></td>
+            <td>System (Boot/Package)</td>
+            <td>Exported by default</td>
+            <td>Use ONLY for <code>BOOT_COMPLETED</code></td>
+          </tr>
+          <tr>
+            <td><strong>SharedFlow / StateFlow</strong></td>
+            <td>In-app Process</td>
+            <td>100% private to JVM process</td>
+            <td><strong>Standard for intra-app events</strong></td>
+          </tr>
+          <tr>
+            <td><strong>NetworkCallback</strong></td>
+            <td>Network state</td>
+            <td>Direct system callback</td>
+            <td>Replaces <code>CONNECTIVITY_ACTION</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Leaking Dynamic Receivers</div>
+      <p>Registering in <code>onStart()</code> without unregistering in <code>onStop()</code> (or <code>onResume()</code> / <code>onPause()</code>) causes an <code>IntentReceiverLeaked</code> error and keeps the surrounding Activity in memory.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Launching Async Coroutines without goAsync()</div>
+      <p>Once <code>onReceive()</code> returns, the Android OS considers the broadcast handled and reduces the process priority. Any background thread launched inside without <code>goAsync()</code> may be abruptly killed by the OS low memory killer.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Using LocalBroadcastManager (Deprecated)</div>
+      <p><code>LocalBroadcastManager</code> was deprecated in Jetpack. For internal app messaging, use Kotlin Coroutines (<code>SharedFlow</code>, <code>Channel</code>, or EventBus pattern).</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "BroadcastReceiver is an Android component for receiving system-wide or cross-app Intent broadcasts. Static receivers are declared in the manifest but restricted since API 26, while dynamic receivers are registered at runtime with mandatory RECEIVER_EXPORTED/NOT_EXPORTED flags in API 33+. onReceive runs on the main thread with a 10s timeout, extendable via goAsync()."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "BroadcastReceivers enable loosely coupled publish-subscribe messaging in Android. Under API 26 background execution limits, implicit broadcasts cannot be registered statically in the manifest, except for exempted actions like ACTION_BOOT_COMPLETED. For dynamic registration, API 33 requires explicitly specifying RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED for security.<br><br>
+      onReceive() executes on the Main thread. If async work is needed, goAsync() returns a PendingResult, keeping the process alive until pendingResult.finish() is called. For ordered broadcasts, receivers process intents sequentially based on priority, allowing modifications via setResultData() or cancellation via abortBroadcast(). For intra-app communication, we favor Kotlin SharedFlow over deprecated LocalBroadcastManager."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Static vs Dynamic:</strong> Manifest vs runtime registration lifecycles.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>API 26 Restrictions:</strong> Prohibition of static implicit broadcasts.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>API 33 Flags:</strong> <code>RECEIVER_EXPORTED</code> vs <code>RECEIVER_NOT_EXPORTED</code>.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Threading &amp; goAsync():</strong> 10s main thread limit and asynchronous delegation.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>RECEIVER BASICS</h4>
+        <pre><code>onReceive(context, intent) -> Main Thread
+Timeout                    -> 10 seconds (ANR)
+goAsync()                  -> Asynchronous extension
+finish()                   -> Completes goAsync</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>API 33+ REGISTRATION</h4>
+        <pre><code>registerReceiver(
+    receiver, filter,
+    Context.RECEIVER_NOT_EXPORTED // Or EXPORTED
+)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ORDERED BROADCASTS</h4>
+        <pre><code>sendOrderedBroadcast(intent, permission)
+abortBroadcast()    // Stop propagation
+setResultData()     // Alter downstream data
+priority in filter  // Higher integer fires first</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>MODERN REPLACEMENTS</h4>
+        <pre><code>LocalBroadcastManager -> SharedFlow / Channel
+CONNECTIVITY_ACTION   -> NetworkCallback
+Static receivers      -> WorkManager / Dynamic</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the execution time limit for BroadcastReceiver.onReceive()?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The execution time limit is <strong>10 seconds</strong> on the main thread. If <code>onReceive()</code> blocks for more than 10 seconds, the Android OS flags the receiver with an Application Not Responding (ANR) dialog.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the difference between static and dynamic receivers?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Static receivers</strong> are declared in <code>AndroidManifest.xml</code> and can wake up a cold process when the broadcast fires. <strong>Dynamic receivers</strong> are registered at runtime using <code>context.registerReceiver()</code> and are only active during the lifecycle of the registering component.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What flag is required when dynamically registering a receiver on Android 13 (API 33)+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">You must pass either <code>Context.RECEIVER_EXPORTED</code> (if other apps can send broadcasts to it) or <code>Context.RECEIVER_NOT_EXPORTED</code> (if restricted to your app and the system). Omitting this parameter throws a runtime <code>SecurityException</code>.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — How does goAsync() work and why is it needed?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>goAsync()</code> returns a <code>PendingResult</code> object and informs the OS that the receiver intends to complete its work asynchronously on a background thread. This prevents the OS from considering the broadcast completed immediately upon <code>onReceive()</code> return and lowering process priority. Once work finishes, the worker must call <code>pendingResult.finish()</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — Why can't you register a static receiver for CONNECTIVITY_ACTION on Android 8.0+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Android 8.0 (API 26) introduced Background Execution Limits to prevent battery drain. Because network changes occur frequently, waking up hundreds of apps via static broadcast receivers caused severe battery depletion. Apps must use dynamic registration or <code>ConnectivityManager.registerNetworkCallback()</code> instead.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — How do Ordered Broadcasts work?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Sent via <code>sendOrderedBroadcast()</code>, intents are delivered sequentially to receivers based on priority (defined in <code>android:priority</code>). Each receiver can read/modify results via <code>getResultExtras()</code> and <code>setResultData()</code>, or stop further delivery entirely by invoking <code>abortBroadcast()</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — How do you restrict a broadcast so that only specific apps can receive it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Define a custom permission in the sender app manifest (e.g. <code>signature</code> protection level).<br>2. Call <code>sendBroadcast(intent, "com.example.CUSTOM_PERMISSION")</code>.<br>3. Receiver apps must declare <code>&lt;uses-permission android:name="com.example.CUSTOM_PERMISSION" /&gt;</code> signed with the same developer certificate.</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — How do you handle ACTION_BOOT_COMPLETED to schedule alarms in an Android 14 app?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Declare <code>RECEIVE_BOOT_COMPLETED</code> permission in manifest.<br>2. Register static receiver for <code>android.intent.action.BOOT_COMPLETED</code>.<br>3. In <code>onReceive()</code>, call <code>goAsync()</code> or enqueue a WorkManager <code>OneTimeWorkRequest</code> to read scheduled alarms from Room DB and register them with <code>AlarmManager</code>. (WorkManager is preferred to avoid ANRs during heavy post-boot device load).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — Why was LocalBroadcastManager deprecated and what is the modern Kotlin replacement?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>LocalBroadcastManager</code> was deprecated because it relied on global Intent serialization and Context references for what is fundamentally an in-process pub-sub pattern. The modern replacement is Kotlin Coroutines using <code>MutableSharedFlow</code> (or <code>Channel</code> for single-subscriber events), which provides compile-time type safety, zero IPC serialization overhead, and seamless lifecycle awareness.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — An app receives an SMS broadcast via an ordered receiver to parse 2FA OTP. How do you prevent other apps from reading it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Historically, apps used high-priority ordered receivers and called <code>abortBroadcast()</code>, but modern Android restricts SMS broadcast manipulation. The modern, secure Google-recommended solution is the <strong>SMS Retriever API</strong> (or SMS User Consent API), which delivers the 2FA SMS exclusively to your app without requiring the sensitive <code>RECEIVE_SMS</code> permission.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

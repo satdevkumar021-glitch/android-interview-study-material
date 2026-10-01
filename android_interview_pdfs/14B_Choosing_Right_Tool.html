@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>14B — Choosing the Right Background Tool | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">14B · Choosing Background Tool</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>14B</span> — Choosing the Right Background Tool</h1>
+    <p class="hero-desc">The ultimate background processing decision matrix: WorkManager vs Foreground Services vs AlarmManager vs Coroutines under modern Android battery constraints (Doze, App Standby, API 34+ restrictions).</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 14B</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 (Core Architecture)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; The Background Spectrum</div>
+    <p>Modern Android imposes strict battery-saving restrictions to prevent rogue apps from draining resources in the background. Choosing the correct background processing tool requires balancing <strong>Exact Timing</strong>, <strong>User Awareness</strong>, <strong>Persistence</strong>, and <strong>Battery Efficiency</strong>.</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">The 4 Primary Execution Paradigms</div>
+      <ul>
+        <li><strong>In-Memory / UI-Bound:</strong> <code>viewModelScope</code> / <code>lifecycleScope</code> — dies when user leaves the screen or process terminates.</li>
+        <li><strong>Immediate &amp; User-Aware:</strong> <code>Foreground Service</code> — user is actively aware (audio playback, workout recording, GPS navigation); requires an ongoing Notification.</li>
+        <li><strong>Persistent &amp; Deferrable:</strong> <code>WorkManager</code> — guaranteed execution even after app kill or reboot, obeys battery Doze mode and OS constraints.</li>
+        <li><strong>Exact Wall-Clock Timing:</strong> <code>AlarmManager</code> — fires at an exact millisecond timestamp (alarm clock, medical reminders).</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: Decision Matrix &amp; How It Works →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Decision Matrix &amp; Framework Mechanics</div>
+    
+    <h3>Comprehensive Tool Comparison Matrix</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Trigger Type</th>
+            <th>Persists Reboot?</th>
+            <th>Exact Timing?</th>
+            <th>Battery Impact</th>
+            <th>Primary Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>WorkManager</strong></td>
+            <td>Constraint / Deferrable</td>
+            <td><strong>Yes (Room DB)</strong></td>
+            <td>No (Batch window)</td>
+            <td>Lowest (Doze batching)</td>
+            <td>Data sync, log uploads, DB cleanup</td>
+          </tr>
+          <tr>
+            <td><strong>Foreground Service</strong></td>
+            <td>Immediate (User-initiated)</td>
+            <td>No</td>
+            <td>Immediate</td>
+            <td>Medium-High</td>
+            <td>Music player, GPS navigation, live fitness</td>
+          </tr>
+          <tr>
+            <td><strong>AlarmManager</strong></td>
+            <td>Exact timestamp / RTC</td>
+            <td>No (reschedule on boot)</td>
+            <td><strong>Yes (ms precision)</strong></td>
+            <td>High (wakes CPU from Doze)</td>
+            <td>Morning alarm, medicine reminder</td>
+          </tr>
+          <tr>
+            <td><strong>viewModelScope</strong></td>
+            <td>User interaction (UI)</td>
+            <td>No</td>
+            <td>Immediate</td>
+            <td>Negligible</td>
+            <td>Fetching list data, search suggestions</td>
+          </tr>
+          <tr>
+            <td><strong>CoroutineWorker</strong></td>
+            <td>WorkManager task</td>
+            <td>Yes (via WorkManager)</td>
+            <td>No</td>
+            <td>Lowest</td>
+            <td>Structured background work with coroutines</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Android OS Battery Management Layers</h3>
+    <ul>
+      <li><strong>Doze Mode (API 23+):</strong> When the screen is off, stationary, and on battery, the OS disables network access and defers jobs/alarms until periodic maintenance windows.</li>
+      <li><strong>App Standby Buckets (API 28+):</strong> Tiered execution caps (Active, Working Set, Frequent, Rare, Restricted) limiting how often jobs and alarms can fire based on user engagement.</li>
+      <li><strong>Background Execution Limits (API 26+):</strong> Apps cannot launch regular background services when not in the foreground.</li>
+      <li><strong>Foreground Service Restrictions (API 34+):</strong> Mandatory <code>foregroundServiceType</code> declaration and permission grants (e.g. <code>location</code>, <code>mediaPlayback</code>, <code>dataSync</code>).</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use (Decision Tree) →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. Decision Tree: Which Tool to Choose?</div>
+
+    <h3>Step-by-Step Decision Logic</h3>
+    <ol>
+      <li><strong>Does the work need to finish if the user leaves the screen?</strong>
+        <ul>
+          <li><em>No</em> &rarr; Use <strong>viewModelScope</strong> or <strong>lifecycleScope</strong>.</li>
+          <li><em>Yes</em> &rarr; Proceed to Question 2.</li>
+        </ul>
+      </li>
+      <li><strong>Does the user expect immediate, continuous feedback with an ongoing UI presence?</strong>
+        <ul>
+          <li><em>Yes (Music, GPS turn-by-turn, Voice Call)</em> &rarr; Use <strong>Foreground Service</strong>.</li>
+          <li><em>No</em> &rarr; Proceed to Question 3.</li>
+        </ul>
+      </li>
+      <li><strong>Does the task have an exact wall-clock deadline that cannot be delayed even by 5 minutes?</strong>
+        <ul>
+          <li><em>Yes (Alarm clock, calendar reminder, stock price trigger)</em> &rarr; Use <strong>AlarmManager</strong> (<code>setExactAndAllowWhileIdle</code>).</li>
+          <li><em>No</em> &rarr; Use <strong>WorkManager</strong> (<code>OneTimeWorkRequest</code> or <code>PeriodicWorkRequest</code>).</li>
+        </ul>
+      </li>
+    </ol>
+
+    <div class="callout callout-red">
+      <div class="callout-label">When NOT to use each tool</div>
+      <ul>
+        <li><strong>Do NOT use WorkManager</strong> for exact timers (e.g. 7:00 AM wake up alarm) or instant playback.</li>
+        <li><strong>Do NOT use Foreground Services</strong> for silent batch syncs or data uploads (Google Play Store policy will reject non-conforming types on Android 14+).</li>
+        <li><strong>Do NOT use AlarmManager</strong> for general background network calls or heavy processing.</li>
+        <li><strong>Do NOT use viewModelScope</strong> for critical database migrations or analytics dispatch.</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Scenarios →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Implementation Examples</div>
+
+    <h3>1. Exact Medicine Reminder (AlarmManager on API 31+)</h3>
+    <pre><code><span class="kw">fun</span> <span class="fn">scheduleExactMedicineReminder</span>(context: <span class="cl">Context</span>, triggerAtMillis: <span class="cl">Long</span>, reminderId: <span class="cl">Int</span>) {
+    <span class="kw">val</span> alarmManager = context.<span class="fn">getSystemService</span>(<span class="cl">Context</span>.ALARM_SERVICE) <span class="kw">as</span> <span class="cl">AlarmManager</span>
+    <span class="kw">val</span> intent = <span class="cl">Intent</span>(context, <span class="cl">ReminderReceiver</span>::<span class="kw">class</span>.java).<span class="fn">apply</span> {
+        <span class="fn">putExtra</span>(<span class="str">"REMINDER_ID"</span>, reminderId)
+    }
+    <span class="kw">val</span> pendingIntent = <span class="cl">PendingIntent</span>.<span class="fn">getBroadcast</span>(
+        context, reminderId, intent,
+        <span class="cl">PendingIntent</span>.FLAG_UPDATE_CURRENT <span class="kw">or</span> <span class="cl">PendingIntent</span>.FLAG_IMMUTABLE
+    )
+
+    <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT &gt;= <span class="cl">Build</span>.VERSION_CODES.S) {
+        <span class="kw">if</span> (!alarmManager.<span class="fn">canScheduleExactAlarms</span>()) {
+            <span class="cm">// Direct user to Settings to grant SCHEDULE_EXACT_ALARM</span>
+            context.<span class="fn">startActivity</span>(<span class="cl">Intent</span>(<span class="cl">Settings</span>.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+            <span class="kw">return</span>
+        }
+    }
+
+    alarmManager.<span class="fn">setExactAndAllowWhileIdle</span>(
+        <span class="cl">AlarmManager</span>.RTC_WAKEUP,
+        triggerAtMillis,
+        pendingIntent
+    )
+}</code></pre>
+
+    <h3>2. Turn-by-Turn GPS Navigation (Foreground Service API 34+)</h3>
+    <pre><code><span class="cm">// Manifest declaration requires type:</span>
+<span class="cm">// &lt;service android:name=".NavigationService" android:foregroundServiceType="location" /&gt;</span>
+
+<span class="kw">class</span> <span class="cl">NavigationService</span> : <span class="cl">Service</span>() {
+    <span class="kw">override fun</span> <span class="fn">onStartCommand</span>(intent: <span class="cl">Intent</span>?, flags: <span class="cl">Int</span>, startId: <span class="cl">Int</span>): <span class="cl">Int</span> {
+        <span class="kw">val</span> notification = <span class="fn">buildNotification</span>()
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT &gt;= <span class="cl">Build</span>.VERSION_CODES.Q) {
+            <span class="fn">startForeground</span>(
+                <span class="nu">101</span>, notification,
+                <span class="cl">ServiceInfo</span>.FOREGROUND_SERVICE_TYPE_LOCATION
+            )
+        } <span class="kw">else</span> {
+            <span class="fn">startForeground</span>(<span class="nu">101</span>, notification)
+        }
+        <span class="fn">startLocationUpdates</span>()
+        <span class="kw">return</span> START_STICKY
+    }
+    <span class="kw">override fun</span> <span class="fn">onBind</span>(intent: <span class="cl">Intent</span>?): <span class="cl">IBinder</span>? = <span class="kw">null</span>
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Approach</th><th>Trade-off</th><th>Risk of Wrong Choice</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Using <strong>AlarmManager</strong> for background sync</td>
+            <td>Wakes up CPU forcefully; drains battery fast</td>
+            <td>High battery drain; app penalized in App Standby buckets</td>
+          </tr>
+          <tr>
+            <td>Using <strong>viewModelScope</strong> for critical upload</td>
+            <td>No OS persistence; zero boilerplate</td>
+            <td>Upload cancelled if user switches apps and OS kills process</td>
+          </tr>
+          <tr>
+            <td>Using <strong>Foreground Service</strong> for background fetch</td>
+            <td>Bypasses Doze; runs instantly</td>
+            <td>User irritation from mandatory notification; rejection on Google Play Store (API 34+)</td>
+          </tr>
+          <tr>
+            <td>Using <strong>WorkManager</strong> for live chat messaging</td>
+            <td>Deferred execution saves battery</td>
+            <td>Messages delayed by minutes to hours during Doze mode; broken UX</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Failing to handle SCHEDULE_EXACT_ALARM on Android 12+ (API 31+)</div>
+      <p>Calling <code>setExactAndAllowWhileIdle()</code> without checking <code>alarmManager.canScheduleExactAlarms()</code> will throw a <code>SecurityException</code> if the user revoked permission or the app lacks exemption.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Launching a Foreground Service from Background on Android 12+</div>
+      <p>Android 12+ blocks <code>context.startForegroundService()</code> when the app is in the background, throwing <code>ForegroundServiceStartNotAllowedException</code>. Use WorkManager with expedited jobs (<code>setExpedited()</code>) instead.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Not Rescheduling Alarms on Device Reboot</div>
+      <p>AlarmManager alarms are NOT persisted across device reboots. You must register a <code>BroadcastReceiver</code> for <code>ACTION_BOOT_COMPLETED</code> and re-register all alarms from your local Room database.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "Choosing the right background tool in Android boils down to three axes: persistence, user-awareness, and timing precision. For deferrable, guaranteed background work with network/charging constraints, WorkManager is standard. For continuous user-perceivable tasks like audio playback or turn-by-turn navigation, Foreground Services are required. For exact wall-clock alarms, AlarmManager is used. For pure in-app UI tasks, coroutines in viewModelScope are ideal."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "Modern Android is heavily optimized for battery through Doze mode and App Standby buckets. When deciding:<br>
+      1. If work is tied strictly to the screen lifecycle, we keep it in memory with viewModelScope.<br>
+      2. If work must survive screen closure and process death, we evaluate timing. If it's deferrable (analytics, database sync, photo backup), WorkManager handles batching and respects Doze maintenance windows.<br>
+      3. If timing is strictly exact (an alarm clock ringing at 6:30 AM), we use AlarmManager.setExactAndAllowWhileIdle, respecting API 31+ SCHEDULE_EXACT_ALARM permissions and rescheduling after ACTION_BOOT_COMPLETED.<br>
+      4. If the user is actively engaged in an ongoing long task (workout tracking, music), a Foreground Service with an explicit ForegroundServiceType (mandated in Android 14) and persistent notification is appropriate."
+    </div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Doze Mode &amp; Battery:</strong> How Android batches background execution to conserve power.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>WorkManager vs AlarmManager:</strong> Deferrable + persistent vs exact timestamp.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Foreground Service Types (API 34+):</strong> Mandatory type declarations and permissions.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Reboot Behavior:</strong> WorkManager auto-resumes; AlarmManager requires <code>BOOT_COMPLETED</code> listener.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>BACKGROUND DECISION</h4>
+        <pre><code>UI only          -> viewModelScope
+Deferrable sync  -> WorkManager
+Exact alarm      -> AlarmManager
+Ongoing & active -> Foreground Service
+Immediate BG job -> WorkManager.setExpedited()</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ALARM MANAGER APIS</h4>
+        <pre><code>setExact()
+setExactAndAllowWhileIdle() // fires in Doze
+canScheduleExactAlarms()    // API 31+ check
+ACTION_BOOT_COMPLETED       // Reschedule alarms</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>FOREGROUND SERVICE RESTRICTIONS</h4>
+        <pre><code>API 26+: Notification within 5s
+API 31+: Cannot start from background
+API 34+: foregroundServiceType required
+(location, mediaPlayback, health, etc.)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DOZE MODE SUMMARY</h4>
+        <pre><code>Deep Doze   -> Stationary, screen off, on battery
+Light Doze  -> Screen off, moving, on battery
+Maintenance -> Network enabled, jobs executed</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — When should you choose WorkManager over a Foreground Service?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Choose WorkManager when the task is deferrable and does not require immediate, continuous user awareness via an ongoing notification (e.g. syncing data, compressing logs, uploading analytics). Use Foreground Services only when the user is actively monitoring ongoing work (music, active navigation, active fitness tracking).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — Why doesn't WorkManager fire at an exact minute?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">WorkManager is designed for battery efficiency. It batches work and aligns execution with the Android OS's Doze mode maintenance windows and constraint evaluations (e.g., waiting for unmetered Wi-Fi). To preserve device battery, it intentionally trades exact timing for power savings.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What happens to AlarmManager alarms when a phone reboots?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">All alarms scheduled in AlarmManager are cleared from OS memory upon reboot. The application must register a broadcast receiver listening for <code>android.intent.action.BOOT_COMPLETED</code> to query stored reminders from a local database and reschedule each alarm.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — What is the difference between setExact() and setExactAndAllowWhileIdle() in AlarmManager?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>setExact()</code> guarantees exact delivery when the device is awake or in light sleep, but delivery is deferred if the device is in Deep Doze mode until the next maintenance window. <code>setExactAndAllowWhileIdle()</code> fires the alarm at the exact specified time even if the device is currently asleep in Doze mode.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — What permission is required for exact alarms on Android 12 (API 31)+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">On API 31+, apps must declare <code>android.permission.SCHEDULE_EXACT_ALARM</code> (or <code>USE_EXACT_ALARM</code> for calendar/clock apps on API 33+). Before calling exact alarm APIs, the app must call <code>alarmManager.canScheduleExactAlarms()</code>. If false, the app must direct the user to the system Settings page to toggle the permission.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — How does Android's Doze Mode affect background execution?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Doze mode activates when a device is unplugged, stationary, and screen-off. It suspends network access, ignores WakeLocks, defers standard AlarmManager alarms, and defers JobScheduler/WorkManager execution. Execution is only allowed during periodic "maintenance windows", which occur with decreasing frequency over time.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — What is an Expedited Job in WorkManager and when should it be used?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Expedited jobs (<code>setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)</code>) allow WorkManager tasks to run immediately, even when the app is in the background. They have higher execution quotas and are designed for critical, urgent background work (e.g. processing an urgent push notification message or payment confirmation).</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — An e-commerce app needs to sync user shopping cart changes across devices immediately. Which tool should you use?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">For an active user modifying their cart in the app: use <strong>viewModelScope</strong> with optimistic local Room DB updates for instant UI response, followed by an immediate network call. In addition, enqueue a <strong>WorkManager OneTimeWorkRequest with KEEP unique policy</strong> to ensure that if the app is killed mid-network-call, the cart sync will still complete reliably.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — An automotive navigation app stops tracking location when the user turns off the screen on Android 14. What is the root cause and solution?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Root Cause:</strong> On Android 14 (API 34), foreground services must declare a specific <code>foregroundServiceType</code> in the manifest and specify it in <code>startForeground()</code>. If declared as generic or missing <code>android:foregroundServiceType="location"</code> along with <code>FOREGROUND_SERVICE_LOCATION</code> and <code>ACCESS_FINE_LOCATION</code> permissions, the OS terminates location updates upon screen-off.<br>
+      <strong>Fix:</strong> Declare the location type in manifest, request permissions, and call <code>startForeground(id, notification, FOREGROUND_SERVICE_TYPE_LOCATION)</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — How would you architect an offline-first fitness tracker that records GPS runs and syncs to a server?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. <strong>Live Workout Recording:</strong> Foreground Service with <code>foregroundServiceType="location"</code>, writing GPS coordinates directly to a local Room database in real-time.<br>
+      2. <strong>UI Observation:</strong> Flow from Room DB collected inside ViewModel with <code>lifecycleScope</code>.<br>
+      3. <strong>Post-Run Upload:</strong> Upon workout finish, stop the Foreground Service and enqueue a <code>WorkManager</code> <code>OneTimeWorkRequest</code> with <code>NetworkType.CONNECTED</code> constraint to handle the bulk upload and retry logic reliably.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

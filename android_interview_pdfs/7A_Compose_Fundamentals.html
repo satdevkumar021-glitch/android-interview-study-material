@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>7A — Compose Fundamentals | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">7A · Compose Fundamentals</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How Compose Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Recomposition</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> State &amp; remember</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>7A</span> — Compose Fundamentals</h1>
+    <p class="hero-desc">@Composable, declarative vs imperative UI, the Composition, recomposition mechanics, slot table, State&lt;T&gt;, remember, and the composable lifecycle.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 7A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+      <span class="badge badge-hot">&#128293; Highest Priority</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Declarative vs Imperative UI</h3>
+    <p><strong>Imperative (View system)</strong>: You mutate existing UI objects — find the TextView, call setText(). The view lives in memory, you issue commands to change it. <em>You control HOW the view changes.</em></p>
+    <p><strong>Declarative (Compose)</strong>: You describe what the UI should look like for the current state. When state changes, Compose re-runs your function and figures out what changed. <em>You control WHAT the UI should show, Compose handles HOW to update it.</em></p>
+    <h3>Key concepts</h3>
+    <ul>
+      <li><strong>@Composable</strong> — annotates a function that describes UI; can call other composables and read state</li>
+      <li><strong>Composition</strong> — the in-memory tree of composable calls; the result of running all your @Composable functions</li>
+      <li><strong>Recomposition</strong> — Compose re-runs composables when their inputs (state) change</li>
+      <li><strong>Slot table</strong> — the data structure Compose uses to store composition state (remember values, positions)</li>
+      <li><strong>State&lt;T&gt;</strong> — a value holder that triggers recomposition when its value changes</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      In Compose, a function is not called once. It is called <em>on every recomposition</em>. Code inside a composable runs for every state change that affects it. This is fundamentally different from the View system. Everything that should NOT re-run on every frame must be wrapped in <code>remember { }</code> or moved outside the composable.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How Compose Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How Compose Works</div>
+    <h3>The Composition tree</h3>
+    <pre><code><span class="cm">// This produces a tree in the Composition:</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductScreen</span>(product: <span class="cl">Product</span>) {
+    <span class="cl">Column</span> {            <span class="cm">// node in tree</span>
+        <span class="cl">ProductImage</span>(product.imageUrl)    <span class="cm">// child node</span>
+        <span class="cl">ProductTitle</span>(product.name)        <span class="cm">// child node</span>
+        <span class="cl">PriceTag</span>(product.price)           <span class="cm">// child node</span>
+    }
+}
+<span class="cm">// Compose tracks each node's position using the slot table</span>
+<span class="cm">// Position = call site in source code (not runtime object)</span></code></pre>
+
+    <h3>The Slot Table — how Compose tracks state</h3>
+    <p>The slot table is a flat array of slots. Every composable call occupies a group of slots that store: the node identity, <code>remember</code> values, and position. When recomposition runs, Compose walks the slot table comparing old and new state at each position.</p>
+    <pre><code><span class="cm">// The POSITION in the call tree is the identity</span>
+<span class="cm">// Two calls at the same position are the SAME composable</span>
+<span class="kw">for</span> (item <span class="kw">in</span> items) {
+    <span class="fn">ItemCard</span>(item)  <span class="cm">// each has a position based on loop index</span>
+}
+<span class="cm">// If you insert an item at the beginning, ALL positions shift</span>
+<span class="cm">// → Compose sees all cards as "changed"</span>
+<span class="cm">// Fix: use key() to give stable identity</span>
+<span class="kw">for</span> (item <span class="kw">in</span> items) {
+    <span class="fn">key</span>(item.id) { <span class="fn">ItemCard</span>(item) }  <span class="cm">// stable identity by item.id</span>
+}</code></pre>
+
+    <h3>Composition lifecycle</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Phase</th><th>Description</th></tr>
+      <tr><td>Enter Composition</td><td>Composable called for the first time; remember initializers run; effects (LaunchedEffect) are launched</td></tr>
+      <tr><td>Recompose</td><td>State changed; composable re-runs with new inputs; unchanged composables skipped</td></tr>
+      <tr><td>Leave Composition</td><td>Composable removed from tree; remember values cleared; DisposableEffect cleanup runs</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Recomposition →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128257;</div>3. Recomposition</div>
+    <h3>What triggers recomposition</h3>
+    <p>Recomposition is triggered when a <strong>State&lt;T&gt;</strong> value that was read during a previous composition changes. Compose tracks every State read during composition — this is the "snapshot system."</p>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">Counter</span>() {
+    <span class="kw">var</span> count by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="nu">0</span>) }
+
+    <span class="cm">// Compose reads "count" here — this composable is subscribed</span>
+    <span class="cl">Text</span>(text = <span class="str">"Count: $count"</span>)     <span class="cm">// re-runs when count changes</span>
+    <span class="cl">Button</span>(onClick = { count++ }) {   <span class="cm">// lambda captures count</span>
+        <span class="cl">Text</span>(<span class="str">"Increment"</span>)
+    }
+}
+<span class="cm">// When count++ fires: State changes → Compose schedules recomposition</span>
+<span class="cm">// Only Counter() re-runs (not the whole screen)</span></code></pre>
+
+    <h3>Smart recomposition — skipping</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">Parent</span>() {
+    <span class="kw">var</span> count by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="nu">0</span>) }
+    <span class="cl">Column</span> {
+        <span class="cl">CounterDisplay</span>(count)    <span class="cm">// ← reads count: WILL recompose</span>
+        <span class="cl">StaticContent</span>()         <span class="cm">// ← reads nothing from count</span>
+    }
+}
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">StaticContent</span>() {
+    <span class="cl">Text</span>(<span class="str">"I never change"</span>)
+    <span class="cm">// Compose: if inputs same as before → SKIP this composable</span>
+}
+<span class="cm">// StaticContent is NOT recomposed when count changes</span>
+<span class="cm">// Compose checks all params — if equal, skips execution</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: State &amp; remember →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128204;</div>4. State&lt;T&gt; &amp; remember</div>
+    <h3>State&lt;T&gt; — the recomposition trigger</h3>
+    <pre><code><span class="cm">// Three equivalent ways to declare state:</span>
+
+<span class="cm">// 1. State + by delegate (most common)</span>
+<span class="kw">var</span> isExpanded by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+isExpanded = <span class="kw">true</span>   <span class="cm">// direct assignment via delegate</span>
+
+<span class="cm">// 2. Explicit State object</span>
+<span class="kw">val</span> expandedState: <span class="cl">MutableState</span>&lt;<span class="cl">Boolean</span>&gt; = <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+expandedState.<span class="fn">value</span> = <span class="kw">true</span>
+
+<span class="cm">// 3. Destructure (read only + setter separate)</span>
+<span class="kw">val</span> (expanded, setExpanded) = <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }</code></pre>
+
+    <h3>remember — survival across recompositions</h3>
+    <pre><code><span class="cm">// remember: survives recomposition, does NOT survive Activity recreation</span>
+<span class="kw">val</span> items = <span class="fn">remember</span> { <span class="fn">mutableListOf</span>&lt;<span class="cl">String</span>&gt;() }
+<span class="cm">// Created once, stored in slot table, same object on every recomposition</span>
+
+<span class="cm">// remember(key): re-creates when key changes</span>
+<span class="kw">val</span> formatter = <span class="fn">remember</span>(locale) {
+    <span class="cl">NumberFormat</span>.<span class="fn">getInstance</span>(locale)  <span class="cm">// re-create only if locale changes</span>
+}
+
+<span class="cm">// WITHOUT remember: object created on EVERY recomposition</span>
+<span class="kw">val</span> expensiveObj = <span class="cl">ExpensiveObject</span>()  <span class="cm">// ❌ new instance per recomposition!</span>
+<span class="kw">val</span> expensiveObj = <span class="fn">remember</span> { <span class="cl">ExpensiveObject</span>() }  <span class="cm">// ✅ created once</span></code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Key Rule</div>
+      Any object creation that should NOT happen on every recomposition must be inside <code>remember { }</code>. This includes: list allocations, format objects, painters, gesture detectors, and any complex objects.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>E-commerce: product card with composition lifecycle</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductCard</span>(
+    product: <span class="cl">Product</span>,
+    onAddToCart: () -> <span class="cl">Unit</span>   <span class="cm">// event callback — hoisted</span>
+) {
+    <span class="cm">// Local UI state — survives recompositions but not process death</span>
+    <span class="kw">var</span> isExpanded by <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="kw">false</span>) }
+
+    <span class="cm">// Expensive object — created once, reused on recompositions</span>
+    <span class="kw">val</span> currencyFormat = <span class="fn">remember</span>(product.currency) {
+        <span class="cl">NumberFormat</span>.<span class="fn">getCurrencyInstance</span>(<span class="cl">Locale</span>.<span class="fn">forLanguageTag</span>(product.currency))
+    }
+
+    <span class="cl">Card</span>(onClick = { isExpanded = !isExpanded }) {
+        <span class="cl">Column</span> {
+            <span class="cl">ProductImage</span>(url = product.imageUrl)
+
+            <span class="cm">// This composable only recomposes if product.name changes</span>
+            <span class="cl">Text</span>(text = product.name, style = <span class="cl">MaterialTheme</span>.typography.titleMedium)
+            <span class="cl">Text</span>(text = currencyFormat.<span class="fn">format</span>(product.price))
+
+            <span class="cm">// AnimatedVisibility: enters/leaves composition</span>
+            <span class="cl">AnimatedVisibility</span>(visible = isExpanded) {
+                <span class="cl">Text</span>(text = product.description)
+            }
+
+            <span class="cl">Button</span>(onClick = onAddToCart) {
+                <span class="cl">Text</span>(<span class="str">"Add to Cart"</span>)
+            }
+        }
+    }
+}
+
+<span class="cm">// Screen-level: state hoisted to ViewModel</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductScreen</span>(viewModel: <span class="cl">ProductViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> state by viewModel.uiState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="kw">when</span> (<span class="kw">val</span> s = state) {
+        <span class="kw">is</span> <span class="cl">Loading</span> -> <span class="cl">LoadingSpinner</span>()
+        <span class="kw">is</span> <span class="cl">Success</span> -> <span class="fn">ProductCard</span>(s.product, onAddToCart = viewModel::<span class="fn">addToCart</span>)
+        <span class="kw">is</span> <span class="cl">Error</span> -> <span class="cl">ErrorMessage</span>(s.message)
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Side effects in composable body</div>
+      Composables can run multiple times. Writing to a database, logging analytics, or network calls in the composable body (not in a LaunchedEffect) will happen on every recomposition — potentially thousands of times. Side effects must always be in LaunchedEffect, DisposableEffect, or SideEffect.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — Creating objects without remember</div>
+      Creating a new list, Painter, Animator, or any object directly in a composable body allocates a new object on every recomposition. Wrap with <code>remember { }</code> to create once and store in the slot table.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — Reading State outside of composable context</div>
+      If you read a <code>State&lt;T&gt;</code> inside a lambda (like an onClick handler) without reading it in the composable body, the composable doesn't subscribe — it won't recompose when the state changes. Ensure state reads happen directly in the composable body.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — Keep composables stateless</div>
+      Composables should ideally be pure functions: same inputs → same output. Push state up to the ViewModel or calling composable. Stateless composables are easier to test, preview, and reuse.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Compose is a declarative UI framework. @Composable functions describe what the UI should look like for given state. When state changes, Compose re-runs affected composables — this is called recomposition. The slot table stores composition state including remember values. Compose skips composables whose inputs haven't changed — smart recomposition."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The fundamental shift is from imperative (mutate views) to declarative (describe what you want). In the View system, you call setText() on a TextView. In Compose, you call Text('currentValue') — when the value changes, the composable reruns automatically.<br><br>The Composition is the in-memory tree of composable calls. The slot table is the data structure backing it — a flat array where each composable call's position is its identity. This is why key() matters in lists — without stable keys, inserting an item shifts all positions, making Compose think every item changed.<br><br>State&lt;T&gt; is the trigger for recomposition. When you read a State value inside a composable, Compose subscribes that composable to the state. When the state changes, only the composables that read it are recomposed — not the whole tree. Everything that should survive recompositions but not re-execute must be in remember { }."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Declarative</strong>: describe WHAT; Compose figures out HOW to update</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Recomposition</strong>: triggered by State reads; only affected composables re-run</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Slot table</strong>: position-based identity; why key() matters in lists</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>remember { }</strong>: survives recomposition; stores in slot table</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>No side effects in composable body</strong>: use LaunchedEffect/DisposableEffect</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "How does Compose know which composables to recompose?"</h4>
+    <p>A: Compose uses a snapshot system. Every State read inside a composable registers the composable as an observer. When the state mutates, all registered observers are scheduled for recomposition. Compose then re-runs those composables and compares their output with the previous run — unchanged subtrees are skipped.</p>
+    <h4>Q: "What is the slot table?"</h4>
+    <p>A: The slot table is the data structure that stores the composition. It's a flat array of slots where each composable call occupies a group of slots containing: the composable's runtime state, remember values, position in the call hierarchy. The position in the source code (call site) is used as the composable's identity — not a runtime object reference like the View system uses.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      Understanding the slot table explains the Compose "if" gotcha: <code>if (condition) { TextA() } else { TextB() }</code> — depending on whether condition is true, a different composable occupies the same slot position. If condition flips, Compose sees a composable "leaving" and "entering" at that position — re-initializing all remember values. This is why conditional composables lose their state when the condition changes, and why you sometimes need <code>key()</code> around them.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Declarative UI</h4>
+        <pre><code>Imperative: find view → mutate it
+Declarative: describe what to show
+            → Compose handles update
+
+Text(state.value)  // re-runs when value changes</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>State declaration</h4>
+        <pre><code>var x by remember { mutableStateOf(0) }
+// by = delegate: read/write directly
+// without by: state.value required</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Composition lifecycle</h4>
+        <pre><code>1. Enter: first call, remember init
+2. Recompose: state changed, re-run
+3. Leave: removed, cleanup effects</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>remember rules</h4>
+        <pre><code>remember { }        // survives recompose
+remember(key) { }   // re-init if key changes
+rememberSaveable{}  // survives process death</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between declarative and imperative UI?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Imperative UI: you manage view objects explicitly — find a TextView, call setText(), handle null checks, manage lifecycle. You describe HOW to change the UI. Declarative UI (Compose): you describe WHAT the UI should look like for a given state. When state changes, the framework re-runs your description and applies the diff. You don't touch existing views — you re-describe the desired output.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What triggers recomposition in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Recomposition is triggered when a <code>State&lt;T&gt;</code> value that was read during the last composition changes. Compose tracks every State read inside a composable function — when any of those states change, the composable is scheduled for recomposition. Only composables that read the changed state are recomposed — not the entire UI tree.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is remember and why do you need it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>remember { }</code> stores a value in the slot table so it persists across recompositions. Without it, the code inside runs on every recomposition — creating new objects, resetting state. Use <code>remember</code> for: mutableStateOf holders, expensive objects (formatters, painters), list instances. remember does NOT survive Activity recreation — use rememberSaveable for that.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the Composition and what is the slot table?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The Composition is the in-memory representation of the UI — a tree built from composable function calls. The slot table is the data structure that backs it: a flat array where each composable call occupies slots storing its runtime state and remember values. The composable's identity in the slot table is its position in the call hierarchy (call site), not a runtime object reference.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does Compose "skip" composables during recomposition?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">If all parameters of a composable are equal to their previous values (using equals()), Compose skips executing that composable entirely — its output is assumed unchanged. This is "smart recomposition." For a composable to be skippable, all its parameters must be stable types (primitives, String, data classes, @Stable annotated classes). Unstable types (like plain List&lt;&gt;) prevent skipping.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A composable creates a new List inside its body on every recomposition. Is this a problem and how do you fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Yes. Without <code>remember</code>, a new list is allocated on every recomposition — causing unnecessary GC pressure and potentially triggering further recompositions if the list is passed as a parameter (since new list instance != old list instance in equals()). Fix: <code>val items = remember(key) { buildList { ... } }</code>. If the list is derived from state, use <code>remember(sourceData) { processData(sourceData) }</code> — only recomputes when sourceData changes.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why might a composable lose its state when a condition around it flips?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Compose identifies composables by their position in the call tree (slot table). <code>if (condition) ComponentA() else ComponentB()</code> — both A and B occupy the same position. When condition flips, Compose sees the previous composable leaving and a new one entering at that position. The new composable's remember values start fresh — state is lost. Fix: use <code>key(condition) { ComponentA() }</code> or restructure so both branches are independent positions.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A developer calls an analytics tracking function directly in the composable body. What is wrong?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Composables can recompose many times — every state change triggers re-execution. Calling analytics directly in the body would log the event on every recomposition, potentially hundreds of times. Additionally, composables may be run during previews, tests, or Compose internal optimizations (recomposition can be speculative). Side effects must be in LaunchedEffect or SideEffect: <code>LaunchedEffect(Unit) { analytics.track("ScreenView") }</code> — runs once when the composable enters composition.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain how the snapshot system works in Compose and how it enables fine-grained recomposition.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Compose's snapshot system is a transactional state system. Every State value has a list of observers (composable scopes). During composition, reading a State registers the current composition scope as an observer. When you write to a State, it creates a new snapshot. The write is committed atomically — all observers are notified and scheduled for recomposition. This is how two different composables can read the same State and only both recompose when that specific state changes, while other composables that don't read it are untouched. The snapshot system also enables multi-thread safety for State mutations.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does key() affect composable identity and recomposition in a LazyColumn?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Without <code>key</code>: each item's identity is its index. Insert an item at position 0 → all items shift → Compose thinks every item changed → full recomposition of all items, all remember values reset. With <code>key = { item.id }</code>: each item's identity is its unique ID. Insert at 0 → only the new item is created, existing items keep their position (by key) → Compose skips recomposing unchanged items. This is critical for lists with animations — without keys, items appear to "jump" because all are treated as new.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

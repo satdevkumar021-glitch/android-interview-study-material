@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>7E – Compose UI</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;} .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  p{margin-bottom:12px;} ul,ol{margin:8px 0 12px 20px;} li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);font-size:14px;font-weight:600;}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>7E · Compose UI</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>7E — Compose UI</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1</span>
+    <span>Row · Column · Box · LazyColumn · LazyRow · Scaffold · Material 3 · Modifiers · Custom Layouts</span>
+  </div>
+</div>
+
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>Jetpack Compose's UI toolkit provides a set of composable layout functions that replace XML views entirely. Layouts are described in Kotlin as composable function calls, and the Compose runtime handles measuring, placing, and drawing efficiently.</p>
+  <div class="box info"><strong>Core principle:</strong> Every composable is a function that emits UI nodes into the composition tree. Layout composables (<code>Row</code>, <code>Column</code>, <code>Box</code>) control how child nodes are measured and positioned. <code>Modifier</code> adds decoration and behaviour without subclassing.</div>
+</section>
+
+<section id="how">
+  <h2>2 · How It Works</h2>
+  <h3>Layout Primitives</h3>
+  <table>
+    <tr><th>Composable</th><th>Axis</th><th>XML equivalent</th><th>Key params</th></tr>
+    <tr><td><code>Row</code></td><td>Horizontal</td><td>LinearLayout horizontal</td><td>horizontalArrangement, verticalAlignment</td></tr>
+    <tr><td><code>Column</code></td><td>Vertical</td><td>LinearLayout vertical</td><td>verticalArrangement, horizontalAlignment</td></tr>
+    <tr><td><code>Box</code></td><td>Stack (Z-axis)</td><td>FrameLayout</td><td>contentAlignment</td></tr>
+    <tr><td><code>LazyColumn</code></td><td>Vertical, lazy</td><td>RecyclerView (vertical)</td><td>items{}, itemsIndexed{}, key</td></tr>
+    <tr><td><code>LazyRow</code></td><td>Horizontal, lazy</td><td>RecyclerView (horizontal)</td><td>items{}, contentPadding</td></tr>
+    <tr><td><code>ConstraintLayout</code></td><td>Constraint-based</td><td>ConstraintLayout</td><td>createRefs(), constrain{}</td></tr>
+  </table>
+
+  <h3>Modifiers</h3>
+  <p>Modifiers are applied left-to-right, each wrapping the next. Order matters — padding before background fills the padded area; background before padding fills outside the padding.</p>
+  <pre><code><span class="cm">// Order matters: size → background → padding → clickable</span>
+<span class="type">Box</span>(
+    <span class="fn">Modifier</span>
+        .<span class="fn">fillMaxWidth</span>()
+        .<span class="fn">height</span>(<span class="num">56</span>.<span class="fn">dp</span>)
+        .<span class="fn">background</span>(<span class="type">MaterialTheme</span>.colorScheme.primary)
+        .<span class="fn">padding</span>(<span class="fn">horizontal</span> = <span class="num">16</span>.<span class="fn">dp</span>)
+        .<span class="fn">clickable</span> { onTap() }
+)</code></pre>
+
+  <h3>Scaffold — Material 3</h3>
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">BankingScreen</span>(
+    viewModel: <span class="type">BankingViewModel</span>,
+    onNavigate: (<span class="type">Route</span>) -> <span class="type">Unit</span>
+) {
+    <span class="type">Scaffold</span>(
+        topBar = {
+            <span class="type">TopAppBar</span>(
+                title = { <span class="type">Text</span>(<span class="str">"Accounts"</span>) },
+                navigationIcon = { <span class="type">IconButton</span>(onClick = { onNavigate(<span class="type">Route</span>.<span class="type">Back</span>) }) {
+                    <span class="type">Icon</span>(<span class="type">Icons</span>.<span class="type">Default</span>.<span class="type">ArrowBack</span>, <span class="str">"Back"</span>)
+                }}
+            )
+        },
+        floatingActionButton = {
+            <span class="type">FloatingActionButton</span>(onClick = { onNavigate(<span class="type">Route</span>.<span class="type">NewTransfer</span>) }) {
+                <span class="type">Icon</span>(<span class="type">Icons</span>.<span class="type">Default</span>.<span class="type">Add</span>, <span class="str">"New transfer"</span>)
+            }
+        }
+    ) { paddingValues ->
+        <span class="cm">// paddingValues accounts for TopAppBar + FAB insets</span>
+        <span class="type">AccountsList</span>(
+            modifier = <span class="type">Modifier</span>.<span class="fn">padding</span>(paddingValues),
+            viewModel = viewModel
+        )
+    }
+}</code></pre>
+
+  <h3>LazyColumn with Keys</h3>
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">TransactionList</span>(transactions: <span class="type">List</span>&lt;<span class="type">Transaction</span>&gt;) {
+    <span class="type">LazyColumn</span>(
+        contentPadding = <span class="type">PaddingValues</span>(<span class="num">16</span>.<span class="fn">dp</span>),
+        verticalArrangement = <span class="type">Arrangement</span>.<span class="fn">spacedBy</span>(<span class="num">8</span>.<span class="fn">dp</span>)
+    ) {
+        <span class="fn">items</span>(
+            items = transactions,
+            key = { it.id }   <span class="cm">// ✅ stable key — preserves scroll pos, avoids full recompose</span>
+        ) { tx ->
+            <span class="type">TransactionItem</span>(transaction = tx)
+        }
+    }
+}</code></pre>
+
+  <h3>Custom Layout</h3>
+  <pre><code><span class="cm">// Custom layout: vertical list where each item has a dot timeline connector</span>
+<span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">TimelineLayout</span>(content: <span class="ann">@Composable</span> () -> <span class="type">Unit</span>) {
+    <span class="type">Layout</span>(content = content) { measurables, constraints ->
+        <span class="kw">val</span> placeables = measurables.<span class="fn">map</span> { it.<span class="fn">measure</span>(constraints) }
+        <span class="kw">val</span> height = placeables.<span class="fn">sumOf</span> { it.height }
+        <span class="fn">layout</span>(<span class="fn">width</span> = constraints.maxWidth, <span class="fn">height</span> = height) {
+            <span class="kw">var</span> y = <span class="num">0</span>
+            placeables.<span class="fn">forEach</span> { placeable ->
+                placeable.<span class="fn">placeRelative</span>(x = <span class="num">0</span>, y = y)
+                y += placeable.height
+            }
+        }
+    }
+}</code></pre>
+
+  <h3>Material 3 Theming</h3>
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">BankingTheme</span>(
+    darkTheme: <span class="type">Boolean</span> = <span class="fn">isSystemInDarkTheme</span>(),
+    content: <span class="ann">@Composable</span> () -> <span class="type">Unit</span>
+) {
+    <span class="kw">val</span> colorScheme = <span class="kw">if</span> (darkTheme) darkColorScheme(
+        primary = <span class="type">Color</span>(<span class="num">0xFF1565C0</span>),
+        secondary = <span class="type">Color</span>(<span class="num">0xFF0288D1</span>)
+    ) <span class="kw">else</span> lightColorScheme(
+        primary = <span class="type">Color</span>(<span class="num">0xFF1E88E5</span>),
+        secondary = <span class="type">Color</span>(<span class="num">0xFF0288D1</span>)
+    )
+    <span class="type">MaterialTheme</span>(colorScheme = colorScheme, typography = <span class="type">BankingTypography</span>) {
+        content()
+    }
+}</code></pre>
+</section>
+
+<section id="when">
+  <h2>3 · When to Use</h2>
+  <table>
+    <tr><th>Component</th><th>Use when</th><th>Avoid when</th></tr>
+    <tr><td>Column</td><td>Vertical list of small, known-count items</td><td>Long lists — use LazyColumn</td></tr>
+    <tr><td>LazyColumn</td><td>Any scrollable list; unknown/large item count</td><td>Very few items — Column is simpler</td></tr>
+    <tr><td>Box</td><td>Overlapping elements (badge on icon, overlay)</td><td>Linear arrangements — Column/Row is cleaner</td></tr>
+    <tr><td>ConstraintLayout in Compose</td><td>Complex layouts that would be deeply nested otherwise; responsive adaptive layouts</td><td>Simple linear arrangements</td></tr>
+    <tr><td>Scaffold</td><td>Any screen with TopAppBar, BottomBar, FAB, Snackbar</td><td>Standalone overlay composables (dialogs)</td></tr>
+    <tr><td>Custom Layout</td><td>Unique placement logic not achievable with built-ins</td><td>Anything achievable with Box/Row/Column</td></tr>
+  </table>
+</section>
+
+<section id="prod">
+  <h2>4 · Production Example — E-Commerce Product Screen</h2>
+  <pre><code><span class="ann">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductDetailScreen</span>(
+    product: <span class="type">Product</span>,
+    onAddToCart: () -> <span class="type">Unit</span>,
+    onBack: () -> <span class="type">Unit</span>
+) {
+    <span class="type">Scaffold</span>(
+        topBar = {
+            <span class="type">TopAppBar</span>(
+                title = { <span class="type">Text</span>(product.name, maxLines = <span class="num">1</span>, overflow = <span class="type">TextOverflow</span>.<span class="type">Ellipsis</span>) },
+                navigationIcon = {
+                    <span class="type">IconButton</span>(onClick = onBack) {
+                        <span class="type">Icon</span>(<span class="type">Icons</span>.<span class="type">AutoMirrored</span>.<span class="type">Default</span>.<span class="type">ArrowBack</span>, <span class="str">"Back"</span>)
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            <span class="type">AddToCartBar</span>(price = product.price, onAddToCart = onAddToCart)
+        }
+    ) { padding ->
+        <span class="type">LazyColumn</span>(
+            modifier = <span class="type">Modifier</span>.<span class="fn">padding</span>(padding),
+            contentPadding = <span class="type">PaddingValues</span>(<span class="fn">bottom</span> = <span class="num">16</span>.<span class="fn">dp</span>)
+        ) {
+            <span class="fn">item</span>(<span class="fn">key</span> = <span class="str">"hero"</span>) {
+                <span class="type">AsyncImage</span>(
+                    model = product.imageUrl,
+                    contentDescription = product.name,
+                    modifier = <span class="type">Modifier</span>.<span class="fn">fillMaxWidth</span>().<span class="fn">height</span>(<span class="num">280</span>.<span class="fn">dp</span>),
+                    contentScale = <span class="type">ContentScale</span>.<span class="type">Crop</span>
+                )
+            }
+            <span class="fn">item</span>(<span class="fn">key</span> = <span class="str">"details"</span>) {
+                <span class="type">Column</span>(<span class="type">Modifier</span>.<span class="fn">padding</span>(<span class="num">16</span>.<span class="fn">dp</span>)) {
+                    <span class="type">Text</span>(product.name, style = <span class="type">MaterialTheme</span>.typography.headlineSmall)
+                    <span class="type">Text</span>(product.description, style = <span class="type">MaterialTheme</span>.typography.bodyMedium,
+                        color = <span class="type">MaterialTheme</span>.colorScheme.onSurfaceVariant)
+                }
+            }
+            <span class="fn">items</span>(product.reviews, key = { it.id }) { review ->
+                <span class="type">ReviewItem</span>(review = review)
+            }
+        }
+    }
+}
+
+<span class="ann">@Composable</span>
+<span class="kw">private fun</span> <span class="fn">AddToCartBar</span>(price: <span class="type">Double</span>, onAddToCart: () -> <span class="type">Unit</span>) {
+    <span class="type">Surface</span>(shadowElevation = <span class="num">8</span>.<span class="fn">dp</span>) {
+        <span class="type">Row</span>(
+            modifier = <span class="type">Modifier</span>.<span class="fn">fillMaxWidth</span>().<span class="fn">padding</span>(<span class="num">16</span>.<span class="fn">dp</span>),
+            horizontalArrangement = <span class="type">Arrangement</span>.<span class="type">SpaceBetween</span>,
+            verticalAlignment = <span class="type">Alignment</span>.<span class="type">CenterVertically</span>
+        ) {
+            <span class="type">Text</span>(<span class="str">"$$price"</span>, style = <span class="type">MaterialTheme</span>.typography.headlineSmall)
+            <span class="type">Button</span>(onClick = onAddToCart) { <span class="type">Text</span>(<span class="str">"Add to Cart"</span>) }
+        }
+    }
+}</code></pre>
+</section>
+
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When</th></tr>
+    <tr><td>Compose LazyColumn</td><td>No adapter boilerplate, type-safe, easy animations</td><td>Can't mix with RecyclerView in same container easily</td><td>New screens; preferred</td></tr>
+    <tr><td>RecyclerView (XML)</td><td>Mature, well-tested, supports all adapters</td><td>Boilerplate (Adapter, ViewHolder, DiffUtil)</td><td>Legacy codebase; incremental migration</td></tr>
+    <tr><td>Column (non-lazy)</td><td>Simpler API, easy to animate</td><td>All items composed at once — OOM for large lists</td><td>&lt;20 items only</td></tr>
+    <tr><td>ConstraintLayout Compose</td><td>Single pass measurement, flat hierarchy</td><td>Verbose API vs Column/Row for simple cases</td><td>Complex adaptive layouts</td></tr>
+  </table>
+</section>
+
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+  <ul>
+    <li><strong>LazyColumn without keys</strong>: Without <code>key</code>, Compose cannot identify item identity — scroll state lost, animations wrong, unnecessary recompositions.</li>
+    <li><strong>Modifier order</strong>: <code>.padding(16.dp).background(Color.Red)</code> vs <code>.background(Color.Red).padding(16.dp)</code> produce different results. Background before padding = background under the padding area.</li>
+    <li><strong>Missing padding(paddingValues) in Scaffold</strong>: Content overlaps TopAppBar / BottomBar if you don't apply the Scaffold's paddingValues to your content.</li>
+    <li><strong>Column for long lists</strong>: Column measures all children eagerly — use LazyColumn for any list that might grow.</li>
+    <li><strong>Modifier.clickable without ripple</strong>: Use <code>Modifier.clickable { }</code> (has built-in ripple) not custom <code>pointerInput</code> unless you need fine-grained gesture control.</li>
+    <li><strong>Hard-coded dp in custom layouts</strong>: Use <code>LocalDensity</code> to convert px ↔ dp in custom layouts, not hard-coded pixel values.</li>
+  </ul>
+  <div class="box good">
+    <strong>Best practices:</strong> Always pass <code>paddingValues</code> in Scaffold. Always provide <code>key</code> in LazyColumn. Use <code>Arrangement.spacedBy()</code> for consistent gaps. Use <code>fillMaxWidth()</code> on top-level layout composables. Apply <code>Modifier</code> parameters in a consistent order: size → background → padding → border → click.
+  </div>
+</section>
+
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "Compose UI is built around three layout primitives — Row (horizontal), Column (vertical), Box (stack) — plus lazy variants LazyColumn and LazyRow for scrollable lists. Scaffold provides the Material 3 chrome (TopAppBar, BottomBar, FAB, Snackbar). Modifiers decorate and add behaviour without subclassing, and their order matters. LazyColumn should always have a stable key per item for correct diffing and scroll preservation. Custom layouts use the Layout composable for full measurement control."
+  </div>
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>Layouts:</strong> Row/Column/Box for simple arrangements; LazyColumn/LazyRow for scrollable lists (analogous to RecyclerView but no Adapter boilerplate). Scaffold is the standard screen wrapper — always pass its paddingValues to the content to avoid overlap with TopAppBar/BottomBar.<br/><br/>
+    <strong>Modifiers:</strong> Applied left-to-right; each wraps the previous. Order matters — size, then background, then padding, then click is the standard pattern. clickable has a built-in ripple; use it instead of custom gesture handlers unless necessary.<br/><br/>
+    <strong>LazyColumn performance:</strong> Always provide stable keys — without them, Compose cannot tell which item moved vs was replaced, causing wrong animations and losing scroll state. Use contentPadding and Arrangement.spacedBy() for spacing.<br/><br/>
+    <strong>Material 3:</strong> MaterialTheme provides colorScheme, typography, shapes. Use MaterialTheme.colorScheme.primary etc. rather than hard-coded colours — themes correctly in dark mode automatically.
+  </div>
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Row/Column/Box are the three layout primitives; Lazy variants for scrollable lists.</li>
+    <li>Modifier order matters (especially padding vs background).</li>
+    <li>Scaffold for Material 3 screen chrome — always use paddingValues.</li>
+    <li>LazyColumn keys — critical for correctness and performance.</li>
+    <li>Custom Layout composable for non-standard placement.</li>
+    <li>Material 3 theming via MaterialTheme (colorScheme, typography, shapes).</li>
+  </ol>
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>Why does Modifier order matter?</td><td>Each Modifier wraps the node; earlier modifiers apply to the outer boundary. padding(16dp).background(Red) draws red only in the inner area. background(Red).padding(16dp) draws red over the full bounds including padding area.</td></tr>
+    <tr><td>When do you use ConstraintLayout in Compose?</td><td>When a layout has many sibling constraints that would require deep Row/Column nesting otherwise. ConstraintLayout enables flat single-pass measurement which is more efficient for complex adaptive screens.</td></tr>
+    <tr><td>How do you add spacing between LazyColumn items?</td><td>Use verticalArrangement = Arrangement.spacedBy(8.dp) in LazyColumn, or contentPadding for outer padding. Don't add padding to individual items as it creates asymmetric spacing.</td></tr>
+  </table>
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The key architectural insight with Compose layouts is that there are no XML inflation or view recycling concerns — LazyColumn handles recycling automatically, and the Compose compiler tracks which items need recomposition via stable keys. The main performance lever is stability: if your list item data class is @Stable or @Immutable and you provide a key, Compose will skip recomposing unchanged items entirely. This is more powerful than DiffUtil in RecyclerView because the skip decision happens per-composable rather than per-list-item."
+  </div>
+</section>
+
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+  <table>
+    <tr><th>Composable</th><th>Purpose</th><th>Key parameter</th></tr>
+    <tr><td>Row</td><td>Horizontal layout</td><td>horizontalArrangement, verticalAlignment</td></tr>
+    <tr><td>Column</td><td>Vertical layout</td><td>verticalArrangement, horizontalAlignment</td></tr>
+    <tr><td>Box</td><td>Stack / overlay</td><td>contentAlignment</td></tr>
+    <tr><td>LazyColumn</td><td>Vertical scrolling list</td><td>key = { item.id }, contentPadding</td></tr>
+    <tr><td>LazyRow</td><td>Horizontal scrolling list</td><td>key, horizontalArrangement</td></tr>
+    <tr><td>Scaffold</td><td>Material 3 screen chrome</td><td>topBar, bottomBar, fab; use paddingValues</td></tr>
+    <tr><td>Layout</td><td>Custom placement</td><td>measurables, constraints, placeRelative()</td></tr>
+  </table>
+  <h3>Modifier Order Convention</h3>
+  <p><code>size → background → padding → border → clip → clickable → semantics</code></p>
+  <h3>LazyColumn Rules</h3>
+  <ul>
+    <li>Always provide <code>key = { item.stableId }</code></li>
+    <li>Never use Column for lists &gt; ~20 items</li>
+    <li>Use <code>Arrangement.spacedBy()</code> for gaps, not item padding</li>
+    <li>Use <code>contentPadding</code> for outer margins</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> Name the three core Compose layout primitives and their XML equivalents.</summary>
+    <div class="ans">Row (LinearLayout horizontal), Column (LinearLayout vertical), Box (FrameLayout). LazyColumn and LazyRow are the lazy/scrollable equivalents of RecyclerView.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> Why does Modifier order matter in Compose?</summary>
+    <div class="ans">Each Modifier wraps the previous one. Modifiers closer to the composable affect the inner content; modifiers further out affect the outer boundary. Example: Modifier.padding(16dp).background(Red) applies background only to the inner content area. Modifier.background(Red).padding(16dp) applies background to the full area including the padding.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is Scaffold and why must you use its paddingValues?</summary>
+    <div class="ans">Scaffold is the Material 3 screen scaffold that provides slots for TopAppBar, BottomNavigationBar, FAB, Snackbar, and DrawerLayout. The paddingValues it passes to the content lambda represent the insets consumed by these components (TopAppBar height, BottomBar height). If you don't apply paddingValues to your content, it will be drawn behind the TopAppBar and BottomBar.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Why should LazyColumn items always have a key? What happens without it?</summary>
+    <div class="ans">Without a key, Compose uses positional identity (index 0, 1, 2...). When items are inserted/removed/reordered, Compose recomposes all subsequent items because their positions changed. With a stable key (item ID), Compose can identify which items moved vs changed, skip recomposing unchanged items, apply correct animations, and preserve scroll state across recompositions. Key must be unique and stable (no random/UUID generated each time).</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How do you add equal spacing between LazyColumn items?</summary>
+    <div class="ans">Use verticalArrangement = Arrangement.spacedBy(8.dp) in the LazyColumn parameters. Don't add padding to individual item composables — that creates asymmetric spacing (double gap between items, single gap at edges). For outer padding (top/bottom of the whole list), use contentPadding = PaddingValues(vertical = 16.dp).</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> When would you use ConstraintLayout in Compose?</summary>
+    <div class="ans">When a layout requires complex sibling constraints that would otherwise need deeply nested Row/Column combinations. ConstraintLayout computes its layout in a single pass regardless of constraint complexity, whereas deeply nested Row/Column can cause multiple measurement passes (though Compose's intrinsic measurement largely mitigates this). Use it for: flexible responsive layouts, baseline alignment between sibling elements, and adaptive layouts that change significantly at different screen sizes.</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> How do you create a custom layout in Compose?</summary>
+    <div class="ans">Use the Layout composable: provide a content lambda (child composables) and a measurePolicy lambda. The measurePolicy receives measurables (children to measure) and constraints (available space). Call measurable.measure(constraints) to get a Placeable. Call layout(width, height) { } to set the layout size and position children using placeable.placeRelative(x, y).</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] A LazyColumn with 1,000 items is janky on scroll. How do you diagnose and optimize it?</summary>
+    <div class="ans">Diagnosis: Use Android Studio Layout Inspector in Compose mode to see recomposition counts. Check Compose compiler metrics for unstable composables. Use systrace/Perfetto to find dropped frames.<br/><br/>Fixes:<br/>1. Add stable keys to items — prevents wrong recompositions<br/>2. Make item data class @Stable or @Immutable — allows Compose to skip recomposition<br/>3. Use remember{} for expensive computations inside item composable<br/>4. Avoid lambdas that capture state inside item composable (use callbacks passed as parameters)<br/>5. Use contentType = { it.type } in items{} if you have heterogeneous item types — improves view recycling<br/>6. Avoid Modifier.graphicsLayer inside items unless needed for animation<br/>7. Check for nested LazyColumns (not allowed — causes measurement exceptions)</div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Implement a horizontally scrollable chip row that wraps to next line if chips don't fit (flow layout).</summary>
+    <div class="ans"><pre><code>// FlowRow is available in Compose Foundation (experimental in 1.4, stable in 1.5+)
+@Composable
+fun FilterChipRow(
+    filters: List&lt;String&gt;,
+    selected: Set&lt;String&gt;,
+    onToggle: (String) -> Unit
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+    ) {
+        filters.forEach { filter ->
+            FilterChip(
+                selected = filter in selected,
+                onClick = { onToggle(filter) },
+                label = { Text(filter) }
+            )
+        }
+    }
+}
+// FlowRow automatically wraps chips to next line when horizontal space is exhausted</code></pre></div>
+  </details>
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] Content in a Scaffold is hidden behind the TopAppBar. What's wrong?</summary>
+    <div class="ans">The paddingValues provided by Scaffold's content lambda is not being applied to the content. Scaffold calculates insets from TopAppBar, BottomBar, and FAB and passes them as PaddingValues to the content slot. If you don't apply them (via Modifier.padding(paddingValues)), your content starts at y=0, which is behind the TopAppBar.<br/>Fix:<pre><code>Scaffold(topBar = { TopAppBar(...) }) { paddingValues ->
+    LazyColumn(modifier = Modifier.padding(paddingValues)) { // ✅
+        ...
+    }
+}</code></pre>Also verify you're not applying contentPadding to the LazyColumn that conflicts with paddingValues.</div>
+  </details>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

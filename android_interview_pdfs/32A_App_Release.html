@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>32A — App Release | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#211a35 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .ascii-diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;font-family:"JetBrains Mono","Fira Code",monospace;font-size:12.5px;color:#8b90b8;line-height:1.8;overflow-x:auto;margin:14px 0 20px;}
+  .ascii-diagram .hl{color:var(--accent2);}
+  .ascii-diagram .hl2{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">32A · App Release</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Build Pipeline</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> APK vs AAB &amp; Signing</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> R8 &amp; ProGuard</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Play Console &amp; Rollout</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Tier 3</div>
+    <h1><span>32A</span> — App Release</h1>
+    <p class="hero-desc">Build pipeline, APK vs AAB, keystore management, R8 shrinking &amp; obfuscation, Play Console tracks, staged rollout, and version code strategy.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 32A</span>
+      <span class="badge badge-tier3">Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What the Interview Tests</h3>
+    <ul>
+      <li>Can you explain the full build pipeline from source to Play Store?</li>
+      <li>What is the difference between APK and AAB — and which should you ship?</li>
+      <li>How does R8 shrink, obfuscate, and optimize code?</li>
+      <li>How do you keep rules (what happens when you don't)?</li>
+      <li>How does staged rollout work and when do you halt?</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      The build pipeline is not just an academic concept — ProGuard/R8 misconfiguration is the #1 cause of production crashes right after release. Every production Android engineer has debugged an obfuscated crash. Know how to set up keep rules and interpret symbolicated stack traces.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Build Pipeline →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Build Pipeline</div>
+    <h3>Source → Play Store</h3>
+    <div class="ascii-diagram">
+<span class="hl">Kotlin/Java Sources</span>
+        │
+        ▼
+<span class="hl">Kotlin Compiler (kotlinc)</span>
+  Kotlin → .class files (JVM bytecode)
+        │
+        ▼
+<span class="hl">D8 / R8</span>  (release builds use R8, debug uses D8)
+  .class → .dex (Dalvik Executable)
+  R8 also: shrinks + obfuscates + optimizes
+        │
+        ▼
+<span class="hl">aapt2</span>  (Android Asset Packaging Tool v2)
+  res/ → compiled resources + R.java
+        │
+        ▼
+<span class="hl2">APK Packager</span>
+  .dex + compiled resources + manifest → .apk or .aab
+        │
+        ▼
+<span class="hl">zipalign</span>  (aligns 4-byte boundaries for memory-mapped access)
+        │
+        ▼
+<span class="hl">apksigner</span>  (signs with keystore — v1/v2/v3 signature schemes)
+        │
+        ▼
+<span class="hl2">Final: signed .apk or .aab → Play Console</span>
+    </div>
+    <h3>D8 vs R8</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Tool</th><th>Used in</th><th>Does</th></tr>
+      <tr><td>D8</td><td>Debug builds</td><td>Converts .class → .dex only; no shrinking</td></tr>
+      <tr><td>R8</td><td>Release builds</td><td>Converts + shrinks + obfuscates + optimizes (replaces ProGuard)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: APK vs AAB →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128230;</div>3. APK vs AAB &amp; Signing</div>
+    <h3>APK vs Android App Bundle (AAB)</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Aspect</th><th>APK</th><th>AAB</th></tr>
+      <tr><td>File extension</td><td>.apk</td><td>.aab</td></tr>
+      <tr><td>Install directly</td><td>Yes — sideload or ADB</td><td>No — Play Store only</td></tr>
+      <tr><td>Device-specific split</td><td>No — one APK for all devices</td><td>Yes — Play generates device-optimized APK</td></tr>
+      <tr><td>Download size</td><td>Larger (all resources included)</td><td>Smaller (~15–20% reduction typical)</td></tr>
+      <tr><td>Play Store requirement</td><td>Accepted but AAB preferred</td><td>Required for new apps since Aug 2021</td></tr>
+      <tr><td>Native libraries</td><td>All ABIs included</td><td>Only ABI for device</td></tr>
+    </table></div>
+    <div class="callout callout-blue">
+      <div class="callout-label">How AAB Works</div>
+      You upload one .aab to Play. When a user installs, Play generates a device-specific APK containing only: the ABI for that CPU, the screen density resources for that screen, and the language resources for installed languages. Result: much smaller download and install.
+    </div>
+
+    <h3>Keystore &amp; Signing</h3>
+    <pre><code><span class="cm"># Generate keystore (do this ONCE, store securely — never commit to git!)</span>
+keytool -genkey -v -keystore my-release-key.jks \
+  -alias my-key-alias -keyalg RSA -keysize 2048 \
+  -validity 10000
+
+<span class="cm"># If you lose the keystore, you CANNOT update your app on Play Store</span>
+<span class="cm"># Google Play App Signing can back it up — enroll early</span></code></pre>
+    <pre><code><span class="cm">// app/build.gradle — signing config</span>
+android {
+    signingConfigs {
+        release {
+            storeFile = file(<span class="cl">System</span>.<span class="fn">getenv</span>(<span class="str">"KEYSTORE_PATH"</span>))  <span class="cm">// from CI env var</span>
+            storePassword = <span class="cl">System</span>.<span class="fn">getenv</span>(<span class="str">"KEYSTORE_PASS"</span>)
+            keyAlias = <span class="cl">System</span>.<span class="fn">getenv</span>(<span class="str">"KEY_ALIAS"</span>)
+            keyPassword = <span class="cl">System</span>.<span class="fn">getenv</span>(<span class="str">"KEY_PASS"</span>)
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.release
+        }
+    }
+}</code></pre>
+    <div class="callout callout-red">
+      <div class="callout-label">Critical: Never Commit Keystore</div>
+      Never commit your .jks keystore file or passwords to git. Store the keystore in a secure vault (AWS Secrets Manager, GitHub Secrets) and inject via CI environment variables. Add *.jks and *.keystore to .gitignore.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: R8 &amp; ProGuard →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128295;</div>4. R8 &amp; ProGuard</div>
+    <h3>What R8 Does</h3>
+    <ul>
+      <li><strong>Shrinking:</strong> removes unused classes, methods, and fields from your code and libraries</li>
+      <li><strong>Obfuscation:</strong> renames classes/methods to short names (a, b, c) — makes reverse engineering harder and reduces DEX size</li>
+      <li><strong>Optimization:</strong> inlines short methods, removes dead code, propagates constants</li>
+    </ul>
+    <pre><code><span class="cm">// Enable in build.gradle (release builds)</span>
+buildTypes {
+    release {
+        minifyEnabled = <span class="kw">true</span>      <span class="cm">// enables R8</span>
+        shrinkResources = <span class="kw">true</span>    <span class="cm">// removes unused resources too</span>
+        proguardFiles(
+            getDefaultProguardFile(<span class="str">"proguard-android-optimize.txt"</span>),
+            <span class="str">"proguard-rules.pro"</span>     <span class="cm">// your custom rules</span>
+        )
+    }
+}</code></pre>
+    <h3>Keep Rules</h3>
+    <pre><code><span class="cm"># proguard-rules.pro</span>
+
+<span class="cm"># Keep data classes used with Gson/Moshi/Retrofit (reflection-based parsing)</span>
+-keep class com.myapp.data.model.** { *; }
+
+<span class="cm"># Keep classes annotated with @Keep</span>
+-keep @androidx.annotation.Keep class * { *; }
+
+<span class="cm"># Keep Retrofit interfaces</span>
+-keep interface com.myapp.network.** { *; }
+
+<span class="cm"># Keep enum values (used in JSON deserialization)</span>
+-keepclassmembers enum * { public static **[] values(); public static ** valueOf(java.lang.String); }
+
+<span class="cm"># Suppress notes for third-party libraries</span>
+-dontnote okhttp3.**
+-dontwarn okhttp3.**</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Most Common R8 Crash Pattern</div>
+      You add a new data class for a JSON API response. It works in debug. In release, the class is renamed or fields are removed by R8. Retrofit/Gson can't parse the JSON → null fields or ClassNotFoundException. Fix: add -keep rule or annotate with @Keep, or use code generation (kotlinx.serialization with kotlin-reflect kept).
+    </div>
+    <h3>Debugging Obfuscated Crashes</h3>
+    <pre><code><span class="cm"># Use retrace to de-obfuscate a crash stack trace</span>
+<span class="cm"># mapping.txt is generated at: app/build/outputs/mapping/release/mapping.txt</span>
+retrace app/build/outputs/mapping/release/mapping.txt obfuscated-stacktrace.txt
+
+<span class="cm"># Crashlytics automatically de-obfuscates using mapping.txt uploaded by the</span>
+<span class="cm"># firebase-crashlytics Gradle plugin at build time</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Play Console →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128640;</div>5. Play Console &amp; Rollout</div>
+    <h3>Release Tracks</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Track</th><th>Who sees it</th><th>Use case</th></tr>
+      <tr><td>Internal Testing</td><td>Up to 100 testers (by Google account)</td><td>Automated CI builds, daily smoke test</td></tr>
+      <tr><td>Closed Testing (Alpha)</td><td>Selected testers (email list or group)</td><td>QA team, beta testers</td></tr>
+      <tr><td>Open Testing (Beta)</td><td>Anyone who opts in</td><td>Pre-release feedback, wider testing</td></tr>
+      <tr><td>Production</td><td>All users (staged rollout possible)</td><td>Official release</td></tr>
+    </table></div>
+    <h3>Staged Rollout</h3>
+    <ul>
+      <li>Start at 10% of users → monitor crash-free rate for 24–48 hours</li>
+      <li>Increase to 50% if metrics are green</li>
+      <li>Increase to 100% if no regressions</li>
+      <li><strong>Emergency halt:</strong> Play Console → Release → Halt rollout — stops further distribution of the new version</li>
+      <li>Users who already updated keep the new version (you cannot force downgrade)</li>
+    </ul>
+    <h3>Version Code Strategy</h3>
+    <pre><code><span class="cm">// app/build.gradle — CI-driven version code</span>
+android {
+    defaultConfig {
+        <span class="cm">// CI sets GITHUB_RUN_NUMBER or BITRISE_BUILD_NUMBER env var</span>
+        versionCode = (<span class="cl">System</span>.<span class="fn">getenv</span>(<span class="str">"BUILD_NUMBER"</span>)?.<span class="fn">toIntOrNull</span>()) ?: <span class="nu">1</span>
+        versionName = <span class="str">"2.14.0"</span>  <span class="cm">// semantic version for humans</span>
+    }
+}
+
+<span class="cm">// Rules:</span>
+<span class="cm">// 1. versionCode must ALWAYS increase with every Play Store upload</span>
+<span class="cm">// 2. Never reuse a versionCode — Play will reject the upload</span>
+<span class="cm">// 3. versionName is shown to users; versionCode is used by Play for ordering</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="table-wrap"><table>
+      <tr><th>Pitfall</th><th>Impact</th><th>Fix</th></tr>
+      <tr><td>Missing keep rules for reflection classes</td><td>Production crash on first launch</td><td>-keep class com.myapp.model.** { *; } or @Keep annotation</td></tr>
+      <tr><td>Committing keystore to git</td><td>Security vulnerability, app can be re-signed</td><td>Store in secret vault, inject via CI env vars, add to .gitignore</td></tr>
+      <tr><td>Reusing versionCode</td><td>Play Store rejects upload</td><td>Use CI build number; never manually set versionCode</td></tr>
+      <tr><td>Shipping to 100% immediately</td><td>No recovery window for bugs</td><td>Always start staged rollout at 10%</td></tr>
+      <tr><td>Not uploading mapping.txt to Crashlytics</td><td>Obfuscated stack traces in dashboard</td><td>firebase-crashlytics plugin uploads automatically on release build</td></tr>
+      <tr><td>Testing only on debug build before release</td><td>R8 bugs only appear in release</td><td>Always test release builds on device before pushing to Play</td></tr>
+    </table></div>
+    <div class="callout callout-green">
+      <div class="callout-label">Google Play App Signing</div>
+      Enroll in Google Play App Signing — Google holds the upload key, and if you lose your local keystore, Google can still publish future updates. The signing key is stored securely by Google. This is now the recommended approach for all new apps.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">How to Answer Build Pipeline Questions</div>
+      Walk the pipeline from source to Play Store: source → Kotlin compile → D8/R8 → resources (aapt2) → APK/AAB → zipalign → apksign → Play Console. Pause to explain R8 (shrink, obfuscate, optimize) and why keep rules matter. End with staged rollout.
+    </div>
+    <h3>Common Questions &amp; Answers</h3>
+    <ul>
+      <li><strong>"APK vs AAB — which do you ship and why?"</strong> → AAB required for new apps. Play generates device-specific APK. Smaller download, same functionality.</li>
+      <li><strong>"What is R8?"</strong> → Replacement for ProGuard. Combines shrinking (remove unused code), obfuscation (rename), and optimization (inline methods). Enabled with minifyEnabled=true.</li>
+      <li><strong>"How do you debug a crash in a release build?"</strong> → Get the obfuscated stack trace from Crashlytics (auto-symbolicated if mapping.txt was uploaded). If not, use retrace with mapping.txt manually.</li>
+      <li><strong>"How do you manage the keystore securely?"</strong> → Store in secret manager (not git). Inject path and passwords as CI environment variables. Enroll in Google Play App Signing as backup.</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Concept</th><th>One-liner</th></tr>
+      <tr><td>D8</td><td>.class → .dex; debug builds; no shrinking</td></tr>
+      <tr><td>R8</td><td>D8 + shrink + obfuscate + optimize; release builds</td></tr>
+      <tr><td>aapt2</td><td>Compiles XML resources to binary; generates R.java</td></tr>
+      <tr><td>AAB</td><td>Play generates device-specific APK from bundle; smaller downloads</td></tr>
+      <tr><td>APK</td><td>Installable directly; all resources for all devices</td></tr>
+      <tr><td>Shrinking</td><td>Remove unused classes/methods/fields</td></tr>
+      <tr><td>Obfuscation</td><td>Rename to a/b/c — harder to reverse engineer, smaller DEX</td></tr>
+      <tr><td>Keep rules</td><td>Prevent R8 from removing classes used via reflection/serialization</td></tr>
+      <tr><td>mapping.txt</td><td>Obfuscation map — needed to de-obfuscate crash stack traces</td></tr>
+      <tr><td>Staged rollout</td><td>10% → 50% → 100%; halt immediately on crash spike</td></tr>
+      <tr><td>versionCode rule</td><td>Always increase; never reuse; use CI build number</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Walk me through the Android build pipeline from source code to Play Store.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Kotlin source → Kotlin compiler (.class files) → R8 (shrink/obfuscate/optimize → .dex) + aapt2 (compile resources) → APK packager (.dex + compiled resources + AndroidManifest → .apk or .aab) → zipalign (4-byte alignment) → apksigner (sign with keystore) → upload to Play Console.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does R8 do and why is it important?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">R8 is the replacement for ProGuard that runs as part of the release build. It does three things: (1) Shrinking — removes unused classes, methods, and fields from your code and all libraries; (2) Obfuscation — renames classes/methods to short names (a, b, c) reducing DEX size and making reverse engineering harder; (3) Optimization — inlines short methods, removes dead code. Enabled with minifyEnabled=true.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why does my app crash in release but not debug? How do you debug it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Most likely R8 removed or renamed a class/field used via reflection (JSON parsing, serialization, dependency injection). Debug steps: (1) Check Crashlytics — Crashlytics auto-symbolicated the trace if mapping.txt was uploaded; (2) Use retrace manually with mapping.txt; (3) Look for ClassNotFoundException or NullPointerException where a field is null despite being set in JSON; (4) Add -keep rules for the affected class and test the release build.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between APK and AAB? Which should you ship?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">APK is a complete installable file — contains code, resources for all screen densities, all CPU ABIs, all languages. AAB (Android App Bundle) is an upload format — Play Store generates a device-specific APK from it containing only what that device needs. AAB results in 15–20% smaller downloads. AAB is required for new apps on Play Store since Aug 2021. Ship AAB.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you manage keystore security in a team?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Never commit the .jks keystore to git. Store it in a secrets manager (AWS Secrets Manager, GitHub Encrypted Secrets, HashiCorp Vault). In CI, inject keystore path and passwords as environment variables into the build. Add *.jks and *.keystore to .gitignore. Enroll in Google Play App Signing so Google holds a backup — if you lose your keystore, you can still publish updates.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What are -keep rules and when do you need them?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Keep rules prevent R8 from removing or renaming classes/members that are referenced via reflection at runtime. You need them for: data classes used with Gson/Moshi/Retrofit JSON parsing, enums used in JSON, Parcelable implementations, classes loaded by Class.forName(), custom View constructors used in XML. Use @Keep annotation or -keep rules in proguard-rules.pro.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is a staged rollout and how does it protect production?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">A staged rollout releases the new version to a percentage of users first. Start at 10%, monitor crash-free rate and ANR rate for 24–48 hours. If metrics are healthy, expand to 50%, then 100%. If crash-free rate drops (e.g., from 99.5% to 97%), immediately halt the rollout in Play Console — new users stop receiving the update. Existing users who updated keep the new version; you cannot force a downgrade.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you set versionCode in CI and what is the rule?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Set versionCode to the CI build number: System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1. This ensures every build has a unique, monotonically increasing versionCode. The rule: versionCode must always increase with every Play Store upload. Play rejects uploads with a versionCode ≤ current published versionCode. Never manually set it — always use CI automation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is zipalign and why is it needed?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">zipalign aligns all uncompressed data in an APK on 4-byte boundaries. This allows the OS to memory-map the APK file directly, improving performance and reducing RAM usage at runtime. It must be applied BEFORE signing (apksigner) — aligning after signing invalidates the signature. Android Studio and Gradle handle this automatically in release builds.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What are the Play Console release tracks and when do you use each?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Internal Testing: up to 100 specific testers, instant publish (no review). Use for automated CI builds and smoke tests. Closed (Alpha): selected testers via email or group. Use for QA and beta testers. Open (Beta): any user can opt in. Use for wide pre-release feedback. Production: all users; staged rollout available. Promotions flow internal → alpha → beta → production. Each track requires the build to pass Google's review for production.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

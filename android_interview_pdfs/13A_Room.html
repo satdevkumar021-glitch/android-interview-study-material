@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>13A – Room | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">13A · Room</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>13A</span> — Room</h1>
+    <p class="hero-desc">Room's full API — <code>@Entity</code>, <code>@Dao</code>, <code>@Database</code>, relations, <code>@TypeConverter</code>, <code>@Transaction</code>, migrations, Flow integration, FTS, and indexing.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 13A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What is Room?</h3>
+    <p>Room is Google's ORM (Object-Relational Mapping) library built on top of SQLite. It provides compile-time query verification, type-safe access to the database, and seamless integration with Kotlin Flow and coroutines.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Component</th><th>Annotation</th><th>Responsibility</th></tr>
+      <tr><td>Entity</td><td><code>@Entity(tableName = "orders")</code></td><td>Defines a database table — maps a data class to a table row</td></tr>
+      <tr><td>DAO</td><td><code>@Dao</code></td><td>Data Access Object — interface with query methods</td></tr>
+      <tr><td>Database</td><td><code>@Database(entities=[...], version=1)</code></td><td>Creates/manages the SQLite database file</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Room's biggest advantage over raw SQLite: compile-time query verification. If your SQL has a typo, references a non-existent column, or returns the wrong type, the build fails. This catches data access bugs before they reach production. The Flow integration turns a static SQL query into a live, reactive data source.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>@Entity — Table Definition</h3>
+    <pre><code><span class="an">@Entity</span>(
+    tableName = <span class="str">"transactions"</span>,
+    indices = [<span class="cl">Index</span>(value = [<span class="str">"account_id"</span>]),  <span class="cm">// speed up queries by accountId</span>
+               <span class="cl">Index</span>(value = [<span class="str">"transaction_date"</span>])]
+)
+<span class="kw">data class</span> <span class="cl">TransactionEntity</span>(
+    <span class="an">@PrimaryKey</span> <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"account_id"</span>) <span class="kw">val</span> accountId: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"amount_cents"</span>) <span class="kw">val</span> amountCents: <span class="cl">Long</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"transaction_date"</span>) <span class="kw">val</span> date: <span class="cl">LocalDate</span>,  <span class="cm">// needs TypeConverter</span>
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"status"</span>) <span class="kw">val</span> status: <span class="cl">TransactionStatus</span>  <span class="cm">// needs TypeConverter</span>
+)</code></pre>
+
+    <h3>@TypeConverter — Custom Types</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">Converters</span> {
+    <span class="an">@TypeConverter</span>
+    <span class="kw">fun</span> <span class="fn">fromLocalDate</span>(date: <span class="cl">LocalDate</span>): <span class="cl">String</span> = date.<span class="fn">toString</span>()  <span class="cm">// ISO-8601</span>
+    <span class="an">@TypeConverter</span>
+    <span class="kw">fun</span> <span class="fn">toLocalDate</span>(value: <span class="cl">String</span>): <span class="cl">LocalDate</span> = <span class="cl">LocalDate</span>.<span class="fn">parse</span>(value)
+
+    <span class="an">@TypeConverter</span>
+    <span class="kw">fun</span> <span class="fn">fromStatus</span>(status: <span class="cl">TransactionStatus</span>) = status.name
+    <span class="an">@TypeConverter</span>
+    <span class="kw">fun</span> <span class="fn">toStatus</span>(value: <span class="cl">String</span>) = <span class="cl">TransactionStatus</span>.<span class="fn">valueOf</span>(value)
+}</code></pre>
+
+    <h3>@Dao — Data Access Object</h3>
+    <pre><code><span class="an">@Dao</span>
+<span class="kw">interface</span> <span class="cl">TransactionDao</span> {
+    <span class="cm">// Flow — re-emits automatically when table changes</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT * FROM transactions WHERE account_id = :accountId ORDER BY transaction_date DESC"</span>)
+    <span class="kw">fun</span> <span class="fn">getTransactions</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">TransactionEntity</span>&gt;&gt;
+
+    <span class="cm">// Suspend — for one-shot operations</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT * FROM transactions WHERE id = :transactionId"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">getTransaction</span>(transactionId: <span class="cl">String</span>): <span class="cl">TransactionEntity</span>?
+
+    <span class="an">@Insert</span>(onConflict = <span class="cl">OnConflictStrategy</span>.<span class="cl">REPLACE</span>)
+    <span class="kw">suspend fun</span> <span class="fn">insertAll</span>(transactions: <span class="cl">List</span>&lt;<span class="cl">TransactionEntity</span>&gt;)
+
+    <span class="an">@Update</span>
+    <span class="kw">suspend fun</span> <span class="fn">update</span>(transaction: <span class="cl">TransactionEntity</span>): <span class="cl">Int</span>  <span class="cm">// returns rows affected</span>
+
+    <span class="an">@Delete</span>
+    <span class="kw">suspend fun</span> <span class="fn">delete</span>(transaction: <span class="cl">TransactionEntity</span>)
+
+    <span class="an">@Query</span>(<span class="str">"DELETE FROM transactions WHERE account_id = :accountId"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">deleteByAccount</span>(accountId: <span class="cl">String</span>)
+
+    <span class="cm">// @Transaction — multiple queries in one atomic operation</span>
+    <span class="an">@Transaction</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT * FROM transactions WHERE account_id = :accountId"</span>)
+    <span class="kw">fun</span> <span class="fn">getTransactionsWithDetails</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">TransactionWithDetails</span>&gt;&gt;
+}</code></pre>
+
+    <h3>@Relation — One-to-Many and Many-to-Many</h3>
+    <pre><code><span class="cm">// One-to-Many: Account has many Transactions</span>
+<span class="kw">data class</span> <span class="cl">AccountWithTransactions</span>(
+    <span class="an">@Embedded</span> <span class="kw">val</span> account: <span class="cl">AccountEntity</span>,
+    <span class="an">@Relation</span>(parentColumn = <span class="str">"id"</span>, entityColumn = <span class="str">"account_id"</span>)
+    <span class="kw">val</span> transactions: <span class="cl">List</span>&lt;<span class="cl">TransactionEntity</span>&gt;
+)
+<span class="cm">// Must mark DAO query as @Transaction — Room fetches both in one atomic operation</span>
+<span class="an">@Transaction</span>
+<span class="an">@Query</span>(<span class="str">"SELECT * FROM accounts WHERE id = :accountId"</span>)
+<span class="kw">suspend fun</span> <span class="fn">getAccountWithTransactions</span>(accountId: <span class="cl">String</span>): <span class="cl">AccountWithTransactions</span>?
+
+<span class="cm">// Many-to-Many: Order can have many Products; Product can be in many Orders</span>
+<span class="an">@Entity</span>(primaryKeys = [<span class="str">"order_id"</span>, <span class="str">"product_id"</span>])
+<span class="kw">data class</span> <span class="cl">OrderProductCrossRef</span>(
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"order_id"</span>) <span class="kw">val</span> orderId: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"product_id"</span>) <span class="kw">val</span> productId: <span class="cl">String</span>
+)
+<span class="kw">data class</span> <span class="cl">OrderWithProducts</span>(
+    <span class="an">@Embedded</span> <span class="kw">val</span> order: <span class="cl">OrderEntity</span>,
+    <span class="an">@Relation</span>(parentColumn = <span class="str">"id"</span>, entityColumn = <span class="str">"product_id"</span>,
+              associateBy = <span class="cl">Junction</span>(<span class="cl">OrderProductCrossRef</span>::<span class="kw">class</span>))
+    <span class="kw">val</span> products: <span class="cl">List</span>&lt;<span class="cl">ProductEntity</span>&gt;
+)</code></pre>
+
+    <h3>@Database and Migrations</h3>
+    <pre><code><span class="an">@Database</span>(
+    entities = [<span class="cl">TransactionEntity</span>::<span class="kw">class</span>, <span class="cl">AccountEntity</span>::<span class="kw">class</span>, <span class="cl">OrderProductCrossRef</span>::<span class="kw">class</span>],
+    version = <span class="nu">3</span>,
+    exportSchema = <span class="kw">true</span>  <span class="cm">// exports schema JSON to assets — track in git</span>
+)
+<span class="an">@TypeConverters</span>(<span class="cl">Converters</span>::<span class="kw">class</span>)
+<span class="kw">abstract class</span> <span class="cl">AppDatabase</span> : <span class="cl">RoomDatabase</span>() {
+    <span class="kw">abstract fun</span> <span class="fn">transactionDao</span>(): <span class="cl">TransactionDao</span>
+    <span class="kw">abstract fun</span> <span class="fn">accountDao</span>(): <span class="cl">AccountDao</span>
+}
+
+<span class="cm">// Migration 2→3: add index on transaction_date</span>
+<span class="kw">val</span> <span class="cl">MIGRATION_2_3</span> = <span class="kw">object</span> : <span class="cl">Migration</span>(<span class="nu">2</span>, <span class="nu">3</span>) {
+    <span class="kw">override fun</span> <span class="fn">migrate</span>(database: <span class="cl">SupportSQLiteDatabase</span>) {
+        database.<span class="fn">execSQL</span>(<span class="str">"CREATE INDEX index_transactions_transaction_date ON transactions (transaction_date)"</span>)
+    }
+}
+
+<span class="cm">// Database builder — in Hilt module</span>
+<span class="cl">Room</span>.<span class="fn">databaseBuilder</span>(context, <span class="cl">AppDatabase</span>::<span class="kw">class</span>.java, <span class="str">"app.db"</span>)
+    .<span class="fn">addMigrations</span>(<span class="cl">MIGRATION_1_2</span>, <span class="cl">MIGRATION_2_3</span>)
+    .<span class="fn">fallbackToDestructiveMigration</span>()  <span class="cm">// ⚠️ dev only — wipes data if migration missing</span>
+    .<span class="fn">build</span>()</code></pre>
+
+    <h3>Full-Text Search (FTS)</h3>
+    <pre><code><span class="cm">// FTS4 virtual table — enables fast full-text search</span>
+<span class="an">@Fts4</span>(contentEntity = <span class="cl">ProductEntity</span>::<span class="kw">class</span>)
+<span class="an">@Entity</span>(tableName = <span class="str">"products_fts"</span>)
+<span class="kw">data class</span> <span class="cl">ProductFtsEntity</span>(
+    <span class="an">@PrimaryKey</span> <span class="an">@ColumnInfo</span>(name = <span class="str">"rowid"</span>) <span class="kw">val</span> rowId: <span class="cl">Int</span>,
+    <span class="kw">val</span> name: <span class="cl">String</span>,
+    <span class="kw">val</span> description: <span class="cl">String</span>
+)
+
+<span class="cm">// FTS search query — MATCH operator</span>
+<span class="an">@Query</span>(<span class="str">"SELECT * FROM products JOIN products_fts ON products.rowid = products_fts.rowid WHERE products_fts MATCH :query"</span>)
+<span class="kw">suspend fun</span> <span class="fn">searchProducts</span>(query: <span class="cl">String</span>): <span class="cl">List</span>&lt;<span class="cl">ProductEntity</span>&gt;</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Room is the Right Choice for</h3>
+    <ul>
+      <li>Any structured relational data that must be queried, filtered, or sorted</li>
+      <li>Offline-first apps where the database is the single source of truth</li>
+      <li>Large data sets with millions of rows where query performance matters</li>
+      <li>Complex relationships between entities (one-to-many, many-to-many)</li>
+    </ul>
+    <h3>Use @Transaction When</h3>
+    <ul>
+      <li>Fetching a parent entity and its related child entities — prevents inconsistent reads</li>
+      <li>Writing multiple related records atomically — either all succeed or all fail</li>
+      <li>Any multi-step operation that must be atomic (e.g., delete then re-insert)</li>
+    </ul>
+    <h3>Room + Flow</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Reactive Database</div>
+      When a DAO method returns <code>Flow&lt;List&lt;T&gt;&gt;</code>, Room automatically observes the table for changes. Every INSERT, UPDATE, or DELETE to the observed table triggers a new emission. This is what makes the offline-first pattern work — the UI never polls; it just reacts to database changes.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-Commerce App — Orders with Products</h3>
+    <pre><code><span class="cm">// ── Entities ─────────────────────────────────────────────────</span>
+<span class="an">@Entity</span>(tableName = <span class="str">"orders"</span>, indices = [<span class="cl">Index</span>(<span class="str">"user_id"</span>), <span class="cl">Index</span>(<span class="str">"created_at"</span>)])
+<span class="kw">data class</span> <span class="cl">OrderEntity</span>(
+    <span class="an">@PrimaryKey</span> <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"user_id"</span>) <span class="kw">val</span> userId: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"total_cents"</span>) <span class="kw">val</span> totalCents: <span class="cl">Long</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"status"</span>) <span class="kw">val</span> status: <span class="cl">String</span>,
+    <span class="an">@ColumnInfo</span>(name = <span class="str">"created_at"</span>) <span class="kw">val</span> createdAt: <span class="cl">Instant</span>  <span class="cm">// TypeConverter needed</span>
+)
+
+<span class="cm">// ── DAO ───────────────────────────────────────────────────────</span>
+<span class="an">@Dao</span>
+<span class="kw">interface</span> <span class="cl">OrderDao</span> {
+    <span class="an">@Transaction</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT * FROM orders WHERE user_id = :userId ORDER BY created_at DESC"</span>)
+    <span class="kw">fun</span> <span class="fn">getOrdersWithProducts</span>(userId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">OrderWithProducts</span>&gt;&gt;
+
+    <span class="an">@Transaction</span>
+    <span class="kw">suspend fun</span> <span class="fn">upsertOrderWithItems</span>(order: <span class="cl">OrderEntity</span>, items: <span class="cl">List</span>&lt;<span class="cl">OrderItemEntity</span>&gt;) {
+        <span class="fn">upsertOrder</span>(order)
+        <span class="fn">deleteOrderItems</span>(order.id)
+        <span class="fn">insertOrderItems</span>(items)
+    }
+
+    <span class="an">@Insert</span>(onConflict = <span class="cl">OnConflictStrategy</span>.<span class="cl">REPLACE</span>)
+    <span class="kw">suspend fun</span> <span class="fn">upsertOrder</span>(order: <span class="cl">OrderEntity</span>)
+
+    <span class="an">@Query</span>(<span class="str">"DELETE FROM order_items WHERE order_id = :orderId"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">deleteOrderItems</span>(orderId: <span class="cl">String</span>)
+
+    <span class="an">@Insert</span>
+    <span class="kw">suspend fun</span> <span class="fn">insertOrderItems</span>(items: <span class="cl">List</span>&lt;<span class="cl">OrderItemEntity</span>&gt;)
+}
+
+<span class="cm">// ── Repository using the DAO ──────────────────────────────────</span>
+<span class="kw">class</span> <span class="cl">OrderRepositoryImpl</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> dao: <span class="cl">OrderDao</span>,
+    <span class="kw">private val</span> api: <span class="cl">OrderApi</span>
+) : <span class="cl">OrderRepository</span> {
+
+    <span class="kw">override fun</span> <span class="fn">getOrders</span>(userId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;&gt; =
+        dao.<span class="fn">getOrdersWithProducts</span>(userId).<span class="fn">map</span> { it.<span class="fn">map</span>(OrderWithProducts::<span class="fn">toDomain</span>) }
+            .<span class="fn">onStart</span> { <span class="fn">refreshOrders</span>(userId) }
+
+    <span class="kw">private suspend fun</span> <span class="fn">refreshOrders</span>(userId: <span class="cl">String</span>) {
+        <span class="fn">runCatching</span> { api.<span class="fn">getOrders</span>(userId) }
+            .<span class="fn">onSuccess</span> { orders -&gt;
+                orders.<span class="fn">forEach</span> { dto ->
+                    dao.<span class="fn">upsertOrderWithItems</span>(dto.<span class="fn">toEntity</span>(), dto.items.<span class="fn">map</span>(OrderItemDto::<span class="fn">toEntity</span>))
+                }
+            }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>Migration Strategies</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Strategy</th><th>Use when</th><th>Risk</th></tr>
+      <tr><td>addMigrations()</td><td>Production app with user data — always preferred</td><td>Requires writing correct SQL migration</td></tr>
+      <tr><td>fallbackToDestructiveMigration()</td><td>Development only — wipes all data if migration is missing</td><td>Destroys all user data — NEVER in production</td></tr>
+      <tr><td>allowDestructiveMigrationOnDowngrade()</td><td>When version downgrade is possible in testing</td><td>Data loss on downgrade</td></tr>
+    </table></div>
+    <h3>OnConflictStrategy</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Strategy</th><th>Behaviour</th></tr>
+      <tr><td>REPLACE</td><td>Delete old row, insert new — triggers re-emission of observers</td></tr>
+      <tr><td>IGNORE</td><td>Skip insert if row exists — use for "insert if not exists"</td></tr>
+      <tr><td>ABORT</td><td>Rollback and throw exception (default)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Common Mistakes</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Querying on Main Thread</div>
+      Room throws <code>IllegalStateException: Cannot access database on the main thread</code> if you call a non-Flow, non-suspend DAO method on the main thread. Always use <code>suspend fun</code> or <code>Flow</code>. Never call <code>.allowMainThreadQueries()</code> in production — it blocks UI rendering.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">@Relation without @Transaction</div>
+      Loading a parent + its children requires at least two SQL queries. Without <code>@Transaction</code>, another thread could modify a child between the two queries, giving you an inconsistent result. Always add <code>@Transaction</code> to any DAO method that returns a type with <code>@Relation</code>.
+    </div>
+    <h3>Database Migration Best Practices</h3>
+    <ul>
+      <li>Set <code>exportSchema = true</code> — tracks the schema JSON file in git. This lets you verify migrations haven't missed columns</li>
+      <li>Write migration tests using <code>MigrationTestHelper</code> from Room's test dependency</li>
+      <li>Never use <code>fallbackToDestructiveMigration()</code> in production builds</li>
+      <li>Always run migrations on a background thread (Room handles this, but ensure you're not blocking the main thread during startup)</li>
+    </ul>
+    <h3>@Index Best Practices</h3>
+    <ul>
+      <li>Add indexes on foreign key columns (e.g., <code>account_id</code> on the transactions table)</li>
+      <li>Add indexes on columns used in <code>WHERE</code> clauses in frequent queries</li>
+      <li>Indexes slow down INSERT/UPDATE/DELETE — don't index every column</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Room is Android's SQLite ORM with three main components: <code>@Entity</code> maps a data class to a database table, <code>@Dao</code> is an interface with annotated query methods, and <code>@Database</code> ties everything together and provides DAO instances. The key advantage over raw SQLite: queries are verified at compile time — a typo in your SQL is a build error, not a runtime crash. Returning <code>Flow&lt;List&lt;T&gt;&gt;</code> from a DAO makes it reactive — the Flow re-emits whenever the underlying table changes."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"For relations: <code>@Relation</code> maps a one-to-many or many-to-many relationship. Always pair it with <code>@Transaction</code> — loading a parent and its children requires two queries, and without a transaction another thread could modify the children between queries giving you an inconsistent result. For custom types like <code>LocalDate</code> or enums, use <code>@TypeConverter</code> to convert to/from a SQLite-supported type. For migrations: write explicit <code>Migration</code> objects for every version bump — never use <code>fallbackToDestructiveMigration</code> in production. For performance: add <code>@Index</code> on foreign key columns and frequently queried columns. For FTS: <code>@Fts4</code> creates a virtual table that enables fast full-text search with the MATCH operator."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Compile-time query verification</strong>: SQL typos and type mismatches are build errors</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Flow reactive queries</strong>: Room auto-re-emits when the queried table changes</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>@Transaction required with @Relation</strong>: prevents inconsistent reads across multiple queries</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>@TypeConverter</strong>: converts non-primitive types (LocalDate, enums, BigDecimal)</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Migration objects</strong>: never fallbackToDestructiveMigration in production</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>@Index on foreign keys</strong>: critical for query performance on large tables</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Paging 3 + Room integration (separate topic — PagingSource)</li>
+      <li>Room's code generation internals (just say "annotation processing")</li>
+      <li>WAL mode details (mention it exists for multi-process access if asked)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"How does Room emit Flow updates?"</td><td>Room registers an <code>InvalidationTracker.Observer</code> on the queried tables. When a write occurs to any tracked table, Room posts an update, and the Flow collector re-runs the query and emits the new result.</td></tr>
+      <tr><td>"What is @Embedded used for?"</td><td>Flattens a nested object's fields into the parent table. Unlike @Relation (separate query), @Embedded is part of the same row. Used for ValueObjects like <code>Address</code> embedded in a <code>UserEntity</code>.</td></tr>
+      <tr><td>"What happens if a migration is missing?"</td><td>Room throws <code>IllegalStateException: A migration from version X to Y was required but not found</code> on database open. Without <code>fallbackToDestructiveMigration</code>, the app crashes. With it, the database is wiped and recreated.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The <code>@Transaction</code>-with-<code>@Relation</code> requirement is the most commonly missed Room concept. Room's relation loading is not a JOIN — it's multiple separate queries. Without a transaction wrapping them, you have a TOCTOU (time-of-check-to-time-of-use) race condition. Mentioning this demonstrates real-world Room knowledge beyond the happy path.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Core Annotations</h4>
+        <pre><code>@Entity(tableName="orders")   → table
+@PrimaryKey val id: String    → PK
+@ColumnInfo(name="user_id")   → column
+@TypeConverters(Converters::class) → custom types
+@Dao  → query interface
+@Database(entities=[...], version=3)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DAO Methods</h4>
+        <pre><code>@Query("SELECT * FROM orders WHERE...")
+fun getOrders(): Flow&lt;List&lt;OrderEntity&gt;&gt;
+
+@Insert(onConflict = REPLACE)
+suspend fun insert(order: OrderEntity)
+
+@Transaction
+suspend fun upsertOrderWithItems(...)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Relations</h4>
+        <pre><code>data class OrderWithProducts(
+    @Embedded val order: OrderEntity,
+    @Relation(parentColumn = "id",
+              entityColumn = "order_id")
+    val items: List&lt;OrderItemEntity&gt;
+)
+// Always add @Transaction to the DAO method!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Migrations</h4>
+        <pre><code>val MIGRATION_2_3 = object : Migration(2,3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE orders ADD COLUMN notes TEXT")
+    }
+}
+// In builder: .addMigrations(MIGRATION_2_3)
+// NEVER .fallbackToDestructiveMigration() in prod!</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What are the three main components of Room and what does each do?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>@Entity</strong>: annotates a data class to define a database table. Fields map to columns. <code>@PrimaryKey</code> defines the primary key; <code>@ColumnInfo</code> customises column names.<br><br>
+        <strong>@Dao</strong>: interface that defines methods to interact with the table. Methods are annotated with <code>@Query</code>, <code>@Insert</code>, <code>@Update</code>, or <code>@Delete</code>. Room generates the implementation at compile time.<br><br>
+        <strong>@Database</strong>: abstract class extending <code>RoomDatabase</code>. Declares all entities, the database version, and abstract methods returning DAO instances. Built via <code>Room.databaseBuilder()</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> How does Room's Flow integration work?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        When a DAO method returns <code>Flow&lt;List&lt;T&gt;&gt;</code>, Room wraps the query in an <code>InvalidationTracker</code> observer. Whenever a row in the queried table is inserted, updated, or deleted, Room marks the table as invalid and re-runs the query. The new result is emitted to all active collectors. This makes Room queries reactive — the UI doesn't need to manually refresh; it just collects the Flow and reacts to emissions.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is a TypeConverter and when do you need one?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        SQLite natively supports: INTEGER, REAL, TEXT, BLOB, and NULL. For any other type — <code>LocalDate</code>, <code>Instant</code>, <code>BigDecimal</code>, enums, <code>List&lt;String&gt;</code> — you need a TypeConverter. A TypeConverter class has two methods: one converting FROM the Kotlin type TO a SQLite-supported type, and one converting back. Register it with <code>@TypeConverters(Converters::class)</code> on the <code>@Database</code> class.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Why must @Relation DAO methods be annotated with @Transaction?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Room's @Relation is NOT a SQL JOIN. It executes multiple SQL queries: one to fetch the parent entities, then one (or more) separate queries to fetch the related children. Between these two queries, another thread could write to the child table — you might get a parent with outdated children or missing children. <code>@Transaction</code> wraps all these queries in a single SQLite transaction, ensuring you get a consistent snapshot of the database at a single point in time.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you add a column to a Room table in an existing production app?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        1. Add the new column to the <code>@Entity</code> data class. If nullable: <code>val notes: String? = null</code>; if non-nullable, provide a default.<br>
+        2. Increment the <code>@Database(version = N+1)</code>.<br>
+        3. Write a Migration: <code>val MIGRATION_N_N1 = object : Migration(N, N+1) { override fun migrate(db) { db.execSQL("ALTER TABLE my_table ADD COLUMN notes TEXT") } }</code>.<br>
+        4. Register: <code>Room.databaseBuilder(...).addMigrations(MIGRATION_N_N1).build()</code>.<br>
+        5. Test with <code>MigrationTestHelper</code> to verify migration works on the old schema.<br>
+        Never use <code>fallbackToDestructiveMigration</code> in production — it destroys all user data.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What is @Fts4 and when would you use it?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <code>@Fts4</code> creates an SQLite FTS (Full-Text Search) virtual table. Regular SQL <code>LIKE '%query%'</code> performs a full table scan — O(n) on every search. FTS creates an inverted index, enabling fast token-based searches with the <code>MATCH</code> operator. Use it when: users type search queries against large text content (product descriptions, notes, messages), you need relevance ranking, or you need prefix matching. Trade-off: FTS tables don't support standard SQL operations like <code>JOIN</code> directly — you typically <code>JOIN</code> back to the original table via <code>rowid</code>.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Explain the difference between @Embedded and @Relation.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>@Embedded</strong>: flattens a nested object's fields directly into the same table row. <code>@Embedded val address: Address</code> means Address's fields (street, city, zip) are columns in the parent table. One row, one query. Good for value objects that belong to one entity.<br><br>
+        <strong>@Relation</strong>: represents a relationship between two different tables. Room runs separate queries for parent and children. Requires <code>@Transaction</code>. Good for one-to-many or many-to-many associations where children are stored in a separate table with a foreign key.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design the Room schema for a banking app with accounts, transactions, and categories.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>AccountEntity</strong>: PK=id, userId, name, type (CHECKING/SAVINGS), balanceCents. Index on userId.<br><br>
+        <strong>TransactionEntity</strong>: PK=id, FK=accountId, FK=categoryId (nullable), amountCents, type (DEBIT/CREDIT), description, date (Instant→TypeConverter), status. Index on accountId, date.<br><br>
+        <strong>CategoryEntity</strong>: PK=id, name, iconName, color.<br><br>
+        <strong>Relations</strong>: <code>AccountWithTransactions(@Embedded account, @Relation transactions)</code>. <code>TransactionWithCategory(@Embedded transaction, @Relation category)</code>. Both DAOs methods annotated with <code>@Transaction</code>.<br><br>
+        <strong>Indexes</strong>: account_id on transactions (FK queries), date on transactions (sort/filter), userId on accounts.<br><br>
+        <strong>TypeConverters</strong>: Instant, TransactionType enum, TransactionStatus enum.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> What happens at compile time when Room processes your DAO annotations?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Room uses an annotation processor (KSP or kapt). For each DAO interface, Room:<br><br>
+        1. <strong>Parses SQL strings</strong>: validates syntax, resolves column names against the <code>@Entity</code> field names, checks that return types match query result types. A <code>SELECT * FROM orders WHERE uer_id = :id</code> typo is caught here.<br>
+        2. <strong>Generates a concrete implementation class</strong>: e.g., <code>OrderDao_Impl</code>. For Flow methods, the generated code wraps the query in <code>RoomTrackingLiveData</code> / <code>CoroutinesRoom.createFlow()</code> with the table invalidation tracker.<br>
+        3. <strong>Generates the Database implementation</strong>: <code>AppDatabase_Impl</code> that creates tables, runs migrations, and returns DAO instances.<br>
+        4. <strong>Validates relationships</strong>: ensures @Relation column names exist in the referenced entities.<br>
+        Any error (bad SQL, missing column, type mismatch) is a compile error — not a runtime crash.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A query that was fast in development is slow in production with 100k rows. How do you investigate?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        1. <strong>EXPLAIN QUERY PLAN</strong>: run the SQL with <code>EXPLAIN QUERY PLAN</code> prefix on the production database (copy it to dev). Look for "SCAN TABLE" (full scan) vs "SEARCH TABLE USING INDEX" (fast). Full scans on large tables = missing index.<br><br>
+        2. <strong>Add @Index</strong>: on the column(s) in the WHERE clause. Re-run EXPLAIN QUERY PLAN to verify it uses the index.<br><br>
+        3. <strong>Check query complexity</strong>: multiple JOINs or nested SELECT → consider a denormalised view or restructuring the query.<br><br>
+        4. <strong>Room profiling</strong>: enable SQLite WAL mode and use Android Studio's Database Inspector to trace query execution times.<br><br>
+        5. <strong>Paging</strong>: if the query returns large lists, paginate with Paging 3 — never load 100k rows at once.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

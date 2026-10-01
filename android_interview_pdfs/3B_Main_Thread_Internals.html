@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>3B – Main Thread Internals</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>3B · Main Thread</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>3B — Main Thread Internals</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Core Framework Internals</span>
+    <span>Main Thread · UI Thread · Looper · MessageQueue · Handler · Epoll · Choreographer</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>The <strong>Main Thread</strong> (also known as the UI thread) is the execution engine of every Android application. It processes touch events, lifecycle transitions, view measurement/layout/draw calls, broadcast deliveries, and frame rendering callbacks.</p>
+  <p><strong>The Core Problem Solved:</strong> UI toolkits are inherently non-thread-safe. Synchronizing every button, text view, and layout pass across multiple threads using locks would create massive overhead, race conditions, and deadlocks. Android solves this with a single-threaded message-passing architecture powered by <strong>Looper</strong>, <strong>MessageQueue</strong>, and <strong>Handler</strong> (the Handler-Looper pipeline).</p>
+  <div class="box info">
+    <strong>Key Components of the Loop:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>Message:</strong> The data container holding a task (Runnable), message code (what), and parameters.</li>
+      <li><strong>MessageQueue:</strong> A priority queue of messages ordered chronologically by execution timestamp (<code>when</code>).</li>
+      <li><strong>Looper:</strong> The infinite loop attached to a thread via <code>ThreadLocal</code>, popping messages from <code>MessageQueue</code>.</li>
+      <li><strong>Handler:</strong> The bridge that enqueues messages into <code>MessageQueue</code> and processes them when dispatched.</li>
+      <li><strong>Native Epoll / EventFD:</strong> Linux kernel mechanism that puts the thread to sleep when no messages are ready, consuming 0% CPU.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <div class="ascii">
+[Background Thread]               [Main Thread (Looper)]
+        │                                   │
+        │ 1. handler.sendMessage(msg)       │
+        ├──────────────────────────────────►│ [MessageQueue] (Sorted by `when`)
+        │                                   │ ┌───────────────────────────┐
+        │                                   │ │ msg1 (t=100) ──► msg2(150)│
+        │                                   │ └─────────────┬─────────────┘
+        │                                   │               │
+        │                                   │ 2. nativePollOnce() [Linux epoll]
+        │                                   │    (Blocks without consuming CPU)
+        │                                   │               │
+        │                                   │ 3. Looper.loop() extracts msg1
+        │                                   │               │
+        │                                   │ 4. msg1.target.dispatchMessage()
+        │                                   │               ▼
+        │                                   │    [Handler.handleMessage()]
+        │                                   │    or Runnable.run()
+        │                                   │               │
+        │                                   │ 5. msg1.recycleUnchecked() (Pool)
+  </div>
+
+  <h3>Step-by-Step Execution Lifecycle</h3>
+
+  <h4>1. Looper Initialization & ThreadLocal Binding</h4>
+  <p>A Looper is bound to a single thread via <code>ThreadLocal&lt;Looper&gt;</code>. Calling <code>Looper.prepare()</code> ensures only one Looper exists per thread:</p>
+  <pre><code><span class="kw">public static void</span> <span class="fn">prepare</span>() {
+    <span class="kw">if</span> (sThreadLocal.<span class="fn">get</span>() != <span class="kw">null</span>) {
+        <span class="kw">throw new</span> <span class="type">RuntimeException</span>(<span class="str">"Only one Looper may be created per thread"</span>);
+    }
+    sThreadLocal.<span class="fn">set</span>(<span class="kw">new</span> <span class="type">Looper</span>(<span class="kw">true</span>));
+}</code></pre>
+
+  <h4>2. Looper.loop() & Native Epoll Mechanism</h4>
+  <p>Inside <code>Looper.loop()</code>, an infinite loop runs. When <code>MessageQueue.next()</code> finds no messages or when the next message is scheduled for the future, it calls the native method <code>nativePollOnce(ptr, timeout)</code>.</p>
+  <p>This invokes Linux <strong>epoll_wait()</strong> on an event file descriptor (<code>eventfd</code>). The thread yields CPU execution and enters kernel-level sleep. When a new message is posted from another thread, <code>nativeWake()</code> writes to the <code>eventfd</code>, immediately waking the Main thread to process the message.</p>
+
+  <h4>3. Message Dispatch Priority</h4>
+  <p>When <code>msg.target.dispatchMessage(msg)</code> is called, resolution follows this strict order:</p>
+  <ol>
+    <li>If <code>msg.callback != null</code>: runs <code>msg.callback.run()</code> (e.g. <code>handler.post(runnable)</code>).</li>
+    <li>Else if <code>mCallback != null</code> (Handler's Callback interface): calls <code>mCallback.handleMessage(msg)</code>. If it returns true, stops here.</li>
+    <li>Else: calls <code>handler.handleMessage(msg)</code>.</li>
+  </ol>
+
+  <h4>4. Message Pooling (Message.obtain())</h4>
+  <p>Allocating new <code>Message</code> objects on every touch or frame would cause GC pressure. Android maintains a global linked-list pool of up to 50 recycled <code>Message</code> instances. Calling <code>Message.obtain()</code> reuses a pooled object instead of allocating with <code>new</code>.</p>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & ARCHITECTURAL IMPACT ═══ -->
+<section id="when">
+  <h2>3 · When to Use & Thread Affinity</h2>
+
+  <table>
+    <tr>
+      <th>Thread / Mechanism</th>
+      <th>Permitted Responsibilities</th>
+      <th>Forbidden Operations</th>
+    </tr>
+    <tr>
+      <td><strong>Main / UI Thread</strong></td>
+      <td>State mutations, Compose recomposition triggers, view rendering, user input handling, lightweight callback dispatch.</td>
+      <td>Disk I/O (Room, SharedPreferences), Network requests, heavy cryptographic hashing, blocking Thread.sleep().</td>
+    </tr>
+    <tr>
+      <td><strong>HandlerThread</strong></td>
+      <td>Sequential background tasks requiring a message loop (e.g., Camera frame processing, Bluetooth packet parsing).</td>
+      <td>Direct UI manipulation without posting back to main Handler.</td>
+    </tr>
+    <tr>
+      <td><strong>Coroutine (Dispatchers.Main)</strong></td>
+      <td>Modern replacement for Handlers; structured lifecycle-aware UI dispatching.</td>
+      <td>Blocking CPU-heavy work without switching to <code>Dispatchers.Default</code>.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: Custom HandlerThread & Safe Main Handler</h2>
+  <p>Production Bluetooth/Automotive telemetry pipeline processing high-frequency sensor packets on a dedicated <code>HandlerThread</code> and posting throttled summaries to the Main Thread.</p>
+
+  <pre><code><span class="kw">package</span> com.enterprise.automotive.telemetry
+
+<span class="kw">import</span> android.os.Handler
+<span class="kw">import</span> android.os.HandlerThread
+<span class="kw">import</span> android.os.Looper
+<span class="kw">import</span> android.os.Message
+<span class="kw">import</span> java.lang.ref.WeakReference
+
+<span class="cm">/**
+ * Telemetry background worker using HandlerThread to avoid thread spawn overhead.
+ */</span>
+<span class="kw">class</span> <span class="type">SensorTelemetryManager</span>(
+    listener: <span class="type">TelemetryUiListener</span>
+) {
+    <span class="kw">private val</span> uiHandler = <span class="type">SafeUiHandler</span>(listener)
+    <span class="kw">private val</span> workerThread = <span class="type">HandlerThread</span>(<span class="str">"SensorProcessingThread"</span>, android.os.<span class="type">Process</span>.<span class="type">THREAD_PRIORITY_BACKGROUND</span>)
+    <span class="kw">private var</span> workerHandler: <span class="type">Handler</span>? = <span class="kw">null</span>
+
+    <span class="kw">init</span> {
+        workerThread.<span class="fn">start</span>()
+        workerHandler = <span class="kw">object</span> : <span class="type">Handler</span>(workerThread.<span class="fn">looper</span>) {
+            <span class="kw">override fun</span> <span class="fn">handleMessage</span>(msg: <span class="type">Message</span>) {
+                <span class="kw">if</span> (msg.what == MSG_PROCESS_SENSOR_RAW) {
+                    <span class="kw">val</span> rawValue = msg.arg1
+                    <span class="kw">val</span> processedSpeed = <span class="fn">computeVehicleSpeed</span>(rawValue)
+                    
+                    <span class="cm">// Send aggregated result to UI thread</span>
+                    <span class="kw">val</span> uiMsg = uiHandler.<span class="fn">obtainMessage</span>(SafeUiHandler.MSG_UPDATE_SPEED, processedSpeed, <span class="num">0</span>)
+                    uiHandler.<span class="fn">sendMessage</span>(uiMsg)
+                }
+            }
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">onRawSensorPacket</span>(sensorValue: <span class="type">Int</span>) {
+        workerHandler?.<span class="fn">let</span> { handler -&gt;
+            <span class="kw">val</span> msg = handler.<span class="fn">obtainMessage</span>(MSG_PROCESS_SENSOR_RAW, sensorValue, <span class="num">0</span>)
+            handler.<span class="fn">sendMessage</span>(msg)
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">cleanup</span>() {
+        uiHandler.<span class="fn">removeCallbacksAndMessages</span>(<span class="kw">null</span>)
+        workerThread.<span class="fn">quitSafely</span>()
+    }
+
+    <span class="kw">private fun</span> <span class="fn">computeVehicleSpeed</span>(raw: <span class="type">Int</span>): <span class="type">Int</span> = raw * <span class="num">100</span> / <span class="num">255</span>
+
+    <span class="cm">/**
+     * Static / separate class with WeakReference prevents Activity / Context memory leaks.
+     */</span>
+    <span class="kw">private class</span> <span class="type">SafeUiHandler</span>(
+        listener: <span class="type">TelemetryUiListener</span>
+    ) : <span class="type">Handler</span>(<span class="type">Looper</span>.<span class="fn">getMainLooper</span>()) {
+        
+        <span class="kw">private val</span> weakListener = <span class="type">WeakReference</span>(listener)
+
+        <span class="kw">override fun</span> <span class="fn">handleMessage</span>(msg: <span class="type">Message</span>) {
+            <span class="kw">val</span> listener = weakListener.<span class="fn">get</span>() ?: <span class="kw">return</span>
+            <span class="kw">if</span> (msg.what == MSG_UPDATE_SPEED) {
+                listener.<span class="fn">onSpeedUpdated</span>(speedKmh = msg.arg1)
+            }
+        }
+
+        <span class="kw">companion object</span> {
+            <span class="kw">const val</span> MSG_UPDATE_SPEED = <span class="num">101</span>
+        }
+    }
+
+    <span class="kw">companion object</span> {
+        <span class="kw">private const val</span> MSG_PROCESS_SENSOR_RAW = <span class="num">1</span>
+    }
+}
+
+<span class="kw">interface</span> <span class="type">TelemetryUiListener</span> {
+    <span class="kw">fun</span> <span class="fn">onSpeedUpdated</span>(speedKmh: <span class="type">Int</span>)
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives & Comparison</h2>
+
+  <table>
+    <tr>
+      <th>Mechanism</th>
+      <th>Threading Model</th>
+      <th>Cancellation / Lifecycle</th>
+      <th>Use Case</th>
+    </tr>
+    <tr>
+      <td><strong>Handler / Looper</strong></td>
+      <td>Direct message queue dispatch.</td>
+      <td>Manual: <code>removeCallbacksAndMessages(null)</code>.</td>
+      <td>Low-level framework components, custom queues, legacy Android SDKs.</td>
+    </tr>
+    <tr>
+      <td><strong>Kotlin Coroutines (Dispatchers.Main)</strong></td>
+      <td>Built on top of Handler (<code>Handler.post</code> under the hood via <code>HandlerContext</code>).</td>
+      <td>Automatic structured cancellation with <code>lifecycleScope</code> / <code>viewModelScope</code>.</td>
+      <td>Modern standard for asynchronous UI work, networking, and room database calls.</td>
+    </tr>
+    <tr>
+      <td><strong>RxJava (AndroidSchedulers.mainThread())</strong></td>
+      <td>Uses Main Looper to dispatch reactive stream emissions.</td>
+      <td>Manual: <code>CompositeDisposable.dispose()</code>.</td>
+      <td>Reactive stream codebases.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & Memory Leak Traps</h2>
+  <div class="box danger">
+    <strong>1. Non-Static Inner Handler Memory Leaks:</strong> Defining an anonymous inner <code>Handler</code> inside an Activity retains an implicit reference to the <code>Activity.this</code>. If a message is posted with a 10-minute delay (<code>postDelayed</code>), the message in the global <code>MessageQueue</code> holds a reference to the Handler, which in turn holds the Activity, leaking the entire Activity hierarchy.
+  </div>
+  <div class="box warn">
+    <strong>2. ANR (Application Not Responding):</strong> The Main thread looper must process every message in &lt; 5 seconds (for input events, &lt; 5000ms). If a single message blocks the thread on disk/DB/network, subsequent touch event messages pile up unhandled, triggering an ANR dialog.
+  </div>
+  <div class="box info">
+    <strong>3. Forgetting to Quit Background HandlerThreads:</strong> <code>HandlerThread.start()</code> creates an infinite loop. Failing to call <code>handlerThread.quitSafely()</code> when the owning component is destroyed permanently leaks the underlying OS thread and memory.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"The Main thread runs an infinite loop managed by <code>Looper.loop()</code>, extracting <code>Message</code> objects from a timestamp-ordered <code>MessageQueue</code>. When the queue is empty, the thread sleeps in the Linux kernel via <code>nativePollOnce()</code> (epoll), consuming 0% CPU. When a background thread posts a task via a <code>Handler</code>, it writes to an <code>eventfd</code> (<code>nativeWake</code>), waking the Main thread to dispatch and execute the message on the UI toolkit."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Single-Threaded UI Rule:</strong> Android views are not thread-safe. A single-threaded message-passing queue coordinates all UI interactions, lifecycle callbacks, and rendering passes.</li>
+    <li><strong>The Core Triad:</strong>
+      <ul>
+        <li><code>MessageQueue</code>: Priority queue holding messages sorted by execution time (<code>when</code>).</li>
+        <li><code>Looper</code>: Attached to the thread via <code>ThreadLocal</code>. Runs <code>for (;;) { Message msg = queue.next(); msg.target.dispatchMessage(msg); }</code>.</li>
+        <li><code>Handler</code>: Exposes <code>post()</code> / <code>sendMessage()</code> to enqueue messages and implements <code>handleMessage()</code> to process them.</li>
+      </ul>
+    </li>
+    <li><strong>Zero-CPU Idle via Linux Epoll:</strong> <code>Looper.loop()</code> does not busy-wait. It calls <code>nativePollOnce()</code> which invokes kernel <code>epoll_wait()</code>, suspending the thread until a message is due or <code>nativeWake()</code> is triggered.</li>
+    <li><strong>Rendering Synchronization (Choreographer):</strong> VSYNC pulses from the display hardware schedule <code>CallbackRecord</code> messages on the Main thread looper via <code>Choreographer</code> to trigger <code>doFrame()</code>.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li><code>ThreadLocal&lt;Looper&gt;</code> and <code>Looper.prepareMainLooper()</code>.</li>
+    <li><code>MessageQueue.next()</code> and native <strong>epoll / eventfd</strong> (<code>nativePollOnce()</code> / <code>nativeWake()</code>).</li>
+    <li><code>Message.obtain()</code> pooling to prevent GC allocation churn.</li>
+    <li>Memory leaks caused by non-static Handlers holding outer Activity references in <code>msg.target</code>.</li>
+    <li><code>Choreographer</code>, <strong>VSYNC</strong>, and 16.6ms (60Hz) / 8.33ms (120Hz) frame budgets.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: Why doesn't the infinite while(true) loop in Looper.loop() freeze the app or drain the battery?</h4>
+    <p>Because it doesn't spin in a busy loop. When <code>MessageQueue</code> is empty, it drops into native C++ code calling <code>epoll_wait()</code>. The Linux kernel puts the thread into an idle waiting state, releasing the CPU core until an I/O event or timer interrupts it.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How does Coroutine Dispatchers.Main actually post work to the Main Thread?</h4>
+    <p>Under the hood, <code>Dispatchers.Main</code> is implemented as <code>HandlerContext</code>, which wraps the main looper's <code>Handler</code>. When you call <code>launch(Dispatchers.Main)</code>, it executes <code>handler.post(runnable)</code> into the main <code>MessageQueue</code>.</p>
+  </div>
+  <div class="card">
+    <h4>Q: What is a Sync Barrier in MessageQueue?</h4>
+    <p>A Sync Barrier is a special <code>Message</code> with a null <code>target</code> posted by the framework (e.g. <code>ViewRootImpl</code> during layout). When the Looper encounters a barrier, it pauses all normal messages and only executes <strong>asynchronous messages</strong> (like UI draw/VSYNC frames) to guarantee frame rate smoothness.</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "Whenever you encounter jank or frame drops, the issue isn't that the GPU is slow; it's that a long-running message in the Main <code>MessageQueue</code> delayed the Choreographer's <code>DO_FRAME</code> callback past the VSYNC deadline. Senior engineers use <strong>Looper.setMessageLogging()</strong> or <strong>Perfetto</strong> to trace every single message dispatch duration on the main thread."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>Looper:</strong> One per thread (stored in <code>ThreadLocal</code>); loops forever calling <code>MessageQueue.next()</code>.</li>
+    <li><strong>MessageQueue:</strong> Priority queue linked list sorted by execution timestamp (<code>when</code>).</li>
+    <li><strong>Handler:</strong> Produces messages (<code>sendMessage</code>) and consumes messages (<code>handleMessage</code> / <code>Runnable.run</code>).</li>
+    <li><strong>Linux Epoll:</strong> <code>nativePollOnce()</code> sleeps the thread; <code>nativeWake()</code> wakes it up via <code>eventfd</code>.</li>
+    <li><strong>Message Pooling:</strong> <code>Message.obtain()</code> reuses instances from a linked list pool (max 50) to avoid GC churn.</li>
+    <li><strong>Choreographer:</strong> Coordinates animation, input, and traversal callbacks synced to display VSYNC pulses.</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. What are the four core components of Android's message handling mechanism?</summary>
+    <div class="ans">
+      The four components are <strong>Message</strong> (the data packet/task), <strong>MessageQueue</strong> (the chronological queue), <strong>Looper</strong> (the infinite pump iterating through the queue), and <strong>Handler</strong> (the interface to enqueue and process messages).
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. Can a standard background thread have a Looper?</summary>
+    <div class="ans">
+      Yes. By default, standard Java/Kotlin threads do not have a Looper. You can attach one by calling <code>Looper.prepare()</code> followed by <code>Looper.loop()</code>, or by using the built-in <code>HandlerThread</code> class.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. Why is Message.obtain() preferred over new Message()?</summary>
+    <div class="ans">
+      <code>Message.obtain()</code> retrieves a recycled <code>Message</code> instance from a global object pool (holding up to 50 items). This prevents continuous object allocation and garbage collection churn during high-frequency events like touches or animations.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. How does the Looper sleep when there are no messages in the queue?</summary>
+    <div class="ans">
+      <code>MessageQueue.next()</code> calls the native JNI method <code>nativePollOnce()</code>, which uses the Linux kernel <strong>epoll_wait()</strong> system call on an event file descriptor (<code>eventfd</code>). The operating system puts the thread in a blocked/wait state with 0% CPU consumption until another thread calls <code>nativeWake()</code> or a timer expires.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. How does a non-static Handler cause an Activity memory leak?</summary>
+    <div class="ans">
+      A non-static inner class holds an implicit strong reference to its enclosing <code>Activity</code> instance. When a message is sent to the Handler, the <code>Message.target</code> field holds a reference to the Handler. As long as the message remains in the <code>MessageQueue</code> (e.g. delayed execution), the path <code>MessageQueue → Message → Handler → Activity</code> prevents the garbage collector from reclaiming the Activity.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. What is the difference between quit() and quitSafely() on a Looper?</summary>
+    <div class="ans">
+      <code>quit()</code> discards all pending messages in the <code>MessageQueue</code> immediately. <code>quitSafely()</code> only discards future delayed messages while delivering all messages whose timestamps are already due, ensuring in-flight tasks finish cleanly.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What is Choreographer and what role does it play with the Main Looper?</summary>
+    <div class="ans">
+      <code>Choreographer</code> receives hardware VSYNC pulses from <code>SurfaceFlinger</code> and schedules frame rendering tasks (input, animation, traversal) on the Main Looper's <code>MessageQueue</code>. It ensures the app renders frames in sync with the display refresh rate (e.g., 60Hz = 16.6ms, 120Hz = 8.33ms).
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. What is a Synchronization Barrier in Android's MessageQueue?</summary>
+    <div class="ans">
+      A Synchronization Barrier is a special <code>Message</code> with a null <code>target</code> (Handler). When the <code>Looper</code> encounters a barrier in the queue, it stops processing standard synchronous messages and only searches for and executes <strong>asynchronous messages</strong> (such as VSYNC traversal requests). This prioritizes UI rendering over normal application messages until <code>removeSyncBarrier()</code> is called.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. How do Kotlin Coroutines integrate with the Android Main Looper?</summary>
+    <div class="ans">
+      <code>Dispatchers.Main</code> is implemented by <code>HandlerContext</code> in <code>kotlinx-coroutines-android</code>. When a coroutine resumes on <code>Dispatchers.Main</code>, the dispatcher calls <code>Handler.post(runnable)</code> on the main Looper. In modern coroutine versions, it uses <code>Choreographer.postFrameCallback</code> or asynchronous Handler messages to eliminate queue scheduling latency.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. How would you build a custom Main Looper watchdog to detect Main thread blocks without third-party libraries?</summary>
+    <div class="ans">
+      1. Register a custom printer with <code>Looper.getMainLooper().setMessageLogging(Printer)</code>.<br/>
+      2. Track the start and end log strings: <code>"&gt;&gt;&gt;&gt;&gt; Dispatching to"</code> and <code>"&lt;&lt;&lt;&lt;&lt; Finished to"</code>.<br/>
+      3. Start a watchdog timer on a background thread when dispatch starts; if the finish log is not received within a threshold (e.g., 100ms), dump the Main Thread's stack trace via <code>Looper.getMainLooper().thread.stackTrace</code> to log the culprit blocking method (this is how <strong>BlockCanary</strong> works).
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

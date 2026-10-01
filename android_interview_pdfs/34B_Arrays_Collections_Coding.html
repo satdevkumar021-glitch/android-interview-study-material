@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>34B — Arrays &amp; Collections Coding | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(79,158,255,.12);border:1px solid rgba(79,158,255,.3);color:#4f9eff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-coding{background:rgba(79,158,255,.12);color:#4f9eff;border:1px solid rgba(79,158,255,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(79,158,255,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:#4f9eff;background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:#4f9eff;}
+  .callout-purple .callout-label{color:var(--accent);}
+  .problem-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:32px;overflow:hidden;}
+  .problem-header{background:var(--surface2);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+  .problem-num{background:rgba(79,158,255,.2);color:#4f9eff;font-size:11px;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .problem-title{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+  .complexity-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(86,207,178,.15);color:var(--accent2);}
+  .problem-body{padding:18px;}
+  .step-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:16px;}
+  .step-label:first-child{margin-top:0;}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">34B · Arrays &amp; Collections</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Two Sum</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Remove Duplicates</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Sort &amp; Group</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Kadane's Algorithm</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> HashMap Problems</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#128187; Coding</div>
+    <h1><span>34B</span> — Arrays &amp; Collections Coding (Kotlin)</h1>
+    <p class="hero-desc">Two Sum, remove duplicates, sort by criteria, groupBy, Kadane's max subarray, word frequency, and most common element — with complete Kotlin solutions.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 34B</span>
+      <span class="badge badge-coding">Coding</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Array & Collection Problems</h3>
+    <p>Arrays and collections are the foundation of most coding interviews. Master the HashMap trick (O(n²) → O(n)), Kotlin's collection APIs, and the key algorithms like Kadane's.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Problem</th><th>Key Technique</th><th>Complexity</th></tr>
+      <tr><td>Two Sum</td><td>HashMap: value → index</td><td>O(n) time, O(n) space</td></tr>
+      <tr><td>Remove duplicates (sorted)</td><td>Two-pointer in-place</td><td>O(n) time, O(1) space</td></tr>
+      <tr><td>Sort by criteria</td><td>sortedWith(compareBy)</td><td>O(n log n)</td></tr>
+      <tr><td>Group elements</td><td>groupBy{} / groupingBy{}.eachCount()</td><td>O(n)</td></tr>
+      <tr><td>Max subarray</td><td>Kadane's algorithm</td><td>O(n) time, O(1) space</td></tr>
+      <tr><td>Most common element</td><td>HashMap + maxByOrNull</td><td>O(n)</td></tr>
+    </table></div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Two Sum →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9889;</div>2. Two Sum</div>
+    <div class="problem-card">
+      <div class="problem-header"><div class="problem-num">1</div><div class="problem-title">Find indices of two numbers that add to target. [2,7,11,15], target=9 → [0,1]</div><span class="complexity-badge">O(n) time · O(n) space</span></div>
+      <div class="problem-body">
+        <div class="step-label">Brute Force O(n²)</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">twoSumBrute</span>(nums: <span class="cl">IntArray</span>, target: <span class="cl">Int</span>): <span class="cl">IntArray</span> {
+    <span class="kw">for</span> (i <span class="kw">in</span> nums.indices) {
+        <span class="kw">for</span> (j <span class="kw">in</span> i + <span class="nu">1</span> until nums.size) {
+            <span class="kw">if</span> (nums[i] + nums[j] == target) <span class="kw">return</span> <span class="fn">intArrayOf</span>(i, j)
+        }
+    }
+    <span class="kw">return</span> <span class="fn">intArrayOf</span>()  <span class="cm">// no solution found</span>
+}</code></pre>
+        <div class="step-label">Optimal: HashMap O(n)</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">twoSum</span>(nums: <span class="cl">IntArray</span>, target: <span class="cl">Int</span>): <span class="cl">IntArray</span> {
+    <span class="kw">val</span> seen = <span class="cl">HashMap</span>&lt;<span class="cl">Int</span>, <span class="cl">Int</span>&gt;()   <span class="cm">// value → index</span>
+
+    <span class="kw">for</span> ((index, num) <span class="kw">in</span> nums.<span class="fn">withIndex</span>()) {
+        <span class="kw">val</span> complement = target - num    <span class="cm">// what we need to find</span>
+        <span class="kw">if</span> (complement <span class="kw">in</span> seen) {
+            <span class="kw">return</span> <span class="fn">intArrayOf</span>(seen[complement]!!, index)
+        }
+        seen[num] = index
+    }
+    <span class="kw">return</span> <span class="fn">intArrayOf</span>()
+}
+
+<span class="cm">// Trace: nums=[2,7,11,15], target=9</span>
+<span class="cm">// i=0: complement=7, not in seen. seen={2:0}</span>
+<span class="cm">// i=1: complement=2, in seen at index 0! → return [0,1]</span>
+
+<span class="fn">println</span>(<span class="fn">twoSum</span>(<span class="fn">intArrayOf</span>(<span class="nu">2</span>,<span class="nu">7</span>,<span class="nu">11</span>,<span class="nu">15</span>), <span class="nu">9</span>).<span class="fn">contentToString</span>())  <span class="cm">// [0, 1]</span></code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Remove Duplicates →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128257;</div>3. Remove Duplicates from Sorted Array</div>
+    <div class="problem-card">
+      <div class="problem-header"><div class="problem-num">2</div><div class="problem-title">[1,1,2,3,3,4] → [1,2,3,4], return length 4 (in-place)</div><span class="complexity-badge">O(n) time · O(1) space</span></div>
+      <div class="problem-body">
+        <div class="step-label">Two-pointer in-place approach</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">removeDuplicates</span>(nums: <span class="cl">IntArray</span>): <span class="cl">Int</span> {
+    <span class="kw">if</span> (nums.<span class="fn">isEmpty</span>()) <span class="kw">return</span> <span class="nu">0</span>
+
+    <span class="kw">var</span> slow = <span class="nu">0</span>   <span class="cm">// pointer to last unique position</span>
+    <span class="kw">for</span> (fast <span class="kw">in</span> <span class="nu">1</span> until nums.size) {
+        <span class="kw">if</span> (nums[fast] != nums[slow]) {
+            slow++
+            nums[slow] = nums[fast]  <span class="cm">// place next unique element</span>
+        }
+    }
+    <span class="kw">return</span> slow + <span class="nu">1</span>  <span class="cm">// length of unique elements</span>
+}
+
+<span class="cm">// Trace: [1,1,2,3,3,4]</span>
+<span class="cm">// slow=0, fast=1: 1==1, skip</span>
+<span class="cm">// slow=0, fast=2: 1!=2, slow=1, nums[1]=2 → [1,2,2,3,3,4]</span>
+<span class="cm">// slow=1, fast=3: 2!=3, slow=2, nums[2]=3 → [1,2,3,3,3,4]</span>
+<span class="cm">// slow=2, fast=4: 3==3, skip</span>
+<span class="cm">// slow=2, fast=5: 3!=4, slow=3, nums[3]=4 → [1,2,3,4,3,4]</span>
+<span class="cm">// return 4</span>
+
+<span class="cm">// Kotlin idiomatic (not in-place but clean):</span>
+<span class="kw">fun</span> <span class="fn">removeDuplicatesKt</span>(nums: <span class="cl">IntArray</span>): <span class="cl">IntArray</span> = nums.<span class="fn">toSortedSet</span>().<span class="fn">toIntArray</span>()</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Sort &amp; Group →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128202;</div>4. Sort &amp; Group Collections</div>
+    <div class="problem-card">
+      <div class="problem-header"><div class="problem-num">3</div><div class="problem-title">Sort and group elements by multiple criteria</div><span class="complexity-badge">O(n log n) · O(n) space</span></div>
+      <div class="problem-body">
+        <div class="step-label">Sort by multiple criteria</div>
+        <pre><code><span class="kw">data class</span> <span class="cl">Product</span>(<span class="kw">val</span> name: <span class="cl">String</span>, <span class="kw">val</span> price: <span class="cl">Double</span>, <span class="kw">val</span> category: <span class="cl">String</span>)
+
+<span class="kw">val</span> products = <span class="fn">listOf</span>(
+    <span class="cl">Product</span>(<span class="str">"Apple"</span>, <span class="nu">1.5</span>, <span class="str">"Fruit"</span>),
+    <span class="cl">Product</span>(<span class="str">"Banana"</span>, <span class="nu">0.8</span>, <span class="str">"Fruit"</span>),
+    <span class="cl">Product</span>(<span class="str">"Broccoli"</span>, <span class="nu">2.0</span>, <span class="str">"Veg"</span>)
+)
+
+<span class="cm">// Sort by category ascending, then by price ascending</span>
+<span class="kw">val</span> sorted = products.<span class="fn">sortedWith</span>(<span class="fn">compareBy</span>({ it.category }, { it.price }))
+
+<span class="cm">// Sort by price descending</span>
+<span class="kw">val</span> byPriceDesc = products.<span class="fn">sortedByDescending</span> { it.price }
+
+<span class="cm">// Sort with natural order then custom comparator</span>
+<span class="kw">val</span> custom = products.<span class="fn">sortedWith</span>(compareBy&lt;<span class="cl">Product</span>&gt; { it.category }.<span class="fn">thenByDescending</span> { it.price })</code></pre>
+        <div class="step-label">Group elements</div>
+        <pre><code><span class="cm">// groupBy: group into Map&lt;Key, List&lt;T&gt;&gt;</span>
+<span class="kw">val</span> byCategory: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;&gt; = products.<span class="fn">groupBy</span> { it.category }
+<span class="cm">// {"Fruit": [Apple, Banana], "Veg": [Broccoli]}</span>
+
+<span class="cm">// groupingBy + eachCount: count occurrences</span>
+<span class="kw">val</span> words = <span class="fn">listOf</span>(<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"apple"</span>, <span class="str">"cherry"</span>, <span class="str">"banana"</span>, <span class="str">"banana"</span>)
+<span class="kw">val</span> wordCount: <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Int</span>&gt; = words.<span class="fn">groupingBy</span> { it }.<span class="fn">eachCount</span>()
+<span class="cm">// {"apple":2, "banana":3, "cherry":1}</span>
+
+<span class="cm">// Count and find most common word</span>
+<span class="kw">val</span> mostCommon = wordCount.<span class="fn">maxByOrNull</span> { it.value }?.key
+<span class="cm">// "banana"</span>
+
+<span class="cm">// partition: split into two lists based on predicate</span>
+<span class="kw">val</span> (expensive, cheap) = products.<span class="fn">partition</span> { it.price > <span class="nu">1.0</span> }</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Kadane's →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128200;</div>5. Kadane's Algorithm — Maximum Subarray</div>
+    <div class="problem-card">
+      <div class="problem-header"><div class="problem-num">4</div><div class="problem-title">[-2,1,-3,4,-1,2,1,-5,4] → 6 (subarray [4,-1,2,1])</div><span class="complexity-badge">O(n) time · O(1) space</span></div>
+      <div class="problem-body">
+        <div class="step-label">Brute Force O(n²)</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">maxSubarrayBrute</span>(nums: <span class="cl">IntArray</span>): <span class="cl">Int</span> {
+    <span class="kw">var</span> max = <span class="cl">Int</span>.<span class="cl">MIN_VALUE</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> nums.indices) {
+        <span class="kw">var</span> sum = <span class="nu">0</span>
+        <span class="kw">for</span> (j <span class="kw">in</span> i until nums.size) {
+            sum += nums[j]
+            max = <span class="fn">maxOf</span>(max, sum)
+        }
+    }
+    <span class="kw">return</span> max
+}</code></pre>
+        <div class="step-label">Kadane's Algorithm O(n)</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">maxSubarray</span>(nums: <span class="cl">IntArray</span>): <span class="cl">Int</span> {
+    <span class="kw">var</span> currentSum = nums[<span class="nu">0</span>]
+    <span class="kw">var</span> maxSum = nums[<span class="nu">0</span>]
+
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">1</span> until nums.size) {
+        <span class="cm">// Either extend the previous subarray, or start fresh from nums[i]</span>
+        currentSum = <span class="fn">maxOf</span>(nums[i], currentSum + nums[i])
+        maxSum = <span class="fn">maxOf</span>(maxSum, currentSum)
+    }
+    <span class="kw">return</span> maxSum
+}
+
+<span class="cm">// Trace: [-2,1,-3,4,-1,2,1,-5,4]</span>
+<span class="cm">// i=1: current = max(1, -2+1=-1) = 1, max = 1</span>
+<span class="cm">// i=2: current = max(-3, 1-3=-2) = -2, max = 1</span>
+<span class="cm">// i=3: current = max(4, -2+4=2) = 4, max = 4</span>
+<span class="cm">// i=4: current = max(-1, 4-1=3) = 3, max = 4</span>
+<span class="cm">// i=5: current = max(2, 3+2=5) = 5, max = 5</span>
+<span class="cm">// i=6: current = max(1, 5+1=6) = 6, max = 6</span>
+<span class="cm">// i=7: current = max(-5, 6-5=1) = 1, max = 6</span>
+<span class="cm">// i=8: current = max(4, 1+4=5) = 5, max = 6 → return 6</span>
+
+<span class="fn">println</span>(<span class="fn">maxSubarray</span>(<span class="fn">intArrayOf</span>(-<span class="nu">2</span>,<span class="nu">1</span>,-<span class="nu">3</span>,<span class="nu">4</span>,-<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">1</span>,-<span class="nu">5</span>,<span class="nu">4</span>)))  <span class="cm">// 6</span></code></pre>
+        <div class="callout callout-blue">
+          <div class="callout-label">Kadane's Insight</div>
+          The key decision at each element: "Is it better to extend the current subarray (currentSum + nums[i]) or start fresh (nums[i])?" Start fresh when the current sum has become negative — a negative sum is worse than starting over.
+        </div>
+      </div>
+    </div>
+
+    <h3>Rotate Array</h3>
+    <pre><code><span class="cm">// Rotate array k positions to the right: [1,2,3,4,5], k=2 → [4,5,1,2,3]</span>
+<span class="kw">fun</span> <span class="fn">rotate</span>(nums: <span class="cl">IntArray</span>, k: <span class="cl">Int</span>) {
+    <span class="kw">val</span> n = nums.size
+    <span class="kw">val</span> shift = k % n   <span class="cm">// handle k > n</span>
+    <span class="kw">val</span> rotated = nums.<span class="fn">takeLast</span>(shift) + nums.<span class="fn">take</span>(n - shift)
+    rotated.<span class="fn">forEachIndexed</span> { i, v -> nums[i] = v }
+}
+
+<span class="cm">// Or in-place with three reverses:</span>
+<span class="kw">fun</span> <span class="fn">rotateInPlace</span>(nums: <span class="cl">IntArray</span>, k: <span class="cl">Int</span>) {
+    <span class="kw">val</span> n = nums.size; <span class="kw">val</span> shift = k % n
+    <span class="kw">fun</span> <span class="fn">reverse</span>(a: <span class="cl">Int</span>, b: <span class="cl">Int</span>) { <span class="kw">var</span> l=a; <span class="kw">var</span> r=b; <span class="kw">while</span>(l&lt;r){val t=nums[l];nums[l]=nums[r];nums[r]=t;l++;r--} }
+    <span class="fn">reverse</span>(<span class="nu">0</span>, n-<span class="nu">1</span>); <span class="fn">reverse</span>(<span class="nu">0</span>, shift-<span class="nu">1</span>); <span class="fn">reverse</span>(shift, n-<span class="nu">1</span>)
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: HashMap Problems →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128202;</div>6. HashMap Problems</div>
+    <div class="problem-card">
+      <div class="problem-header"><div class="problem-num">5</div><div class="problem-title">Word frequency count and most common element</div><span class="complexity-badge">O(n) time · O(n) space</span></div>
+      <div class="problem-body">
+        <div class="step-label">Word frequency from text</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">wordFrequency</span>(text: <span class="cl">String</span>): <span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Int</span>&gt; =
+    text.<span class="fn">lowercase</span>()
+        .<span class="fn">split</span>(<span class="str">"\\s+"</span>.<span class="fn">toRegex</span>())
+        .<span class="fn">filter</span> { it.<span class="fn">isNotEmpty</span>() }
+        .<span class="fn">groupingBy</span> { it }
+        .<span class="fn">eachCount</span>()
+
+<span class="kw">val</span> text = <span class="str">"the quick brown fox jumps over the lazy dog the"</span>
+<span class="kw">val</span> freq = <span class="fn">wordFrequency</span>(text)
+<span class="fn">println</span>(freq[<span class="str">"the"</span>])  <span class="cm">// 3</span>
+
+<span class="cm">// Top 3 most frequent words</span>
+<span class="kw">val</span> top3 = freq.<span class="fn">entries</span>.<span class="fn">sortedByDescending</span> { it.value }.<span class="fn">take</span>(<span class="nu">3</span>)
+    .<span class="fn">map</span> { it.key }</code></pre>
+        <div class="step-label">Most common element in array</div>
+        <pre><code><span class="kw">fun</span> <span class="fn">mostCommon</span>(nums: <span class="cl">IntArray</span>): <span class="cl">Int</span>? {
+    <span class="kw">val</span> freq = <span class="cl">HashMap</span>&lt;<span class="cl">Int</span>, <span class="cl">Int</span>&gt;()
+    <span class="kw">for</span> (n <span class="kw">in</span> nums) freq[n] = (freq[n] ?: <span class="nu">0</span>) + <span class="nu">1</span>
+    <span class="kw">return</span> freq.<span class="fn">maxByOrNull</span> { it.value }?.key
+}
+
+<span class="cm">// Kotlin idiomatic</span>
+<span class="kw">fun</span> <span class="fn">mostCommonKt</span>(nums: <span class="cl">IntArray</span>): <span class="cl">Int</span>? =
+    nums.<span class="fn">toList</span>().<span class="fn">groupingBy</span> { it }.<span class="fn">eachCount</span>().<span class="fn">maxByOrNull</span> { it.value }?.key
+
+<span class="fn">println</span>(<span class="fn">mostCommon</span>(<span class="fn">intArrayOf</span>(<span class="nu">1</span>,<span class="nu">3</span>,<span class="nu">2</span>,<span class="nu">3</span>,<span class="nu">1</span>,<span class="nu">3</span>)))  <span class="cm">// 3</span>
+
+<span class="cm">// Two Sum variation: count pairs with difference k</span>
+<span class="kw">fun</span> <span class="fn">countPairsWithDiff</span>(nums: <span class="cl">IntArray</span>, k: <span class="cl">Int</span>): <span class="cl">Int</span> {
+    <span class="kw">val</span> set = nums.<span class="fn">toHashSet</span>()
+    <span class="kw">return</span> nums.<span class="fn">count</span> { (it + k) <span class="kw">in</span> set }
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Array Interview Template</div>
+      Brute force: nested loops O(n²). Optimize: "I can reduce to O(n) by using a HashMap to store previously seen values." Code the HashMap solution. Edge cases: empty array, single element, all same values, negative numbers.
+    </div>
+    <h3>Key Patterns</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Problem type</th><th>Time</th></tr>
+      <tr><td>HashMap: value → index</td><td>Two Sum, find complement</td><td>O(n)</td></tr>
+      <tr><td>Two pointer</td><td>Remove duplicates (sorted), reverse, pair sum</td><td>O(n)</td></tr>
+      <tr><td>Sliding window</td><td>Subarray sum = k, max subarray length</td><td>O(n)</td></tr>
+      <tr><td>Kadane's</td><td>Maximum subarray, max product subarray</td><td>O(n)</td></tr>
+      <tr><td>Sort + compare</td><td>Meeting rooms, merge intervals</td><td>O(n log n)</td></tr>
+    </table></div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Kotlin Collection Cheat Sheet</div>
+      <code>groupBy { }</code> → Map&lt;K, List&lt;T&gt;&gt; | <code>groupingBy { }.eachCount()</code> → Map&lt;K, Int&gt; | <code>sortedWith(compareBy({ }, { }))</code> → multi-key sort | <code>partition { }</code> → Pair&lt;List, List&gt; | <code>maxByOrNull { }</code> → max element | <code>count { }</code> → count matching elements
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Problem</th><th>Key code pattern</th><th>Time / Space</th></tr>
+      <tr><td>Two Sum</td><td>HashMap(value→index); complement = target - num; if complement in seen</td><td>O(n) / O(n)</td></tr>
+      <tr><td>Remove dups (sorted)</td><td>Two-pointer: slow/fast; if nums[fast]!=nums[slow]: slow++, nums[slow]=nums[fast]</td><td>O(n) / O(1)</td></tr>
+      <tr><td>Sort multi-key</td><td>sortedWith(compareBy({ it.a }, { it.b }))</td><td>O(n log n) / O(n)</td></tr>
+      <tr><td>Group count</td><td>groupingBy { it }.eachCount()</td><td>O(n) / O(k)</td></tr>
+      <tr><td>Kadane's</td><td>currentSum = max(nums[i], currentSum+nums[i]); maxSum = max(maxSum, currentSum)</td><td>O(n) / O(1)</td></tr>
+      <tr><td>Most common</td><td>HashMap freq; maxByOrNull { it.value }?.key</td><td>O(n) / O(k)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain the HashMap trick that reduces Two Sum from O(n²) to O(n).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Brute force checks every pair (i, j) — O(n²). The insight: for each element x, we need to find (target - x) somewhere in the array. Instead of searching through the array again (O(n) per element), store each element in a HashMap as we go. When we encounter x, look up (target - x) in the HashMap in O(1). Total: one pass = O(n) time. We're trading space O(n) for time.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is Kadane's algorithm and why does it work?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Kadane's algorithm finds the maximum sum contiguous subarray in O(n) time. At each element, it makes a greedy choice: should I extend the current subarray (currentSum + nums[i]) or start a new one (nums[i])? If currentSum is negative, starting fresh is always better — a negative prefix only drags down the sum. currentSum = max(nums[i], currentSum + nums[i]). Track maxSum = max(maxSum, currentSum) throughout. This works because the optimal subarray ends at some index and starts at the best starting point.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write code to find all pairs in an array that sum to a target value.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun findPairs(nums: IntArray, target: Int): List&lt;Pair&lt;Int,Int&gt;&gt; { val seen = HashSet&lt;Int&gt;(); val result = mutableListOf&lt;Pair&lt;Int,Int&gt;&gt;(); val added = HashSet&lt;Int&gt;(); for (n in nums) { val complement = target - n; if (complement in seen && n !in added) { result.add(n to complement); added.add(n); added.add(complement) }; seen.add(n) }; return result }. The added set prevents duplicate pairs.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you sort a list of data class instances by multiple fields in Kotlin?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">list.sortedWith(compareBy({ it.field1 }, { it.field2 })) — sorts by field1 first, then by field2 for ties. For descending on one field: compareBy&lt;T&gt; { it.field1 }.thenByDescending { it.field2 }. Alternatively: list.sortedWith(compareByDescending { it.price }) for single descending. The lambda parameters are evaluated in order — first lambda is primary sort key, second is tiebreaker.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between groupBy and groupingBy in Kotlin?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">groupBy { key } immediately creates a Map&lt;K, List&lt;V&gt;&gt; — all elements grouped into lists. It's eager and materializes the entire result. groupingBy { key } creates a lazy Grouping object — you then chain operations: eachCount() (count per group), fold() (custom reduction), aggregate() (custom). groupingBy is more memory-efficient for operations that don't need the full lists, like counting. eachCount() is groupingBy's most common use.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write code to find the intersection of two arrays (common elements).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun intersection(a: IntArray, b: IntArray): IntArray { val setA = a.toHashSet(); return b.filter { it in setA }.toIntArray() }. O(n + m) time. For distinct results: b.distinct().filter { it in setA }. Kotlin idiomatic: (a.toSet() intersect b.toSet()).toIntArray(). The intersect extension function on sets directly computes set intersection.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does the two-pointer approach remove duplicates from a sorted array in O(1) space?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use two pointers: slow (last unique position) and fast (scanner). Fast advances every step. When nums[fast] != nums[slow], we found a new unique element: slow++, copy nums[fast] to nums[slow]. Since the array is sorted, duplicates are adjacent — when fast encounters a new value, it's guaranteed to be unique. This overwrites duplicates with later unique values. No extra array needed → O(1) space.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write a function to find the majority element (appears more than n/2 times).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Boyer-Moore Voting Algorithm — O(n) time, O(1) space: fun majorityElement(nums: IntArray): Int { var candidate = nums[0]; var count = 1; for (i in 1 until nums.size) { if (count == 0) { candidate = nums[i]; count = 1 } else if (nums[i] == candidate) count++ else count-- }; return candidate }. Intuition: majority element "survives" against all others in a vote — its count never reaches 0 if it truly appears more than n/2 times.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you merge two sorted arrays into one sorted array?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Two-pointer approach: var i=0, j=0; result = IntArray(a.size + b.size); for each position: if a[i] ≤ b[j], take a[i], else take b[j]; after one array exhausted, copy remaining. O(n+m) time, O(n+m) space. Kotlin one-liner: (a.toList() + b.toList()).sorted().toIntArray() — O((n+m) log(n+m)) but simpler. The two-pointer approach is O(n+m) and is the optimal solution to know for interviews.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does the partition function do in Kotlin collections?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">partition { predicate } splits a collection into two lists: (matching, notMatching). Returns a Pair&lt;List&lt;T&gt;, List&lt;T&gt;&gt;. Example: val (evens, odds) = listOf(1,2,3,4,5).partition { it % 2 == 0 }. Destructuring the Pair into named variables makes it very readable. Under the hood, it's O(n) — iterates once and puts each element in one of two lists. Useful for splitting positive/negative, active/inactive, etc.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

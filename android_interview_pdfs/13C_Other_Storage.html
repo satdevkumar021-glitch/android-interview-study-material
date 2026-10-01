@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>13C – Other Storage | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">13C · Other Storage</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>13C</span> — Other Storage</h1>
+    <p class="hero-desc">SharedPreferences (legacy), DataStore (Preferences + Proto), Files (internal/external/FileProvider), Android Keystore, and EncryptedSharedPreferences.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 13C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Android Storage Options</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Storage</th><th>Best for</th><th>Type-safe?</th><th>Async?</th><th>Encrypted?</th></tr>
+      <tr><td>SharedPreferences</td><td>Simple key-value settings (legacy)</td><td>No</td><td>No (main thread)</td><td>No (unless Encrypted)</td></tr>
+      <tr><td>Preferences DataStore</td><td>Key-value settings, modern replacement</td><td>No (key-based)</td><td>Yes (Flow/coroutines)</td><td>No (unless encrypted)</td></tr>
+      <tr><td>Proto DataStore</td><td>Typed structured settings with schema</td><td>Yes (protocol buffers)</td><td>Yes (Flow/coroutines)</td><td>No (unless encrypted)</td></tr>
+      <tr><td>Files (internal)</td><td>App-private data files, caches</td><td>N/A</td><td>Manual</td><td>No</td></tr>
+      <tr><td>Files (external)</td><td>Media shared with other apps</td><td>N/A</td><td>Manual</td><td>No</td></tr>
+      <tr><td>Android Keystore</td><td>Cryptographic keys (hardware-backed)</td><td>N/A</td><td>Yes</td><td>Yes (hardware)</td></tr>
+      <tr><td>EncryptedSharedPreferences</td><td>Encrypted key-value store</td><td>No</td><td>No</td><td>Yes (Keystore)</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      The storage hierarchy in Android: Keystore (keys in hardware) → EncryptedSharedPreferences (Keystore-backed, for sensitive prefs like tokens) → DataStore (coroutine-safe, atomic) → Files (blobs, media) → Room (structured relational). SharedPreferences is legacy — avoid in new code. DataStore is the modern replacement.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>1. SharedPreferences (Legacy)</h3>
+    <p>XML-based key-value storage. Simple but has serious problems: not type-safe, not thread-safe, blocking I/O on the main thread, no error propagation, and no observability without workarounds.</p>
+    <pre><code><span class="cm">// DO NOT USE in new code — legacy only</span>
+<span class="kw">val</span> prefs = context.<span class="fn">getSharedPreferences</span>(<span class="str">"settings"</span>, <span class="cl">Context</span>.<span class="cl">MODE_PRIVATE</span>)
+prefs.<span class="fn">edit</span>().<span class="fn">putBoolean</span>(<span class="str">"dark_mode"</span>, <span class="kw">true</span>).<span class="fn">apply</span>()  <span class="cm">// apply() = async write (not guaranteed)</span>
+prefs.<span class="fn">edit</span>().<span class="fn">putBoolean</span>(<span class="str">"dark_mode"</span>, <span class="kw">true</span>).<span class="fn">commit</span>() <span class="cm">// commit() = sync write (blocks!)</span>
+<span class="kw">val</span> isDark = prefs.<span class="fn">getBoolean</span>(<span class="str">"dark_mode"</span>, <span class="kw">false</span>)    <span class="cm">// no type safety on key name</span></code></pre>
+
+    <h3>2. Preferences DataStore</h3>
+    <p>DataStore is the modern replacement for SharedPreferences. Uses Kotlin coroutines and Flow; atomic writes; handles exceptions gracefully; no main thread I/O.</p>
+    <pre><code><span class="cm">// Define keys</span>
+<span class="kw">val</span> DARK_MODE_KEY = <span class="fn">booleanPreferencesKey</span>(<span class="str">"dark_mode"</span>)
+<span class="kw">val</span> USER_ID_KEY   = <span class="fn">stringPreferencesKey</span>(<span class="str">"user_id"</span>)
+<span class="kw">val</span> FONT_SIZE_KEY = <span class="fn">intPreferencesKey</span>(<span class="str">"font_size"</span>)
+
+<span class="cm">// Create DataStore (one per file name)</span>
+<span class="kw">val</span> dataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt; <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(name = <span class="str">"settings"</span>)
+<span class="cm">// Inject via Hilt as @Singleton</span>
+
+<span class="cm">// READ — returns a Flow; null if key not set</span>
+<span class="kw">val</span> darkModeFlow: <span class="cl">Flow</span>&lt;<span class="cl">Boolean</span>&gt; = context.dataStore.data
+    .<span class="fn">map</span> { prefs -&gt; prefs[DARK_MODE_KEY] ?: <span class="kw">false</span> }
+    .<span class="fn">catch</span> { e -&gt; <span class="kw">if</span> (e <span class="kw">is</span> <span class="cl">IOException</span>) <span class="fn">emit</span>(<span class="kw">false</span>) <span class="kw">else</span> <span class="kw">throw</span> e }
+
+<span class="cm">// WRITE — atomic; only via edit lambda</span>
+<span class="kw">suspend fun</span> <span class="fn">setDarkMode</span>(enabled: <span class="cl">Boolean</span>) {
+    context.dataStore.<span class="fn">edit</span> { prefs -&gt;
+        prefs[DARK_MODE_KEY] = enabled
+    }
+}</code></pre>
+
+    <h3>3. Proto DataStore</h3>
+    <p>Type-safe, schema-driven DataStore using Protocol Buffers. Define the schema in a <code>.proto</code> file; Protocol Buffers generates Kotlin classes.</p>
+    <pre><code><span class="cm">// settings.proto</span>
+<span class="cm">// syntax = "proto3";</span>
+<span class="cm">// message UserSettings {</span>
+<span class="cm">//   bool dark_mode = 1;</span>
+<span class="cm">//   string locale = 2;</span>
+<span class="cm">//   int32 font_size = 3;</span>
+<span class="cm">// }</span>
+
+<span class="cm">// Serializer for Proto DataStore</span>
+<span class="kw">object</span> <span class="cl">UserSettingsSerializer</span> : <span class="cl">Serializer</span>&lt;<span class="cl">UserSettings</span>&gt; {
+    <span class="kw">override val</span> defaultValue: <span class="cl">UserSettings</span> = <span class="cl">UserSettings</span>.<span class="fn">getDefaultInstance</span>()
+    <span class="kw">override suspend fun</span> <span class="fn">readFrom</span>(input: <span class="cl">InputStream</span>): <span class="cl">UserSettings</span> =
+        <span class="cl">UserSettings</span>.<span class="fn">parseFrom</span>(input)
+    <span class="kw">override suspend fun</span> <span class="fn">writeTo</span>(t: <span class="cl">UserSettings</span>, output: <span class="cl">OutputStream</span>) =
+        t.<span class="fn">writeTo</span>(output)
+}
+
+<span class="kw">val</span> protoDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">UserSettings</span>&gt; <span class="kw">by</span> <span class="fn">dataStore</span>(
+    fileName = <span class="str">"user_settings.pb"</span>,
+    serializer = <span class="cl">UserSettingsSerializer</span>
+)
+
+<span class="cm">// READ — type-safe access to settings fields</span>
+<span class="kw">val</span> darkMode: <span class="cl">Flow</span>&lt;<span class="cl">Boolean</span>&gt; = protoDataStore.data.<span class="fn">map</span> { it.darkMode }
+
+<span class="cm">// WRITE — copy with modified field (immutable proto)</span>
+<span class="kw">suspend fun</span> <span class="fn">setDarkMode</span>(enabled: <span class="cl">Boolean</span>) {
+    protoDataStore.<span class="fn">updateData</span> { current -&gt;
+        current.<span class="fn">toBuilder</span>().<span class="fn">setDarkMode</span>(enabled).<span class="fn">build</span>()
+    }
+}</code></pre>
+
+    <h3>4. Android Keystore</h3>
+    <p>The Keystore system generates and stores cryptographic keys in a hardware-backed secure element (TEE/StrongBox). Private keys never leave the hardware — they're used in-place for operations.</p>
+    <pre><code><span class="cm">// Generate an AES key stored in Keystore</span>
+<span class="kw">val</span> keyGenerator = <span class="cl">KeyGenerator</span>.<span class="fn">getInstance</span>(<span class="cl">KeyProperties</span>.<span class="cl">KEY_ALGORITHM_AES</span>, <span class="str">"AndroidKeyStore"</span>)
+keyGenerator.<span class="fn">init</span>(
+    <span class="cl">KeyGenParameterSpec</span>.<span class="cl">Builder</span>(<span class="str">"myKeyAlias"</span>, <span class="cl">KeyProperties</span>.<span class="cl">PURPOSE_ENCRYPT</span> <span class="kw">or</span> <span class="cl">KeyProperties</span>.<span class="cl">PURPOSE_DECRYPT</span>)
+        .<span class="fn">setBlockModes</span>(<span class="cl">KeyProperties</span>.<span class="cl">BLOCK_MODE_GCM</span>)
+        .<span class="fn">setEncryptionPaddings</span>(<span class="cl">KeyProperties</span>.<span class="cl">ENCRYPTION_PADDING_NONE</span>)
+        .<span class="fn">setKeySize</span>(<span class="nu">256</span>)
+        .<span class="fn">setUserAuthenticationRequired</span>(<span class="kw">false</span>)  <span class="cm">// true = requires biometric unlock</span>
+        .<span class="fn">build</span>()
+)
+keyGenerator.<span class="fn">generateKey</span>()  <span class="cm">// key is stored in Keystore, never in app memory</span>
+
+<span class="cm">// Use the key for encryption — key stays in hardware</span>
+<span class="kw">val</span> keyStore = <span class="cl">KeyStore</span>.<span class="fn">getInstance</span>(<span class="str">"AndroidKeyStore"</span>).<span class="fn">apply</span> { <span class="fn">load</span>(<span class="kw">null</span>) }
+<span class="kw">val</span> key = keyStore.<span class="fn">getKey</span>(<span class="str">"myKeyAlias"</span>, <span class="kw">null</span>) <span class="kw">as</span> <span class="cl">SecretKey</span>
+<span class="kw">val</span> cipher = <span class="cl">Cipher</span>.<span class="fn">getInstance</span>(<span class="str">"AES/GCM/NoPadding"</span>)
+cipher.<span class="fn">init</span>(<span class="cl">Cipher</span>.<span class="cl">ENCRYPT_MODE</span>, key)
+<span class="kw">val</span> encrypted = cipher.<span class="fn">doFinal</span>(plaintext)</code></pre>
+
+    <h3>5. EncryptedSharedPreferences</h3>
+    <p>Uses Android Keystore to encrypt both keys and values in a SharedPreferences file. The encryption/decryption key is stored in hardware, never in app memory. This is the recommended way to store sensitive small data like tokens.</p>
+    <pre><code><span class="cm">// EncryptedSharedPreferences — backed by Keystore, API-compatible with SharedPreferences</span>
+<span class="kw">val</span> encryptedPrefs = <span class="cl">EncryptedSharedPreferences</span>.<span class="fn">create</span>(
+    context,
+    <span class="str">"secure_prefs"</span>,                  <span class="cm">// file name</span>
+    <span class="cl">MasterKeys</span>.<span class="fn">getOrCreate</span>(<span class="cl">MasterKeys</span>.<span class="cl">AES256_GCM_SPEC</span>),  <span class="cm">// master key in Keystore</span>
+    <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefKeyEncryptionScheme</span>.<span class="cl">AES256_SIV</span>,
+    <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefValueEncryptionScheme</span>.<span class="cl">AES256_GCM</span>
+)
+
+<span class="cm">// Use exactly like SharedPreferences — but encrypted at rest</span>
+encryptedPrefs.<span class="fn">edit</span>().<span class="fn">putString</span>(<span class="str">"access_token"</span>, token).<span class="fn">apply</span>()
+<span class="kw">val</span> token = encryptedPrefs.<span class="fn">getString</span>(<span class="str">"access_token"</span>, <span class="kw">null</span>)</code></pre>
+
+    <h3>6. Files — Internal vs External</h3>
+    <pre><code><span class="cm">// Internal storage — private to your app, deleted on uninstall</span>
+<span class="kw">val</span> internalFile = <span class="cl">File</span>(context.<span class="fn">filesDir</span>, <span class="str">"report.pdf"</span>)
+<span class="kw">val</span> cacheFile = <span class="cl">File</span>(context.<span class="fn">cacheDir</span>, <span class="str">"temp_image.jpg"</span>)  <span class="cm">// system may delete if low space</span>
+
+<span class="cm">// External storage — shared with other apps (requires WRITE_EXTERNAL_STORAGE or Scoped Storage)</span>
+<span class="cm">// API 29+: Scoped Storage — use MediaStore API for media, FileProvider for sharing</span>
+
+<span class="cm">// FileProvider — share a file with another app without exposing internal path</span>
+<span class="cm">// In FileProvider.xml:</span>
+<span class="cm">// &lt;files-path name="reports" path="reports/" /&gt;</span>
+<span class="kw">val</span> fileUri: <span class="cl">Uri</span> = <span class="cl">FileProvider</span>.<span class="fn">getUriForFile</span>(
+    context,
+    <span class="str">"${context.packageName}.fileprovider"</span>,
+    <span class="cl">File</span>(context.filesDir, <span class="str">"reports/statement.pdf"</span>)
+)
+<span class="cm">// Share via Intent — only the receiving app gets temporary read permission</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <div class="table-wrap"><table>
+      <tr><th>Scenario</th><th>Storage choice</th><th>Reason</th></tr>
+      <tr><td>Auth tokens (access + refresh)</td><td>EncryptedSharedPreferences</td><td>Encrypted at rest with hardware key; simple API</td></tr>
+      <tr><td>App settings (theme, locale, font size)</td><td>Preferences DataStore</td><td>Coroutine-safe, atomic, Flow reactive</td></tr>
+      <tr><td>Typed settings with schema</td><td>Proto DataStore</td><td>Type-safe, schema versioning, efficient binary format</td></tr>
+      <tr><td>User-generated files (exports, reports)</td><td>Internal files + FileProvider</td><td>Private by default; FileProvider for controlled sharing</td></tr>
+      <tr><td>Biometric key pair generation</td><td>Android Keystore (asymmetric)</td><td>Private key never leaves hardware</td></tr>
+      <tr><td>Legacy integration</td><td>SharedPreferences</td><td>Only if existing code can't be migrated</td></tr>
+    </table></div>
+    <div class="callout callout-red">
+      <div class="callout-label">Never Store Tokens in Plain SharedPreferences</div>
+      Plain SharedPreferences stores data as plain XML in <code>/data/data/com.app/shared_prefs/</code>. On rooted devices, this is readable by any app. Always use EncryptedSharedPreferences (backed by hardware Keystore) for tokens, user credentials, or any sensitive small data.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>Banking App — Token Store with EncryptedSharedPreferences + DataStore</h3>
+    <pre><code><span class="cm">// ── Encrypted Token Store ─────────────────────────────────────</span>
+<span class="kw">class</span> <span class="cl">SecureTokenStore</span> <span class="kw">@Inject constructor</span>(
+    <span class="an">@ApplicationContext</span> <span class="kw">private val</span> context: <span class="cl">Context</span>
+) : <span class="cl">TokenStore</span> {
+
+    <span class="kw">private val</span> prefs: <span class="cl">SharedPreferences</span> <span class="kw">by</span> <span class="fn">lazy</span> {
+        <span class="cl">EncryptedSharedPreferences</span>.<span class="fn">create</span>(
+            context, <span class="str">"auth_tokens"</span>,
+            <span class="cl">MasterKeys</span>.<span class="fn">getOrCreate</span>(<span class="cl">MasterKeys</span>.<span class="cl">AES256_GCM_SPEC</span>),
+            <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefKeyEncryptionScheme</span>.<span class="cl">AES256_SIV</span>,
+            <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefValueEncryptionScheme</span>.<span class="cl">AES256_GCM</span>
+        )
+    }
+
+    <span class="kw">override fun</span> <span class="fn">getAccessToken</span>(): <span class="cl">String</span>? = prefs.<span class="fn">getString</span>(<span class="str">"access_token"</span>, <span class="kw">null</span>)
+    <span class="kw">override fun</span> <span class="fn">getRefreshToken</span>(): <span class="cl">String</span>? = prefs.<span class="fn">getString</span>(<span class="str">"refresh_token"</span>, <span class="kw">null</span>)
+
+    <span class="kw">override fun</span> <span class="fn">saveTokens</span>(accessToken: <span class="cl">String</span>, refreshToken: <span class="cl">String</span>) {
+        prefs.<span class="fn">edit</span>()
+            .<span class="fn">putString</span>(<span class="str">"access_token"</span>, accessToken)
+            .<span class="fn">putString</span>(<span class="str">"refresh_token"</span>, refreshToken)
+            .<span class="fn">apply</span>()
+    }
+
+    <span class="kw">override fun</span> <span class="fn">clearTokens</span>() = prefs.<span class="fn">edit</span>().<span class="fn">clear</span>().<span class="fn">apply</span>()
+}
+
+<span class="cm">// ── DataStore for User Preferences ────────────────────────────</span>
+<span class="kw">val</span> <span class="cl">Context</span>.settingsDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt; <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(<span class="str">"settings"</span>)
+
+<span class="kw">class</span> <span class="cl">UserSettingsDataSource</span> <span class="kw">@Inject constructor</span>(
+    <span class="an">@ApplicationContext</span> <span class="kw">private val</span> context: <span class="cl">Context</span>
+) {
+    <span class="kw">private companion object</span> {
+        <span class="kw">val</span> DARK_MODE     = <span class="fn">booleanPreferencesKey</span>(<span class="str">"dark_mode"</span>)
+        <span class="kw">val</span> NOTIFICATIONS = <span class="fn">booleanPreferencesKey</span>(<span class="str">"notifications_enabled"</span>)
+        <span class="kw">val</span> CURRENCY      = <span class="fn">stringPreferencesKey</span>(<span class="str">"preferred_currency"</span>)
+    }
+
+    <span class="kw">val</span> settings: <span class="cl">Flow</span>&lt;<span class="cl">AppSettings</span>&gt; = context.settingsDataStore.data
+        .<span class="fn">catch</span> { <span class="kw">if</span> (it <span class="kw">is</span> <span class="cl">IOException</span>) <span class="fn">emit</span>(<span class="fn">emptyPreferences</span>()) <span class="kw">else</span> <span class="kw">throw</span> it }
+        .<span class="fn">map</span> { prefs -&gt;
+            <span class="cl">AppSettings</span>(
+                darkMode = prefs[DARK_MODE] ?: <span class="kw">false</span>,
+                notificationsEnabled = prefs[NOTIFICATIONS] ?: <span class="kw">true</span>,
+                currency = prefs[CURRENCY] ?: <span class="str">"GBP"</span>
+            )
+        }
+
+    <span class="kw">suspend fun</span> <span class="fn">setDarkMode</span>(enabled: <span class="cl">Boolean</span>) {
+        context.settingsDataStore.<span class="fn">edit</span> { it[DARK_MODE] = enabled }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <h3>DataStore vs SharedPreferences</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>DataStore</th><th>SharedPreferences</th></tr>
+      <tr><td>Thread safety</td><td>Fully safe — coroutine-based</td><td>Not safe — concurrent reads/writes can corrupt</td></tr>
+      <tr><td>Main thread</td><td>Never blocks main thread</td><td><code>commit()</code> blocks; <code>apply()</code> writes async but reads block</td></tr>
+      <tr><td>Error handling</td><td>Exceptions in Flow — catchable</td><td>Silent failures common</td></tr>
+      <tr><td>Atomicity</td><td>Atomic write semantics</td><td>Not atomic — partial writes possible</td></tr>
+      <tr><td>Observability</td><td>Flow — reactive</td><td>OnSharedPreferenceChangeListener (fragile)</td></tr>
+    </table></div>
+    <h3>Preferences DataStore vs Proto DataStore</h3>
+    <div class="table-wrap"><table>
+      <tr><th></th><th>Preferences DataStore</th><th>Proto DataStore</th></tr>
+      <tr><td>Type safety</td><td>Moderate — typed keys</td><td>Full — generated Kotlin classes</td></tr>
+      <tr><td>Schema evolution</td><td>Add new keys freely</td><td>Protobuf field numbering</td></tr>
+      <tr><td>Setup complexity</td><td>Low</td><td>High — requires .proto file, protobuf plugin</td></tr>
+      <tr><td>KMM compatibility</td><td>Android only</td><td>Better — protobuf is multiplatform</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>DataStore Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Multiple DataStore Instances for the Same File</div>
+      Creating two <code>DataStore</code> instances pointing to the same file causes <code>IllegalStateException: There are multiple DataStore files with the same name</code>. Use the <code>by preferencesDataStore()</code> property delegate (on <code>Context</code>) which is a Kotlin singleton — only one instance is created per file name. Inject as <code>@Singleton</code> via Hilt.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">No Migration from SharedPreferences to DataStore</div>
+      DataStore doesn't automatically read existing SharedPreferences files. If migrating, use <code>SharedPreferencesMigration</code> to copy values: <code>preferencesDataStore(name, produceMigrations = { SharedPreferencesMigration(it, "old_prefs_name") })</code>. Without this, users lose their settings on first launch after update.
+    </div>
+    <h3>Keystore Pitfalls</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Keystore Keys Lost on Factory Reset</div>
+      Android Keystore keys are bound to the device. Factory reset wipes all Keystore keys. Any data encrypted with a Keystore key (including EncryptedSharedPreferences) becomes unreadable. Always have a recovery path: on <code>KeyPermanentlyInvalidatedException</code>, clear the encrypted data and ask the user to log in again.
+    </div>
+    <h3>File Provider Pitfalls</h3>
+    <ul>
+      <li>Never share a file URI from internal storage directly — use FileProvider. Direct file URIs fail with <code>FileUriExposedException</code> on API 24+</li>
+      <li>Grant read permission to the receiving app via <code>Intent.FLAG_GRANT_READ_URI_PERMISSION</code></li>
+      <li>FileProvider paths must be declared in <code>res/xml/file_paths.xml</code></li>
+    </ul>
+    <h3>Best Practices</h3>
+    <ul>
+      <li>Store tokens in EncryptedSharedPreferences — never plain SharedPreferences or Room</li>
+      <li>Use DataStore (not SharedPreferences) for new code</li>
+      <li>Handle <code>IOException</code> in DataStore flows — file corruption is possible</li>
+      <li>Set expiry on Keystore keys linked to biometrics to prevent key use after biometric enrollment change</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"For small key-value data: DataStore is the modern replacement for SharedPreferences — it's coroutine-safe, atomic, and never blocks the main thread. Two flavours: Preferences DataStore (typed key-value) and Proto DataStore (full schema with protocol buffers). For sensitive data like auth tokens: EncryptedSharedPreferences wraps SharedPreferences with Keystore-backed encryption — keys and values are encrypted using a hardware key that never leaves the device. For arbitrary files: internal storage for app-private data, FileProvider to share files with other apps. Android Keystore generates and stores cryptographic keys in hardware — used for biometric auth and encryption operations."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"The SharedPreferences problems that DataStore solves: <code>commit()</code> blocks the main thread; <code>apply()</code> is async but reads can block; it's not thread-safe (concurrent writes can corrupt the file); no error propagation. DataStore uses coroutines and Flow, writes are atomic, and IOExceptions are propagated through the Flow where you can handle them. For EncryptedSharedPreferences: it uses Android Keystore's AES-256 hardware-backed key to encrypt both the key names and values before writing to the XML file. On rooted devices, the XML is still just encrypted bytes — useless without the hardware key. The important gotcha: Keystore keys are lost on factory reset — any data encrypted with them becomes inaccessible. Always catch <code>KeyPermanentlyInvalidatedException</code> and handle it by clearing the encrypted data and re-authenticating."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>DataStore replaces SharedPreferences</strong>: coroutine-safe, atomic, Flow reactive, no main thread I/O</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Preferences vs Proto DataStore</strong>: typed keys vs full schema with protobuf</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>EncryptedSharedPreferences</strong>: Keystore-backed AES-256 encryption; for tokens and secrets</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Keystore keys lost on factory reset</strong>: handle <code>KeyPermanentlyInvalidatedException</code></div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Internal files vs external</strong>: internal = private; external = shared via Scoped Storage/MediaStore</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>FileProvider</strong>: required to share internal files with other apps — never expose raw file URIs</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Protobuf schema syntax (just say "Protocol Buffers defines the schema")</li>
+      <li>Full Android Keystore cryptographic API (just say "generates hardware-backed keys for encryption or biometric auth")</li>
+      <li>MediaStore API details</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Why is SharedPreferences not thread-safe?"</td><td>Multiple threads can call <code>edit()</code> and <code>apply()</code> simultaneously, leading to partial writes or lost updates if they operate on different editor instances without coordination. DataStore uses Kotlin's serialised coroutine execution to ensure writes are always sequential.</td></tr>
+      <tr><td>"Can DataStore replace Room?"</td><td>No. DataStore is for simple key-value or small structured settings. Room is for relational data with querying, filtering, sorting, and complex relationships. DataStore has no query language.</td></tr>
+      <tr><td>"What is StrongBox?"</td><td>StrongBox is a dedicated tamper-resistant hardware security module (separate chip from the main CPU) for Keystore keys. More secure than TEE (which shares the main CPU's secure world). Available on Pixel 3+ and some other devices. Requested via <code>setIsStrongBoxBacked(true)</code> in KeyGenParameterSpec.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      The most important security insight: "encrypted at rest" doesn't mean the data is safe against all attackers — it's about the threat model. EncryptedSharedPreferences protects against: an attacker with physical access to a backed-up device image, or a rooted device that can read files. It does NOT protect against: malware running with the same UID (same process isolation boundary), or a device that has already been unlocked by the user (the Keystore key is accessible). For genuine secrets, you need to combine EncryptedSharedPreferences with user-authentication-required Keystore keys (<code>setUserAuthenticationRequired(true)</code>) so the key is only accessible after biometric verification.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>DataStore (New Code)</h4>
+        <pre><code>val DARK_MODE = booleanPreferencesKey("dark_mode")
+val Context.dataStore by preferencesDataStore("settings")
+
+// READ
+dataStore.data.map { prefs -> prefs[DARK_MODE] ?: false }
+
+// WRITE (atomic)
+dataStore.edit { prefs -> prefs[DARK_MODE] = true }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>EncryptedSharedPreferences</h4>
+        <pre><code>EncryptedSharedPreferences.create(
+    context, "secure_prefs",
+    MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+    PrefKeyEncryptionScheme.AES256_SIV,
+    PrefValueEncryptionScheme.AES256_GCM
+)
+// Store tokens here — backed by hardware Keystore</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Storage Decision</h4>
+        <pre><code>Auth tokens        → EncryptedSharedPreferences
+App settings       → Preferences DataStore
+Typed settings     → Proto DataStore
+Private files      → context.filesDir
+Share with other   → FileProvider
+Crypto keys        → Android Keystore</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Key Warnings</h4>
+        <pre><code>⚠ SharedPreferences — LEGACY, not coroutine-safe
+⚠ commit() on main thread — ANR risk
+⚠ Keystore keys lost on factory reset
+⚠ Never expose file:// URIs — use FileProvider
+⚠ Multiple DataStore instances → crash</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What are the main problems with SharedPreferences that DataStore solves?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        1. <strong>Main thread blocking</strong>: <code>commit()</code> blocks the main thread for disk I/O. DataStore never blocks the main thread — it's fully coroutine-based.<br>
+        2. <strong>Thread safety</strong>: SharedPreferences isn't thread-safe — concurrent <code>edit()</code> calls can corrupt the file. DataStore uses Kotlin's serialised execution for writes.<br>
+        3. <strong>No error propagation</strong>: SharedPreferences silently ignores I/O errors. DataStore propagates <code>IOException</code> through the Flow.<br>
+        4. <strong>Not atomic</strong>: a crash during a SharedPreferences write can leave a partially written file. DataStore writes are atomic.<br>
+        5. <strong>No observability</strong>: SharedPreferences requires a change listener that must be managed manually. DataStore returns a Flow.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the difference between Preferences DataStore and Proto DataStore?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Preferences DataStore</strong>: stores typed key-value pairs — <code>booleanPreferencesKey("dark_mode")</code>, <code>stringPreferencesKey("locale")</code>. No schema enforcement. Easy to add new keys. Key names are the schema — if you rename a key, you lose the old value. Works without any additional dependencies.<br><br>
+        <strong>Proto DataStore</strong>: stores a single typed Kotlin object generated from a <code>.proto</code> schema file using Protocol Buffers. Fully type-safe — accessing <code>settings.darkMode</code> is a property, not a string key lookup. Schema evolution follows Protobuf rules (field numbers, backward compatibility). Requires the Protobuf Gradle plugin. Better for complex settings with many fields or when you need schema versioning.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is EncryptedSharedPreferences and how does it work?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        EncryptedSharedPreferences is a drop-in replacement for SharedPreferences that encrypts both key names and values using Android Keystore-backed keys. It uses AES-256-SIV to encrypt key names (deterministic, allows look-up) and AES-256-GCM to encrypt values. The master key is generated and stored in Android Keystore — it never leaves the hardware. The resulting XML file contains encrypted bytes that cannot be read even on a rooted device without the hardware key. Suitable for storing access tokens, refresh tokens, and other secrets that must survive process death but shouldn't be readable from disk.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How does Android Keystore protect cryptographic keys?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Android Keystore stores keys in a Trusted Execution Environment (TEE) or a dedicated StrongBox chip — hardware isolated from the main application processor. Cryptographic operations (encrypt, decrypt, sign) happen inside this hardware using the key; the raw key material is never exposed to the application. Even with root access to the device, you cannot extract the key. The only way to use the key is via the Keystore API on the same device. For biometric-protected keys (<code>setUserAuthenticationRequired(true)</code>), the key is additionally locked until biometric authentication succeeds.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> What happens to EncryptedSharedPreferences data after a factory reset?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A factory reset wipes all Keystore keys along with all user data. The master key used to encrypt the EncryptedSharedPreferences file is permanently destroyed. The encrypted file (if somehow preserved) becomes unreadable forever — without the key, the data is irretrievably encrypted.<br><br>
+        For the app: on next launch after factory reset, accessing EncryptedSharedPreferences may throw <code>KeyPermanentlyInvalidatedException</code> or <code>GeneralSecurityException</code>. Handle this by: catching the exception, deleting the old encrypted prefs file, and creating a fresh one. The user will need to log in again to re-populate the tokens.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Why can't you share an internal file directly using a file:// URI?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Since Android 7 (API 24), sharing <code>file://</code> URIs outside the app's process throws <code>FileUriExposedException</code>. The reason: a file URI gives the receiving app direct path access to your app's internal storage — bypassing Android's permission model. The receiving app would need to have permission to read that path, which ordinary apps don't have.<br><br>
+        The solution is FileProvider: it converts an internal file path to a <code>content://</code> URI that Android routes through a ContentProvider. The receiving app is granted temporary read permission only for that specific URI. No direct file system access is needed.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you migrate existing SharedPreferences data to DataStore?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Use <code>SharedPreferencesMigration</code>:<br><br>
+        <code>val dataStore by preferencesDataStore(name = "settings", produceMigrations = { context -> listOf(SharedPreferencesMigration(context, "old_prefs_name")) })</code><br><br>
+        On first access to the DataStore, it reads all keys from the named SharedPreferences file and copies them to DataStore. You can filter which keys to migrate. After migration, DataStore deletes the old SharedPreferences file. Without this migration, users lose their settings on first launch after the update.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design a token storage system for a banking app that survives app updates, handles biometric authentication, and gracefully handles Keystore invalidation.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Token storage</strong>: EncryptedSharedPreferences backed by a Keystore AES-256-GCM master key. Access and refresh tokens stored here. Survives app updates (Keystore keys are per-device, not per-app-version).<br><br>
+        <strong>Biometric protection</strong>: For accessing the token, generate a separate Keystore key with <code>setUserAuthenticationRequired(true)</code> and <code>setUserAuthenticationValidityDurationSeconds(30)</code>. Biometric prompt must succeed before this key is usable. This prevents token access without the user's consent — even if someone has physical device access.<br><br>
+        <strong>Invalidation handling</strong>: Wrap all EncryptedSharedPreferences operations in try-catch for <code>KeyPermanentlyInvalidatedException</code> (biometric enrollment changed) and <code>GeneralSecurityException</code> (factory reset, or key deleted). On exception: (1) delete the encrypted prefs file, (2) emit an "authentication required" event via a StateFlow, (3) navigate to login. The repository layer handles this transparently so ViewModels never see low-level crypto exceptions.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> When would you use Proto DataStore over Preferences DataStore and how do you handle schema migrations?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Choose Proto DataStore when: (1) you have 10+ settings fields and type-safe access matters, (2) the settings have complex structure (nested objects, lists), (3) the project uses KMM (protobuf is multiplatform), or (4) you need strict schema versioning for regulatory compliance (e.g., audit logs).<br><br>
+        <strong>Schema migrations</strong>: Protobuf handles backward compatibility at the format level — adding a new field is safe (older versions read default values). Removing a field requires reserving the field number (<code>reserved 3;</code>) to prevent reuse. For DataStore itself, if you rename the <code>.pb</code> file or change the Serializer, existing data is lost unless you: (1) read the old file as raw bytes, (2) deserialise with the old schema class, (3) write to the new file with the new serialiser. This is manual — no equivalent of Room's <code>addMigrations()</code>. If schema evolution is frequent, consider Preferences DataStore with explicit versioning keys.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A developer reports that DataStore is throwing "There are multiple DataStore files with the same name" in tests. What's the cause and fix?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        The error occurs when two DataStore instances are created pointing to the same file in the same process. Most commonly: (1) the <code>by preferencesDataStore()</code> delegate is defined inside a class (creating one per instance) rather than at the top level as an extension on <code>Context</code>; or (2) in tests, the DataStore from production code and the DataStore from a test module both try to use the same file name.<br><br>
+        <strong>Production fix</strong>: define the DataStore as a top-level property: <code>val Context.settingsDataStore by preferencesDataStore("settings")</code>. Kotlin's property delegation ensures only one instance is created per Context.<br><br>
+        <strong>Test fix</strong>: use <code>TestCoroutineRule</code> + a temporary file per test: <code>PreferenceDataStoreFactory.create(scope = testScope) { context.preferencesDataStoreFile("test_settings") }</code>. Clean up the file in <code>@After</code>. This gives each test an isolated DataStore without file name conflicts.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

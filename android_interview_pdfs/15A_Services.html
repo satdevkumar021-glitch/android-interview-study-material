@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>15A — Services | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">15A · Services</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>15A</span> — Services</h1>
+    <p class="hero-desc">Started Services, Bound Services, Foreground Services (API 34+ types), IntentService deprecation, Background Execution Limits (API 26+), and LifecycleService.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 15A</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 (Core Architecture)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Service Anatomy</div>
+    <p>An Android <strong>Service</strong> is an application component that can perform long-running operations in the background and does NOT provide a user interface. <em>Crucially, a Service runs on the application's Main (UI) thread by default</em> unless explicitly dispatched to background threads or coroutines.</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">The Three Primary Types of Services</div>
+      <ul>
+        <li><strong>Foreground Service:</strong> Performs operations noticeable to the user (e.g., media playback, audio recording, GPS). Requires an ongoing Status Bar Notification and explicit <code>foregroundServiceType</code> on API 34+.</li>
+        <li><strong>Background / Started Service:</strong> Triggered via <code>startService()</code> for background work. Severely restricted since Android 8.0 (API 26+) — modern apps must use WorkManager instead.</li>
+        <li><strong>Bound Service:</strong> Offers a client-server interface (via <code>IBinder</code> / AIDL / Messenger) that allows components to bind, send requests, and receive responses. Active only while clients remain bound.</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works Under the Hood</div>
+
+    <h3>1. Started Service Lifecycle &amp; onStartCommand Return Flags</h3>
+    <p>When started via <code>startService(Intent)</code>, the lifecycle is: <code>onCreate()</code> &rarr; <code>onStartCommand()</code> &rarr; (runs until <code>stopSelf()</code> or <code>stopService()</code>) &rarr; <code>onDestroy()</code>.</p>
+    <p>The integer returned from <code>onStartCommand()</code> instructs the OS how to handle process kills under memory pressure:</p>
+    <ul>
+      <li><code>START_STICKY</code>: OS recreates the service after killing it and calls <code>onStartCommand(null, 0, startId)</code>. Ideal for explicit start/stop services (e.g. music players).</li>
+      <li><code>START_NOT_STICKY</code>: OS does NOT recreate the service unless pending start intents exist. Ideal for one-off operations.</li>
+      <li><code>START_REDELIVER_INTENT</code>: OS recreates the service and redelivers the exact original <code>Intent</code>. Ideal for file downloads that must resume with original arguments.</li>
+    </ul>
+
+    <h3>2. Bound Service Lifecycle (ServiceConnection &amp; IBinder)</h3>
+    <p>Client components bind using <code>bindService(intent, connection, BIND_AUTO_CREATE)</code>:</p>
+    <pre><code><span class="kw">class</span> <span class="cl">LocalAudioService</span> : <span class="cl">Service</span>() {
+    <span class="kw">private val</span> binder = <span class="cl">LocalBinder</span>()
+
+    <span class="kw">inner class</span> <span class="cl">LocalBinder</span> : <span class="cl">Binder</span>() {
+        <span class="kw">fun</span> <span class="fn">getService</span>(): <span class="cl">LocalAudioService</span> = <span class="kw">this@LocalAudioService</span>
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onBind</span>(intent: <span class="cl">Intent</span>?): <span class="cl">IBinder</span> = binder
+}</code></pre>
+    <p>When the last client unbinds via <code>unbindService()</code>, <code>onUnbind()</code> is called followed by <code>onDestroy()</code> unless the service was also started via <code>startService()</code>.</p>
+
+    <h3>3. LifecycleService (Jetpack)</h3>
+    <p><code>LifecycleService</code> extends <code>Service</code> and implements <code>LifecycleOwner</code>, allowing you to use <code>lifecycleScope</code> and collect Flows or observe LiveData safely without manual lifecycle cleanup.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use &amp; Modern Rules →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. When to Use &amp; Modern OS Restrictions</div>
+
+    <h3>Android 8.0 (API 26+) Background Limits</h3>
+    <p>Apps in the background cannot create background services. Calling <code>startService()</code> while in the background throws an <code>IllegalStateException</code>. Apps must call <code>startForegroundService()</code> and call <code>startForeground()</code> within <strong>5 seconds</strong>, or use WorkManager.</p>
+
+    <h3>Android 14 (API 34+) Foreground Service Types</h3>
+    <p>Google mandates that every foreground service must declare one or more specific types in <code>AndroidManifest.xml</code> and possess corresponding runtime permissions:</p>
+    <ul>
+      <li><code>camera</code> &mdash; Accessing camera while backgrounded.</li>
+      <li><code>connectedDevice</code> &mdash; Interacting with external Bluetooth/USB devices.</li>
+      <li><code>dataSync</code> &mdash; Data transfer (heavily restricted; Google recommends WorkManager).</li>
+      <li><code>health</code> &mdash; Fitness/health tracking (wearables).</li>
+      <li><code>location</code> &mdash; GPS navigation / ride sharing.</li>
+      <li><code>mediaPlayback</code> &mdash; Audio/Video playback.</li>
+      <li><code>mediaProjection</code> &mdash; Screen recording/casting.</li>
+      <li><code>phoneCall</code> &mdash; Ongoing VoIP/telephony.</li>
+      <li><code>specialUse</code> &mdash; Custom cases needing Google Play Store justification.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Example (Media Playback Service)</div>
+
+    <pre><code><span class="kw">class</span> <span class="cl">AudioStreamingService</span> : <span class="cl">LifecycleService</span>() {
+
+    <span class="kw">private val</span> binder = <span class="cl">AudioBinder</span>()
+    <span class="kw">private var</span> isPlaying = <span class="kw">false</span>
+
+    <span class="kw">inner class</span> <span class="cl">AudioBinder</span> : <span class="cl">Binder</span>() {
+        <span class="kw">fun</span> <span class="fn">getService</span>(): <span class="cl">AudioStreamingService</span> = <span class="kw">this@AudioStreamingService</span>
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+        <span class="fn">createNotificationChannel</span>()
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStartCommand</span>(intent: <span class="cl">Intent</span>?, flags: <span class="cl">Int</span>, startId: <span class="cl">Int</span>): <span class="cl">Int</span> {
+        <span class="kw">super</span>.<span class="fn">onStartCommand</span>(intent, flags, startId)
+        <span class="kw">val</span> notification = <span class="fn">buildNotification</span>()
+
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT &gt;= <span class="cl">Build</span>.VERSION_CODES.Q) {
+            <span class="fn">startForeground</span>(
+                <span class="nu">1001</span>,
+                notification,
+                <span class="cl">ServiceInfo</span>.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
+        } <span class="kw">else</span> {
+            <span class="fn">startForeground</span>(<span class="nu">1001</span>, notification)
+        }
+
+        lifecycleScope.<span class="fn">launch</span>(<span class="cl">Dispatchers</span>.IO) {
+            <span class="fn">startStreamingEngine</span>()
+        }
+
+        <span class="kw">return</span> START_STICKY
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onBind</span>(intent: <span class="cl">Intent</span>): <span class="cl">IBinder</span> {
+        <span class="kw">super</span>.<span class="fn">onBind</span>(intent)
+        <span class="kw">return</span> binder
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onDestroy</span>() {
+        <span class="kw">super</span>.<span class="fn">onDestroy</span>()
+        <span class="fn">stopStreamingEngine</span>()
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Pros</th><th>Cons</th><th>Modern Status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Foreground Service</strong></td>
+            <td>High OS priority, not killed during Doze</td>
+            <td>Mandatory notification, battery intensive, complex type policies</td>
+            <td>Active (Strictly audited API 34+)</td>
+          </tr>
+          <tr>
+            <td><strong>IntentService</strong></td>
+            <td>Worker thread queue, auto stop</td>
+            <td>Subject to API 26+ background execution limits</td>
+            <td><strong>Deprecated</strong> (Use WorkManager)</td>
+          </tr>
+          <tr>
+            <td><strong>LifecycleService</strong></td>
+            <td>Integrates with <code>lifecycleScope</code> and Flow</td>
+            <td>Still requires standard service management</td>
+            <td>Recommended for Jetpack services</td>
+          </tr>
+          <tr>
+            <td><strong>WorkManager</strong></td>
+            <td>Persisted in SQLite, constraint-driven, battery friendly</td>
+            <td>Not suited for continuous real-time audio/GPS</td>
+            <td>Recommended for all deferrable tasks</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Blocking the Main Thread in onStartCommand</div>
+      <p>Services run on the Main Thread. Doing file I/O or network requests directly inside <code>onStartCommand()</code> will trigger an ANR (Application Not Responding) within 5 seconds. Always launch work in a coroutine or background thread.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Missing startForeground() within 5 Seconds</div>
+      <p>Calling <code>startForegroundService()</code> creates a 5-second OS timer. If the service does not call <code>startForeground(id, notification)</code> within that window, the OS throws an <code>ANR / RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()</code> and crashes the app.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Leaking ServiceConnection via Unbind Omission</div>
+      <p>Every <code>bindService()</code> in an Activity or Fragment MUST have a matching <code>unbindService()</code> in <code>onStop()</code> or <code>onDestroy()</code>. Failure to unbind causes memory leaks and keeps the Service alive indefinitely in memory.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "An Android Service is a non-UI component for running tasks. It runs on the main thread by default. Services come in three forms: Started (runs until stopped), Bound (client-server IPC via IBinder), and Foreground (user-aware task with ongoing notification). In modern Android, background services are replaced by WorkManager, while Foreground Services strictly require foregroundServiceType declarations on Android 14."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "Historically, Started Services were used for background tasks, but API 26 Background Execution Limits made launching background services from the background illegal. Today, Foreground Services are reserved for user-noticeable work like media playback and GPS navigation. On Android 14 (API 34), apps must declare explicit foregroundServiceType attributes in the manifest and specify them in startForeground().<br><br>
+      For lifecycle management, onStartCommand returns START_STICKY, START_NOT_STICKY, or START_REDELIVER_INTENT to control restart behavior after low-memory kills. For Bound Services, components connect via ServiceConnection and communicate using an IBinder. Jetpack's LifecycleService enables coroutine lifecycleScope integration."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Main Thread Default:</strong> Services run on UI thread unless dispatched explicitly.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Foreground Service 5s Rule:</strong> Must call <code>startForeground()</code> within 5s of <code>startForegroundService()</code>.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>onStartCommand Flags:</strong> <code>START_STICKY</code> vs <code>START_NOT_STICKY</code> vs <code>START_REDELIVER_INTENT</code>.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Android 14 Requirements:</strong> Manifest <code>foregroundServiceType</code> and runtime permissions.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>SERVICE TYPES</h4>
+        <pre><code>Foreground -> startForeground() + Notification
+Bound      -> bindService() + IBinder
+Started    -> startService() + onStartCommand
+Lifecycle  -> LifecycleService + lifecycleScope</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ONSTARTCOMMAND FLAGS</h4>
+        <pre><code>START_STICKY           -> Recreate, null intent
+START_NOT_STICKY       -> Do not recreate
+START_REDELIVER_INTENT -> Recreate with original intent</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>API 34+ FOREGROUND TYPES</h4>
+        <pre><code>android:foregroundServiceType="
+  location | mediaPlayback | health |
+  dataSync | connectedDevice | camera
+"</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CRITICAL RULES</h4>
+        <pre><code>Runs on Main Thread by default!
+startForeground within 5 seconds.
+IntentService is deprecated -> WorkManager.
+Unbind on onDestroy to prevent leaks.</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — On which thread does an Android Service run by default?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">An Android Service runs on the <strong>Main (UI) Thread</strong> of the hosting process by default. Performing heavy calculations, database queries, or network requests directly inside a Service will freeze the UI and cause an ANR (Application Not Responding) error. Background work must be offloaded using coroutines or background threads.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the purpose of START_STICKY in onStartCommand()?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>START_STICKY</code> tells the Android OS that if the service process is killed due to low memory, the OS should recreate the service when resources become available and call <code>onStartCommand()</code> with a <code>null</code> Intent. It is ideal for continuous background operations like music streaming services.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — Why was IntentService deprecated?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>IntentService</code> was deprecated in API 30 because it does not conform to Android 8.0+ (API 26) Background Execution Limits. It cannot be launched from the background without throwing exceptions. Google officially recommends replacing <code>IntentService</code> with <code>WorkManager</code> (via <code>CoroutineWorker</code>) or Jetpack JobIntentService.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — What happens if startForeground() is not called within 5 seconds of startForegroundService()?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">If an app calls <code>startForegroundService()</code> and does not invoke <code>startForeground(notificationId, notification)</code> inside the service within 5 seconds, the system throws a <code>RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()</code>, causing an immediate fatal app crash.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — What is the lifecycle difference between a Started Service and a Bound Service?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">A <strong>Started Service</strong> is started via <code>startService()</code>, runs indefinitely until it calls <code>stopSelf()</code> or another component calls <code>stopService()</code>. A <strong>Bound Service</strong> is started when a client binds via <code>bindService()</code> and is automatically destroyed by the OS when all clients have called <code>unbindService()</code> (unless it was also started with <code>startService()</code>).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — Explain the difference between START_NOT_STICKY and START_REDELIVER_INTENT.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>START_NOT_STICKY</code> tells the OS not to recreate the service if killed under memory pressure, unless new start intents are queued. <code>START_REDELIVER_INTENT</code> tells the OS to recreate the service AND redeliver the exact original <code>Intent</code> (with all extras) that was being processed at the time of the kill.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — What is a LifecycleService and why is it preferred in modern Android?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>LifecycleService</code> is an <code>androidx.lifecycle</code> component extending <code>Service</code> that implements <code>LifecycleOwner</code>. It gives the service access to <code>lifecycleScope</code>, allowing coroutines to be launched and automatically cancelled when the service's <code>onDestroy()</code> fires, avoiding coroutine leaks.</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — How do you build a multi-process Bound Service using AIDL?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Define an <code>.aidl</code> file specifying interface methods.<br>2. Android SDK generates a Java interface with an internal <code>Stub</code> abstract class extending <code>Binder</code>.<br>3. In the Service, implement the <code>Stub</code> and return it in <code>onBind()</code>.<br>4. In the Client app, implement <code>ServiceConnection</code>; in <code>onServiceConnected()</code>, call <code>IMyAidlInterface.Stub.asInterface(service)</code>.<br>5. Handle <code>RemoteException</code> on all IPC method calls.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — What changes are required to adapt a Foreground Location Service for Android 14 (API 34)?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Declare <code>&lt;uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" /&gt;</code> and <code>ACCESS_FINE_LOCATION</code> in the manifest.<br>2. In manifest <code>&lt;service&gt;</code> tag, add <code>android:foregroundServiceType="location"</code>.<br>3. In code, pass <code>ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION</code> to <code>startForeground()</code>.<br>4. Request runtime permissions before starting the service; otherwise a <code>SecurityException</code> will be thrown.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — How would you communicate state from a Foreground Service to a Compose UI?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Expose a singleton <code>StateFlow</code> repository or shared domain model injected into both the <code>ForegroundService</code> and the <code>ViewModel</code> via Hilt. The Service updates the <code>MutableStateFlow</code> in the repository, and the ViewModel exposes it as a read-only <code>StateFlow</code> collected in Jetpack Compose using <code>collectAsStateWithLifecycle()</code>. This decouples the Service from the UI and eliminates complex Binder connection boilerplate.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

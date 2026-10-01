@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>19A — Data &amp; Network Security | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">19A · Data &amp; Network Security</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>19A</span> — Data &amp; Network Security</h1>
+    <p class="hero-desc">Android Sandbox, Hardware-Backed Keystore, EncryptedSharedPreferences, SQLCipher, TLS enforcement, Certificate Pinning, Network Security Config, and secrets handling.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 19A</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 (Security Architecture)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Android Security Model</div>
+    <p>Android security relies on the <strong>Linux Application Sandbox</strong>. Each app runs with a distinct Linux User ID (UID) in its own process. By default, apps cannot access other apps' private data directories (<code>/data/data/&lt;package_name&gt;</code>).</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Core Android Security Pillars</div>
+      <ul>
+        <li><strong>Hardware-Backed Keystore:</strong> Private keys and symmetric keys reside in a Secure Element / TEE (Trusted Execution Environment). Key material never enters the Android OS user space memory.</li>
+        <li><strong>EncryptedSharedPreferences:</strong> AES-256 GCM encryption for key-value storage backed by a Keystore master key.</li>
+        <li><strong>Network Security Config:</strong> Declarative XML rules enforcing HTTPS, disabling cleartext traffic, and configuring custom trust anchors.</li>
+        <li><strong>Certificate Pinning:</strong> Restricts accepted TLS certificates to specific cryptographic public key hashes (SHA-256 pins).</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works &amp; Keystore →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works Under the Hood</div>
+
+    <h3>1. Android Keystore System</h3>
+    <p>The Android Keystore lets apps create and use cryptographic keys without exposing key bytes to the app process or RAM. Operations (signing, decryption) are executed inside the secure hardware (TEE/StrongBox):</p>
+    <pre><code><span class="kw">val</span> keyGenerator = <span class="cl">KeyGenerator</span>.<span class="fn">getInstance</span>(
+    <span class="cl">KeyProperties</span>.KEY_ALGORITHM_AES,
+    <span class="str">"AndroidKeyStore"</span>
+)
+<span class="kw">val</span> spec = <span class="cl">KeyGenParameterSpec</span>.<span class="cl">Builder</span>(
+    <span class="str">"MyMasterKeyAlias"</span>,
+    <span class="cl">KeyProperties</span>.PURPOSE_ENCRYPT <span class="kw">or</span> <span class="cl">KeyProperties</span>.PURPOSE_DECRYPT
+)
+    .<span class="fn">setBlockModes</span>(<span class="cl">KeyProperties</span>.BLOCK_MODE_GCM)
+    .<span class="fn">setEncryptionPaddings</span>(<span class="cl">KeyProperties</span>.ENCRYPTION_PADDING_NONE)
+    .<span class="fn">setKeySize</span>(<span class="nu">256</span>)
+    .<span class="fn">build</span>()
+
+keyGenerator.<span class="fn">init</span>(spec)
+keyGenerator.<span class="fn">generateKey</span>()</code></pre>
+
+    <h3>2. EncryptedSharedPreferences (Jetpack Security)</h3>
+    <p>Uses a two-tier key scheme: A <strong>Master Key</strong> stored in the Android Keystore encrypts keyset subkeys (using Tink), which encrypt the SharedPreferences values via AES-256 GCM and keys via AES-256 SIV.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Network Security &amp; Pinning →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. Network Security &amp; Certificate Pinning</div>
+
+    <h3>1. Network Security Config (res/xml/network_security_config.xml)</h3>
+    <pre><code><span class="cm">&lt;!-- Disallow all cleartext HTTP and enforce TLS --&gt;</span>
+&lt;network-security-config&gt;
+    &lt;base-config cleartextTrafficPermitted="false"&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="system" /&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;api.bank.com&lt;/domain&gt;
+        &lt;pin-set expiration="2026-12-31"&gt;
+            &lt;pin digest="SHA-256"&gt;k2v657xBsOwg11+/sgYDnU542/gGHPQFiXZq5PCmj0=&lt;/pin&gt;
+            &lt;!-- Backup pin required for certificate rotation --&gt;
+            &lt;pin digest="SHA-256"&gt;0Z/WvNvqA9oPj1m12Y2F4Q1aK0bFqW8lG5E4Q3P2A1=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;</code></pre>
+
+    <h3>2. OkHttp CertificatePinner</h3>
+    <pre><code><span class="kw">val</span> certPinner = <span class="cl">CertificatePinner</span>.<span class="cl">Builder</span>()
+    .<span class="fn">add</span>(<span class="str">"api.bank.com"</span>, <span class="str">"sha256/k2v657xBsOwg11+/sgYDnU542/gGHPQFiXZq5PCmj0="</span>)
+    .<span class="fn">add</span>(<span class="str">"api.bank.com"</span>, <span class="str">"sha256/0Z/WvNvqA9oPj1m12Y2F4Q1aK0bFqW8lG5E4Q3P2A1="</span>) <span class="cm">// Backup pin</span>
+    .<span class="fn">build</span>()
+
+<span class="kw">val</span> okHttpClient = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+    .<span class="fn">certificatePinner</span>(certPinner)
+    .<span class="fn">build</span>()</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Example (Secure Auth Token Storage)</div>
+
+    <pre><code><span class="kw">class</span> <span class="cl">SecureTokenStorage</span>(context: <span class="cl">Context</span>) {
+
+    <span class="kw">private val</span> masterKey = <span class="cl">MasterKey</span>.<span class="cl">Builder</span>(context)
+        .<span class="fn">setKeyScheme</span>(<span class="cl">MasterKey</span>.<span class="cl">KeyScheme</span>.AES256_GCM)
+        .<span class="fn">build</span>()
+
+    <span class="kw">private val</span> sharedPreferences = <span class="cl">EncryptedSharedPreferences</span>.<span class="fn">create</span>(
+        context,
+        <span class="str">"secure_bank_prefs"</span>,
+        masterKey,
+        <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefKeyEncryptionScheme</span>.AES256_SIV,
+        <span class="cl">EncryptedSharedPreferences</span>.<span class="cl">PrefValueEncryptionScheme</span>.AES256_GCM
+    )
+
+    <span class="kw">fun</span> <span class="fn">saveAuthToken</span>(token: <span class="cl">String</span>) {
+        sharedPreferences.<span class="fn">edit</span>().<span class="fn">putString</span>(<span class="str">"AUTH_JWT"</span>, token).<span class="fn">apply</span>()
+    }
+
+    <span class="kw">fun</span> <span class="fn">getAuthToken</span>(): <span class="cl">String</span>? = sharedPreferences.<span class="fn">getString</span>(<span class="str">"AUTH_JWT"</span>, <span class="kw">null</span>)
+
+    <span class="kw">fun</span> <span class="fn">clear</span>() = sharedPreferences.<span class="fn">edit</span>().<span class="fn">clear</span>().<span class="fn">apply</span>()
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Storage Mechanism</th><th>Encryption Level</th><th>Performance</th><th>Best For</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>EncryptedSharedPreferences</strong></td>
+            <td>Hardware Keystore + AES-256</td>
+            <td>Medium</td>
+            <td>Auth JWTs, session tokens, user secrets</td>
+          </tr>
+          <tr>
+            <td><strong>SQLCipher for Android</strong></td>
+            <td>Full DB page-level AES-256</td>
+            <td>Slight SQL overhead (5-15%)</td>
+            <td>Encrypted offline financial / health records</td>
+          </tr>
+          <tr>
+            <td><strong>Standard SharedPreferences</strong></td>
+            <td><strong>None (Plaintext XML)</strong></td>
+            <td>Fastest</td>
+            <td>Non-sensitive UI settings (dark mode, layout)</td>
+          </tr>
+          <tr>
+            <td><strong>Raw Android Keystore AES</strong></td>
+            <td>Direct TEE encryption</td>
+            <td>Fastest crypto</td>
+            <td>Custom binary file encryption</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Hardcoding API Secrets &amp; Private Keys in Kotlin Code</div>
+      <p>Strings in Kotlin source code or <code>BuildConfig</code> are trivially extracted in seconds via <code>jadx-gui</code> or <code>strings classes.dex</code>. Sensitive backend secrets must live on a backend proxy server; client-side keys should be obfuscated with NDK C++ JNI and protected via API gateway authentication.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Single Certificate Pin Brick Hazard</div>
+      <p>Pinning a single leaf certificate without configuring a <strong>backup pin</strong> (intermediate CA or backup public key) means your app will permanently fail to connect to your backend if your production certificate expires or is revoked, requiring an emergency Play Store update.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Sensitive Logging in Release Builds (Timber)</div>
+      <p>Logging user PII, credit card details, or auth tokens via <code>Log.d()</code> exposes them to Android Logcat. In production, use Timber with a release tree that strips debug and sensitive logs.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "Android security follows defense-in-depth: the Linux UID sandbox isolates private app storage, the hardware-backed Android Keystore generates and stores cryptographic keys inside the TEE/StrongBox so raw keys never enter RAM, and EncryptedSharedPreferences protects local auth tokens. Over the wire, Network Security Config enforces TLS, and OkHttp CertificatePinner prevents Man-in-the-Middle attacks."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "At rest, sensitive tokens and keys must never be stored in plain SharedPreferences. We use Jetpack Security's EncryptedSharedPreferences, which uses a 2-tier key model: a Keystore MasterKey encrypts keyset encryption subkeys via AES-256 GCM. For relational datasets, SQLCipher encrypts SQLite databases at the page level.<br><br>
+      In transit, Android disables cleartext HTTP by default via Network Security Config. For high-security banking endpoints, we enforce Certificate Pinning on the SPKI public key hash. To prevent app brinking during certificate rotation, we always include primary and backup pins. In code, secrets are never hardcoded; Timber release trees strip Logcat logs, and sensitive crypto operations require biometric user presence."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Android Keystore / TEE:</strong> Keys generated and stored in secure hardware; never leave TEE.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>EncryptedSharedPreferences:</strong> MasterKey + AES-256 GCM / SIV.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Certificate Pinning:</strong> Public key SHA-256 pinning + mandatory backup pins.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Network Security Config:</strong> <code>cleartextTrafficPermitted="false"</code>.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>DATA AT REST</h4>
+        <pre><code>Android Keystore -> TEE / StrongBox backed
+EncryptedPrefs   -> AES-256 GCM + MasterKey
+SQLCipher        -> Encrypted SQLite pages
+Never store      -> Plain text tokens / passwords</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DATA IN TRANSIT</h4>
+        <pre><code>NetworkSecurityConfig -> Disable cleartext
+CertificatePinner    -> OkHttp SHA-256 pin
+Backup Pin           -> Mandatory for rotation
+TLS 1.3 / 1.2        -> Modern cipher suites</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SECRETS &amp; KEYS</h4>
+        <pre><code>BuildConfig / NDK   -> Obfuscation, not encryption
+Backend Proxy       -> True secret isolation
+Keystore Alias      -> Hardware key reference</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LOGGING &amp; PII</h4>
+        <pre><code>Timber.plant(ReleaseTree) -> Strip debug logs
+FLAG_SECURE -> Prevent screenshots / recents preview</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — How does the Android Application Sandbox isolate app data?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Android assigns each installed application a unique Linux User ID (UID) and runs it in an isolated process. File system permissions ensure that private directories (<code>/data/data/&lt;package_name&gt;</code>) can only be read and written by that specific UID, preventing other apps from accessing private files.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the primary advantage of storing keys in the Android Keystore?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The Android Keystore protects key material from being extracted. Keys are generated and stored inside hardware-backed secure enclaves (TEE or StrongBox). Cryptographic operations (signing, decryption) are performed inside the hardware module; raw key bytes are never exposed in the application's RAM.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is Certificate Pinning and why is it used?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Certificate Pinning is a security technique where the client app hardcodes or verifies the exact cryptographic public key hash (SPKI SHA-256) of the server's certificate. This protects against Man-in-the-Middle (MitM) attacks where a compromised or rogue Certificate Authority (CA) issues fraudulent certificates.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — How does EncryptedSharedPreferences work under the hood?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">It uses Google's Tink crypto library with a 2-tier key architecture: A hardware-backed <code>MasterKey</code> in the Android Keystore encrypts a local keyset. Key names are deterministically encrypted using AES-256 SIV (so keys can be queried), and key values are encrypted using AES-256 GCM authenticated encryption.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — Why must you always configure a backup pin when using Certificate Pinning?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">If you pin only one certificate/key and that certificate expires, is revoked, or the server rotates keys due to a compromise, your mobile app will reject the new server certificate and permanently fail all network calls. A backup pin ensures smooth rotation without breaking existing client apps.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What is SQLCipher and how does it differ from standard Room DB?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Standard Room DB stores SQLite database files in plaintext on disk. SQLCipher is an open-source extension providing transparent 256-bit AES page-level encryption for the entire SQLite database file, headers, and journal data. It integrates with Room using <code>SupportFactory(passphrase)</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — How do you prevent sensitive screens from appearing in Android Recents / App Switcher?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Call <code>window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)</code> in the Activity's <code>onCreate()</code>. This instructs the OS to treat the window surface as secure, blocking screenshots, screen recordings, and masking the window preview in the recent apps task switcher.</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — How do you protect a third-party payment gateway API secret in a mobile client?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Never store master payment gateway private keys in the client app code or APK. The only secure architecture is a <strong>Backend-for-Frontend (BFF) proxy</strong>: The Android client authenticates against your own secure backend with a user JWT, your backend communicates with the payment gateway using the secret key, and passes a short-lived, scoped client token/intent back to the Android app.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — How would you implement biometric-bound encryption for high-value banking transactions?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Generate an AES key in Keystore with <code>setUserAuthenticationRequired(true)</code> and <code>setUserAuthenticationParameters(0, AUTH_BIOMETRIC_STRONG)</code>.<br>2. Initialize a <code>Cipher</code> in <code>ENCRYPT_MODE</code>.<br>3. Wrap the cipher in <code>BiometricPrompt.CryptoObject(cipher)</code>.<br>4. Present <code>BiometricPrompt.authenticate(promptInfo, cryptoObject)</code>.<br>5. In <code>onAuthenticationSucceeded()</code>, obtain the authenticated cipher from <code>result.cryptoObject.cipher</code> and encrypt transaction payload.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — What happens to Keystore keys when the user changes or removes their device lock screen PIN/biometrics?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">If a key is generated with <code>setInvalidatedByBiometricEnrollment(true)</code> or bound to user authentication, enrolling a new fingerprint or disabling the lock screen permanently <strong>invalidates</strong> the key in the TEE. Attempting to use the key throws a <code>KeyPermanentlyInvalidatedException</code>. The app must detect this exception, clear local credentials, and force the user to re-authenticate with server credentials.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

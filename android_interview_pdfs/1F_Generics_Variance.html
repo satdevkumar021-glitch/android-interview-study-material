@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1F — Generics & Variance | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1F · Generics & Variance</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1F</span> — Generics &amp; Variance</h1>
+    <p class="hero-desc">Generics, <code>in</code>/<code>out</code> variance annotations, covariance, contravariance — the type-system mechanics behind Flow, StateFlow, Result, and Clean Architecture generics.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1F</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What it is</h3>
+    <p>Generics let you write type-safe code that works with multiple types without duplication. Variance (<code>in</code>/<code>out</code>) controls how generic types relate when their type parameters are in a subtype relationship — determining whether <code>List&lt;Dog&gt;</code> can be used as a <code>List&lt;Animal&gt;</code>.</p>
+    <h3>Why it matters for Android</h3>
+    <ul>
+      <li><code>Flow&lt;T&gt;</code>, <code>StateFlow&lt;T&gt;</code>, <code>Result&lt;T&gt;</code>, <code>LiveData&lt;T&gt;</code> are all generic — understanding variance explains why <code>StateFlow&lt;UiState&gt;</code> is safe to assign to <code>Flow&lt;UiState&gt;</code>.</li>
+      <li><code>BaseUseCase&lt;in P, out R&gt;</code> — the variance annotations are meaningful and necessary.</li>
+      <li>Repository generics: <code>Resource&lt;T&gt;</code>, <code>ApiResult&lt;T&gt;</code> — you need to design these correctly.</li>
+      <li>Compose: <code>@Composable</code> functions with generic state types.</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <strong>out T (covariant)</strong> = T only comes OUT (returned). Safe to read, not write. A <code>Producer&lt;Dog&gt;</code> IS-A <code>Producer&lt;Animal&gt;</code>.<br>
+      <strong>in T (contravariant)</strong> = T only goes IN (consumed). Safe to write, not read. A <code>Consumer&lt;Animal&gt;</code> IS-A <code>Consumer&lt;Dog&gt;</code>.<br>
+      <strong>Invariant (no annotation)</strong> = T both in and out. No subtype relationship. <code>MutableList&lt;Dog&gt;</code> is NOT a <code>MutableList&lt;Animal&gt;</code>.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Basic Generics</h3>
+    <pre><code><span class="cm">// Generic function</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">wrapInResult</span>(value: <span class="cl">T</span>): <span class="cl">Result</span>&lt;<span class="cl">T</span>&gt; = <span class="cl">Result</span>.<span class="fn">success</span>(value)
+
+<span class="cm">// Generic class</span>
+<span class="kw">class</span> <span class="cl">Box</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> value: <span class="cl">T</span>)
+
+<span class="cm">// Multiple type params</span>
+<span class="kw">class</span> <span class="cl">Pair</span>&lt;<span class="cl">A</span>, <span class="cl">B</span>&gt;(<span class="kw">val</span> first: <span class="cl">A</span>, <span class="kw">val</span> second: <span class="cl">B</span>)
+
+<span class="cm">// Upper bound constraint</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span> : <span class="cl">Comparable</span>&lt;<span class="cl">T</span>&gt;&gt; <span class="fn">max</span>(a: <span class="cl">T</span>, b: <span class="cl">T</span>): <span class="cl">T</span> = <span class="kw">if</span> (a > b) a <span class="kw">else</span> b
+
+<span class="cm">// Multiple bounds — use where</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">process</span>(item: <span class="cl">T</span>) <span class="kw">where</span> <span class="cl">T</span> : <span class="cl">Serializable</span>, <span class="cl">T</span> : <span class="cl">Comparable</span>&lt;<span class="cl">T</span>&gt; { }</span></code></pre>
+
+    <h3>The Variance Problem — Why Invariance Exists</h3>
+    <pre><code><span class="cm">// Dogs are Animals — OK</span>
+<span class="kw">val</span> dog: <span class="cl">Animal</span> = <span class="cl">Dog</span>()  <span class="cm">// fine</span>
+
+<span class="cm">// But MutableList&lt;Dog&gt; is NOT a MutableList&lt;Animal&gt; — why?</span>
+<span class="kw">val</span> dogs: <span class="cl">MutableList</span>&lt;<span class="cl">Dog</span>&gt; = <span class="fn">mutableListOf</span>(<span class="cl">Dog</span>())
+<span class="cm">// val animals: MutableList&lt;Animal&gt; = dogs  // ❌ compile error</span>
+
+<span class="cm">// If it were allowed:</span>
+<span class="cm">// animals.add(Cat())  // would corrupt the dogs list!</span>
+<span class="cm">// dogs[0] is now a Cat — type safety broken</span></code></pre>
+    <p>This is why generic types are <strong>invariant by default</strong> — to prevent type-unsafe writes.</p>
+
+    <h3>out T — Covariance (Producer)</h3>
+    <pre><code><span class="cm">// out T: T only appears in OUT position (return type / val)</span>
+<span class="kw">interface</span> <span class="cl">Producer</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {
+    <span class="kw">fun</span> <span class="fn">produce</span>(): <span class="cl">T</span>   <span class="cm">// ✅ T in out position</span>
+    <span class="cm">// fun consume(item: T)  // ❌ compile error: T in in-position</span>
+}
+
+<span class="kw">val</span> dogProducer: <span class="cl">Producer</span>&lt;<span class="cl">Dog</span>&gt; = DogFactory()
+<span class="kw">val</span> animalProducer: <span class="cl">Producer</span>&lt;<span class="cl">Animal</span>&gt; = dogProducer  <span class="cm">// ✅ safe — can only read</span>
+
+<span class="cm">// Real example: Flow is covariant</span>
+<span class="kw">val</span> dogFlow: <span class="cl">Flow</span>&lt;<span class="cl">Dog</span>&gt; = <span class="fn">flowOf</span>(<span class="cl">Dog</span>())
+<span class="kw">val</span> animalFlow: <span class="cl">Flow</span>&lt;<span class="cl">Animal</span>&gt; = dogFlow  <span class="cm">// ✅ Flow&lt;out T&gt;</span></code></pre>
+
+    <h3>in T — Contravariance (Consumer)</h3>
+    <pre><code><span class="cm">// in T: T only appears in IN position (parameter)</span>
+<span class="kw">interface</span> <span class="cl">Consumer</span>&lt;<span class="kw">in</span> <span class="cl">T</span>&gt; {
+    <span class="kw">fun</span> <span class="fn">consume</span>(item: <span class="cl">T</span>)   <span class="cm">// ✅ T in in-position</span>
+    <span class="cm">// fun produce(): T     // ❌ T in out-position — not allowed</span>
+}
+
+<span class="kw">val</span> animalConsumer: <span class="cl">Consumer</span>&lt;<span class="cl">Animal</span>&gt; = AnimalPrinter()
+<span class="kw">val</span> dogConsumer: <span class="cl">Consumer</span>&lt;<span class="cl">Dog</span>&gt; = animalConsumer  <span class="cm">// ✅ Animal consumer can handle Dog</span>
+
+<span class="cm">// Real example: Comparator is contravariant</span>
+<span class="kw">val</span> animalComparator: <span class="cl">Comparator</span>&lt;<span class="cl">Animal</span>&gt; = compareBy { it.name }
+<span class="kw">val</span> dogComparator: <span class="cl">Comparator</span>&lt;<span class="cl">Dog</span>&gt; = animalComparator  <span class="cm">// ✅ works</span></code></pre>
+
+    <h3>Declaration-site vs Use-site Variance</h3>
+    <pre><code><span class="cm">// Declaration-site: variance on the class/interface itself</span>
+<span class="kw">interface</span> <span class="cl">Flow</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt;   <span class="cm">// covariant — defined by the library</span>
+
+<span class="cm">// Use-site: variance at the call site (type projection)</span>
+<span class="kw">fun</span> <span class="fn">copy</span>(from: <span class="cl">Array</span>&lt;<span class="kw">out</span> <span class="cl">Animal</span>&gt;, to: <span class="cl">Array</span>&lt;<span class="cl">Animal</span>&gt;) {
+    <span class="cm">// 'from' is projected — can only read from it</span>
+    <span class="kw">for</span> (item <span class="kw">in</span> from) to[<span class="nu">0</span>] = item
+}
+<span class="cm">// Array is invariant, but use-site 'out' projects it to read-only</span></code></pre>
+
+    <h3>Star Projection *</h3>
+    <pre><code><span class="cm">// * = "I don't know the type parameter"</span>
+<span class="kw">fun</span> <span class="fn">printList</span>(list: <span class="cl">List</span>&lt;*&gt;) {
+    list.<span class="fn">forEach</span> { <span class="fn">println</span>(it) }  <span class="cm">// elements are Any? — read-only</span>
+}
+<span class="cm">// Equivalent to List&lt;out Any?&gt; for reading</span>
+<span class="cm">// Cannot add elements — type unknown</span></code></pre>
+
+    <h3>Key Terms Summary</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Term</th><th>Annotation</th><th>Direction</th><th>Subtype relation</th><th>Real example</th></tr>
+      <tr><td>Invariant</td><td>(none)</td><td>In + Out</td><td>None — exact type only</td><td><code>MutableList&lt;T&gt;</code></td></tr>
+      <tr><td>Covariant</td><td><code>out T</code></td><td>Out only</td><td><code>C&lt;Dog&gt;</code> is <code>C&lt;Animal&gt;</code></td><td><code>Flow&lt;T&gt;</code>, <code>List&lt;T&gt;</code></td></tr>
+      <tr><td>Contravariant</td><td><code>in T</code></td><td>In only</td><td><code>C&lt;Animal&gt;</code> is <code>C&lt;Dog&gt;</code></td><td><code>Comparator&lt;T&gt;</code></td></tr>
+      <tr><td>Star projection</td><td><code>*</code></td><td>Read-only unknown</td><td>Like <code>out Any?</code></td><td><code>List&lt;*&gt;</code></td></tr>
+    </table>
+    </div>
+
+    <h3>Nothing and Any? in variance</h3>
+    <pre><code><span class="cm">// Nothing is a subtype of everything — bottom type</span>
+<span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()
+<span class="cm">// With UiState&lt;out T&gt;, Loading (UiState&lt;Nothing&gt;) is assignable to UiState&lt;Any&gt;</span>
+
+<span class="cm">// Any? is supertype of everything — top type</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span> : <span class="cl">Any</span>&gt; <span class="fn">nonNull</span>(value: <span class="cl">T</span>): <span class="cl">T</span> = value  <span class="cm">// T is non-nullable</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+    <h3>Real Android Use Cases</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Variance used</th><th>Why</th></tr>
+      <tr><td><code>Flow&lt;out T&gt;</code></td><td>Covariant</td><td>Flow only emits (produces) T — safe to assign <code>Flow&lt;Dog&gt;</code> to <code>Flow&lt;Animal&gt;</code></td></tr>
+      <tr><td><code>StateFlow&lt;out T&gt;</code></td><td>Covariant</td><td>Same — value is read-only from the outside</td></tr>
+      <tr><td><code>BaseUseCase&lt;in P, out R&gt;</code></td><td>Contravariant P, Covariant R</td><td>P is consumed (input), R is produced (output)</td></tr>
+      <tr><td><code>sealed class UiState&lt;out T&gt;</code></td><td>Covariant</td><td>Allows <code>UiState.Loading : UiState&lt;Nothing&gt;</code> to be used as <code>UiState&lt;SomeData&gt;</code></td></tr>
+      <tr><td><code>Resource&lt;T&gt;</code> wrapper</td><td>Covariant</td><td>Resource only wraps and exposes data — never mutates it</td></tr>
+      <tr><td>Generic Repository</td><td>Invariant (usually)</td><td>Both reads and writes needed</td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to annotate variance</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Add <code>out</code> if T appears in a function parameter — compile error</li>
+        <li>Add <code>in</code> if T appears as a return type — compile error</li>
+        <li>Use <code>*</code> when you know the type — use the concrete type or bound instead</li>
+        <li>Over-engineer variance for simple use cases — most app-level classes don't need it</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app — generic result wrapper, covariant UiState, contravariant use case base — all in Clean Architecture.
+    </div>
+
+    <h3>Covariant UiState — Loading works for any T</h3>
+    <pre><code><span class="cm">// domain/state/UiState.kt</span>
+<span class="kw">sealed class</span> <span class="cl">UiState</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {           <span class="cm">// out T: only produced, never consumed</span>
+    <span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()   <span class="cm">// Nothing = valid subtype of any T</span>
+    <span class="kw">data class</span>  <span class="cl">Success</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> data: <span class="cl">T</span>) : <span class="cl">UiState</span>&lt;<span class="cl">T</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> msg: <span class="cl">String</span>) : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()
+}
+
+<span class="cm">// Because UiState is covariant:</span>
+<span class="kw">val</span> state: <span class="cl">UiState</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; = <span class="cl">UiState</span>.Loading  <span class="cm">// ✅</span>
+<span class="kw">val</span> state2: <span class="cl">UiState</span>&lt;<span class="cl">UserProfile</span>&gt; = <span class="cl">UiState</span>.Loading       <span class="cm">// ✅ same Loading instance</span></code></pre>
+
+    <h3>Covariant Flow — StateFlow assignable to Flow</h3>
+    <pre><code><span class="cm">// presentation/TransactionViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">TransactionViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getTransactions: <span class="cl">GetTransactionsUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">UiState</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt;&gt;(<span class="cl">UiState</span>.Loading)
+
+    <span class="cm">// Exposed as Flow — safe because StateFlow is covariant (out T)</span>
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">UiState</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt;&gt; = _uiState.<span class="fn">asStateFlow</span>()
+    <span class="cm">// Could also expose as Flow&lt;UiState&lt;...&gt;&gt; — valid because Flow&lt;out T&gt;</span>
+}</code></pre>
+
+    <h3>Generic BaseUseCase with in/out</h3>
+    <pre><code><span class="cm">// domain/usecase/BaseUseCase.kt</span>
+<span class="kw">abstract class</span> <span class="cl">BaseUseCase</span>&lt;<span class="kw">in</span> <span class="cl">P</span>, <span class="kw">out</span> <span class="cl">R</span>&gt; {
+    <span class="cm">// P is consumed (input param) → in P</span>
+    <span class="cm">// R is produced (return value) → out R</span>
+    <span class="kw">protected abstract suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">P</span>): <span class="cl">R</span>
+
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(params: <span class="cl">P</span>): <span class="cl">Result</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">try</span> {
+        <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">execute</span>(params))
+    } <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) { <span class="kw">throw</span> e }
+      <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="cl">Result</span>.<span class="fn">failure</span>(e) }
+}
+
+<span class="cm">// Usage: P=String (userId), R=UserProfile</span>
+<span class="kw">class</span> <span class="cl">GetUserProfileUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">UserRepository</span>
+) : <span class="cl">BaseUseCase</span>&lt;<span class="cl">String</span>, <span class="cl">UserProfile</span>&gt;() {
+    <span class="kw">override suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">String</span>) = repo.<span class="fn">getUser</span>(params)
+}</code></pre>
+
+    <h3>Generic ApiResult wrapper</h3>
+    <pre><code><span class="cm">// data/remote/ApiResult.kt</span>
+<span class="kw">sealed class</span> <span class="cl">ApiResult</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {
+    <span class="kw">data class</span>  <span class="cl">Success</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> data: <span class="cl">T</span>) : <span class="cl">ApiResult</span>&lt;<span class="cl">T</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">HttpError</span>(<span class="kw">val</span> code: <span class="cl">Int</span>, <span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">ApiResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">NetworkError</span>(<span class="kw">val</span> cause: <span class="cl">Throwable</span>) : <span class="cl">ApiResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">ApiResult</span>&lt;<span class="cl">Nothing</span>&gt;()
+}
+
+<span class="cm">// Map the data while preserving error cases</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>, <span class="cl">R</span>&gt; <span class="cl">ApiResult</span>&lt;<span class="cl">T</span>&gt;.<span class="fn">map</span>(transform: (<span class="cl">T</span>) -> <span class="cl">R</span>): <span class="cl">ApiResult</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">when</span> (<span class="kw">this</span>) {
+    <span class="kw">is</span> <span class="cl">ApiResult</span>.<span class="cl">Success</span>      -> <span class="cl">ApiResult</span>.<span class="cl">Success</span>(<span class="fn">transform</span>(data))
+    <span class="kw">is</span> <span class="cl">ApiResult</span>.<span class="cl">HttpError</span>    -> <span class="kw">this</span>
+    <span class="kw">is</span> <span class="cl">ApiResult</span>.<span class="cl">NetworkError</span> -> <span class="kw">this</span>
+    <span class="cl">ApiResult</span>.Loading          -> <span class="cl">ApiResult</span>.Loading
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td>Invariant generic (default)</td><td>Simple, safe, no annotation</td><td>No subtype flexibility</td><td>Mutable containers, classes with both reads + writes</td></tr>
+      <tr><td><code>out T</code> (covariant)</td><td>Subtype flexibility for producers</td><td>Cannot accept T as input</td><td>Read-only wrappers: Flow, UiState, Result, ApiResult</td></tr>
+      <tr><td><code>in T</code> (contravariant)</td><td>Supertype flexibility for consumers</td><td>Cannot return T</td><td>Consumers: Comparator, event sinks, callbacks</td></tr>
+      <tr><td>Use-site variance (<code>Array&lt;out T&gt;</code>)</td><td>Project invariant types read-only at call site</td><td>Verbose; type projection loses write capability</td><td>When working with Java invariant types like Array</td></tr>
+      <tr><td>Star projection <code>*</code></td><td>Works when type unknown</td><td>Loses type info; can only read as Any?</td><td>Logging, reflection, type-erasure scenarios</td></tr>
+    </table>
+    </div>
+    <h3>Interviewer Comparisons</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Expect These</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Java wildcards vs Kotlin variance</strong> — Java uses <code>? extends T</code> (covariant) and <code>? super T</code> (contravariant) at use-site. Kotlin uses <code>out</code>/<code>in</code> at declaration-site (cleaner) or use-site projection.</li>
+        <li><strong>List vs MutableList variance</strong> — <code>List&lt;out T&gt;</code> is covariant (read-only). <code>MutableList&lt;T&gt;</code> is invariant (read+write).</li>
+        <li><strong>Flow vs StateFlow vs SharedFlow</strong> — all are <code>out T</code> covariant; StateFlow is a subtype of Flow, which is why it can be assigned to a Flow reference.</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>out T with mutable state — type safety violation attempt</h3>
+    <pre><code><span class="cm">// ❌ Won't compile — correctly rejected by the compiler</span>
+<span class="kw">class</span> <span class="cl">BadBox</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt;(<span class="kw">var</span> value: <span class="cl">T</span>) <span class="cm">// ❌ var exposes T in in-position (setter)</span>
+
+<span class="cm">// ✅ GOOD — val only for covariant types</span>
+<span class="kw">class</span> <span class="cl">Box</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt;(<span class="kw">val</span> value: <span class="cl">T</span>)   <span class="cm">// ✅ read-only property</span></code></pre>
+
+    <h3>Forgetting Nothing for no-data sealed subtypes</h3>
+    <pre><code><span class="cm">// ❌ BAD — UiState.Loading has type param UiState&lt;Unit&gt; — awkward</span>
+<span class="kw">sealed class</span> <span class="cl">UiState</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {
+    <span class="kw">object</span> <span class="cl">Loading</span> : <span class="cl">UiState</span>&lt;<span class="cl">Unit</span>&gt;()   <span class="cm">// Unit — leaks into type signature</span>
+}
+<span class="kw">val</span> s: <span class="cl">UiState</span>&lt;<span class="cl">List</span>&lt;<span class="cl">User</span>&gt;&gt; = <span class="cl">UiState</span>.Loading  <span class="cm">// ❌ won't compile</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Nothing is subtype of every type; works with covariant out T</span>
+<span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">UiState</span>&lt;<span class="cl">Nothing</span>&gt;()
+<span class="kw">val</span> s: <span class="cl">UiState</span>&lt;<span class="cl">List</span>&lt;<span class="cl">User</span>&gt;&gt; = <span class="cl">UiState</span>.Loading  <span class="cm">// ✅</span></code></pre>
+
+    <h3>Type erasure at runtime</h3>
+    <pre><code><span class="cm">// ❌ BAD — generic type erased at runtime</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">isListOf</span>(list: <span class="cl">List</span>&lt;*&gt;): <span class="cl">Boolean</span> = list <span class="kw">is</span> <span class="cl">List</span>&lt;<span class="cl">T</span>&gt;  <span class="cm">// ❌ unchecked cast warning</span>
+
+<span class="cm">// ✅ GOOD — use reified with inline (covered in 1I)</span>
+<span class="kw">inline fun</span> &lt;<span class="kw">reified</span> <span class="cl">T</span>&gt; <span class="fn">isListOf</span>(list: <span class="cl">List</span>&lt;*&gt;): <span class="cl">Boolean</span> =
+    list.<span class="fn">all</span> { it <span class="kw">is</span> <span class="cl">T</span> }</code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Use <code>out T</code> for read-only wrappers: <code>UiState&lt;out T&gt;</code>, <code>ApiResult&lt;out T&gt;</code>, <code>Resource&lt;out T&gt;</code>.</li>
+      <li>Use <code>Nothing</code> as type arg for no-data sealed subtypes — allows assignment to any covariant generic.</li>
+      <li>Expose <code>StateFlow</code> as <code>StateFlow</code> (not <code>Flow</code>) in ViewModels — provides <code>.value</code> access; covariance means it's still assignable to <code>Flow</code> when needed.</li>
+      <li>Don't over-annotate — most application-level classes are invariant and that's fine.</li>
+      <li>Use <code>where T : SomeInterface</code> for multiple type bounds instead of complex inheritance.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Generics let you write type-safe code that works across multiple types. Variance controls how generic types relate under subtyping. <code>out T</code> means covariant — T is only produced, never consumed, so <code>Producer&lt;Dog&gt;</code> is safely assignable to <code>Producer&lt;Animal&gt;</code>. <code>in T</code> means contravariant — T is only consumed, so <code>Consumer&lt;Animal&gt;</code> works as a <code>Consumer&lt;Dog&gt;</code>. This is why <code>Flow&lt;out T&gt;</code> allows <code>StateFlow&lt;T&gt;</code> to be used as a <code>Flow&lt;T&gt;</code>, and why I annotate <code>UiState&lt;out T&gt;</code> so <code>UiState.Loading : UiState&lt;Nothing&gt;</code> works for any state type."
+    </div>
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "The core question variance answers is: if Dog is a subtype of Animal, is <code>Box&lt;Dog&gt;</code> a subtype of <code>Box&lt;Animal&gt;</code>? By default, no — because if it were, you could write a Cat into a Dog box.<br><br>
+      <code>out T</code> (covariant) makes it safe by restricting T to output positions only — return types and val properties. You can only read T, never write it. So <code>Producer&lt;Dog&gt;</code> is safe as <code>Producer&lt;Animal&gt;</code> — you can only get animals out, and dogs are animals.<br><br>
+      <code>in T</code> (contravariant) restricts T to input positions only. A <code>Consumer&lt;Animal&gt;</code> can handle dogs since dogs are animals — so <code>Consumer&lt;Animal&gt;</code> works as <code>Consumer&lt;Dog&gt;</code>.<br><br>
+      In my Android code: I annotate all read-only result wrappers — <code>UiState&lt;out T&gt;</code>, <code>ApiResult&lt;out T&gt;</code> — as covariant. This lets me use <code>Nothing</code> as the type arg for no-data states like Loading, which then satisfies any <code>UiState&lt;SomeDataType&gt;</code> requirement. This is exactly how Kotlin's built-in <code>Flow&lt;out T&gt;</code> works — <code>StateFlow</code> is a subtype of <code>Flow</code> because of covariance."
+    </div>
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Generic types are <strong>invariant by default</strong> — <code>MutableList&lt;Dog&gt;</code> is NOT a <code>MutableList&lt;Animal&gt;</code></div></div>
+      <div class="must-item"><div class="must-num">2</div><div><code>out T</code> = covariant = T only in output positions = producer; subtype relationship follows type param</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>in T</code> = contravariant = T only in input positions = consumer; subtype relationship reverses</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><code>Flow&lt;out T&gt;</code> — that's why <code>StateFlow&lt;T&gt;</code> is assignable to <code>Flow&lt;T&gt;</code></div></div>
+      <div class="must-item"><div class="must-num">5</div><div><code>Nothing</code> is the bottom type — subtype of everything; enables <code>UiState.Loading : UiState&lt;Nothing&gt;</code> to satisfy any <code>UiState&lt;T&gt;</code> with covariance</div></div>
+      <div class="must-item"><div class="must-num">6</div><div>Declaration-site variance (on the class) is cleaner than use-site projection (on each call site)</div></div>
+    </div>
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>JVM type erasure and how generics are implemented at bytecode level</li>
+      <li><code>reified</code> type parameters with <code>inline</code> functions — covered in 1I</li>
+      <li>Kotlin's <code>@UnsafeVariance</code> annotation</li>
+    </ul>
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>Why is MutableList invariant but List covariant?</td><td><code>List</code> is read-only — T only in output positions → safe to be covariant. <code>MutableList</code> has <code>add(T)</code> — T in input position → must be invariant to prevent type-unsafe writes.</td></tr>
+      <tr><td>What is Nothing in Kotlin?</td><td>The bottom type — a subtype of every type. No instance can ever be created. Used as type arg for sealed subtypes that carry no data, and as return type of functions that never return (throw or infinite loop).</td></tr>
+      <tr><td>What is star projection?</td><td><code>List&lt;*&gt;</code> means "a list of some unknown type." Equivalent to <code>List&lt;out Any?&gt;</code> for reading. You can read elements as <code>Any?</code> but cannot add anything (type unknown).</td></tr>
+      <tr><td>How does Java handle variance vs Kotlin?</td><td>Java uses use-site wildcards: <code>List&lt;? extends Animal&gt;</code> (covariant) and <code>List&lt;? super Dog&gt;</code> (contravariant) — specified at every call site. Kotlin uses declaration-site variance with <code>out</code>/<code>in</code> on the class itself — less repetitive and clearer.</td></tr>
+    </table>
+    </div>
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "The practical payoff of understanding variance in Android is the <code>UiState&lt;out T&gt;</code> + <code>Nothing</code> pattern. By making UiState covariant, a single <code>data object Loading : UiState&lt;Nothing&gt;</code> satisfies every screen's state type — <code>UiState&lt;List&lt;Transaction&gt;&gt;</code>, <code>UiState&lt;UserProfile&gt;</code>, whatever. Without <code>out T</code>, you'd need a <code>Loading</code> instance per generic type, or use <code>UiState&lt;*&gt;</code> and lose type safety. This is the same pattern Kotlin's stdlib uses for <code>Result&lt;out T&gt;</code>."
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>VARIANCE AT A GLANCE</h4>
+        <pre><code>Invariant (default):
+  MutableList&lt;Dog&gt; ≠ MutableList&lt;Animal&gt;
+
+out T (covariant = producer):
+  List&lt;Dog&gt; IS-A List&lt;Animal&gt;
+  Flow&lt;Dog&gt; IS-A Flow&lt;Animal&gt;
+  T only in OUT positions (return/val)
+
+in T (contravariant = consumer):
+  Comparator&lt;Animal&gt; IS-A Comparator&lt;Dog&gt;
+  T only in IN positions (params)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ANDROID EXAMPLES</h4>
+        <pre><code>Flow&lt;out T&gt;       → covariant
+StateFlow&lt;out T&gt;  → covariant (subtype of Flow)
+List&lt;out T&gt;       → covariant (read-only)
+MutableList&lt;T&gt;    → invariant
+Comparator&lt;in T&gt;  → contravariant
+UiState&lt;out T&gt;    → covariant (design pattern)
+BaseUseCase&lt;in P, out R&gt;</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>NOTHING + COVARIANCE</h4>
+        <pre><code>Nothing = bottom type = subtype of all
+// With sealed class UiState&lt;out T&gt;:
+data object Loading : UiState&lt;Nothing&gt;()
+// Assignable to UiState&lt;List&lt;User&gt;&gt; ✅
+// Because Nothing IS-A List&lt;User&gt;
+// and UiState is covariant</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>TYPE BOUNDS</h4>
+        <pre><code>fun &lt;T : Comparable&lt;T&gt;&gt; max(a: T, b: T): T
+// multiple bounds:
+fun &lt;T&gt; f(x: T) where T : A, T : B
+
+// Star projection:
+fun print(list: List&lt;*&gt;)
+// = List&lt;out Any?&gt; — read-only unknown</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>GOTCHAS</h4>
+        <pre><code>out T: var property ❌ (in-position)
+out T: val property ✅
+in T: return type ❌ (out-position)
+in T: fun param ✅
+Type erasure: List&lt;Dog&gt; == List&lt;Cat&gt; at runtime
+Use reified inline for runtime type checks</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>JAVA COMPARISON</h4>
+        <pre><code>Java use-site:
+  List&lt;? extends Animal&gt; = out Animal
+  List&lt;? super Dog&gt;       = in Dog
+
+Kotlin declaration-site (cleaner):
+  class Box&lt;out T&gt;  // annotated once
+  // no per-call-site repetition</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What does it mean for a generic type to be invariant? Give an Android example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Invariant means no subtype relationship exists between generic types even if their type arguments have a subtype relationship. <code>MutableList&lt;Dog&gt;</code> is NOT a subtype of <code>MutableList&lt;Animal&gt;</code>, even though <code>Dog</code> extends <code>Animal</code>. This prevents type-unsafe mutations: if it were allowed, you could add a <code>Cat</code> to a list that was expected to contain only <code>Dog</code>s. Android example: <code>MutableStateFlow&lt;UiState&gt;</code> — invariant because it supports both reads and writes.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What does <code>out T</code> mean? Give a real Kotlin/Android example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>out T</code> declares covariance — T appears only in output positions (return types, val properties). This means if <code>Dog</code> is a subtype of <code>Animal</code>, then <code>Producer&lt;Dog&gt;</code> is a subtype of <code>Producer&lt;Animal&gt;</code>.<br><br>Real example: <code>Flow&lt;out T&gt;</code> in Kotlin coroutines. Because Flow is covariant, <code>StateFlow&lt;Dog&gt;</code> (which extends <code>Flow&lt;Dog&gt;</code>) can be assigned to a <code>Flow&lt;Animal&gt;</code> variable. Also: <code>List&lt;out T&gt;</code> is covariant because it's read-only — no <code>add()</code> method takes T as a parameter.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is <code>Nothing</code> and why is it used with covariant sealed classes?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>Nothing</code> is Kotlin's bottom type — a subtype of every type. No instance of <code>Nothing</code> can be created. Because of covariance: if <code>Nothing</code> is a subtype of T, and <code>UiState</code> is covariant (<code>out T</code>), then <code>UiState&lt;Nothing&gt;</code> is a subtype of <code>UiState&lt;T&gt;</code> for ANY T. This means <code>data object Loading : UiState&lt;Nothing&gt;</code> is assignable to <code>UiState&lt;List&lt;Transaction&gt;&gt;</code>, <code>UiState&lt;UserProfile&gt;</code>, etc. — one Loading object works for all generic types.</div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — Why is List covariant but MutableList invariant in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>List&lt;out T&gt;</code> is read-only — it has no <code>add(T)</code> or <code>set(T)</code> methods. T only appears in output positions (get, iterator, etc.). Because it can never be used to write a T, it's safe to treat a <code>List&lt;Dog&gt;</code> as a <code>List&lt;Animal&gt;</code> — you can only read animals from it, and dogs are animals.<br><br><code>MutableList&lt;T&gt;</code> has <code>add(T)</code> where T is in an input position. If it were covariant, you could assign a <code>MutableList&lt;Dog&gt;</code> to <code>MutableList&lt;Animal&gt;</code> and call <code>add(Cat())</code> — corrupting the dog list. Invariance prevents this.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) Why won't this compile? How do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">class</span> <span class="cl">Box</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt;(<span class="kw">var</span> value: <span class="cl">T</span>)  <span class="cm">// ❌</span></code></pre>
+      <strong>Problem:</strong> <code>var value: T</code> generates a setter that takes T as a parameter — an input position. <code>out T</code> restricts T to output positions only. The setter violates this, so the compiler rejects it.<br><br>
+      <strong>Fix:</strong> Use <code>val</code> instead of <code>var</code>:
+<pre><code><span class="kw">class</span> <span class="cl">Box</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt;(<span class="kw">val</span> value: <span class="cl">T</span>)  <span class="cm">// ✅ val = getter only = out position</span></code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What is declaration-site variance vs use-site variance? Which does Kotlin prefer?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Declaration-site variance</strong>: annotate the class/interface once — <code>class Flow&lt;out T&gt;</code>. Every usage site automatically gets the covariance. Kotlin-idiomatic.<br><br>
+      <strong>Use-site variance (type projection)</strong>: annotate at each call site — <code>fun copy(src: Array&lt;out T&gt;)</code>. Used when the class itself can't be annotated (e.g., invariant Java classes like Array).<br><br>
+      Kotlin prefers declaration-site — less repetition, clearer intent. Java only has use-site wildcards (<code>? extends T</code>, <code>? super T</code>). Kotlin supports both but declaration-site is idiomatic for your own code.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — What is contravariance? Give a real Android/Kotlin use case.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Contravariance (<code>in T</code>): T appears only in input positions. The subtype relationship is <em>reversed</em> — <code>Consumer&lt;Animal&gt;</code> is a subtype of <code>Consumer&lt;Dog&gt;</code> because a consumer that can handle animals can certainly handle dogs.<br><br>
+      Real Kotlin example: <code>Comparator&lt;in T&gt;</code>. A <code>Comparator&lt;Animal&gt;</code> that compares by name can be used to sort a list of dogs — dogs are animals, so the comparator works. You can pass an <code>animalComparator</code> wherever a <code>dogComparator</code> is needed.<br><br>
+      Android example: <code>BaseUseCase&lt;in P, out R&gt;</code> — the params type P is consumed (input), so contravariant; the result R is produced (output), so covariant.</div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — Design a generic <code>Resource&lt;T&gt;</code> sealed class for the data layer. Justify the variance annotation.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">sealed class</span> <span class="cl">Resource</span>&lt;<span class="kw">out</span> <span class="cl">T</span>&gt; {           <span class="cm">// out T: only produced, never consumed</span>
+    <span class="kw">data class</span>  <span class="cl">Success</span>&lt;<span class="cl">T</span>&gt;(<span class="kw">val</span> data: <span class="cl">T</span>) : <span class="cl">Resource</span>&lt;<span class="cl">T</span>&gt;()
+    <span class="kw">data class</span>  <span class="cl">Error</span>(<span class="kw">val</span> exception: <span class="cl">Throwable</span>) : <span class="cl">Resource</span>&lt;<span class="cl">Nothing</span>&gt;()
+    <span class="kw">data object</span> <span class="cl">Loading</span> : <span class="cl">Resource</span>&lt;<span class="cl">Nothing</span>&gt;()
+}
+
+<span class="cm">// Extension to transform the data</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>, <span class="cl">R</span>&gt; <span class="cl">Resource</span>&lt;<span class="cl">T</span>&gt;.<span class="fn">map</span>(f: (<span class="cl">T</span>) -> <span class="cl">R</span>): <span class="cl">Resource</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">when</span> (<span class="kw">this</span>) {
+    <span class="kw">is</span> <span class="cl">Resource</span>.<span class="cl">Success</span> -> <span class="cl">Resource</span>.<span class="cl">Success</span>(<span class="fn">f</span>(data))
+    <span class="kw">is</span> <span class="cl">Resource</span>.<span class="cl">Error</span>   -> <span class="kw">this</span>
+    <span class="cl">Resource</span>.Loading    -> <span class="cl">Resource</span>.Loading
+}</code></pre>
+      <strong>Justification:</strong> <code>out T</code> because Resource only wraps and exposes data — it never accepts T as input anywhere. This allows: (1) <code>Resource.Loading</code> and <code>Resource.Error</code> with <code>Nothing</code> to satisfy any <code>Resource&lt;T&gt;</code>; (2) a <code>Resource&lt;Dog&gt;</code> to be assigned to <code>Resource&lt;Animal&gt;</code> when the consuming code only reads.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — (Scenario) A teammate asks: "Why can I assign a StateFlow&lt;UiState&gt; to a Flow&lt;UiState&gt; variable but not a MutableStateFlow to a MutableSharedFlow?" Explain.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>StateFlow → Flow is valid</strong> because both are declared as <code>interface Flow&lt;out T&gt;</code> and <code>interface StateFlow&lt;out T&gt; : Flow&lt;T&gt;</code>. StateFlow IS-A Flow — it extends it. The covariance (<code>out T</code>) isn't even needed here; it's a direct subtype relationship via interface inheritance.<br><br>
+      <strong>MutableStateFlow → MutableSharedFlow is invalid</strong> because <code>MutableStateFlow</code> and <code>MutableSharedFlow</code> are separate interfaces in different parts of the hierarchy. <code>MutableStateFlow&lt;T&gt;</code> extends both <code>StateFlow&lt;T&gt;</code> and <code>MutableSharedFlow&lt;T&gt;</code>, so a <code>MutableStateFlow</code> IS-A <code>MutableSharedFlow</code> — actually this assignment IS valid. If it fails in practice it may be a generics invariance issue with a specific type argument.<br><br>
+      The key insight: variance enables subtype relationships <em>based on type params</em>. Direct interface inheritance enables them <em>based on the class hierarchy</em>. Both matter.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — When would you use star projection <code>*</code> vs a bounded type parameter vs a concrete type?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Concrete type</strong> (<code>List&lt;String&gt;</code>): use when you know and care about the exact type at compile time. Most common case.<br><br>
+        <strong>Bounded type parameter</strong> (<code>&lt;T : Serializable&gt;</code>): use when you don't know the exact type but need it to satisfy a constraint. The type is known within the function scope. Use this for generic utility functions.<br><br>
+        <strong>Star projection</strong> (<code>List&lt;*&gt;</code>): use when you truly don't care about the type and only need to work with the container, not the elements — e.g., logging a list's size, checking if it's empty, or passing to a reflection API. Elements read as <code>Any?</code>. Cannot write. Use sparingly — it loses type information.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

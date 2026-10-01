@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2B – Activity Lifecycle & State</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>2B · Lifecycle</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>2B — Activity Lifecycle &amp; State</h1>
+  <div class="meta">
+    <span class="badge t2">Tier 2</span>
+    <span>onCreate · onStart · onResume · onPause · onStop · onDestroy · config changes · process death · onSaveInstanceState</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>An Activity's lifecycle is the sequence of callbacks the Android OS calls as it creates, shows, hides, and destroys the Activity. Understanding it is mandatory for correctness: doing the wrong work in the wrong callback causes ANRs, memory leaks, UI glitches, and data loss.</p>
+  <p>The lifecycle exists because Android is a resource-constrained, multi-app environment. The OS can pause, stop, or kill your Activity at any time to reclaim memory. Your job is to react correctly to each transition so the app remains consistent regardless of interruptions.</p>
+  <div class="box info">
+    <strong>Key problems the lifecycle solves:</strong>
+    <ul style="margin-top:8px;">
+      <li>Releasing resources (camera, GPS, network) when not visible</li>
+      <li>Saving and restoring UI state across configuration changes and process death</li>
+      <li>Knowing when to start / stop work (animation, polling, observers)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <h3>Callback Flow</h3>
+  <div class="ascii">            ┌─────────────────────────────────────────────────────┐
+            │                  Activity Created                   │
+            └──────────────────────┬──────────────────────────────┘
+                                   ▼
+                             onCreate()        ← setContentView, init ViewModel, observe
+                                   ▼
+                             onStart()         ← Activity becomes visible (not interactive)
+                                   ▼
+                             onResume()        ← Activity in foreground, user can interact
+                                   │
+              ┌────────────────────┴────────────────────┐
+              │ Another Activity / dialog in front       │
+              ▼                                          │
+         onPause()          ← still partially visible    │
+              │                                          │
+              ▼ (fully hidden)                           │
+         onStop()           ← not visible                │
+              │                                          │
+              ├──── onRestart() ──────────────────────► onStart()
+              │
+              ▼
+         onDestroy()        ← finishing OR config change
+
+  Config change (rotation):  onPause → onStop → onDestroy → onCreate → onStart → onResume
+  Process death:             OS silently kills; no callbacks after onStop</div>
+
+  <h3>Callback Responsibilities</h3>
+  <table>
+    <tr><th>Callback</th><th>What to do here</th><th>What NOT to do</th></tr>
+    <tr><td><code>onCreate()</code></td><td>setContentView / setContent, init ViewModel, observe LiveData/Flow, restore state from savedInstanceState</td><td>Long blocking work, animations</td></tr>
+    <tr><td><code>onStart()</code></td><td>Register lightweight observers, start animations that should show when visible</td><td>Acquire exclusive resources (camera)</td></tr>
+    <tr><td><code>onResume()</code></td><td>Acquire exclusive resources (camera, sensor), resume paused media</td><td>Heavy init (already done in onCreate)</td></tr>
+    <tr><td><code>onPause()</code></td><td>Release exclusive resources, pause media, commit critical unsaved data</td><td>Heavy operations — this must be fast; blocks the new Activity from showing</td></tr>
+    <tr><td><code>onStop()</code></td><td>Release observers, stop network polling, unregister receivers</td><td>Saving data that must not be lost — use onPause or ViewModel</td></tr>
+    <tr><td><code>onDestroy()</code></td><td>Release anything not yet released; called on finish() OR config change</td><td>Saving state — too late; use onSaveInstanceState</td></tr>
+    <tr><td><code>onRestart()</code></td><td>Refresh data that may have changed while stopped (rare)</td><td>Heavy re-init — use ViewModel</td></tr>
+  </table>
+
+  <h3>Configuration Change Flow</h3>
+  <p>A rotation, locale change, or dark-mode toggle triggers a <strong>full Activity teardown and recreation</strong> by default. The OS calls onSaveInstanceState before onStop, then recreates the Activity passing the saved Bundle to onCreate.</p>
+  <div class="ascii">Rotation detected
+  → onPause()
+  → onStop()
+  → onSaveInstanceState(bundle)   ← save cheap UI state (scroll pos, selected tab)
+  → onDestroy()                   ← ViewModel NOT destroyed (ViewModelStore survives)
+  → onCreate(savedInstanceState)  ← restore from bundle
+  → onStart() → onResume()</div>
+
+  <h3>Process Death</h3>
+  <p>When the OS kills your process (low memory), it calls nothing after <code>onStop()</code>. On relaunch, the OS restores the back stack and passes the <strong>saved instance state Bundle</strong> to <code>onCreate()</code> — but only if <code>onSaveInstanceState()</code> was called before death.</p>
+  <div class="box danger">
+    <strong>Process death ≠ normal finish:</strong> <code>onDestroy()</code> is NOT called on process death. Never rely on onDestroy to save critical data.
+  </div>
+
+  <h3>State Saving Mechanisms</h3>
+  <table>
+    <tr><th>Mechanism</th><th>Survives rotation?</th><th>Survives process death?</th><th>Best for</th></tr>
+    <tr><td>ViewModel</td><td>✅</td><td>❌</td><td>In-memory UI state, loaded data</td></tr>
+    <tr><td>onSaveInstanceState Bundle</td><td>✅</td><td>✅</td><td>Small, cheap UI state (selected tab, scroll offset)</td></tr>
+    <tr><td>SavedStateHandle (in ViewModel)</td><td>✅</td><td>✅</td><td>ViewModel state that must survive death</td></tr>
+    <tr><td>Room / DataStore</td><td>✅</td><td>✅</td><td>Persistent user data</td></tr>
+  </table>
+
+  <h3>Key Terms</h3>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>Configuration change</td><td>Device rotation, locale/language change, dark mode toggle, font size — causes Activity recreation by default</td></tr>
+    <tr><td>Process death</td><td>OS kills app process silently when memory is needed; app is in background</td></tr>
+    <tr><td>Saved instance state</td><td>Small Bundle persisted by system across recreation; passed to onCreate</td></tr>
+    <tr><td>ViewModelStore</td><td>Container that holds ViewModels; survives configuration changes but not process death</td></tr>
+    <tr><td>SavedStateHandle</td><td>Key-value map inside ViewModel backed by saved instance state; survives process death</td></tr>
+  </table>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE ═══ -->
+<section id="when">
+  <h2>3 · Why and When to Use It</h2>
+  <p>You cannot opt out of the Activity lifecycle — it is the contract between your app and the OS. What you control is where you put your logic:</p>
+  <table>
+    <tr><th>Scenario</th><th>Right callback / mechanism</th></tr>
+    <tr><td>Initialize ViewModel, observe data streams</td><td><code>onCreate()</code></td></tr>
+    <tr><td>Start camera or audio recording</td><td><code>onResume()</code></td></tr>
+    <tr><td>Stop camera or audio recording</td><td><code>onPause()</code></td></tr>
+    <tr><td>Unregister BroadcastReceiver</td><td><code>onStop()</code></td></tr>
+    <tr><td>Persist critical unsaved form data</td><td><code>onPause()</code> (guaranteed) or autosave in ViewModel</td></tr>
+    <tr><td>Save selected tab / scroll position</td><td><code>onSaveInstanceState()</code></td></tr>
+    <tr><td>Survive rotation with loaded data</td><td>ViewModel</td></tr>
+    <tr><td>Survive process death with small state</td><td>SavedStateHandle in ViewModel</td></tr>
+  </table>
+  <div class="box warn">
+    <strong>When NOT to:</strong> Never start long-running coroutines or network calls directly inside lifecycle callbacks — use ViewModel + lifecycleScope with <code>repeatOnLifecycle</code> so they auto-cancel when appropriate.
+  </div>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example (E-Commerce: Product Detail Screen)</h2>
+  <p>An e-commerce product detail Activity that loads product data, tracks analytics, and saves the selected variant across rotation and process death.</p>
+
+  <h3>ViewModel with SavedStateHandle</h3>
+  <pre><code><span class="ann">@HiltViewModel</span>
+<span class="kw">class</span> <span class="type">ProductDetailViewModel</span> <span class="ann">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> getProductUseCase: <span class="type">GetProductUseCase</span>,
+    <span class="kw">private val</span> savedState: <span class="type">SavedStateHandle</span>   <span class="cm">// survives process death</span>
+) : <span class="type">ViewModel</span>() {
+
+    <span class="cm">// Reads productId from navigation argument via SavedStateHandle</span>
+    <span class="kw">private val</span> productId: <span class="type">String</span> = <span class="fn">checkNotNull</span>(savedState[<span class="str">"productId"</span>])
+
+    <span class="cm">// Selected variant persisted across rotation AND process death</span>
+    <span class="kw">var</span> selectedVariant: <span class="type">String</span>?
+        <span class="kw">get</span>() = savedState[<span class="str">"selectedVariant"</span>]
+        <span class="kw">set</span>(value) { savedState[<span class="str">"selectedVariant"</span>] = value }
+
+    <span class="kw">val</span> uiState: <span class="type">StateFlow</span>&lt;<span class="type">ProductUiState</span>&gt; = <span class="fn">flow</span> {
+        <span class="fn">emit</span>(<span class="type">ProductUiState</span>.<span class="type">Loading</span>)
+        <span class="fn">emit</span>(getProductUseCase(productId).<span class="fn">fold</span>(
+            onSuccess = { <span class="type">ProductUiState</span>.<span class="type">Success</span>(it) },
+            onFailure = { <span class="type">ProductUiState</span>.<span class="type">Error</span>(it.message) }
+        ))
+    }.<span class="fn">stateIn</span>(viewModelScope, <span class="type">SharingStarted</span>.<span class="type">WhileSubscribed</span>(<span class="num">5_000</span>), <span class="type">ProductUiState</span>.<span class="type">Loading</span>)
+}</code></pre>
+
+  <h3>Activity — Lifecycle-Aware Observation</h3>
+  <pre><code><span class="ann">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="type">ProductDetailActivity</span> : <span class="type">ComponentActivity</span>() {
+
+    <span class="kw">private val</span> viewModel: <span class="type">ProductDetailViewModel</span> <span class="kw">by</span> <span class="fn">viewModels</span>()
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="type">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="type">ProductDetailScreen</span>(viewModel)
+        }
+        <span class="cm">// Collect Flow safely: pauses when Activity goes to background</span>
+        lifecycleScope.<span class="fn">launch</span> {
+            <span class="fn">repeatOnLifecycle</span>(<span class="type">Lifecycle</span>.<span class="type">State</span>.<span class="type">STARTED</span>) {
+                viewModel.uiState.<span class="fn">collect</span> { state -&gt;
+                    <span class="cm">// update UI based on state</span>
+                }
+            }
+        }
+    }
+}
+
+<span class="cm">// Note: In Compose, you would use collectAsStateWithLifecycle() instead —
+// it handles lifecycle awareness automatically.</span></code></pre>
+
+  <h3>onSaveInstanceState — Light UI State Only</h3>
+  <pre><code><span class="cm">// Use ONLY for cheap, non-sensitive UI state</span>
+<span class="kw">override fun</span> <span class="fn">onSaveInstanceState</span>(outState: <span class="type">Bundle</span>) {
+    <span class="kw">super</span>.<span class="fn">onSaveInstanceState</span>(outState)
+    <span class="cm">// scroll position, selected tab — NOT loaded data (that's ViewModel's job)</span>
+    outState.<span class="fn">putInt</span>(<span class="str">"scrollY"</span>, binding.scrollView.scrollY)
+}
+
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="type">Bundle</span>?) {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    savedInstanceState?.<span class="fn">getInt</span>(<span class="str">"scrollY"</span>)?.let { binding.scrollView.<span class="fn">scrollTo</span>(<span class="num">0</span>, it) }
+}</code></pre>
+
+  <h3>Handling Configuration Changes in Manifest (opt-out — use sparingly)</h3>
+  <pre><code><span class="cm">&lt;!-- Only for Activities that manually handle config changes (e.g., video player) --&gt;</span>
+<span class="kw">&lt;activity</span>
+    android:name=".player.VideoPlayerActivity"
+    android:configChanges="orientation|screenSize|keyboardHidden"
+    <span class="kw">/&gt;</span>
+
+<span class="cm">// Then in Activity:</span>
+<span class="kw">override fun</span> <span class="fn">onConfigurationChanged</span>(newConfig: <span class="type">Configuration</span>) {
+    <span class="kw">super</span>.<span class="fn">onConfigurationChanged</span>(newConfig)
+    <span class="cm">// Manually adjust layout; no onCreate called — ViewModel already has state</span>
+}</code></pre>
+  <div class="box warn">Opting out of configuration changes with <code>android:configChanges</code> is acceptable for media players and maps. For most screens, letting the system recreate and using ViewModel is cleaner.</div>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+    <tr>
+      <td>ViewModel (default)</td>
+      <td>Survives rotation; no Bundle size limits; clean separation</td>
+      <td>Lost on process death unless combined with SavedStateHandle</td>
+      <td>All UI state and loaded data — always use</td>
+    </tr>
+    <tr>
+      <td>SavedStateHandle in ViewModel</td>
+      <td>Survives rotation + process death; type-safe with Kotlin delegation</td>
+      <td>Size limits (~1 MB Bundle); serialisation overhead</td>
+      <td>Small critical state: selected IDs, input text, filters</td>
+    </tr>
+    <tr>
+      <td>onSaveInstanceState (Activity)</td>
+      <td>Simple for small primitive state</td>
+      <td>Limited size; manual save/restore boilerplate; only for small data</td>
+      <td>Scroll position, selected tab in legacy code; prefer SavedStateHandle</td>
+    </tr>
+    <tr>
+      <td>android:configChanges</td>
+      <td>No recreation overhead; useful for video/camera</td>
+      <td>Manual layout adjustment; easy to miss edge cases; not recommended generally</td>
+      <td>Video player, map screen where recreation cost is prohibitive</td>
+    </tr>
+    <tr>
+      <td>Room / DataStore</td>
+      <td>Survives everything; user data persists</td>
+      <td>Disk I/O; not for transient UI state</td>
+      <td>Actual user data that must persist beyond session</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+
+  <h3>Collecting Flow in onCreate Without repeatOnLifecycle</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad — collects in background, wastes resources</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onCreate</span>(...) {
+    lifecycleScope.<span class="fn">launch</span> {
+        <span class="cm">// Keeps collecting even when Activity is stopped</span>
+        viewModel.uiState.<span class="fn">collect</span> { render(it) }
+    }
+}</code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good — pauses when not STARTED</h4>
+      <pre><code><span class="kw">override fun</span> <span class="fn">onCreate</span>(...) {
+    lifecycleScope.<span class="fn">launch</span> {
+        <span class="fn">repeatOnLifecycle</span>(<span class="type">Lifecycle</span>.<span class="type">State</span>.<span class="type">STARTED</span>) {
+            viewModel.uiState.<span class="fn">collect</span> { render(it) }
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>Doing Work in onDestroy</h3>
+  <div class="box danger">
+    <code>onDestroy()</code> is NOT guaranteed to be called (process death). Never save critical data here. Use <code>onPause()</code> for must-save data or a ViewModel + Room for persistence.
+  </div>
+
+  <h3>Other Critical Pitfalls</h3>
+  <ul>
+    <li><strong>Heavy work in onCreate/onResume</strong>: Causes jank and slow start. Move I/O to ViewModel/coroutine.</li>
+    <li><strong>Leak via anonymous inner class</strong>: An inner class in Activity captures Activity reference. If passed to a background thread, leaks the Activity.</li>
+    <li><strong>Not restoring state from Bundle</strong>: After process death + relaunch, the user sees a blank screen instead of their previous position.</li>
+    <li><strong>Forgetting isFinishing() check in onStop</strong>: Some cleanup (like analytics flush) should only happen if actually finishing, not just hiding.</li>
+    <li><strong>Starting Activity from onResume in a loop</strong>: If you start another Activity in onResume and that Activity finishes back to you, you get an infinite loop.</li>
+    <li><strong>Network calls in lifecycle callbacks</strong>: Put them in ViewModel with viewModelScope. Callbacks may be called multiple times on rotation.</li>
+  </ul>
+
+  <div class="box good">
+    <strong>Best Practice checklist:</strong>
+    <ul style="margin-top:8px;">
+      <li>Use ViewModel for all UI state — it survives rotation automatically</li>
+      <li>Use SavedStateHandle for small state that must survive process death</li>
+      <li>Use <code>repeatOnLifecycle(STARTED)</code> to collect Flows</li>
+      <li>In Compose, use <code>collectAsStateWithLifecycle()</code> from <code>lifecycle-runtime-compose</code></li>
+      <li>Never call blocking operations in lifecycle callbacks</li>
+      <li>Release exclusive resources (camera, GPS) in <code>onPause()</code>, not <code>onStop()</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW ═══ -->
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "The Activity lifecycle is a series of callbacks the OS uses to manage screen visibility and memory. The key transitions are onCreate → onStart → onResume for coming to foreground, and onPause → onStop → onDestroy for leaving. The critical insight is: configuration changes like rotation destroy and recreate the Activity, but ViewModel survives. Process death is silent — no callbacks after onStop — so I use SavedStateHandle for small state that must survive that. In modern code with Compose, I use collectAsStateWithLifecycle() to observe flows safely."
+  </div>
+
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>The six main callbacks:</strong> onCreate (setup), onStart (visible), onResume (interactive), onPause (partially hidden — release exclusive resources), onStop (fully hidden), onDestroy (finishing or config change).<br/><br/>
+    <strong>Configuration changes:</strong> Rotation triggers full teardown + recreation. onSaveInstanceState is called before onStop, letting you save cheap UI state. ViewModel survives via ViewModelStore — it's retained across config changes by the framework.<br/><br/>
+    <strong>Process death:</strong> The OS kills the process silently when memory is needed. Callbacks stop after onStop. On relaunch the system reconstructs the back stack and passes saved instance state to onCreate. For critical ViewModel state I use SavedStateHandle, which is backed by the saved instance state Bundle.<br/><br/>
+    <strong>In production:</strong> I put data loading in ViewModel with viewModelScope. UI observes via StateFlow using repeatOnLifecycle(STARTED) — or collectAsStateWithLifecycle() in Compose — to automatically pause collection when the Activity is in background, preventing unnecessary work and wasted resources.
+  </div>
+
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Six main callbacks and what belongs in each (especially onCreate vs onResume).</li>
+    <li>Configuration change = full Activity recreation; ViewModel survives via ViewModelStore.</li>
+    <li>Process death is silent — onDestroy is NOT guaranteed.</li>
+    <li>onSaveInstanceState called before onStop, Bundle size limited — for small UI state only.</li>
+    <li>SavedStateHandle in ViewModel for state that survives both rotation AND process death.</li>
+    <li>repeatOnLifecycle(STARTED) for safe Flow collection (or collectAsStateWithLifecycle in Compose).</li>
+    <li>Release exclusive resources (camera, sensors) in onPause — not onStop.</li>
+    <li>Never do blocking/heavy work in lifecycle callbacks — always delegate to ViewModel/coroutine.</li>
+  </ol>
+
+  <h3>Do Not Go Deeper Unless Asked</h3>
+  <ul>
+    <li>ViewModelStore implementation details (wait for 4A)</li>
+    <li>repeatOnLifecycle implementation internals (4C)</li>
+    <li>Parcelable vs Bundle serialisation</li>
+    <li>Multi-Activity back stack and launch modes (2C)</li>
+  </ul>
+
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>What's the difference between onStop and onDestroy?</td><td>onStop = Activity is no longer visible but still in memory. onDestroy = Activity is being destroyed (finish() called or config change). onStop is always called; onDestroy may not be called on process death.</td></tr>
+    <tr><td>Why does ViewModel survive rotation but not process death?</td><td>ViewModel is held by ViewModelStore, which is retained by the framework's NonConfigurationInstance mechanism during config changes. Process death kills the entire process — all in-memory objects are gone. SavedStateHandle bridges this by persisting data in the Bundle.</td></tr>
+    <tr><td>What's the difference between finish() and pressing Back?</td><td>Back navigates up the back stack (can be intercepted via OnBackPressedDispatcher). finish() explicitly destroys the Activity and removes it from the task.</td></tr>
+    <tr><td>When is onSaveInstanceState called?</td><td>Before onStop — guaranteed even if onDestroy is not called. Called for rotation, going to home screen, receiving a call — any time the Activity might be destroyed and recreated.</td></tr>
+  </table>
+
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "The important distinction is that there are three kinds of 'death' for an Activity: (1) config change — only Activity dies, ViewModel survives; (2) user presses Back/finish() — ViewModel also dies, back stack removed, no state to restore; (3) process death — everything dies, system restores back stack and Bundle only. Many bugs come from conflating these three. SavedStateHandle is only for case 3. ViewModel is for case 1. Room/DataStore is for persistent user data across all cases. In a Compose+ViewModel architecture this is clean: ViewModel holds all state, SavedStateHandle holds the survival-critical subset, and Room holds user data — no onSaveInstanceState override needed in most Activity code."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+
+  <h3>Lifecycle at a Glance</h3>
+  <table>
+    <tr><th>Callback</th><th>Activity Visible?</th><th>Interactive?</th><th>Key Work</th></tr>
+    <tr><td>onCreate</td><td>No</td><td>No</td><td>setContentView, ViewModel init, observe</td></tr>
+    <tr><td>onStart</td><td>Yes (partial)</td><td>No</td><td>Start lightweight observers</td></tr>
+    <tr><td>onResume</td><td>Yes</td><td>Yes ✅</td><td>Acquire camera/sensors, resume media</td></tr>
+    <tr><td>onPause</td><td>Partial</td><td>No</td><td>Release camera/sensors, pause media, save critical data</td></tr>
+    <tr><td>onStop</td><td>No</td><td>No</td><td>Unregister receivers, stop polling</td></tr>
+    <tr><td>onDestroy</td><td>No</td><td>No</td><td>Last cleanup; NOT guaranteed on process death</td></tr>
+  </table>
+
+  <h3>State Survival Matrix</h3>
+  <table>
+    <tr><th>Mechanism</th><th>Rotation</th><th>Process Death</th><th>Back pressed</th></tr>
+    <tr><td>ViewModel</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>SavedStateHandle</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>onSaveInstanceState Bundle</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Room / DataStore</td><td>✅</td><td>✅</td><td>✅</td></tr>
+  </table>
+
+  <h3>Golden Rules</h3>
+  <ul>
+    <li>Use <code>ViewModel</code> for all UI state</li>
+    <li>Use <code>SavedStateHandle</code> for small survival-critical state</li>
+    <li>Collect Flows with <code>repeatOnLifecycle(STARTED)</code> or <code>collectAsStateWithLifecycle()</code></li>
+    <li>Release exclusive resources in <code>onPause()</code></li>
+    <li>Never rely on <code>onDestroy()</code> for critical saves</li>
+    <li>onSaveInstanceState → small primitives / IDs only (Bundle size ~1 MB limit)</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> List the six Activity lifecycle callbacks in order and describe what each one means.</summary>
+    <div class="ans">onCreate → Activity created; onStart → visible but not interactive; onResume → foreground, interactive; onPause → partially hidden (another Activity/dialog in front), release exclusive resources; onStop → fully hidden; onDestroy → being destroyed (finish or config change). onRestart is called between onStop and onStart when coming back to a stopped Activity.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is the difference between a configuration change and process death?</summary>
+    <div class="ans">Configuration change (rotation, locale): Activity is torn down and recreated. ViewModel survives via ViewModelStore. onSaveInstanceState is called.<br/>Process death: OS kills entire process silently. No callbacks after onStop. ViewModel is gone. Only saved instance state Bundle + Room/DataStore data survives. On relaunch, the system reconstructs the back stack and passes the Bundle to onCreate.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> When is onSaveInstanceState called?</summary>
+    <div class="ans">Before onStop, when the Activity may be destroyed and recreated. This includes rotation, going to home screen, receiving a phone call, going to another app. It is NOT called when the user presses Back (intentional finish) because there's no expectation of restoration.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Why does ViewModel survive rotation but not process death?</summary>
+    <div class="ans">ViewModel is stored in ViewModelStore, which is attached to the Activity's NonConfigurationInstance. When a configuration change occurs, the framework retains NonConfigurationInstance across teardown/recreation, so ViewModelStore (and thus ViewModel) survives. During process death, the OS terminates the process entirely — all JVM objects are gone, including ViewModelStore. SavedStateHandle bridges this by serialising ViewModel state into the saved instance Bundle, which the OS does persist across process death.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the correct way to collect a StateFlow from an Activity in 2025?</summary>
+    <div class="ans">Two correct approaches:<br/>1. <code>lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { ... } } }</code><br/>2. In Compose: <code>val state by viewModel.uiState.collectAsStateWithLifecycle()</code> from <code>lifecycle-runtime-compose</code>.<br/>Both automatically pause collection when the Activity goes below STARTED (background), preventing unnecessary work. The anti-pattern is plain <code>lifecycleScope.launch { flow.collect { ... } }</code> with no repeatOnLifecycle, which keeps collecting even in background.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> When should you release the camera — in onPause or onStop?</summary>
+    <div class="ans">onPause. Camera is an exclusive resource. Another Activity (like the system camera app) may need it while your Activity is partially hidden (onPause state). If you release in onStop, the other app may fail to open the camera. Release exclusive hardware resources (camera, microphone, GPS with FINE location via requestSingleUpdate) in onPause.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What happens to a ViewModel when the user presses Back?</summary>
+    <div class="ans">When the user presses Back and the Activity finishes (not just a config change), the Activity's ViewModelStore is cleared. ViewModel.onCleared() is called. The ViewModel is destroyed. This is intentional — the user left that screen. SavedStateHandle also loses its data since the system discards the saved state for a finished Activity.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] After a rotation, users report that a form they were filling out is blank. What went wrong and how do you fix it?</summary>
+    <div class="ans">Root cause: Form state (text fields, selections) was stored only in the View/Composable local state without being backed by ViewModel or SavedStateHandle. On rotation, the Activity recreates, the View is re-inflated, and state is lost.<br/><br/>Fix in Compose: Use <code>rememberSaveable</code> for local UI state (it's backed by saved instance state). For important form fields, hoist state to ViewModel using MutableStateFlow or SavedStateHandle — <code>savedState.getStateFlow("email", "")</code>.<br/><br/>Fix in XML Views: Use EditText's built-in state saving (it saves if the view has an android:id) for simple cases. For complex forms, use ViewModel with SavedStateHandle. Never reconstruct form state from scratch in onCreate without checking savedInstanceState.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Show how to use SavedStateHandle in a ViewModel to persist a search query across process death.</summary>
+    <div class="ans"><pre><code><span class="ann">@HiltViewModel</span>
+<span class="kw">class</span> <span class="type">SearchViewModel</span> <span class="ann">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> searchUseCase: <span class="type">SearchProductsUseCase</span>,
+    <span class="kw">private val</span> savedState: <span class="type">SavedStateHandle</span>
+) : <span class="type">ViewModel</span>() {
+
+    <span class="cm">// StateFlow backed by SavedStateHandle — survives process death</span>
+    <span class="kw">val</span> query: <span class="type">StateFlow</span>&lt;<span class="type">String</span>&gt; =
+        savedState.<span class="fn">getStateFlow</span>(<span class="str">"query"</span>, <span class="str">""</span>)
+
+    <span class="kw">val</span> results: <span class="type">StateFlow</span>&lt;<span class="type">List</span>&lt;<span class="type">Product</span>&gt;&gt; = query
+        .<span class="fn">debounce</span>(<span class="num">300</span>)
+        .<span class="fn">flatMapLatest</span> { searchUseCase(it) }
+        .<span class="fn">stateIn</span>(viewModelScope, <span class="type">SharingStarted</span>.<span class="type">WhileSubscribed</span>(<span class="num">5_000</span>), <span class="fn">emptyList</span>())
+
+    <span class="kw">fun</span> <span class="fn">onQueryChanged</span>(newQuery: <span class="type">String</span>) {
+        savedState[<span class="str">"query"</span>] = newQuery   <span class="cm">// persisted immediately</span>
+    }
+}</code></pre>
+savedState.getStateFlow() returns a StateFlow directly backed by the Bundle. Any assignment to savedState["query"] is immediately persisted.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] Your app crashes with "IllegalStateException: Fragment already added" after rotation. What caused it and how do you fix it?</summary>
+    <div class="ans">Caused by adding a Fragment in onCreate without checking if it already exists. On rotation, the FragmentManager automatically restores previously added Fragments from the back stack. If your code then calls fragmentManager.beginTransaction().add(MyFragment()) unconditionally, the Fragment is added twice — crash.<br/><br/>Fix: Check before adding:<br/><code>if (supportFragmentManager.findFragmentByTag("myFragment") == null) { supportFragmentManager.beginTransaction().add(R.id.container, MyFragment(), "myFragment").commit() }</code><br/><br/>Better: Prefer Navigation Component (manages back stack for you) or Compose (no Fragment add/remove boilerplate).</div>
+  </details>
+
+  <hr style="border-color:var(--border);margin:32px 0;"/>
+  <h3 style="color:var(--warn);">Answer Key Summary</h3>
+  <p style="color:var(--muted);font-size:13px;">Self-assessment checklist:</p>
+  <ul>
+    <li>Can you recite all 6 callbacks + what work belongs in each?</li>
+    <li>Can you explain why ViewModel survives rotation but not process death?</li>
+    <li>Can you write a StateFlow + SavedStateHandle ViewModel from memory?</li>
+    <li>Do you know the difference between repeatOnLifecycle and a plain launch?</li>
+    <li>Can you debug the "Fragment already added" crash and explain the root cause?</li>
+  </ul>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>4B – LiveData</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>4B · LiveData</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>4B — LiveData & Observer Pattern</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Architecture Core</span>
+    <span>Lifecycle Awareness · Observer Pattern · setValue vs postValue · MediatorLiveData · LiveData vs StateFlow</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p><strong>LiveData</strong> is an observable data holder class that is lifecycle-aware. Unlike regular observables in Java or RxJava, LiveData respects the lifecycle of other app components, such as Activities, Fragments, or Services.</p>
+  <p><strong>The Core Problem Solved:</strong> In classical Android development, background callbacks updating UI after an Activity was paused or destroyed caused fatal crashes (<code>IllegalStateException: Can not perform this action after onSaveInstanceState</code>) or memory leaks. LiveData ensures observers only receive updates when their lifecycle is in the <strong>STARTED</strong> or <strong>RESUMED</strong> active states, and automatically removes observers upon <strong>DESTROYED</strong>.</p>
+  <div class="box info">
+    <strong>Key Attributes of LiveData:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>No Memory Leaks:</strong> Observers are bound to <code>LifecycleOwner</code> and auto-cleaned up on destruction.</li>
+      <li><strong>No Crashes Due to Stopped Activities:</strong> Data is not dispatched to inactive UI.</li>
+      <li><strong>Always Up-to-Date:</strong> If a lifecycle becomes inactive and returns to active (e.g. background to foreground), it automatically receives the latest value.</li>
+      <li><strong>Main Thread Bound:</strong> Observers are always notified on the Android Main thread.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works Under the Hood</h2>
+
+  <div class="ascii">
+[ViewModel / Background Task]
+           │
+           ├── 1. setValue(data)  ──► [Main Thread Check] ──► Dispatches Immediately
+           │
+           └── 2. postValue(data) ──► [mPendingData Lock] ──► Handler.post() to Main Thread
+                                                                      │
+                                                                      ▼
+                                                            [setValue(data)]
+                                                                      │
+                                                                      ▼
+                                                          [LifecycleBoundObserver]
+                                                                      │
+                                     ┌────────────────────────────────┴───────────────────────────────┐
+                                     ▼                                                                ▼
+                     State is STARTED or RESUMED?                                           State is DESTROYED?
+                                     │                                                                │
+                            ┌────────┴────────┐                                                       ▼
+                            ▼                 ▼                                            [Auto Remove Observer]
+                        YES: Emit       NO: Suppress / Wait                                (Prevents Memory Leak!)
+  </div>
+
+  <h3>setValue() vs postValue() Internals</h3>
+  <ul>
+    <li><strong><code>setValue(T)</code>:</strong> Must be called from the <strong>Main thread</strong>. It directly increments the internal version counter (<code>mVersion++</code>) and immediately iterates through the active observers synchronously.</li>
+    <li><strong><code>postValue(T)</code>:</strong> Can be called from <strong>any background thread</strong>. It acquires a synchronized lock, stores data in <code>mPendingData</code>, and posts a <code>mPostValueRunnable</code> to the Main Looper's Handler.</li>
+  </ul>
+
+  <div class="box warn">
+    <strong>The postValue() Conflation Gotcha:</strong> If <code>postValue()</code> is called 4 times in rapid succession from background threads before the Main thread executes the posted runnable, only the <strong>very last value</strong> is emitted to observers. The intermediate 3 values are overwritten in <code>mPendingData</code>.
+  </div>
+
+  <h3>LifecycleBoundObserver Mechanics</h3>
+  <p>When you call <code>liveData.observe(owner, observer)</code>, LiveData wraps the observer in a <code>LifecycleBoundObserver</code> and subscribes to the owner's <code>Lifecycle</code>:</p>
+  <ul>
+    <li>On <code>ON_START</code> / <code>ON_RESUME</code>: Changes active state to <code>true</code> and triggers <code>dispatchingValue()</code>.</li>
+    <li>On <code>ON_STOP</code> / <code>ON_PAUSE</code>: Changes active state to <code>false</code>; events are queued.</li>
+    <li>On <code>ON_DESTROY</code>: Calls <code>removeObserver()</code> automatically, breaking the reference chain.</li>
+  </ul>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & ARCHITECTURAL IMPACT ═══ -->
+<section id="when">
+  <h2>3 · When to Use: Modern Architecture Context</h2>
+  <p>While <strong>StateFlow</strong> and <strong>SharedFlow</strong> are now the modern standard for Kotlin-first Android architecture, understanding LiveData remains critical for legacy maintenance, ViewBinding/DataBinding XML integration, and senior technical interviews.</p>
+
+  <table>
+    <tr>
+      <th>Layer</th>
+      <th>Recommended State Holder</th>
+      <th>Why</th>
+    </tr>
+    <tr>
+      <td><strong>Data & Domain Layer</strong></td>
+      <td>Flow / Kotlin Coroutines</td>
+      <td>Flow is platform-independent (pure Kotlin), supports multiplatform, and has rich functional operators.</td>
+    </tr>
+    <tr>
+      <td><strong>Jetpack Compose UI</strong></td>
+      <td>StateFlow / Compose <code>State&lt;T&gt;</code></td>
+      <td>Native Compose snapshot integration (<code>collectAsStateWithLifecycle()</code>).</td>
+    </tr>
+    <tr>
+      <td><strong>XML DataBinding UI (Legacy)</strong></td>
+      <td>LiveData</td>
+      <td>First-class two-way XML binding support out of the box.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: MediatorLiveData for Multi-Source Form Validation</h2>
+  <p>Production Banking form combining multiple input fields into an aggregated validation state using <code>MediatorLiveData</code>.</p>
+
+  <pre><code><span class="kw">package</span> com.enterprise.banking.auth
+
+<span class="kw">import</span> androidx.lifecycle.LiveData
+<span class="kw">import</span> androidx.lifecycle.MediatorLiveData
+<span class="kw">import</span> androidx.lifecycle.MutableLiveData
+<span class="kw">import</span> androidx.lifecycle.ViewModel
+
+<span class="kw">class</span> <span class="type">LoginFormViewModel</span> : <span class="type">ViewModel</span>() {
+
+    <span class="kw">val</span> accountNumber = <span class="type">MutableLiveData</span>&lt;<span class="type">String</span>&gt;(<span class="str">""</span>)
+    <span class="kw">val</span> password = <span class="type">MutableLiveData</span>&lt;<span class="type">String</span>&gt;(<span class="str">""</span>)
+
+    <span class="cm">// MediatorLiveData aggregates multiple LiveData sources</span>
+    <span class="kw">private val</span> _isSubmitEnabled = <span class="type">MediatorLiveData</span>&lt;<span class="type">Boolean</span>&gt;().apply {
+        <span class="fn">addSource</span>(accountNumber) { <span class="fn">validateForm</span>() }
+        <span class="fn">addSource</span>(password) { <span class="fn">validateForm</span>() }
+    }
+    <span class="kw">val</span> isSubmitEnabled: <span class="type">LiveData</span>&lt;<span class="type">Boolean</span>&gt; = _isSubmitEnabled
+
+    <span class="kw">private fun</span> <span class="fn">validateForm</span>() {
+        <span class="kw">val</span> acc = accountNumber.value.orEmpty()
+        <span class="kw">val</span> pwd = password.value.orEmpty()
+        
+        <span class="kw">val</span> isValid = acc.length == <span class="num">10</span> &amp;&amp; pwd.length &gt;= <span class="num">8</span>
+        _isSubmitEnabled.value = isValid
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · LiveData vs StateFlow vs SharedFlow</h2>
+
+  <table>
+    <tr>
+      <th>Feature</th>
+      <th>LiveData</th>
+      <th>StateFlow</th>
+      <th>SharedFlow</th>
+    </tr>
+    <tr>
+      <td><strong>Lifecycle Awareness</strong></td>
+      <td>Built-in via <code>LifecycleOwner</code>.</td>
+      <td>Requires <code>repeatOnLifecycle</code> / <code>collectAsStateWithLifecycle</code>.</td>
+      <td>Requires <code>repeatOnLifecycle</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Initial Value Required</strong></td>
+      <td>No (Nullable by default).</td>
+      <td>Yes (Non-null initial state).</td>
+      <td>No.</td>
+    </tr>
+    <tr>
+      <td><strong>Threading & Platform</strong></td>
+      <td>Android-only (Main thread bound).</td>
+      <td>Pure Kotlin / Coroutines (Multiplatform).</td>
+      <td>Pure Kotlin / Coroutines (Multiplatform).</td>
+    </tr>
+    <tr>
+      <td><strong>Operators</strong></td>
+      <td>Limited (<code>map</code>, <code>switchMap</code>).</td>
+      <td>Full Coroutine Flow operator suite (100+).</td>
+      <td>Full Coroutine Flow operator suite.</td>
+    </tr>
+    <tr>
+      <td><strong>Event Handling (One-off)</strong></td>
+      <td>Requires <code>Event&lt;T&gt;</code> / SingleLiveEvent hack.</td>
+      <td>Not suited (replays state on rotation).</td>
+      <td>Ideal via <code>Channel</code> or <code>SharedFlow(replay = 0)</code>.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & Memory Leak Traps</h2>
+  <div class="box danger">
+    <strong>1. Using this instead of viewLifecycleOwner in Fragments:</strong> In Fragments, observing LiveData using <code>this</code> (Fragment instance) instead of <code>viewLifecycleOwner</code> creates duplicate observers on every navigation return because the Fragment view is destroyed on <code>onDestroyView()</code> but the Fragment instance lives on in the back stack!
+  </div>
+  <div class="box warn">
+    <strong>2. Missing Emissions with Rapid postValue():</strong> <code>postValue()</code> only holds the latest value in <code>mPendingData</code>. If you emit progress updates (1%, 2%, 3%) in a tight loop via <code>postValue()</code>, intermediate values will be skipped.
+  </div>
+  <div class="box info">
+    <strong>3. Using LiveData in Repositories or Domain Layer:</strong> LiveData is tied to the Android framework UI thread. Putting LiveData inside pure domain models or data layers breaks clean architecture and unit testability.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"LiveData is an observable data holder that dispatches value updates exclusively to observers in an active lifecycle state (STARTED or RESUMED). It prevents memory leaks and view crashes by auto-removing observers on DESTROYED. Updating data from the main thread uses <code>setValue()</code>, while background threads use <code>postValue()</code>, which delegates to the Main Looper with conflation."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Core Architecture:</strong> LiveData implements the Observer pattern with lifecycle hooks. When subscribed via <code>observe(owner, observer)</code>, it wraps the callback in a <code>LifecycleBoundObserver</code>.</li>
+    <li><strong>Lifecycle Rules:</strong>
+      <ul>
+        <li>Dispatches data only when the owner is <strong>STARTED</strong> or <strong>RESUMED</strong>.</li>
+        <li>Queues or suppresses emissions when inactive.</li>
+        <li>Unregisters automatically when the owner hits <strong>DESTROYED</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>setValue vs postValue:</strong> <code>setValue()</code> is synchronous on the Main thread. <code>postValue()</code> posts a runnable to the Main Looper via a synchronized lock, conflating rapid updates into only the latest state.</li>
+    <li><strong>Modern Migration to StateFlow:</strong> StateFlow is pure Kotlin (KMP-ready), supports coroutine operators, and enforces non-null initial state. When collected using <code>repeatOnLifecycle()</code>, StateFlow provides equivalent lifecycle safety without Android framework dependencies.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li><code>LifecycleBoundObserver</code> and active states (<code>STARTED</code> / <code>RESUMED</code>).</li>
+    <li>Synchronous <code>setValue()</code> vs Asynchronous conflated <code>postValue()</code>.</li>
+    <li><code>viewLifecycleOwner</code> in Fragments vs Fragment <code>this</code>.</li>
+    <li><code>MediatorLiveData</code> and <code>Transformations.switchMap()</code>.</li>
+    <li>LiveData vs <code>StateFlow</code> with <code>repeatOnLifecycle()</code>.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: Why does Fragment require viewLifecycleOwner instead of Fragment's lifecycle?</h4>
+    <p>A Fragment has two lifecycles: the Fragment instance lifecycle and the Fragment View lifecycle. When a Fragment is placed on the back stack, its View is destroyed (<code>onDestroyView</code>), but the Fragment instance survives. Observing with <code>this</code> leaks the old observer, causing duplicate callbacks when the View is recreated.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How does postValue() handle rapid successive updates?</h4>
+    <p>It stores the value in a volatile <code>mPendingData</code> variable and posts a Runnable to the Main thread. If multiple <code>postValue()</code> calls occur before the Runnable executes, <code>mPendingData</code> is overwritten with the newest value, dropping intermediate updates.</p>
+  </div>
+  <div class="card">
+    <h4>Q: What is MediatorLiveData?</h4>
+    <p>A subclass of LiveData that can observe multiple source LiveData instances and react to changes from any of them, allowing developers to combine, filter, or merge data streams.</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "In modern Android projects, LiveData is considered legacy. StateFlow is strictly superior for business logic and data layers because it is pure Kotlin. However, in legacy codebases using DataBinding XML, LiveData is still useful because it requires no lifecycle boilerplate in layout files."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>Active States:</strong> <code>STARTED</code> and <code>RESUMED</code>.</li>
+    <li><strong>Auto Cleanup:</strong> Removed on <code>DESTROYED</code>.</li>
+    <li><strong>setValue:</strong> Main thread only, synchronous, immediate dispatch.</li>
+    <li><strong>postValue:</strong> Any thread, asynchronous, posts to Main Looper, conflates rapid calls.</li>
+    <li><strong>Fragment Rule:</strong> Always use <code>viewLifecycleOwner</code>.</li>
+    <li><strong>MediatorLiveData:</strong> Combines multiple LiveData sources into one.</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. What does it mean that LiveData is lifecycle-aware?</summary>
+    <div class="ans">
+      It means LiveData respects the lifecycle state of components like Activities and Fragments, only emitting updates to active observers (STARTED or RESUMED) and automatically cleaning up observers when the component is DESTROYED.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. What is the difference between setValue() and postValue()?</summary>
+    <div class="ans">
+      <code>setValue()</code> must be called from the Main thread and executes immediately. <code>postValue()</code> can be called from background threads and posts a task to the Main thread's message queue to execute <code>setValue()</code>.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. What lifecycle owner should be used when observing LiveData inside a Fragment?</summary>
+    <div class="ans">
+      Always use <code>viewLifecycleOwner</code>. Using the Fragment instance (<code>this</code>) leads to duplicate observers and memory leaks when the Fragment's view is destroyed and recreated on the back stack.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. What happens if postValue() is called 5 times in a background loop before the main thread runs?</summary>
+    <div class="ans">
+      Only the <strong>last (5th) value</strong> is emitted to observers. The previous 4 values are overwritten in the internal <code>mPendingData</code> buffer because <code>postValue()</code> conflates rapid emissions.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. What is MediatorLiveData and when would you use it?</summary>
+    <div class="ans">
+      <code>MediatorLiveData</code> is a LiveData subclass that can listen to multiple other LiveData instances (sources) and react to changes from any of them, such as combining multiple form field values to compute submit button enabled state.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. Why should LiveData not be used in Data or Domain layers?</summary>
+    <div class="ans">
+      LiveData is tied to the Android platform and Main thread Looper. Using it in domain or data layers violates clean architecture separation, breaks Kotlin Multiplatform compatibility, and complicates unit testing without Android test runners.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What is the difference between LiveData and StateFlow?</summary>
+    <div class="ans">
+      LiveData is an Android-specific lifecycle-aware observable bound to the Main thread. StateFlow is a pure Kotlin Coroutines cold-to-hot state stream that works on any dispatcher and platform, requires an initial value, and integrates with the full Flow operator ecosystem.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. How does LiveData handle the Single Live Event / Navigation Event problem?</summary>
+    <div class="ans">
+      Because LiveData replays its latest value on rotation, single-fire events (like SnackBar or Navigation) re-trigger unexpectedly. Solutions included custom <code>Event&lt;T&gt;</code> wrapper classes with <code>hasBeenHandled</code> flags or <code>SingleLiveEvent</code>. In modern Android, <code>Channel</code> or <code>SharedFlow(replay = 0)</code> is the recommended replacement.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. How does LiveData internally track active vs inactive observers?</summary>
+    <div class="ans">
+      It maintains an active observer counter (<code>mActiveCount</code>). When the count transitions from 0 to 1, LiveData calls <code>onActive()</code> (useful for starting location updates or sensors). When it drops from 1 to 0, it calls <code>onInactive()</code> to pause resource consumption.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. How do you safely collect StateFlow in an Activity to match LiveData's lifecycle awareness?</summary>
+    <div class="ans">
+      Use <code>lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { stateFlow.collect { ... } } }</code>. This ensures coroutine collection is cancelled when the Activity stops and restarted when it starts, perfectly matching LiveData's behavior.
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

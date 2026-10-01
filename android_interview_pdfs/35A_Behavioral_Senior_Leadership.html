@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>35A — Behavioral &amp; Senior Leadership | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#211a35 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .story-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px;overflow:hidden;}
+  .story-header{background:var(--surface2);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+  .story-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .story-title{font-size:14px;font-weight:700;color:var(--text);}
+  .story-body{padding:18px;}
+  .star-row{display:grid;grid-template-columns:80px 1fr;gap:10px;margin-bottom:10px;align-items:start;}
+  .star-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px;}
+  .star-content{color:var(--muted);font-size:13.5px;line-height:1.6;}
+  .star-content strong{color:var(--text);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">35A · Behavioral</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> STAR Framework</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Technical Stories</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> People Stories</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Delivery Stories</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Architecture &amp; Design</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Cross-team &amp; Mentoring</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Senior Differentiator</div>
+    <h1><span>35A</span> — Behavioral &amp; Senior Leadership</h1>
+    <p class="hero-desc">11 STAR story templates for senior Android engineers: production incidents, architecture decisions, disagreements, mentoring, missed deadlines, and cross-team collaboration — with complete metrics and WHY framing.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 35A</span>
+      <span class="badge badge-senior">&#11088; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1: STAR Framework -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#11088;</div>1. STAR Framework</div>
+    <h3>The STAR Structure</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Letter</th><th>What</th><th>Time allocation</th><th>Senior emphasis</th></tr>
+      <tr><td>S — Situation</td><td>Context, team, product, scale</td><td>15%</td><td>Be specific: "banking app, 2M users, 5-person team"</td></tr>
+      <tr><td>T — Task</td><td>Your specific responsibility</td><td>10%</td><td>Show ownership, not "we did..."</td></tr>
+      <tr><td>A — Action</td><td>What YOU specifically did</td><td>60%</td><td>Technical depth + WHY you chose this approach</td></tr>
+      <tr><td>R — Result</td><td>Measurable impact</td><td>15%</td><td>Numbers: crash rate %, startup ms, revenue impact</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">The WHY Principle — Senior Differentiator</div>
+      Mid-level: "I migrated from MVP to MVVM." Senior: "I migrated from MVP to MVVM <strong>because</strong> the MVP presenters were becoming a testing bottleneck — 40% of our test time was spent fighting the Presenter–View coupling. MVVM's ViewModel survives rotation without the Presenter lifecycle complexity, and separating ViewState made the UI layer deterministic. Result: test time dropped 35%, and onboarding new engineers went from 2 weeks to 4 days because the pattern was self-documenting."
+    </div>
+    <h3>Opening Line Formula</h3>
+    <p>Every STAR answer should open with: <em>"In my previous role at [Company type], we had [X users / X team size]. I was responsible for [Y component/feature]."</em></p>
+    <h3>What Interviewers Actually Evaluate</h3>
+    <ul>
+      <li><strong>Impact:</strong> Did this actually matter? Do you use metrics?</li>
+      <li><strong>Ownership:</strong> Did YOU do it, or did "we"? (vague "we" is a red flag)</li>
+      <li><strong>Collaboration:</strong> Did you work with others effectively?</li>
+      <li><strong>Learning:</strong> What did you learn? What would you do differently?</li>
+      <li><strong>Judgment:</strong> Did you make good technical decisions? Can you defend them?</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Technical Stories →</button></div>
+  </div>
+
+  <!-- S2: Technical Stories -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128201;</div>2. Technical Stories</div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">1</div><div class="story-title">Difficult Production Bug — Crash Affecting 10% of Users</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">E-commerce Android app, 500K DAU. 3 days after a major release, Crashlytics showed a 10% crash rate spike — up from our 99.5% crash-free baseline to 97.1%. The crash was affecting checkout specifically.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">As the senior engineer who owned the checkout module, I was responsible for diagnosing and fixing the crash within our 4-hour SLA.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content"><strong>Why each step:</strong> (1) Checked Crashlytics — saw NullPointerException in PaymentDto.amount. This told me it was serialization-related. (2) Checked if minifyEnabled was true for the release build — yes. R8 was likely renaming PaymentDto fields. (3) Checked git diff for the release — confirmed PaymentDto was a new class without @Keep. (4) WHY didn't I just disable R8? Because that would increase APK size ~40% for all users — I instead added specific -keep rules. (5) Deployed the fix as an emergency hotfix release. (6) To prevent recurrence, added a CI step that runs the release build's test suite against a real HTTP mock server.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Fix deployed in 2.5 hours. Crash-free rate back to 99.7% within 6 hours. Zero repeat occurrences across 4 subsequent releases. Added the missing-keep-rule check to CI — caught 2 similar issues in the next month before production.</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">2</div><div class="story-title">Performance Problem — App Startup 6 Seconds → 2 Seconds</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Automotive Android app (in-car infotainment). Firebase Performance showed p50 cold start = 6.2 seconds. Product requirement was ≤2 seconds. 3 months of growth had added 8 new SDKs to Application.onCreate().</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">Owned the performance improvement as the lead engineer. Had 2 weeks before the next OEM submission deadline.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY systematic approach: (1) Profiled with System Trace first — never optimize what you haven't measured. Found 3.2s was blocked on 4 SDKs in Application.onCreate(). (2) WHY App Startup library: moving each SDK to its own ContentProvider would add 10ms per SDK overhead — App Startup consolidates into one. (3) Moved analytics and image loader to lazy init — they're not needed until first user interaction, not at app launch. (4) Added Baseline Profiles — WHY: this pre-compiles the JIT-compiled startup path to native code, eliminating ~30% of JIT overhead at first launch. (5) Used Macrobenchmark to measure changes precisely.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Cold start dropped from 6.2s to 1.8s — 71% improvement. Met OEM deadline. Added Macrobenchmark CI gate: build fails if cold start exceeds 2.5s. No regressions over next 6 months.</span></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: People Stories →</button>
+    </div>
+  </div>
+
+  <!-- S3: People Stories -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128101;</div>3. People Stories</div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">3</div><div class="story-title">Disagreement with a Developer — Code Review Conflict</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Banking app with strict security requirements. A colleague submitted a PR using SharedPreferences to store the auth token in plaintext. I reviewed it and disagreed with the approach.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I needed to give feedback that would protect the app's security without damaging the working relationship. The release was 2 days away.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY I didn't just approve it: SharedPreferences is world-readable on rooted devices — a banking app storing auth tokens there was a serious vulnerability. <strong>Approach:</strong> (1) First DM'd the colleague before posting the review comment — WHY: public criticism in a PR can feel embarrassing and defensive. (2) Explained the security risk specifically, with a OWASP reference. (3) Proposed an alternative: EncryptedSharedPreferences (Jetpack Security) which provides the same API surface with encryption at rest. (4) WHY EncryptedSharedPreferences over a full Keystore implementation: the release was 2 days away — a full Keystore implementation would take a week to test properly. EncryptedSharedPreferences was a safe incremental step. (5) Offered to pair on the implementation.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Colleague appreciated the private conversation first. Changed the implementation to EncryptedSharedPreferences same day. We shipped on time. Three months later, during a security audit, the auditor specifically praised the token storage approach. The colleague later mentioned it changed how they think about storage security. I documented the pattern in our team wiki to prevent future occurrences.</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">4</div><div class="story-title">Mentoring a Junior Developer</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Our team had a new junior Android developer who had strong Java knowledge but no Kotlin or Coroutines experience. They were assigned to a feature with network calls.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I was their assigned mentor. The feature needed to ship in 3 weeks.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY structured approach: (1) Assessment first — watched them code for 30 minutes, identified the gaps precisely (callbacks vs coroutines). (2) WHY not just give code examples: adults learn better by doing. I gave them small, progressively harder tasks with the correct pattern, not the solution. (3) Daily 15-minute async code reviews with explanations of WHY — not just "do it this way." (4) Pair programming 2 hours per day for the first week — they drove, I guided. (5) Defined "graduation criteria": when they could code, test, and explain a coroutine + ViewModel + Flow pattern independently.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Feature shipped on time. Junior was contributing independently within 5 weeks. 6 months later, they mentored the next junior who joined. I replicated the graduation criteria approach across the whole team — it became our standard onboarding framework.</span></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Delivery Stories →</button>
+    </div>
+  </div>
+
+  <!-- S4: Delivery Stories -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128640;</div>4. Delivery Stories</div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">5</div><div class="story-title">Technical Debt — Legacy Code Refactoring</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">E-commerce app with a 3-year-old checkout flow written in Java with no architecture pattern — raw Activity with 2,000 lines, 0% test coverage. Every bug fix took 2x expected time due to side effects.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">As the engineer who owned checkout, I needed to refactor it without stopping feature delivery.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY strangler fig pattern: full rewrites fail — too large, too risky, business doesn't pause. Strangler fig = incrementally replace components while keeping the old code running. (1) Wrote characterization tests first (Golden tests) — captured current behavior before touching anything. WHY: no tests = no safety net. (2) Extracted business logic to a Kotlin class without changing the Activity — small, safe. (3) Added a ViewModel over 2 sprints. (4) Replaced the Activity with a Fragment over 1 sprint. (5) Each step: ship, monitor crash rate, move on. (6) Sold this approach to the PM by framing it as risk reduction — "each checkout bug costs us $X per day."</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Complete refactor in 4 months alongside feature delivery. Zero production incidents from the refactor. Checkout bug fix time dropped from average 3 days to 4 hours. Test coverage: 0% → 78%. Checkout conversion rate improved 2.3% (bugs we couldn't previously safely fix).</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">6</div><div class="story-title">Missed Deadline</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">We committed to shipping a real-time location tracking feature for a logistics app in 2 sprints. During sprint 2, we discovered the FusedLocationProvider API had changed significantly in Android 14, requiring a full rewrite of the location layer.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I was the lead engineer. I realized we would miss the deadline 5 days before the release date.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY communicate early: hiding a slip until the last minute destroys trust. I informed the PM immediately with a clear picture: (1) What changed (Android 14 API), (2) Exactly what work remained (3 days), (3) Two options: delay 3 days or ship a version without real-time accuracy (every 30 seconds vs real-time). WHY I proposed two options: gives the PM agency — they don't like no choices. PM chose the 30-second fallback for the deadline and scheduled the real-time version for the next release. I documented the Android 14 change in a runbook so it wouldn't surprise us again.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Shipped the fallback version on time. Real-time version shipped 2 sprints later. PM specifically mentioned my communication approach in my performance review as a positive. Added Android version compatibility checks to our feature planning template.</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">7</div><div class="story-title">Production Incident — Data Loss Outage</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Banking app. A deployment in our Room migration script had a bug — it dropped a column in the accounts table when upgrading from schema version 12 to 13. 0.8% of users upgrading that day lost their cached account data (not the real data in the bank, but the local cache, causing the app to show "no accounts" until a full refresh).</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I was the on-call engineer. Responsible for identifying, containing, and fixing the issue.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">(1) Identified via Crashlytics: "Room cannot verify the data integrity" SQLiteException. (2) Halted rollout immediately in Play Console — stopped 99.2% of users from hitting the issue. (3) The fix: Room migration 13→14 that re-creates the dropped column and marks it for a re-sync. Tested against all upgrade paths: 11→14, 12→14, 13→14. (4) Communicated to users whose cache was cleared: in-app message explaining data would re-sync. (5) Post-mortem: identified root cause (migration tested only happy path), added Room MigrationTestHelper tests that run against ALL historical versions in CI.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Fix shipped in 4 hours. Affected users recovered within 24 hours (cache re-synced). Zero further migration bugs across 18 subsequent releases. The MigrationTestHelper CI requirement became a team standard.</span></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Architecture →</button>
+    </div>
+  </div>
+
+  <!-- S5: Architecture & Design -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127963;</div>5. Architecture &amp; Design Stories</div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">8</div><div class="story-title">Architecture Decision — Migration from MVP to Clean Architecture + MVVM</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Social app, 1.5M users, team of 8 engineers. After 2 years of MVP, we had presenter classes with 800+ lines. New engineers took 3 weeks to become productive. Our test coverage was 22%. We were shipping features at half the speed of 6 months ago.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I was asked to propose an architecture path forward. I drove the decision and implementation.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY Clean Architecture + MVVM specifically: (1) ViewModel survives configuration changes — our Presenters didn't, causing 23% of our crashes. (2) UseCase layer forces separation of business logic from platform — makes domain tests pure JUnit without Robolectric. (3) Repository pattern was already partial — we just needed to formalize it. WHY not just fix MVP: the Presenter-View coupling was fundamentally the wrong abstraction for our async-heavy code. <strong>Execution:</strong> (1) Wrote the architecture ADR (Architecture Decision Record) with 3 alternatives and trade-offs. (2) Built the first feature using the new pattern as a proof-of-concept. (3) Team code review and buy-in session. (4) Migrated module by module over 6 months — never blocked feature delivery.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Test coverage: 22% → 71% over 8 months. New engineer ramp-up: 3 weeks → 1 week. Crash rate from configuration changes: dropped to near zero. Feature delivery velocity increased 40% by Q4. The ADR format became our standard for all architectural decisions.</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">9</div><div class="story-title">Requirement Ambiguity</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">PM asked for "real-time order tracking" for our logistics app. This could mean anything from WebSocket live updates to 1-minute polling to a "refresh" button.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I needed to scope the work accurately before committing to a sprint estimate.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY I asked questions before estimating: a WebSocket implementation is 3x more complex and fragile than polling. Ambiguity at planning = scope creep and missed deadlines. Questions I asked: (1) What update frequency counts as "real-time"? (5s, 30s, 1min?) (2) Does it work when app is backgrounded? (3) Battery impact constraints? (4) How many concurrent orders does a user have? After the answers (30-second updates, app only, no background), I was able to scope correctly: polling every 30 seconds via WorkManager, not WebSocket. Estimated: 4 days instead of the 12 days a WebSocket would have taken.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Delivered in 4 days as estimated. PM was satisfied. Battery usage was well within acceptable bounds. Built a template of clarifying questions I now use for all new feature estimates.</span></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Cross-team →</button>
+    </div>
+  </div>
+
+  <!-- S6: Cross-team & More -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128101;</div>6. Cross-team &amp; Further Stories</div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">10</div><div class="story-title">Working with Backend / Product / Design</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Building a new onboarding flow. Design delivered mockups 1 week before the deadline. The animations required were technically feasible on iOS but would require 3 additional weeks on Android due to differences in animation APIs.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I needed to deliver the onboarding on time without forcing a deadline extension or shipping a poor experience.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY I engaged design proactively: shipping a broken or janky version of the original design would reflect poorly on everyone. I prepared a short demo video showing: (1) The original design rendered in Compose with the animation — janky at 30fps. (2) An alternative that achieved the same visual feel with achievable animations — 60fps. (3) What would need to change (transition type, not the visual concept). I presented this to the designer 1:1 before the team meeting — WHY: designers don't like being told "we can't" in front of the group. Together we arrived at a hybrid. I also built a Compose prototype in 2 hours to de-risk the estimate.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Shipped on time. Designer thanked me for the collaborative approach. Onboarding conversion rate was 3% higher than the previous flow. I was invited to future design reviews earlier in the process.</span></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header"><div class="story-num">11</div><div class="story-title">Improving Existing Architecture</div></div>
+      <div class="story-body">
+        <div class="star-row"><span class="star-label">Situation</span><span class="star-content">Legacy codebase with all network calls directly in Activity lifecycle methods (onResume, onStart). Every screen rotation caused duplicate network requests, and we had 15+ crash reports per day from NullPointerExceptions after rotation.</span></div>
+        <div class="star-row"><span class="star-label">Task</span><span class="star-content">I was tasked with reducing crash rate by 50% without disrupting ongoing feature delivery.</span></div>
+        <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY I targeted ViewModels specifically: the root cause was lifecycle-incorrect code. WHY not RxJava: the team was already learning Kotlin Coroutines — adding RxJava would split attention. WHY incremental approach: (1) Created a shared ViewModel base class that all new screens MUST use. (2) Introduced a PR checklist item: "no network calls in Activity/Fragment lifecycle". (3) Migrated the 5 highest-crash screens first — targeted the 80% of crashes (Pareto). (4) Added a lint rule that flags direct network calls in lifecycle methods. (5) Ran weekly "tech health" reviews showing crash-rate progress to maintain team focus.</span></div>
+        <div class="star-row"><span class="star-label">Result</span><span class="star-content">Crash rate reduced 68% in 3 months (target was 50%). All new screens used ViewModel pattern by month 2. The lint rule caught 12 violations before they reached production. Presented the approach at an internal tech talk — adopted by 2 other teams in the org.</span></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7: Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">2-Minute STAR Answer Structure</div>
+      <strong>0:00–0:15:</strong> Situation (company type, scale, your role) → <strong>0:15–0:25:</strong> Task (your specific responsibility) → <strong>0:25–1:40:</strong> Actions (what YOU did and crucially, WHY) → <strong>1:40–2:00:</strong> Result (metrics, what changed, what you learned)
+    </div>
+    <h3>Opening Line Formula</h3>
+    <p><em>"In my previous role at a [banking/e-commerce/automotive] company with [2M users / 8-person team], I was responsible for [X component/feature]..."</em></p>
+    <h3>Senior-level Differentiators</h3>
+    <ul>
+      <li><strong>Cross-team impact:</strong> "This affected not just my team but 3 other feature teams who depended on the :core:network module"</li>
+      <li><strong>System-level thinking:</strong> "I chose this because the downstream effect on build times at scale was..."</li>
+      <li><strong>Mentoring outcomes:</strong> "I replicated this approach with 2 other engineers"</li>
+      <li><strong>Process improvement:</strong> "I turned this into a team standard / runbook / lint rule"</li>
+      <li><strong>Metrics always:</strong> Crash rate %, startup ms, build time minutes, test coverage %, velocity change</li>
+    </ul>
+    <h3>Common Mistakes</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Mistake</th><th>Fix</th></tr>
+      <tr><td>"We decided to..." — vague team attribution</td><td>"I proposed, advocated for, and implemented..."</td></tr>
+      <tr><td>No metrics in Result</td><td>Always end with numbers: "reduced from X to Y"</td></tr>
+      <tr><td>Describing WHAT without WHY</td><td>After every Action: "I chose this because..."</td></tr>
+      <tr><td>Answer too long (5+ minutes)</td><td>Aim for 2 minutes; practice out loud with a timer</td></tr>
+      <tr><td>Vague situation: "large app"</td><td>Specific: "banking app, 2M monthly active users, 6-person team"</td></tr>
+      <tr><td>No learning in Result</td><td>Always add: "This taught me / I would do differently..."</td></tr>
+    </table></div>
+    <h3>Bridging Technical Depth with Leadership</h3>
+    <p>Senior engineers are expected to make technical decisions that have organizational impact. Frame your technical decisions in terms of team velocity, quality, and future maintainability — not just "this was architecturally correct."</p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8: Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Story</th><th>Core message</th><th>Key metric</th></tr>
+      <tr><td>Production crash</td><td>Systematic debugging + R8 keep rules + CI prevention</td><td>Crash-free rate: 97.1% → 99.7%</td></tr>
+      <tr><td>Startup performance</td><td>Measure first (System Trace), lazy init, Baseline Profiles</td><td>6.2s → 1.8s cold start</td></tr>
+      <tr><td>Code review conflict</td><td>Private conversation first, security risk + alternative</td><td>Feature shipped on time, security audit passed</td></tr>
+      <tr><td>Junior mentoring</td><td>Assessment → tasks → pair programming → graduation criteria</td><td>Independent in 5 weeks, mentoring others at 6 months</td></tr>
+      <tr><td>Technical debt</td><td>Strangler fig, characterization tests first, ship incrementally</td><td>0% → 78% coverage, bug fix 3d → 4h</td></tr>
+      <tr><td>Missed deadline</td><td>Communicate early, present options not just problems</td><td>Shipped fallback on time, real-time in next release</td></tr>
+      <tr><td>Data loss incident</td><td>Halt rollout, fix migration, add MigrationTestHelper CI</td><td>Fix in 4h, 0 incidents across 18 releases</td></tr>
+      <tr><td>Architecture migration</td><td>ADR, proof-of-concept, incremental module migration</td><td>22% → 71% coverage, 40% velocity increase</td></tr>
+      <tr><td>Requirement ambiguity</td><td>Ask before estimating, clarify update frequency / scope</td><td>4 days vs 12 days estimate accuracy</td></tr>
+      <tr><td>Cross-team collaboration</td><td>1:1 before group, prototype to de-risk, alternative with same feel</td><td>Shipped on time, 3% higher conversion</td></tr>
+      <tr><td>Architecture improvement</td><td>Pareto (top 5 crash screens), lint rule, PR checklist</td><td>68% crash reduction in 3 months</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9: Practice Questions -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a time you improved the performance of an app.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #2 (Startup 6s → 1.8s). Opening: "In my previous automotive app role, cold start was 6.2 seconds — 3x our target." Key WHY points: measured with System Trace before optimizing; App Startup library because ContentProvider proliferation was adding overhead; Baseline Profiles because JIT compilation was the bottleneck at first launch. Result: 71% improvement, Macrobenchmark CI gate. Length: 2 minutes.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Describe a time you had a technical disagreement with a teammate.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #3 (code review conflict over auth token storage). Opening: "I reviewed a PR that stored an auth token in plaintext SharedPreferences in a banking app." Key WHY: DM'd before public PR comment (preserve dignity); EncryptedSharedPreferences over full Keystore (release was 2 days away — safe incremental step, not over-engineering). Result: shipped on time, security audit praised it. Don't say "I won the argument" — say "we arrived at a better solution together."</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a time you led an architectural change.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #8 (MVP → Clean Architecture + MVVM). This is a full senior answer. Opening: "Our MVP presenters were causing 23% of our crashes from lifecycle issues and slowing new engineer onboarding to 3 weeks." Key WHY: ViewModel was the right answer specifically for rotation crashes; Clean Architecture because domain tests needed to be platform-free; wrote ADR with alternatives to get team buy-in. Result: test coverage 22%→71%, ramp-up 3w→1w, velocity +40%. Emphasize the organizational impact, not just the code quality.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a time you missed a deadline.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #6 (Android 14 FusedLocationProvider change). Key points: communicated 5 days early (not the day before); presented TWO options with tradeoffs — gave the PM agency; documented the Android 14 change so it wouldn't surprise us again. What NOT to do: don't blame Android for the miss — own the insufficient research on API changes. What interviewers listen for: did you communicate early? Did you present solutions, not just problems? Did you learn from it?</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a production incident you handled.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #7 (Room migration data loss) or Story #1 (R8 crash). Structure: immediate containment action (halt rollout in Play Console); systematic diagnosis (Crashlytics → stack trace → root cause); fix with testing (all migration paths); communication to affected users; post-mortem with prevention. Key metric: how quickly you detected, contained, and fixed it. Senior signal: the prevention step — adding MigrationTestHelper CI ensures this class of bug never reaches production again.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a time you mentored a junior engineer.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #4 (junior developer Kotlin/Coroutines mentoring). Key insight: the learning method matters. Assessment first → structured tasks with increasing difficulty → daily feedback with WHY → pair programming with them driving → defined graduation criteria. Result that shows leverage: they went on to mentor the NEXT junior — your mentoring had a multiplier effect. This shows senior thinking: creating systems that scale beyond your direct contribution.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Describe a time you dealt with technical debt.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="question-text"></span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #5 (2,000-line Activity strangler fig refactor). Senior signals: (1) You explained the business case ("checkout bugs cost $X/day in abandoned carts") to get PM buy-in for refactor time. (2) You used characterization tests before touching anything — you didn't fly blind. (3) Strangler fig pattern — shows architectural sophistication; you didn't do a big-bang rewrite. (4) You shipped alongside feature delivery — you didn't stop the world. Result with business metric: 2.3% checkout conversion improvement from bugs you could now safely fix.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you handle ambiguous requirements?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #9 (real-time order tracking ambiguity). Key insight: scope ambiguity is a risk multiplier — 1 day of clarification prevents 1 week of rework. Questions to ask: Update frequency? Background vs foreground? Battery constraints? Who are the edge cases? Result: 4-day estimate was accurate; without clarification it would have been 12 days of WebSocket work that wasn't needed. Framework answer: "I always ask clarifying questions before estimating, because ambiguity at planning = scope creep at delivery."</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Tell me about a time you collaborated across teams (backend, product, design).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use Story #10 (onboarding animation design collaboration). Senior signal: you engaged early and privately (1:1 with designer before group meeting). You came with an alternative, not just a "no." You built a prototype to de-risk — not just words. You framed it as "same feel, different mechanics" not "your design is too hard." Result: shipped on time AND the designer invited you to future reviews earlier — you improved the process. Cross-team collaboration at senior level means making the collaboration work better, not just completing tasks.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What makes a behavioral answer "senior level" vs "mid-level"?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Mid-level: describes what happened and what they did. Senior: explains WHY — why they chose this approach over alternatives, what the organizational/team impact was, what they changed to prevent recurrence, what leverage they created (lint rule, team standard, runbook, mentoring chain). Mid-level: "I fixed the crash." Senior: "I fixed the crash, added a CI check that catches this class of bug, wrote a runbook for on-call, and presented it as a tech talk so 3 other teams benefited." The recurring theme: how did your action scale beyond the immediate task?</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

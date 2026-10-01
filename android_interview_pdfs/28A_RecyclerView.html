@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>28A — RecyclerView | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">28A · RecyclerView</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture &amp; ViewHolder</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> DiffUtil &amp; ListAdapter</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> LayoutManagers</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Decoration &amp; Nested RVs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Performance</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>28A</span> — RecyclerView</h1>
+    <p class="hero-desc">RecyclerView architecture, ViewHolder pattern, DiffUtil, ListAdapter, LayoutManagers, ItemDecoration, nested RecyclerViews with RecycledViewPool, and performance optimization techniques.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 28A</span>
+      <span class="badge badge-tier3">&#9733; Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>RecyclerView Architecture</h3>
+    <pre><code><span class="cm">RecyclerView</span>
+  ├── <span class="cm">LayoutManager</span>       <span class="cm">— decides where items go (linear, grid, staggered)</span>
+  ├── <span class="cm">Adapter</span>             <span class="cm">— creates and binds ViewHolders</span>
+  │   └── <span class="cm">ViewHolder</span>      <span class="cm">— wraps a single item View</span>
+  ├── <span class="cm">RecycledViewPool</span>    <span class="cm">— cache of recycled ViewHolders by viewType</span>
+  ├── <span class="cm">ItemDecoration</span>      <span class="cm">— draws dividers, spacing, overlays</span>
+  └── <span class="cm">ItemAnimator</span>        <span class="cm">— animates add/remove/change</span></code></pre>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      RecyclerView's core innovation is <strong>view recycling</strong>. Instead of inflating a new View for every list item, it reuses off-screen ViewHolders (via the RecycledViewPool). The ViewHolder caches view references — no <code>findViewById</code> in <code>onBindViewHolder</code>. DiffUtil calculates minimal diff on a background thread, delivering smooth animations without full dataset reloads.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2 ViewHolder -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Architecture &amp; ViewHolder Pattern</div>
+    <h3>Adapter Lifecycle</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">ProductAdapter</span> : <span class="cl">RecyclerView</span>.<span class="cl">Adapter</span>&lt;<span class="cl">ProductAdapter</span>.<span class="cl">ProductViewHolder</span>&gt;() {
+
+    <span class="kw">private val</span> items = <span class="fn">mutableListOf</span>&lt;<span class="cl">Product</span>&gt;()
+
+    <span class="cm">// 1. inflate — called only when no recycled view available</span>
+    <span class="kw">override fun</span> <span class="fn">onCreateViewHolder</span>(parent: <span class="cl">ViewGroup</span>, viewType: <span class="cl">Int</span>): <span class="cl">ProductViewHolder</span> {
+        <span class="kw">val</span> binding = <span class="cl">ItemProductBinding</span>.<span class="fn">inflate</span>(
+            <span class="cl">LayoutInflater</span>.<span class="fn">from</span>(parent.context), parent, <span class="kw">false</span>
+        )
+        <span class="kw">return</span> <span class="cl">ProductViewHolder</span>(binding)
+    }
+
+    <span class="cm">// 2. bind — called every time a ViewHolder is (re)used for an item</span>
+    <span class="cm">// NEVER do findViewById here — use ViewBinding instead</span>
+    <span class="kw">override fun</span> <span class="fn">onBindViewHolder</span>(holder: <span class="cl">ProductViewHolder</span>, position: <span class="cl">Int</span>) {
+        holder.<span class="fn">bind</span>(items[position])
+    }
+
+    <span class="kw">override fun</span> <span class="fn">getItemCount</span>() = items.size
+
+    <span class="cm">// ViewHolder — view references cached as constructor properties</span>
+    <span class="kw">class</span> <span class="cl">ProductViewHolder</span>(
+        <span class="kw">private val</span> binding: <span class="cl">ItemProductBinding</span>
+    ) : <span class="cl">RecyclerView</span>.<span class="cl">ViewHolder</span>(binding.root) {
+
+        <span class="kw">fun</span> <span class="fn">bind</span>(product: <span class="cl">Product</span>) {
+            binding.nameText.text = product.name
+            binding.priceText.text = product.<span class="fn">formattedPrice</span>()
+            <span class="cl">Glide</span>.<span class="fn">with</span>(binding.root)
+                .<span class="fn">load</span>(product.imageUrl)
+                .<span class="fn">into</span>(binding.productImage)
+        }
+    }
+}</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">ViewHolder Pattern</div>
+      The ViewHolder pattern avoids repeated <code>findViewById()</code> calls during scrolling. With ViewBinding, view references are auto-generated as properties of the binding class and cached in the ViewHolder instance. <code>onBindViewHolder</code> is called frequently during scroll — keep it fast.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: DiffUtil →</button>
+    </div>
+  </div>
+
+  <!-- S3 DiffUtil & ListAdapter -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#8635;</div>3. DiffUtil &amp; ListAdapter</div>
+    <h3>DiffUtil.Callback</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">ProductDiffCallback</span> : <span class="cl">DiffUtil</span>.<span class="cl">ItemCallback</span>&lt;<span class="cl">Product</span>&gt;() {
+
+    <span class="cm">// Are these the same item? (same identity — used for move animations)</span>
+    <span class="kw">override fun</span> <span class="fn">areItemsTheSame</span>(oldItem: <span class="cl">Product</span>, newItem: <span class="cl">Product</span>): <span class="cl">Boolean</span> =
+        oldItem.id == newItem.id
+
+    <span class="cm">// Are the contents identical? (used to decide if binding is needed)</span>
+    <span class="kw">override fun</span> <span class="fn">areContentsTheSame</span>(oldItem: <span class="cl">Product</span>, newItem: <span class="cl">Product</span>): <span class="cl">Boolean</span> =
+        oldItem == newItem  <span class="cm">// data class equals() compares all fields</span>
+
+    <span class="cm">// Optional: return specific changed payload for partial binding</span>
+    <span class="kw">override fun</span> <span class="fn">getChangePayload</span>(oldItem: <span class="cl">Product</span>, newItem: <span class="cl">Product</span>): <span class="cl">Any</span>? {
+        <span class="kw">return if</span> (oldItem.price != newItem.price) <span class="str">"PRICE_CHANGED"</span> <span class="kw">else null</span>
+    }
+}</code></pre>
+
+    <h3>ListAdapter — the recommended approach</h3>
+    <pre><code><span class="cm">// ListAdapter wraps DiffUtil with AsyncListDiffer</span>
+<span class="cm">// Diff calculation happens on a background thread</span>
+<span class="kw">class</span> <span class="cl">ProductAdapter</span> : <span class="cl">ListAdapter</span>&lt;<span class="cl">Product</span>, <span class="cl">ProductAdapter</span>.<span class="cl">ProductViewHolder</span>&gt;(
+    <span class="cl">ProductDiffCallback</span>()
+) {
+    <span class="kw">override fun</span> <span class="fn">onCreateViewHolder</span>(parent: <span class="cl">ViewGroup</span>, viewType: <span class="cl">Int</span>) = ...
+    <span class="kw">override fun</span> <span class="fn">onBindViewHolder</span>(holder: <span class="cl">ProductViewHolder</span>, position: <span class="cl">Int</span>) {
+        holder.<span class="fn">bind</span>(<span class="fn">getItem</span>(position))  <span class="cm">// use getItem(), not external list</span>
+    }
+}
+
+<span class="cm">// Submit a new list — diff calculated in background, then dispatched</span>
+<span class="cm">// Only items that actually changed get animated/rebound</span>
+adapter.<span class="fn">submitList</span>(newProducts)
+
+<span class="cm">// Important: always submit a NEW list, not mutate the existing one</span>
+<span class="cm">// DiffUtil compares old vs new — mutating in place skips the diff</span></code></pre>
+    <div class="callout callout-red">
+      <div class="callout-label">Common Mistake</div>
+      Never call <code>adapter.submitList(list)</code> with the same list reference you mutated. <code>AsyncListDiffer</code> compares the new list object to the internally stored one — if it's the same reference, it skips the diff. Always create a new list: <code>submitList(currentList.toMutableList().also { it.add(item) })</code> or work with immutable state.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← ViewHolder</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: LayoutManagers →</button>
+    </div>
+  </div>
+
+  <!-- S4 LayoutManagers -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127930;</div>4. LayoutManagers</div>
+    <div class="table-wrap"><table>
+      <tr><th>LayoutManager</th><th>Layout</th><th>Use case</th></tr>
+      <tr><td>LinearLayoutManager</td><td>Single column/row</td><td>Chat messages, news feed, settings list</td></tr>
+      <tr><td>GridLayoutManager</td><td>Fixed column grid</td><td>Photo grid, product catalog</td></tr>
+      <tr><td>StaggeredGridLayoutManager</td><td>Variable height grid</td><td>Pinterest-style, masonry layout</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// LinearLayoutManager — vertical (default) or horizontal</span>
+recyclerView.layoutManager = <span class="cl">LinearLayoutManager</span>(context)
+recyclerView.layoutManager = <span class="cl">LinearLayoutManager</span>(context, <span class="cl">LinearLayoutManager</span>.HORIZONTAL, <span class="kw">false</span>)
+
+<span class="cm">// GridLayoutManager — 2 columns, with span customization</span>
+<span class="kw">val</span> gridLM = <span class="cl">GridLayoutManager</span>(context, <span class="nu">2</span>).apply {
+    spanSizeLookup = <span class="kw">object</span> : <span class="cl">GridLayoutManager</span>.<span class="cl">SpanSizeLookup</span>() {
+        <span class="kw">override fun</span> <span class="fn">getSpanSize</span>(position: <span class="cl">Int</span>) =
+            <span class="kw">if</span> (adapter.<span class="fn">getItemViewType</span>(position) == HEADER) <span class="nu">2</span> <span class="kw">else</span> <span class="nu">1</span>
+    }
+}
+
+<span class="cm">// StaggeredGridLayoutManager</span>
+recyclerView.layoutManager = <span class="cl">StaggeredGridLayoutManager</span>(<span class="nu">2</span>, <span class="cl">StaggeredGridLayoutManager</span>.VERTICAL)</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← DiffUtil</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Decoration →</button>
+    </div>
+  </div>
+
+  <!-- S5 ItemDecoration & Nested -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127912;</div>5. ItemDecoration &amp; Nested RecyclerViews</div>
+    <h3>ItemDecoration</h3>
+    <pre><code><span class="cm">// Add spacing between items</span>
+<span class="kw">class</span> <span class="cl">SpaceItemDecoration</span>(<span class="kw">private val</span> spacing: <span class="cl">Int</span>) : <span class="cl">RecyclerView</span>.<span class="cl">ItemDecoration</span>() {
+    <span class="kw">override fun</span> <span class="fn">getItemOffsets</span>(
+        outRect: <span class="cl">Rect</span>, view: <span class="cl">View</span>,
+        parent: <span class="cl">RecyclerView</span>, state: <span class="cl">RecyclerView</span>.<span class="cl">State</span>
+    ) {
+        <span class="kw">val</span> position = parent.<span class="fn">getChildAdapterPosition</span>(view)
+        <span class="kw">if</span> (position != <span class="cl">RecyclerView</span>.NO_ID) {
+            outRect.bottom = spacing
+            <span class="kw">if</span> (position == <span class="nu">0</span>) outRect.top = spacing
+        }
+    }
+}
+recyclerView.<span class="fn">addItemDecoration</span>(<span class="cl">SpaceItemDecoration</span>(spacing = <span class="nu">16</span>))</code></pre>
+
+    <h3>Nested RecyclerViews with RecycledViewPool</h3>
+    <pre><code><span class="cm">// Problem: each horizontal RV inside a vertical RV has its own ViewPool</span>
+<span class="cm">// → ViewHolders are not shared, causing excessive inflation</span>
+
+<span class="cm">// Solution: share RecycledViewPool between all nested horizontal RVs</span>
+<span class="kw">val</span> sharedPool = <span class="cl">RecyclerView</span>.<span class="cl">RecycledViewPool</span>()
+sharedPool.<span class="fn">setMaxRecycledViews</span>(VIEW_TYPE_PRODUCT, <span class="nu">20</span>)  <span class="cm">// pool 20 items</span>
+
+<span class="cm">// In the outer adapter's onCreateViewHolder:</span>
+<span class="kw">class</span> <span class="cl">CategoryViewHolder</span>(binding: <span class="cl">ItemCategoryBinding</span>) : <span class="cl">RecyclerView</span>.<span class="cl">ViewHolder</span>(binding.root) {
+    <span class="kw">val</span> productsRV: <span class="cl">RecyclerView</span> = binding.productsRecyclerView
+
+    <span class="kw">fun</span> <span class="fn">bind</span>(category: <span class="cl">Category</span>, sharedPool: <span class="cl">RecyclerView</span>.<span class="cl">RecycledViewPool</span>) {
+        productsRV.<span class="fn">setRecycledViewPool</span>(sharedPool)
+        productsRV.<span class="fn">setHasFixedSize</span>(<span class="kw">true</span>)
+        (productsRV.layoutManager <span class="kw">as</span>? <span class="cl">LinearLayoutManager</span>)
+            ?.<span class="fn">initialPrefetchItemCount</span> = <span class="nu">4</span>
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← LayoutManagers</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Performance →</button>
+    </div>
+  </div>
+
+  <!-- S6 Performance -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9889;</div>6. Performance Optimization</div>
+    <div class="table-wrap"><table>
+      <tr><th>Optimization</th><th>How</th><th>Effect</th></tr>
+      <tr><td>setHasFixedSize(true)</td><td><code>recyclerView.setHasFixedSize(true)</code></td><td>Skips requestLayout() on data change if size doesn't change</td></tr>
+      <tr><td>setItemViewCacheSize</td><td><code>recyclerView.setItemViewCacheSize(20)</code></td><td>Off-screen cache before ViewHolder goes to pool — avoids rebind</td></tr>
+      <tr><td>setInitialPrefetchItemCount</td><td>On nested RV's LinearLayoutManager</td><td>Prefetches N items of nested RV during parent scroll</td></tr>
+      <tr><td>Stable IDs</td><td><code>setHasStableIds(true)</code> + override <code>getItemId()</code></td><td>DiffUtil can optimize rebinding with stable IDs</td></tr>
+      <tr><td>ViewType separation</td><td>Separate viewTypes for different item layouts</td><td>ViewHolder pool separated per type — no wrong-type binding</td></tr>
+      <tr><td>Avoid heavy work in bind</td><td>Don't decode bitmaps in onBindViewHolder — use Glide/Coil</td><td>Prevents jank during scroll</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// Performance checklist:</span>
+recyclerView.<span class="fn">setHasFixedSize</span>(<span class="kw">true</span>)
+recyclerView.<span class="fn">setItemViewCacheSize</span>(<span class="nu">20</span>)
+recyclerView.recycledViewPool.<span class="fn">setMaxRecycledViews</span>(<span class="nu">0</span>, <span class="nu">20</span>)
+
+<span class="cm">// In the adapter:</span>
+<span class="kw">init</span> { <span class="fn">setHasStableIds</span>(<span class="kw">true</span>) }
+<span class="kw">override fun</span> <span class="fn">getItemId</span>(position: <span class="cl">Int</span>): <span class="cl">Long</span> = <span class="fn">getItem</span>(position).id.<span class="fn">hashCode</span>().<span class="fn">toLong</span>()
+
+<span class="cm">// Avoid in onBindViewHolder:</span>
+<span class="cm">// ❌ Bitmap.decodeResource() — use Glide/Coil</span>
+<span class="cm">// ❌ Network requests — data should come from ViewModel</span>
+<span class="cm">// ❌ Creating new listeners each bind — set listener in ViewHolder constructor</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Decoration</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"RecyclerView uses the ViewHolder pattern to cache view references and recycle off-screen views. I use ListAdapter built on DiffUtil's AsyncListDiffer — it calculates the diff on a background thread and dispatches minimal updates with animations. For performance: setHasFixedSize(true), use stable IDs, share RecycledViewPool for nested RecyclerViews, and avoid expensive work in onBindViewHolder."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"RecyclerView separates concerns: the LayoutManager decides positioning, the Adapter creates and binds ViewHolders, and the RecycledViewPool caches off-screen ViewHolders for reuse. The ViewHolder pattern caches view references — with ViewBinding, references are typed properties so no findViewByld is ever needed in bind(). For efficient updates I use ListAdapter, which wraps AsyncListDiffer. DiffUtil requires implementing areItemsTheSame (identity check — usually ID) and areContentsTheSame (equality check — data class equals works). The diff runs on a background thread and dispatches precise insert/remove/change/move animations. Critical mistake: never submit a mutated list — always submit a new list instance. For nested RecyclerViews (e.g. horizontal carousels inside vertical feed), sharing a RecycledViewPool dramatically reduces inflation overhead. And setHasFixedSize(true) skips unnecessary layout passes when item count changes but container size doesn't."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>ViewHolder pattern — caches view refs; onCreateViewHolder (inflate once), onBindViewHolder (bind frequently)</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>ListAdapter + DiffUtil — async diff on background thread, minimal updates, smooth animations</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>areItemsTheSame (identity/ID) vs areContentsTheSame (data equality)</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Never submit the same list reference mutated — DiffUtil compares references first</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Shared RecycledViewPool for nested RVs — prevents excessive inflation</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Know the full RecycledViewPool hierarchy: scrap cache (just off screen, rebind happens but not reinflate) → RecycledViewPool (pooled by viewType, must rebind). For nested RecyclerViews, understand that without a shared pool, each row creates its own pool — if 20 rows each inflate 5 items that's 100 inflations vs sharing a pool of 20. Also know when NOT to use RecyclerView — for &lt;10 static items, a simple Column in Compose or LinearLayout is cheaper.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Performance</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Adapter Callbacks</h4>
+        <pre><code>onCreateViewHolder → inflate
+onBindViewHolder   → bind
+getItemCount       → size
+getItemViewType    → type key</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>DiffUtil Methods</h4>
+        <pre><code>areItemsTheSame  → identity (ID)
+areContentsTheSame → equality
+getChangePayload → partial update</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Performance Checklist</h4>
+        <pre><code>setHasFixedSize(true)
+setItemViewCacheSize(20)
+setHasStableIds(true)
+Shared RecycledViewPool (nested)
+No heavy work in onBind</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LayoutManagers</h4>
+        <pre><code>Linear  → list/feed
+Grid    → fixed columns
+Staggered → variable heights</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. Why is the ViewHolder pattern important?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">ViewHolder caches view references. Without it, onBindViewHolder would call findViewById() on every scroll event — an expensive tree traversal. The ViewHolder stores all view references as properties, created once in onCreateViewHolder. With ViewBinding, references are auto-generated as typed properties — cleaner and null-safe. The key insight: onCreateViewHolder is called rarely (only when no recycled view is available), but onBindViewHolder is called on every visible item during scroll.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What is the difference between areItemsTheSame and areContentsTheSame?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">areItemsTheSame checks identity — are these two items representing the same entity? Usually compares unique IDs. areContentsTheSame checks equality — do both items have the same data to display? Usually uses data class equals() or field-by-field comparison. If areItemsTheSame is false: item is added/removed (insert/delete animation). If true but areContentsTheSame is false: item is updated (change animation). Both true: no change, skip rebind.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What is ListAdapter and how does it improve on plain RecyclerView.Adapter?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">ListAdapter wraps AsyncListDiffer which runs DiffUtil.calculateDiff() on a background thread. Plain adapter requires calling notifyDataSetChanged() (expensive — rebinds everything) or manually calling notifyItemInserted/Removed (error-prone). ListAdapter.submitList() automatically diffs old vs new list and dispatches precise updates with animations. It also stores the current list internally — use getItem(position) in onBindViewHolder.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. Why can't you submit the same mutated list to ListAdapter?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">AsyncListDiffer stores a reference to the last submitted list. When submitList is called, it first checks if oldList === newList (same reference). If yes, it bails out without diffing — even if you mutated the contents. This is why you must always create a new list: currentList.toMutableList().also { it.add(item) }. Functional/immutable state management (like Kotlin's plus operator on lists) naturally avoids this problem.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. When would you use multiple view types in an adapter?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When list items have different layouts: header + items, loading footer, ads between items, different item styles in the same feed. Override getItemViewType() to return a unique Int per type. Create separate ViewHolder classes per type. In onCreateViewHolder, inflate based on viewType. In onBindViewHolder, cast to the correct ViewHolder type. Each viewType gets its own RecycledViewPool bucket — ViewHolders are never reused across types.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. How do shared RecycledViewPool and prefetching help nested RecyclerViews?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">In a vertical RV where each row has a horizontal RV (e.g. category rows): by default each horizontal RV has its own ViewPool — ViewHolders aren't shared. Shared RecycledViewPool lets all horizontal RVs share one pool, dramatically reducing inflation when scrolling vertically. Set initialPrefetchItemCount on the horizontal LinearLayoutManager so the RenderThread prefetches items for new rows before they appear, reducing jank.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. What does setHasFixedSize(true) do?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When set to true, RecyclerView skips calling requestLayout() on the parent when the adapter notifies data changes. requestLayout() is an expensive re-measure/re-layout pass. If your RecyclerView's size doesn't change when items are added/removed (e.g., it's match_parent in both dimensions), this is always safe to enable and avoids unnecessary layout work during updates.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. Your list has janky scrolling. How do you diagnose and fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">1) Use Android Studio's CPU Profiler to find which methods are slow. 2) Check onBindViewHolder — is it doing heavy work? (bitmap decode, network, JSON parsing) Move to Glide/background. 3) Check for synchronous notifyDataSetChanged() calls — switch to ListAdapter. 4) Check overdraw with "Show GPU Overdraw" in developer options. 5) Check if views have complex layouts — flatten with ConstraintLayout. 6) Add setHasFixedSize(true) and stable IDs. 7) For nested RVs, add shared RecycledViewPool and initialPrefetchItemCount.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. How does getChangePayload() improve partial binding?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When areItemsTheSame is true but areContentsTheSame is false, DiffUtil calls getChangePayload() to return a description of what changed. This payload is passed to onBindViewHolder(holder, position, payloads). Instead of rebinding the entire item, you can update only the changed views. Example: if only the price changed, update just the price TextView instead of rebinding the image and name. Reduces unnecessary Glide reloads and prevents image flicker on partial updates.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. How does RecyclerView's recycling work internally?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">RecyclerView has multiple caches: (1) Attached/detached scrap — ViewHolders that are still in the layout but being re-laid out; retrieved without rebinding. (2) Cache (default size 2) — recently off-screen ViewHolders cached by position; retrieved without rebinding if the same position comes back. (3) RecycledViewPool — typed ViewHolders for reuse; must rebind when retrieved. (4) ViewCacheExtension — custom cache layer. Order of retrieval: scrap → cache → pool → onCreateViewHolder. setItemViewCacheSize increases the size of the cache layer, reducing rebinds for recently-off-screen items.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>14A — WorkManager | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier2{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(86,207,178,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">14A · WorkManager</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>14A</span> — WorkManager</h1>
+    <p class="hero-desc">Guaranteed, battery-efficient, constraint-aware, and SQLite-persisted background task scheduling on Android. Mastering CoroutineWorker, chaining, unique policies, and retry strategies.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 14A</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 (Core Architecture)</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Architecture</div>
+    <p><strong>WorkManager</strong> is the recommended Android Jetpack library for persistent, deferrable, and guaranteed background processing. It acts as an abstraction layer above underlying platform schedulers (JobScheduler on API 23+, custom AlarmManager/BroadcastReceiver fallback on API 14-22).</p>
+    
+    <div class="callout callout-purple">
+      <div class="callout-label">Core Pillars of WorkManager</div>
+      <ul>
+        <li><strong>Guaranteed Execution:</strong> Tasks are persisted in an internal Room/SQLite database. Even if the process dies or the device restarts, execution resumes once constraints are met.</li>
+        <li><strong>Constraint-Aware:</strong> Runs work only when defined conditions (network type, battery level, charging state, device idle) are satisfied.</li>
+        <li><strong>Battery Efficient:</strong> Integrates with Doze mode and App Standby, executing jobs in centralized OS maintenance windows.</li>
+        <li><strong>Coroutine Native:</strong> <code>CoroutineWorker</code> provides a first-class <code>suspend fun doWork()</code> with structured cancellation.</li>
+      </ul>
+    </div>
+
+    <h3>WorkManager vs Other Components at a Glance</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>WorkManager</th><th>Foreground Service</th><th>AlarmManager</th><th>viewModelScope</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Persistence across reboot</td><td><strong>Yes (Room DB)</strong></td><td>No</td><td>No (unless rescheduled)</td><td>No (memory only)</td></tr>
+          <tr><td>Timing Precision</td><td>Inexact (Doze aware)</td><td>Immediate</td><td><strong>Exact (to the ms)</strong></td><td>Immediate</td></tr>
+          <tr><td>App Termination</td><td><strong>Survives</strong></td><td>Survives (while active)</td><td>Survives</td><td>Dies with ViewModel</td></tr>
+          <tr><td>Use Case</td><td>Sync, upload, DB purge</td><td>Music playback, navigation</td><td>Alarms, exact reminders</td><td>UI-driven fetch</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works Under the Hood</div>
+    
+    <h3>1. CoroutineWorker &amp; Execution Lifecycle</h3>
+    <p><code>CoroutineWorker</code> runs <code>doWork()</code> on <code>Dispatchers.Default</code> by default. It returns a <code>ListenableWorker.Result</code>:</p>
+    <ul>
+      <li><code>Result.success(outputData)</code>: Task finished successfully. Work state becomes <code>SUCCEEDED</code>.</li>
+      <li><code>Result.failure(outputData)</code>: Permanent failure. Work state becomes <code>FAILED</code> and will not retry.</li>
+      <li><code>Result.retry()</code>: Transient failure. WorkManager reschedules according to the defined backoff policy.</li>
+    </ul>
+
+    <h3>2. Internal Scheduling Pipeline</h3>
+    <p>When you call <code>WorkManager.enqueue()</code>:</p>
+    <ol>
+      <li>The request, tags, constraints, and input parameters are written to the internal Room database.</li>
+      <li>The internal <code>GreedyScheduler</code> checks if the app is in foreground and constraints are already met to run immediately.</li>
+      <li>If constraints are not met or the app is backgrounded, it delegates to <strong>JobScheduler</strong>.</li>
+      <li>When the OS triggers the job, WorkManager spins up the worker class, passes input data, and invokes <code>doWork()</code> inside a coroutine.</li>
+    </ol>
+
+    <h3>3. Work Chaining (Sequential &amp; Parallel)</h3>
+    <p>WorkManager supports complex Directed Acyclic Graphs (DAGs) using <code>beginWith()</code> and <code>then()</code>:</p>
+    <pre><code><span class="cm">// Parallel downloads -> Parallel filters -> Final single aggregation</span>
+<span class="kw">val</span> downloadA = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">DownloadWorker</span>&gt;().<span class="fn">build</span>()
+<span class="kw">val</span> downloadB = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">DownloadWorker</span>&gt;().<span class="fn">build</span>()
+<span class="kw">val</span> filterA = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">FilterWorker</span>&gt;().<span class="fn">build</span>()
+<span class="kw">val</span> filterB = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">FilterWorker</span>&gt;().<span class="fn">build</span>()
+<span class="kw">val</span> upload = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">UploadWorker</span>&gt;().<span class="fn">build</span>()
+
+<span class="kw">val</span> chainA = workManager.<span class="fn">beginWith</span>(downloadA).<span class="fn">then</span>(filterA)
+<span class="kw">val</span> chainB = workManager.<span class="fn">beginWith</span>(downloadB).<span class="fn">then</span>(filterB)
+
+<span class="cl">WorkContinuation</span>.<span class="fn">combine</span>(<span class="fn">listOf</span>(chainA, chainB))
+    .<span class="fn">then</span>(upload)
+    .<span class="fn">enqueue</span>()</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128392;</div>3. When to Use &amp; Constraint Rules</div>
+    
+    <h3>Constraints Specification</h3>
+    <p>Constraints govern when WorkManager is permitted to wake up the app:</p>
+    <ul>
+      <li><code>setRequiredNetworkType(NetworkType.UNMETERED)</code>: Requires Wi-Fi or free network.</li>
+      <li><code>setRequiresCharging(true)</code>: Device must be connected to power.</li>
+      <li><code>setRequiresBatteryNotLow(true)</code>: Device is not in low-battery state.</li>
+      <li><code>setRequiresDeviceIdle(true)</code>: Screen is off and user is inactive (API 23+).</li>
+      <li><code>setRequiresStorageNotLow(true)</code>: User storage is above threshold.</li>
+    </ul>
+
+    <h3>Unique Work Policies</h3>
+    <p>To avoid race conditions or duplicate processing (e.g. syncing the same account twice), use <code>enqueueUniqueWork</code> or <code>enqueueUniquePeriodicWork</code>:</p>
+    <ul>
+      <li><code>ExistingWorkPolicy.REPLACE</code>: Cancels the running/enqueued work and starts the new one.</li>
+      <li><code>ExistingWorkPolicy.KEEP</code>: If existing work is running or enqueued, discards the new request.</li>
+      <li><code>ExistingWorkPolicy.APPEND</code>: Appends the new request to run after the existing work finishes.</li>
+      <li><code>ExistingWorkPolicy.APPEND_OR_REPLACE</code>: Appends if previous succeeded; replaces if previous failed/cancelled.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128187;</div>4. Production Example (Banking Offline Sync)</div>
+    
+    <p>Scenario: In a fintech application, transactions created while offline must be securely uploaded once Wi-Fi or unmetered cellular is active, with exponential backoff on server 5xx errors.</p>
+
+    <pre><code><span class="kw">class</span> <span class="cl">SyncTransactionsWorker</span>(
+    appContext: <span class="cl">Context</span>,
+    workerParams: <span class="cl">WorkerParameters</span>,
+    <span class="kw">private val</span> repository: <span class="cl">TransactionRepository</span>
+) : <span class="cl">CoroutineWorker</span>(appContext, workerParams) {
+
+    <span class="kw">override suspend fun</span> <span class="fn">doWork</span>(): <span class="cl">Result</span> {
+        <span class="kw">val</span> batchId = inputData.<span class="fn">getString</span>(<span class="str">"KEY_BATCH_ID"</span>) ?: <span class="kw">return</span> <span class="cl">Result</span>.<span class="fn">failure</span>()
+        
+        <span class="kw">return try</span> {
+            <span class="kw">val</span> pendingTx = repository.<span class="fn">getPendingTransactions</span>(batchId)
+            <span class="kw">if</span> (pendingTx.<span class="fn">isEmpty</span>()) <span class="kw">return</span> <span class="cl">Result</span>.<span class="fn">success</span>()
+
+            <span class="kw">val</span> syncResult = repository.<span class="fn">uploadBatch</span>(pendingTx)
+            <span class="kw">if</span> (syncResult.isSuccess) {
+                <span class="kw">val</span> output = <span class="fn">workDataOf</span>(<span class="str">"SYNCED_COUNT"</span> to pendingTx.size)
+                <span class="cl">Result</span>.<span class="fn">success</span>(output)
+            } <span class="kw">else</span> {
+                <span class="cm">// Temporary 503 or network socket error -> backoff retry</span>
+                <span class="cl">Result</span>.<span class="fn">retry</span>()
+            }
+        } <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+            <span class="cm">// Worker cancelled because constraints (e.g. Wi-Fi dropped) failed</span>
+            <span class="kw">throw</span> e
+        } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+            <span class="cl">Result</span>.<span class="fn">failure</span>()
+        }
+    }
+}
+
+<span class="cm">// Scheduling inside Repository / ViewModel</span>
+<span class="kw">fun</span> <span class="fn">scheduleOfflineSync</span>(context: <span class="cl">Context</span>, batchId: <span class="cl">String</span>) {
+    <span class="kw">val</span> constraints = <span class="cl">Constraints</span>.<span class="cl">Builder</span>()
+        .<span class="fn">setRequiredNetworkType</span>(<span class="cl">NetworkType</span>.<span class="cl">CONNECTED</span>)
+        .<span class="fn">setRequiresBatteryNotLow</span>(<span class="kw">true</span>)
+        .<span class="fn">build</span>()
+
+    <span class="kw">val</span> syncRequest = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">SyncTransactionsWorker</span>&gt;()
+        .<span class="fn">setConstraints</span>(constraints)
+        .<span class="fn">setBackoffCriteria</span>(
+            <span class="cl">BackoffPolicy</span>.<span class="cl">EXPONENTIAL</span>,
+            <span class="nu">15</span>, <span class="cl">TimeUnit</span>.<span class="cl">SECONDS</span>
+        )
+        .<span class="fn">setInputData</span>(<span class="fn">workDataOf</span>(<span class="str">"KEY_BATCH_ID"</span> to batchId))
+        .<span class="fn">addTag</span>(<span class="str">"TAG_SYNC_TX"</span>)
+        .<span class="fn">build</span>()
+
+    <span class="cl">WorkManager</span>.<span class="fn">getInstance</span>(context).<span class="fn">enqueueUniqueWork</span>(
+        <span class="str">"unique_sync_$batchId"</span>,
+        <span class="cl">ExistingWorkPolicy</span>.<span class="cl">KEEP</span>,
+        syncRequest
+    )
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mechanism</th><th>Pros</th><th>Cons</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>WorkManager</strong></td>
+            <td>Guaranteed, persistent, constraints, battery optimized, retries built-in</td>
+            <td>Minimum interval for periodic is 15 mins; not suited for instant UI actions</td>
+            <td>Standard for deferrable sync and upload</td>
+          </tr>
+          <tr>
+            <td><strong>Foreground Service</strong></td>
+            <td>Runs immediately, high priority, immune to app standby while active</td>
+            <td>Requires persistent notification; strictly regulated in API 34+</td>
+            <td>Use only for user-perceivable tasks (GPS tracking, audio)</td>
+          </tr>
+          <tr>
+            <td><strong>AlarmManager</strong></td>
+            <td>Fires at exact wall-clock second</td>
+            <td>High battery drain; requires special permissions (<code>SCHEDULE_EXACT_ALARM</code> on API 31+)</td>
+            <td>Use exclusively for user alarms and calendar reminders</td>
+          </tr>
+          <tr>
+            <td><strong>viewModelScope</strong></td>
+            <td>Zero overhead, direct lifecycle binding to UI</td>
+            <td>Destroyed when screen closes; work is lost if app killed</td>
+            <td>Use for immediate UI data loading</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Expecting PeriodicWorkRequest to run every minute</div>
+      <p>Android enforces a <strong>hard minimum of 15 minutes</strong> for <code>PeriodicWorkRequest</code> (and 5 minute flex interval). Passing <code>5, TimeUnit.MINUTES</code> will be clamped to 15 minutes automatically. Do not use WorkManager for high-frequency polling.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Swallowing CancellationException inside CoroutineWorker</div>
+      <p>When constraints are lost (e.g., user disables Wi-Fi), WorkManager cancels the worker's coroutine job. If your <code>try-catch</code> catches generic <code>Exception</code> or <code>Throwable</code> without rethrowing <code>CancellationException</code>, WorkManager cannot gracefully acknowledge cancellation and clean up resources.</p>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Storing Large Payloads in Data (10 KB Limit)</div>
+      <p>The <code>Data</code> object (input and output) is stored in the Room DB and passed across processes. It has a strict limit of <strong>10 KB (10,240 bytes)</strong>. Attempting to pass Bitmaps, large JSON arrays, or byte arrays will throw an <code>IllegalStateException</code>. Store data in Room/disk and pass primary keys (IDs) instead.</p>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">Best Practice: Custom WorkerFactory with Hilt</div>
+      <p>Never construct dependencies directly inside Workers. Use <code>@HiltWorker</code> with <code>@AssistedInject</code> to inject repositories cleanly.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "WorkManager is Android Jetpack's standard library for guaranteed, deferrable background execution. It persists requests to an internal SQLite DB so tasks survive process death and device reboots. It is constraint-aware—waiting for network, charging, or idle states—and provides first-class CoroutineWorker support for asynchronous chains and exponential backoff retries."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "Under the hood, WorkManager abstracts JobScheduler (on API 23+) and GreedyScheduler for immediate execution. When a task is queued, WorkManager writes it to Room, inspects constraints, and delegates execution. With CoroutineWorker, doWork() runs on Dispatchers.Default and returns Result.success(), failure(), or retry().<br><br>
+      For enterprise reliability, WorkManager provides UniqueWork with REPLACE, KEEP, and APPEND policies to eliminate duplicate work. It also supports complex dependency graphs through WorkContinuation.combine(). Key constraints include a 15-minute minimum for periodic work and a 10KB payload limit on Data objects. For Hilt integration, we use @HiltWorker with DelegatingWorkerFactory."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Guaranteed &amp; Persisted:</strong> Backed by Room DB; survives app kill and reboot.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Constraints:</strong> Network, battery, charging, device idle triggers.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>CoroutineWorker:</strong> Suspending <code>doWork()</code> returning <code>Result</code>.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Unique Work Policies:</strong> <code>REPLACE</code>, <code>KEEP</code>, <code>APPEND</code>, <code>APPEND_OR_REPLACE</code>.</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Retry &amp; Backoff:</strong> <code>EXPONENTIAL</code> and <code>LINEAR</code> backoff policies.</div></div>
+    </div>
+
+    <h3>Senior Insight &amp; Edge Cases</h3>
+    <p>When the OS kills a worker due to constraint violation, <code>onStopped()</code> is triggered and the worker's coroutine Job is cancelled with <code>CancellationException</code>. If foreground execution is required for long-running tasks, WorkManager supports <code>setForeground(ForegroundInfo)</code> on API 28+ to promote the worker to a foreground service temporarily.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>CORE CONCEPTS</h4>
+        <pre><code>CoroutineWorker  -> suspend doWork(): Result
+Result types     -> success(), failure(), retry()
+Data Limit       -> 10 KB max
+Periodic Min     -> 15 minutes minimum interval
+Underlying API   -> JobScheduler / Room DB</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>UNIQUE WORK POLICIES</h4>
+        <pre><code>REPLACE -> Cancel running/pending, start new
+KEEP    -> Retain existing, discard incoming
+APPEND  -> Chain incoming after existing finishes
+APPEND_OR_REPLACE -> Append or start new on error</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>BACKOFF &amp; RETRY</h4>
+        <pre><code>setBackoffCriteria(
+    BackoffPolicy.EXPONENTIAL, // or LINEAR
+    10, TimeUnit.SECONDS       // min 10s
+)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>OBSERVING WORK</h4>
+        <pre><code>workManager.getWorkInfoByIdFlow(id)
+    .collect { workInfo ->
+        when(workInfo.state) {
+            State.ENQUEUED, State.RUNNING,
+            State.SUCCEEDED, State.FAILED,
+            State.BLOCKED, State.CANCELLED -> ...
+        }
+    }</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer mentally first, then expand each card to verify your answer.</div>
+
+    <h3>Basic Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the primary purpose of WorkManager in Android?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">WorkManager is designed for guaranteed, deferrable background execution. Unlike standard coroutines or services, tasks are persisted in an internal SQLite database, allowing them to survive process termination and device restarts until execution constraints (like network or charging) are satisfied.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What are the 3 return options for CoroutineWorker.doWork()?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. <code>Result.success()</code>: Task completed successfully; triggers dependent tasks in the chain.<br>2. <code>Result.failure()</code>: Permanent failure; halts execution and marks the task as FAILED.<br>3. <code>Result.retry()</code>: Transient failure; WorkManager will reschedule the task according to its backoff policy.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is the minimum interval for PeriodicWorkRequest?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The minimum periodic interval is <strong>15 minutes</strong> (defined by <code>PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS</code>). Any shorter interval passed to the builder will be automatically clamped to 15 minutes by the framework to preserve battery.</div>
+    </div>
+
+    <h3>Intermediate Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — Explain the difference between ExistingWorkPolicy.KEEP and ExistingWorkPolicy.REPLACE.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">When enqueuing unique work with a specific name:<br>• <strong>KEEP:</strong> If work with the same name already exists in an ENQUEUED or RUNNING state, the new request is ignored.<br>• <strong>REPLACE:</strong> If work with that name exists, it is cancelled and deleted, and the new work request is scheduled immediately.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — How does WorkManager handle task cancellation when constraints are lost?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">When a constraint is no longer met (e.g. Wi-Fi drops), WorkManager cancels the worker coroutine's <code>Job</code> by throwing a <code>CancellationException</code> and invokes <code>onStopped()</code>. The worker state is rolled back to ENQUEUED so it can re-run when constraints return. Catching generic <code>Exception</code> without rethrowing <code>CancellationException</code> breaks this flow.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — What is the maximum size allowed for input/output Data in WorkManager and why?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The maximum size is <strong>10 KB (10,240 bytes)</strong>. This limit exists because <code>Data</code> objects are serialized into Room database tables and passed through IPC Binder transactions. Exceeding this limit throws an <code>IllegalStateException</code>. Large blobs or lists should be stored in local files or Room, passing only IDs or paths in the <code>Data</code> object.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — How do you configure exponential backoff retry criteria in WorkRequest?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">You configure it on the WorkRequestBuilder using <code>setBackoffCriteria(BackoffPolicy.EXPONENTIAL, initialDelay, timeUnit)</code>. Minimum initial delay is 10 seconds. On each <code>Result.retry()</code>, delay doubles: 10s, 20s, 40s, 80s, etc., up to a maximum capped delay.</div>
+    </div>
+
+    <h3>Senior &amp; Scenario Questions</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — How do you inject dependencies into a Worker using Hilt?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">1. Annotate the worker class with <code>@HiltWorker</code>.<br>2. Use <code>@AssistedInject</code> on constructor passing <code>@Assisted appContext: Context</code> and <code>@Assisted workerParams: WorkerParameters</code> along with regular injected dependencies.<br>3. Inject <code>HiltWorkerFactory</code> into <code>Application</code> and implement <code>Configuration.Provider</code> returning <code>Configuration.Builder().setWorkerFactory(hiltWorkerFactory).build()</code>.<br>4. Disable default <code>WorkManagerInitializer</code> in <code>AndroidManifest.xml</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — Design a multi-step image sync pipeline: Compress 3 images in parallel, upload them sequentially, and update database.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <pre><code><span class="kw">val</span> compressRequests = imageUris.<span class="fn">map</span> { uri ->
+    <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">CompressWorker</span>&gt;()
+        .<span class="fn">setInputData</span>(<span class="fn">workDataOf</span>(<span class="str">"URI"</span> to uri.<span class="fn">toString</span>()))
+        .<span class="fn">build</span>()
+}
+<span class="kw">val</span> uploadWork = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">BatchUploadWorker</span>&gt;()
+    .<span class="fn">setConstraints</span>(<span class="cl">Constraints</span>.<span class="cl">Builder</span>().<span class="fn">setRequiredNetworkType</span>(<span class="cl">NetworkType</span>.<span class="cl">CONNECTED</span>).<span class="fn">build</span>())
+    .<span class="fn">build</span>()
+<span class="kw">val</span> updateDbWork = <span class="cl">OneTimeWorkRequestBuilder</span>&lt;<span class="cl">UpdateLocalDbWorker</span>&gt;().<span class="fn">build</span>()
+
+workManager.<span class="fn">beginWith</span>(compressRequests) <span class="cm">// Runs in parallel</span>
+    .<span class="fn">then</span>(uploadWork)                   <span class="cm">// Runs after all compressions succeed</span>
+    .<span class="fn">then</span>(updateDbWork)                 <span class="cm">// Final DB update</span>
+    .<span class="fn">enqueue</span>()</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — What happens if an app with scheduled WorkManager tasks is force-stopped by the user?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">When an app is in the "Force Stopped" state on Android, the OS disables all its alarms, JobScheduler registrations, and broadcast receivers. WorkManager will NOT run any scheduled tasks while in this state. The tasks remain persisted in the SQLite database and will automatically reschedule and resume only after the user manually relaunches the application.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

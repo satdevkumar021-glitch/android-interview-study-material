@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>34D — Data Structures &amp; Search | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(79,158,255,.12);border:1px solid rgba(79,158,255,.3);color:#4f9eff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-coding{background:rgba(79,158,255,.12);color:#4f9eff;border:1px solid rgba(79,158,255,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(79,158,255,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:#4f9eff;background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:#4f9eff;}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">34D · Data Structures</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Stack</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Queue</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> LinkedList</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Cycle Detection</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Binary Search</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#128187; Coding</div>
+    <h1><span>34D</span> — Data Structures &amp; Search (Kotlin)</h1>
+    <p class="hero-desc">Stack with balanced parentheses, Queue with BFS, LinkedList with cycle detection (Floyd's algorithm), and binary search variants — complete Kotlin implementations.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 34D</span>
+      <span class="badge badge-coding">Coding</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <div class="table-wrap"><table>
+      <tr><th>Structure</th><th>Kotlin class</th><th>Key operations</th><th>Use case</th></tr>
+      <tr><td>Stack</td><td>ArrayDeque (as Stack)</td><td>addLast / removeLast / last</td><td>Balanced parens, DFS, undo history</td></tr>
+      <tr><td>Queue</td><td>ArrayDeque (as Queue)</td><td>addLast / removeFirst / first</td><td>BFS traversal, task queue</td></tr>
+      <tr><td>LinkedList</td><td>Custom Node class</td><td>append, delete, traverse</td><td>O(1) insert/delete, cycle detection</td></tr>
+      <tr><td>Binary Search</td><td>Array + indices</td><td>halve search space each step</td><td>Find in sorted array O(log n)</td></tr>
+    </table></div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Kotlin ArrayDeque</div>
+      In Kotlin, use <code>ArrayDeque</code> for both Stack and Queue — it's the recommended double-ended queue. Stack: addLast/removeLast (LIFO). Queue: addLast/removeFirst (FIFO). Never use java.util.Stack or LinkedList in Kotlin interviews.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Stack →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128202;</div>2. Stack — Balanced Parentheses</div>
+    <h3>Stack Implementation</h3>
+    <pre><code><span class="cm">// Using ArrayDeque as Stack (LIFO)</span>
+<span class="kw">class</span> <span class="cl">Stack</span>&lt;T&gt; {
+    <span class="kw">private val</span> deque = <span class="cl">ArrayDeque</span>&lt;T&gt;()
+    <span class="kw">fun</span> <span class="fn">push</span>(item: T) = deque.<span class="fn">addLast</span>(item)
+    <span class="kw">fun</span> <span class="fn">pop</span>(): T = deque.<span class="fn">removeLast</span>()
+    <span class="kw">fun</span> <span class="fn">peek</span>(): T = deque.<span class="fn">last</span>()
+    <span class="kw">fun</span> <span class="fn">isEmpty</span>() = deque.<span class="fn">isEmpty</span>()
+    <span class="kw">val</span> size <span class="kw">get</span>() = deque.size
+}
+
+<span class="cm">// Or use ArrayDeque directly (more idiomatic):</span>
+<span class="kw">val</span> stack = <span class="cl">ArrayDeque</span>&lt;<span class="cl">Char</span>&gt;()
+stack.<span class="fn">addLast</span>(<span class="str">'a'</span>)    <span class="cm">// push</span>
+stack.<span class="fn">removeLast</span>()   <span class="cm">// pop</span>
+stack.<span class="fn">last</span>()        <span class="cm">// peek</span></code></pre>
+
+    <h3>Use Case: Balanced Parentheses Checker</h3>
+    <pre><code><span class="cm">// "({[]})" → true,  "({[})" → false,  "(((" → false</span>
+<span class="kw">fun</span> <span class="fn">isBalanced</span>(s: <span class="cl">String</span>): <span class="cl">Boolean</span> {
+    <span class="kw">val</span> stack = <span class="cl">ArrayDeque</span>&lt;<span class="cl">Char</span>&gt;()
+    <span class="kw">val</span> pairs = <span class="fn">mapOf</span>(<span class="str">')'</span> to <span class="str">'('</span>, <span class="str">']'</span> to <span class="str">'['</span>, <span class="str">'}'</span> to <span class="str">'{'</span>)
+
+    <span class="kw">for</span> (ch <span class="kw">in</span> s) {
+        <span class="kw">when</span> (ch) {
+            <span class="str">'('</span>, <span class="str">'['</span>, <span class="str">'{'</span> -> stack.<span class="fn">addLast</span>(ch)   <span class="cm">// open bracket: push</span>
+            <span class="str">')'</span>, <span class="str">']'</span>, <span class="str">'}'</span> -> {
+                <span class="cm">// close bracket: pop and check if it matches</span>
+                <span class="kw">if</span> (stack.<span class="fn">isEmpty</span>() || stack.<span class="fn">removeLast</span>() != pairs[ch]) <span class="kw">return false</span>
+            }
+        }
+    }
+    <span class="kw">return</span> stack.<span class="fn">isEmpty</span>()   <span class="cm">// stack must be empty if fully balanced</span>
+}
+
+<span class="fn">println</span>(<span class="fn">isBalanced</span>(<span class="str">"({[]})"</span>))  <span class="cm">// true</span>
+<span class="fn">println</span>(<span class="fn">isBalanced</span>(<span class="str">"({[})"</span>))   <span class="cm">// false — } doesn't match [</span>
+<span class="fn">println</span>(<span class="fn">isBalanced</span>(<span class="str">"((("</span>))     <span class="cm">// false — stack not empty</span>
+<span class="fn">println</span>(<span class="fn">isBalanced</span>(<span class="str">""</span>))        <span class="cm">// true — empty string is balanced</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Queue →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128202;</div>3. Queue — BFS Traversal</div>
+    <h3>Queue Implementation</h3>
+    <pre><code><span class="cm">// Using ArrayDeque as Queue (FIFO)</span>
+<span class="kw">val</span> queue = <span class="cl">ArrayDeque</span>&lt;<span class="cl">Int</span>&gt;()
+queue.<span class="fn">addLast</span>(<span class="nu">1</span>)    <span class="cm">// enqueue (add to back)</span>
+queue.<span class="fn">removeFirst</span>() <span class="cm">// dequeue (remove from front)</span>
+queue.<span class="fn">first</span>()       <span class="cm">// peek front</span></code></pre>
+
+    <h3>Use Case: BFS (Breadth-First Search) on a Graph</h3>
+    <pre><code><span class="cm">// BFS visits all nodes at distance 1, then distance 2, etc.</span>
+<span class="kw">fun</span> <span class="fn">bfs</span>(graph: <span class="cl">Map</span>&lt;<span class="cl">Int</span>, <span class="cl">List</span>&lt;<span class="cl">Int</span>&gt;&gt;, start: <span class="cl">Int</span>): <span class="cl">List</span>&lt;<span class="cl">Int</span>&gt; {
+    <span class="kw">val</span> visited = <span class="cl">HashSet</span>&lt;<span class="cl">Int</span>&gt;()
+    <span class="kw">val</span> queue = <span class="cl">ArrayDeque</span>&lt;<span class="cl">Int</span>&gt;()
+    <span class="kw">val</span> result = <span class="fn">mutableListOf</span>&lt;<span class="cl">Int</span>&gt;()
+
+    queue.<span class="fn">addLast</span>(start)
+    visited.<span class="fn">add</span>(start)
+
+    <span class="kw">while</span> (queue.<span class="fn">isNotEmpty</span>()) {
+        <span class="kw">val</span> node = queue.<span class="fn">removeFirst</span>()
+        result.<span class="fn">add</span>(node)
+
+        graph[node]?.<span class="fn">forEach</span> { neighbor ->
+            <span class="kw">if</span> (neighbor !<span class="kw">in</span> visited) {
+                visited.<span class="fn">add</span>(neighbor)
+                queue.<span class="fn">addLast</span>(neighbor)
+            }
+        }
+    }
+    <span class="kw">return</span> result
+}
+
+<span class="kw">val</span> graph = <span class="fn">mapOf</span>(
+    <span class="nu">1</span> to <span class="fn">listOf</span>(<span class="nu">2</span>, <span class="nu">3</span>),
+    <span class="nu">2</span> to <span class="fn">listOf</span>(<span class="nu">4</span>),
+    <span class="nu">3</span> to <span class="fn">listOf</span>(<span class="nu">5</span>),
+    <span class="nu">4</span> to <span class="fn">emptyList</span>(),
+    <span class="nu">5</span> to <span class="fn">emptyList</span>()
+)
+<span class="fn">println</span>(<span class="fn">bfs</span>(graph, <span class="nu">1</span>))  <span class="cm">// [1, 2, 3, 4, 5]</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: LinkedList →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128257;</div>4. LinkedList — Implementation</div>
+    <pre><code><span class="cm">// Singly LinkedList Node</span>
+<span class="kw">data class</span> <span class="cl">Node</span>&lt;T&gt;(<span class="kw">val</span> value: T, <span class="kw">var</span> next: <span class="cl">Node</span>&lt;T&gt;? = <span class="kw">null</span>)
+
+<span class="kw">class</span> <span class="cl">LinkedList</span>&lt;T&gt; {
+    <span class="kw">private var</span> head: <span class="cl">Node</span>&lt;T&gt;? = <span class="kw">null</span>
+
+    <span class="cm">// Append to end — O(n)</span>
+    <span class="kw">fun</span> <span class="fn">append</span>(value: T) {
+        <span class="kw">val</span> newNode = <span class="cl">Node</span>(value)
+        <span class="kw">if</span> (head == <span class="kw">null</span>) { head = newNode; <span class="kw">return</span> }
+        <span class="kw">var</span> current = head
+        <span class="kw">while</span> (current?.next != <span class="kw">null</span>) current = current.next
+        current?.next = newNode
+    }
+
+    <span class="cm">// Prepend to front — O(1)</span>
+    <span class="kw">fun</span> <span class="fn">prepend</span>(value: T) {
+        head = <span class="cl">Node</span>(value, head)
+    }
+
+    <span class="cm">// Delete first occurrence of value — O(n)</span>
+    <span class="kw">fun</span> <span class="fn">delete</span>(value: T) {
+        <span class="kw">if</span> (head?.value == value) { head = head?.next; <span class="kw">return</span> }
+        <span class="kw">var</span> current = head
+        <span class="kw">while</span> (current?.next != <span class="kw">null</span>) {
+            <span class="kw">if</span> (current.next?.value == value) {
+                current.next = current.next?.next
+                <span class="kw">return</span>
+            }
+            current = current.next
+        }
+    }
+
+    <span class="cm">// Print all values</span>
+    <span class="kw">fun</span> <span class="fn">toList</span>(): <span class="cl">List</span>&lt;T&gt; {
+        <span class="kw">val</span> result = <span class="fn">mutableListOf</span>&lt;T&gt;()
+        <span class="kw">var</span> current = head
+        <span class="kw">while</span> (current != <span class="kw">null</span>) {
+            result.<span class="fn">add</span>(current.value)
+            current = current.next
+        }
+        <span class="kw">return</span> result
+    }
+}
+
+<span class="kw">val</span> list = <span class="cl">LinkedList</span>&lt;<span class="cl">Int</span>&gt;()
+list.<span class="fn">append</span>(<span class="nu">1</span>); list.<span class="fn">append</span>(<span class="nu">2</span>); list.<span class="fn">append</span>(<span class="nu">3</span>)
+<span class="fn">println</span>(list.<span class="fn">toList</span>())  <span class="cm">// [1, 2, 3]</span>
+list.<span class="fn">delete</span>(<span class="nu">2</span>)
+<span class="fn">println</span>(list.<span class="fn">toList</span>())  <span class="cm">// [1, 3]</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Cycle Detection →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128257;</div>5. Floyd's Cycle Detection (Tortoise &amp; Hare)</div>
+    <p>Detect a cycle in a linked list in O(n) time, O(1) space — no HashSet needed.</p>
+    <pre><code><span class="cm">// Mutable node for cycle creation:</span>
+<span class="kw">class</span> <span class="cl">MutableNode</span>(<span class="kw">val</span> value: <span class="cl">Int</span>, <span class="kw">var</span> next: <span class="cl">MutableNode</span>? = <span class="kw">null</span>)
+
+<span class="kw">fun</span> <span class="fn">hasCycle</span>(head: <span class="cl">MutableNode</span>?): <span class="cl">Boolean</span> {
+    <span class="kw">var</span> slow = head    <span class="cm">// moves 1 step at a time (tortoise)</span>
+    <span class="kw">var</span> fast = head    <span class="cm">// moves 2 steps at a time (hare)</span>
+
+    <span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+        slow = slow?.next
+        fast = fast.next?.next
+        <span class="kw">if</span> (slow == fast) <span class="kw">return true</span>   <span class="cm">// they met → cycle exists</span>
+    }
+    <span class="kw">return false</span>   <span class="cm">// fast reached null → no cycle</span>
+}
+
+<span class="cm">// Create: 1 → 2 → 3 → 4 → 2 (cycle back to node 2)</span>
+<span class="kw">val</span> n1 = <span class="cl">MutableNode</span>(<span class="nu">1</span>); <span class="kw">val</span> n2 = <span class="cl">MutableNode</span>(<span class="nu">2</span>)
+<span class="kw">val</span> n3 = <span class="cl">MutableNode</span>(<span class="nu">3</span>); <span class="kw">val</span> n4 = <span class="cl">MutableNode</span>(<span class="nu">4</span>)
+n1.next = n2; n2.next = n3; n3.next = n4; n4.next = n2   <span class="cm">// cycle!</span>
+<span class="fn">println</span>(<span class="fn">hasCycle</span>(n1))   <span class="cm">// true</span>
+
+<span class="kw">val</span> linear = <span class="cl">MutableNode</span>(<span class="nu">1</span>); linear.next = <span class="cl">MutableNode</span>(<span class="nu">2</span>)
+<span class="fn">println</span>(<span class="fn">hasCycle</span>(linear)) <span class="cm">// false</span></code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Why Floyd's Works</div>
+      If there's a cycle, the fast pointer enters it and laps the slow pointer. Since fast moves 2 steps and slow moves 1, fast gains 1 step per iteration on slow. Eventually fast == slow (fast lapped slow). If there's no cycle, fast reaches null. O(n) time, O(1) space — no HashSet of visited nodes needed.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Binary Search →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128257;</div>6. Binary Search</div>
+    <pre><code><span class="cm">// Classic binary search: find target in sorted array</span>
+<span class="cm">// Returns index or -1 if not found</span>
+
+<span class="cm">// Iterative — O(log n) time, O(1) space (preferred)</span>
+<span class="kw">fun</span> <span class="fn">binarySearch</span>(nums: <span class="cl">IntArray</span>, target: <span class="cl">Int</span>): <span class="cl">Int</span> {
+    <span class="kw">var</span> lo = <span class="nu">0</span>; <span class="kw">var</span> hi = nums.size - <span class="nu">1</span>
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">val</span> mid = lo + (hi - lo) / <span class="nu">2</span>   <span class="cm">// avoids integer overflow vs (lo+hi)/2</span>
+        <span class="kw">when</span> {
+            nums[mid] == target -> <span class="kw">return</span> mid
+            nums[mid] &lt; target  -> lo = mid + <span class="nu">1</span>
+            <span class="kw">else</span>               -> hi = mid - <span class="nu">1</span>
+        }
+    }
+    <span class="kw">return</span> -<span class="nu">1</span>
+}
+
+<span class="fn">println</span>(<span class="fn">binarySearch</span>(<span class="fn">intArrayOf</span>(<span class="nu">1</span>,<span class="nu">3</span>,<span class="nu">5</span>,<span class="nu">7</span>,<span class="nu">9</span>), <span class="nu">5</span>))   <span class="cm">// 2 (index)</span>
+<span class="fn">println</span>(<span class="fn">binarySearch</span>(<span class="fn">intArrayOf</span>(<span class="nu">1</span>,<span class="nu">3</span>,<span class="nu">5</span>,<span class="nu">7</span>,<span class="nu">9</span>), <span class="nu">6</span>))   <span class="cm">// -1 (not found)</span>
+
+<span class="cm">// Recursive — O(log n) time, O(log n) stack space</span>
+<span class="kw">fun</span> <span class="fn">binarySearchRec</span>(nums: <span class="cl">IntArray</span>, target: <span class="cl">Int</span>, lo: <span class="cl">Int</span> = <span class="nu">0</span>, hi: <span class="cl">Int</span> = nums.size-<span class="nu">1</span>): <span class="cl">Int</span> {
+    <span class="kw">if</span> (lo > hi) <span class="kw">return</span> -<span class="nu">1</span>
+    <span class="kw">val</span> mid = lo + (hi - lo) / <span class="nu">2</span>
+    <span class="kw">return</span> <span class="kw">when</span> {
+        nums[mid] == target -> mid
+        nums[mid] &lt; target  -> <span class="fn">binarySearchRec</span>(nums, target, mid + <span class="nu">1</span>, hi)
+        <span class="kw">else</span>               -> <span class="fn">binarySearchRec</span>(nums, target, lo, mid - <span class="nu">1</span>)
+    }
+}</code></pre>
+
+    <h3>Find First / Last Occurrence</h3>
+    <pre><code><span class="cm">// Find FIRST occurrence of target (handles duplicates)</span>
+<span class="kw">fun</span> <span class="fn">findFirst</span>(nums: <span class="cl">IntArray</span>, target: <span class="cl">Int</span>): <span class="cl">Int</span> {
+    <span class="kw">var</span> lo = <span class="nu">0</span>; <span class="kw">var</span> hi = nums.size - <span class="nu">1</span>; <span class="kw">var</span> result = -<span class="nu">1</span>
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">val</span> mid = lo + (hi - lo) / <span class="nu">2</span>
+        <span class="kw">when</span> {
+            nums[mid] == target -> { result = mid; hi = mid - <span class="nu">1</span> }  <span class="cm">// keep searching left</span>
+            nums[mid] &lt; target  -> lo = mid + <span class="nu">1</span>
+            <span class="kw">else</span>               -> hi = mid - <span class="nu">1</span>
+        }
+    }
+    <span class="kw">return</span> result
+}
+
+<span class="cm">// [1,2,2,2,3] target=2 → first=1, last=3</span>
+<span class="cm">// Find LAST: when match found, save result and search right (lo = mid + 1)</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Data Structure Selection</div>
+      Interviewer: "Design X." You: think about what operations are needed, then pick the right structure. Stack → LIFO. Queue → FIFO, BFS. HashMap → O(1) lookup. LinkedList → O(1) insert at known position. Heap → find min/max efficiently.
+    </div>
+    <h3>Binary Search Template (Memorize)</h3>
+    <pre><code><span class="cm">// Template for any binary search problem:</span>
+<span class="kw">var</span> lo = <span class="nu">0</span>; <span class="kw">var</span> hi = n - <span class="nu">1</span>
+<span class="kw">while</span> (lo &lt;= hi) {
+    <span class="kw">val</span> mid = lo + (hi - lo) / <span class="nu">2</span>   <span class="cm">// NEVER (lo + hi) / 2 — can overflow</span>
+    <span class="kw">if</span> (condition(mid)) {
+        result = mid; hi = mid - <span class="nu">1</span>  <span class="cm">// or lo = mid + 1 for last occurrence</span>
+    } <span class="kw">else if</span> (tooSmall(mid)) {
+        lo = mid + <span class="nu">1</span>
+    } <span class="kw">else</span> {
+        hi = mid - <span class="nu">1</span>
+    }
+}</code></pre>
+    <h3>Floyd's vs HashSet for Cycle Detection</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>Time</th><th>Space</th><th>When to use</th></tr>
+      <tr><td>HashSet visited</td><td>O(n)</td><td>O(n)</td><td>When you need to know which node starts the cycle</td></tr>
+      <tr><td>Floyd's (slow/fast)</td><td>O(n)</td><td>O(1)</td><td>When you just need to detect existence of cycle</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Structure/Algorithm</th><th>Key code</th><th>Complexity</th></tr>
+      <tr><td>Stack (push/pop/peek)</td><td>ArrayDeque: addLast / removeLast / last</td><td>O(1) all ops</td></tr>
+      <tr><td>Queue (enq/deq/peek)</td><td>ArrayDeque: addLast / removeFirst / first</td><td>O(1) all ops</td></tr>
+      <tr><td>Balanced parens</td><td>Stack; push on open, pop+check on close</td><td>O(n) / O(n)</td></tr>
+      <tr><td>BFS</td><td>Queue; visited set; while queue not empty: dequeue, process, enqueue neighbors</td><td>O(V+E) / O(V)</td></tr>
+      <tr><td>Floyd's cycle</td><td>slow = head.next; fast = head.next.next; loop until slow==fast or fast==null</td><td>O(n) / O(1)</td></tr>
+      <tr><td>Binary search</td><td>lo=0, hi=n-1; mid=lo+(hi-lo)/2; shift lo/hi based on comparison</td><td>O(log n) / O(1)</td></tr>
+      <tr><td>Find first occurrence</td><td>Binary search; on match: save result, hi=mid-1; continue searching left</td><td>O(log n) / O(1)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is mid = lo + (hi - lo) / 2 preferred over mid = (lo + hi) / 2?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">(lo + hi) can overflow when lo and hi are both large (e.g., lo = Int.MAX_VALUE / 2, hi = Int.MAX_VALUE / 2 + 1 — their sum exceeds Int.MAX_VALUE). lo + (hi - lo) / 2 is mathematically equivalent but safe because (hi - lo) is always smaller than hi, and adding it to lo can't overflow if the original values fit in Int. This is a well-known interview trick to show awareness of integer overflow.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain how Floyd's cycle detection works with a concrete example.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">List: 1→2→3→4→2 (cycle at 2). Slow moves 1 step, fast moves 2: Start: slow=1, fast=1. Step1: slow=2, fast=3. Step2: slow=3, fast=2. Step3: slow=4, fast=4. slow==fast → cycle detected. Intuition: if there's a cycle, fast enters it and gains 1 step per round on slow. Eventually they occupy the same node. If no cycle, fast reaches null. O(1) space — no extra memory for visited set.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use a Stack vs a Queue? Give Android examples.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Stack (LIFO): back navigation history (Activity back stack), undo/redo operations, DFS traversal, balanced parentheses, call stack simulation. Queue (FIFO): BFS traversal, task processing in order (WorkManager queue), network request queuing, event ordering. Android's Fragment back stack is literally a Stack. BFS for finding shortest path in a graph (e.g., social network distance) uses a Queue.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write the algorithm to reverse a linked list.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun reverseList(head: Node?): Node? { var prev: Node? = null; var current = head; while (current != null) { val next = current.next; current.next = prev; prev = current; current = next }; return prev }. Three-pointer technique: save next, point current back to prev, advance both. After loop, prev is the new head. O(n) time, O(1) space. Iterative is preferred over recursive for lists (avoids stack overflow on long lists).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does binary search achieve O(log n) — what is being halved each iteration?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Each iteration halves the search space. Starting with n elements: after 1 step → n/2, after 2 → n/4, after k → n/2^k. When n/2^k = 1, we've found it or exhausted the search. Solving n/2^k = 1 → k = log₂(n). So binary search takes at most log₂(n) iterations. For n=1,000,000: only 20 steps. This requires the array to be sorted — binary search cannot be applied to unsorted data.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you implement a stack that supports getMin() in O(1)?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use two stacks: main stack and min stack. On push(x): push x to main; push min(x, minStack.lastOrNull() ?: x) to minStack. On pop(): pop from both. getMin() = minStack.last(). The min stack always has the current minimum at its top — it tracks the minimum at each state of the main stack. Space: O(n). All operations O(1). class MinStack { private val stack = ArrayDeque&lt;Int&gt;(); private val minStack = ArrayDeque&lt;Int&gt;(); fun push(x: Int) { stack.addLast(x); minStack.addLast(minOf(x, minStack.lastOrNull() ?: x)) }; fun pop() { stack.removeLast(); minStack.removeLast() }; fun getMin() = minStack.last() }</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write binary search to find the first element ≥ target (lower bound).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun lowerBound(nums: IntArray, target: Int): Int { var lo = 0; var hi = nums.size; while (lo &lt; hi) { val mid = lo + (hi - lo) / 2; if (nums[mid] &lt; target) lo = mid + 1 else hi = mid }; return lo }. Returns the index of the first element ≥ target (or nums.size if all elements are smaller). This is the classic lower_bound from C++ STL. Note: loop condition is lo &lt; hi (not ≤) and hi starts at nums.size to handle the "all smaller" case.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the time complexity of finding the middle of a linked list, and how?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">O(n) time, O(1) space using the slow/fast pointer technique (same as Floyd's). slow moves 1 step, fast moves 2. When fast reaches the end, slow is at the middle. fun findMiddle(head: Node?): Node? { var slow = head; var fast = head; while (fast?.next != null) { slow = slow?.next; fast = fast.next?.next }; return slow }. For even-length list, returns the second-middle node. This is also used in merge sort for linked lists.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Implement a valid parentheses checker that also returns the positions of unmatched brackets.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Instead of just a Char stack, push (char, index) pairs. When a close bracket is encountered and matches, pop. At end, the stack contains positions of all unmatched open brackets. For close brackets with no match, track them separately. fun unmatchedPositions(s: String): List&lt;Int&gt; { val stack = ArrayDeque&lt;Int&gt;(); val pairs = mapOf(')' to '(', ']' to '[', '}' to '{'); for ((i, ch) in s.withIndex()) { if (ch in "([{") stack.addLast(i) else if (ch in ")]}") { if (stack.isNotEmpty() && s[stack.last()] == pairs[ch]) stack.removeLast() else stack.addLast(i) } }; return stack.toList().sorted() }</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why does BFS use a Queue while DFS uses a Stack?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">BFS visits all nodes at distance 1 before distance 2 — this "level by level" expansion requires FIFO (Queue). Nodes discovered first are visited first. DFS goes deep into one path before backtracking — this "last in, first out" exploration requires LIFO (Stack, or the implicit call stack in recursive DFS). Queue ensures breadth-first order. Stack ensures depth-first order. BFS guarantees shortest path in unweighted graphs; DFS doesn't.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

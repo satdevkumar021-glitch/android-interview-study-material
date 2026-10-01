@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30A — System Design: Offline-First Product Catalog | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-senior{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">30A · Offline Product Catalog</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem Statement</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture &amp; Components</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Design Decisions</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs &amp; Failure</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep · Senior System Design</div>
+    <h1><span>30A</span> — Offline-First Product Catalog</h1>
+    <p class="hero-desc">Design an Android product catalog with offline browsing, search, pagination, and background sync — a complete senior-level system design answer covering architecture, data flow, trade-offs, and failure handling.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 30A</span>
+      <span class="badge badge-senior">&#9733; Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- S1 Problem Statement -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
+    <h3>Requirements</h3>
+    <h4>Functional</h4>
+    <ul>
+      <li>Browse product catalog with infinite scroll / pagination</li>
+      <li>Search products by name, category, or price range</li>
+      <li>View product detail (images, description, price, availability)</li>
+      <li><strong>Offline access</strong>: catalog usable without internet connection</li>
+      <li>Push catalog updates: price changes, new arrivals visible on next launch</li>
+    </ul>
+    <h4>Non-Functional</h4>
+    <ul>
+      <li>Fast initial load — no blank screen while fetching</li>
+      <li>No duplicate products on pagination</li>
+      <li>Battery efficient background sync</li>
+      <li>Handle device variety: low-end phones with limited storage</li>
+    </ul>
+    <h3>Constraints &amp; Assumptions</h3>
+    <ul>
+      <li>REST API for product catalog (cursor-based pagination)</li>
+      <li>~10,000 products total, 20 per page</li>
+      <li>Catalog updated daily by backend team</li>
+      <li>Users expected to browse offline in areas with poor connectivity</li>
+    </ul>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
+  </div>
+
+  <!-- S2 Architecture & Components -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#127963;</div>2. Architecture &amp; Components</div>
+    <h3>ASCII Architecture Diagram</h3>
+    <pre><code>┌─────────────────────────────────────────────────────────┐
+│                       UI LAYER                          │
+│  CatalogScreen (Compose)  SearchScreen (Compose)        │
+│       LazyColumn                                        │
+│       LazyPagingItems&lt;Product&gt;                          │
+└───────────────────┬─────────────────────────────────────┘
+                    │ observes Flow&lt;PagingData&lt;Product&gt;&gt;
+                    │ observes connectivityState
+                    ▼
+┌─────────────────────────────────────────────────────────┐
+│                   VIEWMODEL LAYER                       │
+│  CatalogViewModel                                       │
+│   • products: Flow&lt;PagingData&lt;Product&gt;&gt;.cachedIn(scope) │
+│   • searchQuery: StateFlow&lt;String&gt;                      │
+│   • uiState: StateFlow&lt;CatalogUiState&gt;                  │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────┐
+│                   DOMAIN LAYER                          │
+│  GetProductsUseCase  SearchProductsUseCase              │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────┐
+│                   DATA LAYER                            │
+│  ProductRepository                                      │
+│   Pager(config, remoteMediator, pagingSourceFactory)    │
+│       │                     │                           │
+│       ▼                     ▼                           │
+│  ProductRemoteMediator   Room (Single Source of Truth)  │
+│   • REFRESH: clear DB    ProductDao.getProductsPaged()  │
+│   • APPEND: fetch next   returns PagingSource&lt;Int,Ent&gt;  │
+│     page, insert DB      auto-invalidates on write      │
+│       │                                                 │
+│       ▼                                                 │
+│  Retrofit / ProductApi                                  │
+│  OkHttp + interceptors                                  │
+└─────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────┐
+│              BACKGROUND SYNC                            │
+│  WorkManager (PeriodicWorkRequest, 6h interval)         │
+│  CatalogSyncWorker → triggers RemoteMediator REFRESH    │
+│  NetworkConnectivityObserver (Flow&lt;Boolean&gt;)            │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+    <h3>Layer Responsibilities</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Layer</th><th>Class</th><th>Responsibility</th></tr>
+      <tr><td>UI</td><td>CatalogScreen</td><td>Displays LazyPagingItems, handles load states</td></tr>
+      <tr><td>ViewModel</td><td>CatalogViewModel</td><td>Holds paged Flow, search state, ui state; caches across rotation</td></tr>
+      <tr><td>Domain</td><td>GetProductsUseCase</td><td>Combines repository + search filtering</td></tr>
+      <tr><td>Repository</td><td>ProductRepository</td><td>Creates Pager with RemoteMediator, maps entities to domain</td></tr>
+      <tr><td>Remote</td><td>ProductRemoteMediator</td><td>Fetches API, writes to Room, handles pagination keys</td></tr>
+      <tr><td>Local</td><td>Room / ProductDao</td><td>Single source of truth, auto-generates PagingSource</td></tr>
+      <tr><td>Sync</td><td>CatalogSyncWorker</td><td>Periodic WorkManager job — keeps catalog fresh</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Problem</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
+    </div>
+  </div>
+
+  <!-- S3 Data Flow -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#8594;</div>3. Data Flow</div>
+    <h3>Online Flow — First Launch</h3>
+    <pre><code>App launch
+  → CatalogViewModel creates Flow&lt;PagingData&gt;
+  → Pager emits initial load request
+  → RemoteMediator.load(REFRESH)
+      → Fetch products/page=1 from API
+      → Insert into Room (transaction: clear + insert)
+  → Room PagingSource auto-invalidates
+  → UI receives PagingData from Room → displays products
+  → User scrolls near end
+  → RemoteMediator.load(APPEND)
+      → Fetch page 2 from API → insert into Room
+  → UI updates with new items</code></pre>
+
+    <h3>Offline Flow</h3>
+    <pre><code>App launch (no internet)
+  → RemoteMediator.load(REFRESH) fails
+  → Returns MediatorResult.Error(NetworkException)
+  → Room PagingSource serves existing cached data immediately
+  → UI shows: "Showing cached data" banner
+  → NetworkConnectivityObserver emits true (connected)
+  → App triggers refresh() on PagingData
+  → RemoteMediator.load(REFRESH) succeeds → fresh data</code></pre>
+
+    <h3>Background Sync Flow</h3>
+    <pre><code>WorkManager PeriodicWorkRequest (every 6 hours, on WiFi + charging)
+  → CatalogSyncWorker.doWork()
+      → Fetch updated catalog from API
+      → Insert/update products in Room
+      → Room invalidates PagingSource
+      → If app is in foreground: UI auto-updates
+      → If app is in background: fresh cache ready on next launch</code></pre>
+
+    <h3>Search Flow</h3>
+    <pre><code>User types in search box
+  → searchQuery StateFlow debounced (300ms)
+  → flatMapLatest: new Pager with search query param
+  → ProductApi.search(query, page) → new RemoteMediator
+  → OR: local Room FTS5 search for offline search</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Architecture</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
+    </div>
+  </div>
+
+  <!-- S4 Key Design Decisions -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9881;</div>4. Key Design Decisions</div>
+
+    <h3>1. Single Source of Truth = Room</h3>
+    <p>The UI never reads directly from the network. Retrofit data goes to Room, and Room feeds the UI via PagingSource. This ensures offline reads are seamless and the UI always has consistent data regardless of network state.</p>
+
+    <h3>2. Stale-While-Revalidate Pattern</h3>
+    <p>Show cached data <strong>immediately</strong> on launch, then fetch fresh data in background. Users see content instantly — the catalog updates underneath. Implemented via: Room PagingSource loads immediately while RemoteMediator refreshes asynchronously.</p>
+
+    <h3>3. WorkManager for Background Sync</h3>
+    <pre><code><span class="kw">val</span> constraints = <span class="cl">Constraints</span>.<span class="cl">Builder</span>()
+    .<span class="fn">setRequiredNetworkType</span>(<span class="cl">NetworkType</span>.CONNECTED)
+    .<span class="fn">setRequiresBatteryNotLow</span>(<span class="kw">true</span>)
+    .<span class="fn">build</span>()
+
+<span class="kw">val</span> syncWork = <span class="cl">PeriodicWorkRequestBuilder</span>&lt;<span class="cl">CatalogSyncWorker</span>&gt;(<span class="nu">6</span>, <span class="cl">TimeUnit</span>.HOURS)
+    .<span class="fn">setConstraints</span>(constraints)
+    .<span class="fn">setBackoffCriteria</span>(<span class="cl">BackoffPolicy</span>.EXPONENTIAL, <span class="nu">30</span>, <span class="cl">TimeUnit</span>.SECONDS)
+    .<span class="fn">build</span>()
+
+<span class="cl">WorkManager</span>.<span class="fn">getInstance</span>(context).<span class="fn">enqueueUniquePeriodicWork</span>(
+    <span class="str">"catalog_sync"</span>,
+    <span class="cl">ExistingPeriodicWorkPolicy</span>.KEEP,
+    syncWork
+)</code></pre>
+
+    <h3>4. NetworkConnectivityObserver</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">NetworkConnectivityObserver</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="an">@ApplicationContext</span> context: <span class="cl">Context</span>
+) {
+    <span class="kw">private val</span> connectivityManager =
+        context.<span class="fn">getSystemService</span>(<span class="cl">ConnectivityManager</span>::<span class="kw">class</span>.java)
+
+    <span class="kw">val</span> isConnected: <span class="cl">Flow</span>&lt;<span class="cl">Boolean</span>&gt; = <span class="fn">callbackFlow</span> {
+        <span class="kw">val</span> callback = <span class="kw">object</span> : <span class="cl">ConnectivityManager</span>.<span class="cl">NetworkCallback</span>() {
+            <span class="kw">override fun</span> <span class="fn">onAvailable</span>(network: <span class="cl">Network</span>) { <span class="fn">trySend</span>(<span class="kw">true</span>) }
+            <span class="kw">override fun</span> <span class="fn">onLost</span>(network: <span class="cl">Network</span>) { <span class="fn">trySend</span>(<span class="kw">false</span>) }
+        }
+        connectivityManager.<span class="fn">registerDefaultNetworkCallback</span>(callback)
+        <span class="fn">awaitClose</span> { connectivityManager.<span class="fn">unregisterNetworkCallback</span>(callback) }
+    }.<span class="fn">distinctUntilChanged</span>()
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Data Flow</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
+    </div>
+  </div>
+
+  <!-- S5 Trade-offs & Failure -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Trade-offs &amp; Failure Handling</div>
+    <h3>Trade-offs</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Decision</th><th>Chosen Approach</th><th>Alternative</th><th>Why Chosen</th></tr>
+      <tr><td>Sync strategy</td><td>WorkManager periodic sync</td><td>Push via FCM + on-demand</td><td>Battery efficient; acceptable for daily catalog updates</td></tr>
+      <tr><td>Search</td><td>API search + Room FTS5 offline</td><td>API search only</td><td>Offline search requires local FTS; minor storage overhead</td></tr>
+      <tr><td>Pagination</td><td>Cursor-based API + Paging3</td><td>Offset-based</td><td>Consistent results when catalog updates between pages</td></tr>
+      <tr><td>Cache strategy</td><td>Stale-while-revalidate</td><td>Network-first / cache-first</td><td>Best UX — instant display + fresh data</td></tr>
+      <tr><td>Storage</td><td>Room (SQLite)</td><td>DataStore, file cache</td><td>Queryable, paging-integrated, relational</td></tr>
+    </table></div>
+
+    <h3>Failure Scenarios</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Failure</th><th>Handling</th></tr>
+      <tr><td>Network unavailable</td><td>RemoteMediator returns Error; Room PagingSource still serves cache; UI shows offline banner</td></tr>
+      <tr><td>API returns 5xx</td><td>RemoteMediator returns MediatorResult.Error; Paging shows retry button; no data loss from cache</td></tr>
+      <tr><td>Room database corrupt</td><td>Room allows destructive migration; re-sync from API on next launch</td></tr>
+      <tr><td>WorkManager fails</td><td>Exponential backoff retry; also sync on app foreground</td></tr>
+      <tr><td>Stale data too old</td><td>Track last_sync timestamp in Room; show "Last updated X hours ago" warning</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Key Decisions</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
+    </div>
+  </div>
+
+  <!-- S6 Scalability -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128200;</div>6. Scalability &amp; Failure Handling</div>
+    <h3>Scaling to Larger Catalogs</h3>
+    <ul>
+      <li><strong>Storage pruning</strong>: Don't store entire 10K catalog on device. Store last N pages viewed (keep 100 most recent items, prune on sync). Use Room entity with last_accessed timestamp.</li>
+      <li><strong>Partial sync</strong>: API supports <code>?updated_after=timestamp</code> — sync only changed products, not full catalog</li>
+      <li><strong>Category-based prefetch</strong>: Pre-sync only the category the user most recently viewed</li>
+      <li><strong>Image caching</strong>: Coil's disk cache handles product images; set max disk cache size per available storage</li>
+    </ul>
+    <h3>Multi-Module Architecture</h3>
+    <pre><code>:feature:catalog  → CatalogScreen, CatalogViewModel
+:feature:search   → SearchScreen, SearchViewModel
+:core:product     → ProductRepository, ProductApi, ProductDao, RemoteMediator
+:core:database    → Room setup, AppDatabase
+:core:network     → Retrofit, OkHttp, interceptors
+:core:sync        → CatalogSyncWorker, NetworkConnectivityObserver</code></pre>
+
+    <h3>Testing Strategy</h3>
+    <ul>
+      <li><strong>Unit tests</strong>: ProductRepository with FakeProductApi + in-memory Room</li>
+      <li><strong>PagingSource tests</strong>: TestPagingDataDiffer to collect paginated items</li>
+      <li><strong>RemoteMediator tests</strong>: Mock API responses, verify Room state after each LoadType</li>
+      <li><strong>E2E tests</strong>: Maestro or Espresso for offline catalog browsing flow</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Trade-offs</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"I'd use an offline-first architecture with Room as the single source of truth. Retrofit fetches from the API via a RemoteMediator, writes to Room, and the UI reads from Room via Paging 3's PagingSource — so it always has data even offline. Background sync runs via WorkManager on a 6-hour schedule when connected. Network state is observed as a Flow to show offline banners and trigger re-sync when reconnected."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"The key insight is stale-while-revalidate: show cached data immediately, refresh in the background. Architecture: Compose UI → CatalogViewModel → GetProductsUseCase → ProductRepository. The repository creates a Pager with a RemoteMediator and Room's auto-generated PagingSource. RemoteMediator handles network: on REFRESH it clears Room and loads page 1; on APPEND it loads the next page and inserts. Room's InvalidationTracker auto-invalidates the PagingSource when RemoteMediator writes, so the UI updates automatically. For offline: if RemoteMediator fails, Room still serves the last cached data — the user sees products with an 'offline' banner. Search works both online (API query) and offline (Room FTS5). Background sync via WorkManager with constraints: connected, battery not low — keeps catalog fresh without draining battery. NetworkConnectivityObserver as a Flow&lt;Boolean&gt; triggers refresh when connectivity returns."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Room = single source of truth; UI never reads from network directly</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>RemoteMediator: REFRESH clears + reloads; APPEND fetches next page + inserts</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Stale-while-revalidate: show cache immediately, refresh in background</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>WorkManager for battery-efficient background sync (constraints: connected, not low battery)</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>NetworkConnectivityObserver as Flow&lt;Boolean&gt; — reactive offline detection</div></div>
+    </div>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Key Answer</th></tr>
+      <tr><td>How do you handle stale data?</td><td>Track last_sync_at timestamp in Room; show "last updated" UI; WorkManager ensures max staleness is 6h</td></tr>
+      <tr><td>What if the catalog has 1M products?</td><td>Prune local cache to last N viewed; partial sync with updated_after timestamp; server-side search instead of local FTS</td></tr>
+      <tr><td>How do you test offline behavior?</td><td>MockWebServer returning errors, in-memory Room, TestPagingDataDiffer to verify loaded items</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Proactively mention that Room's PagingSource auto-invalidates when data is written — this is not obvious and shows deep understanding. Also mention the RemoteKeys table pattern: to track which page corresponds to which cursor/offset across app restarts, store page keys in a separate Room table. Without this, APPEND after app restart restarts from page 1.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Scalability</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Architecture Stack</h4>
+        <pre><code>Compose → ViewModel
+→ UseCase → Repository
+→ RemoteMediator + Room
+→ Retrofit (API)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Offline Strategy</h4>
+        <pre><code>Single source of truth = Room
+Stale-while-revalidate
+RemoteMediator writes Room
+Room PagingSource reads UI</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Sync</h4>
+        <pre><code>WorkManager periodic (6h)
+Constraints: connected + battery
+NetworkConnectivityObserver
+  → triggers refresh on reconnect</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Failure Modes</h4>
+        <pre><code>Network fail → serve cache
+API 5xx → retry button
+Stale → show last_sync_at
+Reconnect → auto-refresh</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What does "single source of truth" mean in offline-first architecture?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Room (local database) is the only source the UI reads from. The network is a supplier of data INTO Room, not a direct source for the UI. This ensures: (a) offline works — Room always has data, (b) UI is consistent — no race between network response and cache, (c) reactivity — Room's LiveData/Flow notifies UI when data changes from any source. Network data → Room → UI (always via Room).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. How does RemoteMediator know which page to load next after app restart?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">RemoteKeys table in Room stores the last fetched page key (cursor or offset). On APPEND, RemoteMediator reads the last key from RemoteKeysDao.getLastKey() to determine which page to fetch next. On REFRESH, it clears the RemoteKeys table along with the product data. Without this table, after app restart APPEND would have no idea where pagination left off and would restart from page 1.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What is the stale-while-revalidate pattern?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Show cached (potentially stale) data immediately to the user, then fetch fresh data in the background and update the UI when it arrives. Users see content instantly — no empty screen. The catalog may be hours old on first render, but updates within seconds as the background fetch completes. This is the best pattern for catalogs: it optimizes perceived performance while ensuring data freshness.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. How do you implement offline search?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Room supports FTS5 (Full Text Search) virtual tables. Define a @Fts4 or @Fts5 entity and create a shadow FTS table. ProductFts entity with content relationship to Product. Room generates efficient full-text search queries using MATCH operator. For online search: use API search endpoint. Strategy: if connected, use API search for fresh results; if offline, fall back to Room FTS search on cached data. Show "searching cached data" indicator when offline.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. How do you detect when the device goes offline and comes back online?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Use ConnectivityManager.registerDefaultNetworkCallback() wrapped in a callbackFlow. Emit true in onAvailable, false in onLost. Use distinctUntilChanged() to avoid duplicate emissions. Expose as Flow&lt;Boolean&gt; from a singleton NetworkConnectivityObserver (Hilt @Singleton). In ViewModel: collect isConnected, when it transitions to true call pagingData.refresh(). In UI: show/hide offline banner based on connectivity state.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. What WorkManager constraints would you use for catalog sync?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">setRequiredNetworkType(NetworkType.CONNECTED) — don't sync without network. setRequiresBatteryNotLow(true) — don't drain low battery. Optional: setRequiresCharging(true) for large syncs only. Use PeriodicWorkRequest with 6-hour interval for catalog freshness. Use ExistingPeriodicWorkPolicy.KEEP to prevent duplicate schedules. Add exponential backoff for retry on failure. For immediate sync on reconnect, schedule a OneTimeWorkRequest with the same worker when connectivity is restored.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How would you handle a product catalog of 1 million items on a mobile device?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Don't cache 1M items locally — that's 100MB+. Instead: (1) Cache only recently viewed categories/pages (LRU eviction policy in Room — prune items not accessed in 7 days). (2) Use partial sync: API endpoint GET /catalog?updated_after={timestamp} — only sync changed items. (3) Use server-side search — don't build local FTS for 1M items. (4) Category-level caching: user's most-browsed categories get deeper local cache; others get minimal cache. (5) Track storage budget: check available device storage, reduce cache size if low.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. Design the Room schema for this system.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Tables: (1) products(id, name, description, price, category, image_url, last_synced_at) — main catalog. (2) remote_keys(id, prev_key, next_key) — pagination state for RemoteMediator. (3) categories(id, name) — for category filter. (4) product_fts USING fts5(content=products) — virtual FTS table for offline search. (5) sync_metadata(key, last_sync_at) — track when last sync occurred. Indices: products(category), products(last_synced_at) for pruning queries.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. How do you show "last updated X minutes ago" to the user?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Store last_sync_at timestamp in Room (a sync_metadata table or SharedPreferences). Expose it as Flow&lt;Long?&gt; from a SyncMetadataRepository. In ViewModel: combine isConnected flow with lastSyncAt flow → compute age string ("Last updated 3 min ago", "Offline — last updated 2 hours ago"). Update last_sync_at in RemoteMediator after successful REFRESH. If last_sync_at is null: never synced (first install). Show "Loading..." until first sync completes.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. Walk through what happens when a user opens the app in airplane mode for the first time.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">First install, airplane mode: (1) CatalogViewModel starts flow. (2) Pager triggers RemoteMediator.load(REFRESH). (3) RemoteMediator tries API → IOException. Returns MediatorResult.Error. (4) Room PagingSource has zero items (empty database). (5) UI receives empty PagingData + loadState.refresh is Error. (6) Show empty state screen: "No internet connection. Please connect to load the catalog." with a "Retry" button. (7) User turns off airplane mode → NetworkConnectivityObserver emits true → ViewModel calls refresh() → RemoteMediator succeeds → products appear. This is the correct UX — graceful empty state, not a crash.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

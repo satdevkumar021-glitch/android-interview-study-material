@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>4C – Lifecycle</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t1{background:rgba(240,107,107,.15);color:var(--danger);}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  .badge.t3{background:rgba(240,160,75,.15);color:var(--warn);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>4C · Lifecycle</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>4C — Lifecycle, Scopes & repeatOnLifecycle</h1>
+  <div class="meta">
+    <span class="badge t1">Tier 1 · Architecture Core</span>
+    <span>LifecycleOwner · DefaultLifecycleObserver · lifecycleScope · repeatOnLifecycle · flowWithLifecycle</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>The Android <strong>Lifecycle</strong> library provides abstractions to build lifecycle-aware components. Instead of writing bloated lifecycle management code inside Activities or Fragments, components can monitor lifecycle state changes independently.</p>
+  <p><strong>The Core Problem Solved:</strong> Manually coordinating external resource subscriptions (GPS listeners, camera hardware, WebSockets) across <code>onStart()</code>/<code>onStop()</code> in Activities leads to race conditions, missed unsubscriptions, and memory leaks. The Lifecycle library inverts control: components observe the <code>LifecycleOwner</code> directly.</p>
+  <div class="box info">
+    <strong>Key Lifecycle Primitives:</strong>
+    <ul style="margin-top:8px;">
+      <li><strong>LifecycleOwner:</strong> Interface implemented by <code>ComponentActivity</code>, <code>Fragment</code>, and <code>ProcessLifecycleOwner</code>.</li>
+      <li><strong>DefaultLifecycleObserver:</strong> The standard interface with default methods (<code>onStart</code>, <code>onResume</code>, <code>onPause</code>, <code>onStop</code>, <code>onDestroy</code>). Replaces deprecated <code>@OnLifecycleEvent</code>.</li>
+      <li><strong>lifecycleScope:</strong> Coroutine scope bound to the owner's lifecycle, automatically cancelled on <code>onDestroy()</code>.</li>
+      <li><strong>repeatOnLifecycle:</strong> Suspends the calling coroutine and restarts the block whenever the lifecycle enters the target state (e.g. <code>STARTED</code>), pausing/cancelling when it drops below.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works: State Machine & repeatOnLifecycle</h2>
+
+  <div class="ascii">
+                    [INITIALIZED]
+                          │  ▲
+                 ON_CREATE│  │ON_DESTROY
+                          ▼  │
+                      [CREATED]
+                          │  ▲
+                  ON_START│  │ON_STOP
+                          ▼  │
+                      [STARTED]   ◄── repeatOnLifecycle(STARTED) active window!
+                          │  ▲
+                 ON_RESUME│  │ON_PAUSE
+                          ▼  │
+                      [RESUMED]
+  </div>
+
+  <h3>State vs Event Mapping</h3>
+  <ul>
+    <li><strong>Events:</strong> Lifecycle transitions fired by the framework (<code>ON_CREATE</code>, <code>ON_START</code>, <code>ON_RESUME</code>, <code>ON_PAUSE</code>, <code>ON_STOP</code>, <code>ON_DESTROY</code>).</li>
+    <li><strong>States:</strong> Current status in the state machine (<code>INITIALIZED</code>, <code>CREATED</code>, <code>STARTED</code>, <code>RESUMED</code>, <code>DESTROYED</code>).</li>
+    <li>When an Activity moves from <code>onStart()</code> to <code>onResume()</code>, its state is <code>STARTED</code> then <code>RESUMED</code>. When it moves to <code>onPause()</code>, its state falls back to <code>STARTED</code>.</li>
+  </ul>
+
+  <h3>Why repeatOnLifecycle Replaced launchWhenStarted</h3>
+  <p>Historically, Jetpack provided <code>lifecycleScope.launchWhenStarted { ... }</code>. However, <code>launchWhenStarted</code> only <strong>pauses execution</strong> (suspends) when the lifecycle drops below STARTED. It does <strong>not cancel</strong> the underlying upstream Flow collection!</p>
+  <p>If a cold Flow is emitting location updates or database emissions, <code>launchWhenStarted</code> keeps the producer active in the background, wasting CPU and battery. <strong><code>repeatOnLifecycle</code></strong> completely cancels the inner coroutine block upon <code>ON_STOP</code> and relaunches a fresh coroutine block upon <code>ON_START</code>.</p>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE & SCOPE MATRIX ═══ -->
+<section id="when">
+  <h2>3 · When to Use: Lifecycle Scope Selection</h2>
+
+  <table>
+    <tr>
+      <th>Scope / Method</th>
+      <th>Trigger & Behavior</th>
+      <th>Recommended Use Case</th>
+    </tr>
+    <tr>
+      <td><code>repeatOnLifecycle(STARTED)</code></td>
+      <td>Starts on <code>ON_START</code>, cancels on <code>ON_STOP</code>, restarts on next <code>ON_START</code>.</td>
+      <td>Collecting UI state flows (<code>StateFlow</code> / <code>SharedFlow</code>) in Activities/Fragments.</td>
+    </tr>
+    <tr>
+      <td><code>flowWithLifecycle(STARTED)</code></td>
+      <td>Flow operator wrapping <code>repeatOnLifecycle</code>.</td>
+      <td>Collecting a single flow when functional operator chaining is preferred.</td>
+    </tr>
+    <tr>
+      <td><code>lifecycleScope.launch</code></td>
+      <td>Launches once; stays alive until <code>ON_DESTROY</code>.</td>
+      <td>One-shot UI operations (e.g. starting a transition animation).</td>
+    </tr>
+    <tr>
+      <td><code>ProcessLifecycleOwner</code></td>
+      <td>Tracks entire Application process lifecycle (app moved to foreground/background).</td>
+      <td>App-wide session timeouts, biometric lock triggers, global analytics.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example: Lifecycle-Aware GPS Tracker & Safe Flow Collection</h2>
+  <p>Production automotive location tracker that automatically starts GPS updates when the screen is visible and halts hardware sensors when the app is backgrounded.</p>
+
+  <pre><code><span class="kw">package</span> com.enterprise.automotive.location
+
+<span class="kw">import</span> android.content.Context
+<span class="kw">import</span> androidx.activity.ComponentActivity
+<span class="kw">import</span> androidx.lifecycle.*
+<span class="kw">import</span> kotlinx.coroutines.flow.StateFlow
+<span class="kw">import</span> kotlinx.coroutines.launch
+
+<span class="cm">/**
+ * Self-contained Lifecycle-Aware Location Observer.
+ * Automatically binds and unbinds hardware sensors.
+ */</span>
+<span class="kw">class</span> <span class="type">GpsLocationTracker</span>(
+    <span class="kw">private val</span> context: <span class="type">Context</span>,
+    <span class="kw">private val</span> onLocationChanged: (<span class="type">LocationPoint</span>) -&gt; <span class="type">Unit</span>
+) : <span class="type">DefaultLifecycleObserver</span> {
+
+    <span class="kw">override fun</span> <span class="fn">onStart</span>(owner: <span class="type">LifecycleOwner</span>) {
+        <span class="cm">// Screen is visible — connect GPS hardware</span>
+        <span class="fn">startHardwareGpsUpdates</span>()
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onStop</span>(owner: <span class="type">LifecycleOwner</span>) {
+        <span class="cm">// Screen hidden — halt GPS to conserve battery</span>
+        <span class="fn">stopHardwareGpsUpdates</span>()
+    }
+
+    <span class="kw">private fun</span> <span class="fn">startHardwareGpsUpdates</span>() { <span class="cm">/* Connect sensor */</span> }
+    <span class="kw">private fun</span> <span class="fn">stopHardwareGpsUpdates</span>() { <span class="cm">/* Disconnect sensor */</span> }
+}
+
+<span class="cm">/**
+ * Activity safely collecting UI StateFlow using repeatOnLifecycle.
+ */</span>
+<span class="kw">class</span> <span class="type">NavigationActivity</span> : <span class="type">ComponentActivity</span>() {
+
+    <span class="kw">private val</span> viewModel: <span class="type">NavigationViewModel</span> <span class="kw">by</span> <span class="fn">viewModels</span>()
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: android.os.<span class="type">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+
+        <span class="cm">// Attach self-managing lifecycle observer</span>
+        <span class="kw">val</span> gpsTracker = <span class="type">GpsLocationTracker</span>(<span class="kw">this</span>) { point -&gt;
+            viewModel.<span class="fn">onNewLocation</span>(point)
+        }
+        lifecycle.<span class="fn">addObserver</span>(gpsTracker)
+
+        <span class="cm">// Safe UI state collection</span>
+        lifecycleScope.<span class="fn">launch</span> {
+            <span class="fn">repeatOnLifecycle</span>(<span class="type">Lifecycle</span>.<span class="type">State</span>.<span class="type">STARTED</span>) {
+                viewModel.uiState.<span class="fn">collect</span> { state -&gt;
+                    <span class="fn">renderNavigationUi</span>(state)
+                }
+            }
+        }
+    }
+
+    <span class="kw">private fun</span> <span class="fn">renderNavigationUi</span>(state: <span class="type">NavigationUiState</span>) {
+        <span class="cm">// Render map coordinates & route guidance</span>
+    }
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES & COMPARISONS ═══ -->
+<section id="alt">
+  <h2>5 · Flow Collection Patterns Comparison</h2>
+
+  <table>
+    <tr>
+      <th>Pattern</th>
+      <th>Background Behavior (onStop)</th>
+      <th>Resource Leak Risk</th>
+      <th>Modern Status</th>
+    </tr>
+    <tr>
+      <td><code>lifecycleScope.launch { flow.collect() }</code></td>
+      <td>Keeps collecting in background until <code>onDestroy()</code>.</td>
+      <td>🚨 High (wastes CPU/battery processing background UI updates).</td>
+      <td>Avoid for UI flows.</td>
+    </tr>
+    <tr>
+      <td><code>lifecycleScope.launchWhenStarted { flow.collect() }</code></td>
+      <td>Suspends consumer coroutine, but keeps upstream Flow active!</td>
+      <td>⚠️ Moderate (producer stays hot).</td>
+      <td>Deprecated in Jetpack.</td>
+    </tr>
+    <tr>
+      <td><code>repeatOnLifecycle(STARTED)</code></td>
+      <td>Cancels collection on stop; restarts fresh on start.</td>
+      <td>✅ Zero leak risk.</td>
+      <td>Official Google standard for Views.</td>
+    </tr>
+    <tr>
+      <td><code>collectAsStateWithLifecycle()</code></td>
+      <td>Compose-native version of <code>repeatOnLifecycle</code>.</td>
+      <td>✅ Zero leak risk.</td>
+      <td>Official standard for Jetpack Compose.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS & COMMON MISTAKES ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls & Memory Leak Traps</h2>
+  <div class="box danger">
+    <strong>1. Using launchWhenStarted with Cold Flows:</strong> <code>launchWhenStarted</code> does not cancel the coroutine when the app goes into the background; it merely suspends the receiver. If collecting a cold flow emitting location updates or database queries, the producer continues running in the background, causing severe battery drain.
+  </div>
+  <div class="box warn">
+    <strong>2. Collecting Multiple Flows in a Single repeatOnLifecycle without child launches:</strong> Putting two sequential <code>flowA.collect()</code> and <code>flowB.collect()</code> inside a single <code>repeatOnLifecycle</code> block will cause <code>flowB</code> to never start because <code>flowA.collect()</code> suspends indefinitely! Each flow collection must be wrapped in its own <code>launch { ... }</code> inside the block.
+  </div>
+  <div class="box info">
+    <strong>3. Using Deprecated @OnLifecycleEvent Annotation:</strong> The annotation-based lifecycle observer requires reflection or KAPT code generation at runtime. Always implement <code>DefaultLifecycleObserver</code>.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW FRAMEWORK ═══ -->
+<section id="interview">
+  <h2>7 · Interview Framework (Senior Differentiator)</h2>
+  
+  <h3>30-Second Answer (Elevator Pitch)</h3>
+  <p>"Jetpack Lifecycle enables components to observe Android lifecycle states without tightly coupling logic to Activities. While <code>lifecycleScope</code> cancels tasks on <code>onDestroy()</code>, UI state flows must be collected using <code>repeatOnLifecycle(STARTED)</code>. This ensures coroutines are cancelled when the screen is stopped (saving CPU and battery) and automatically restarted when the screen becomes visible again."</p>
+
+  <h3>2-Minute Structured Answer</h3>
+  <ol>
+    <li><strong>Core Abstraction:</strong> <code>LifecycleOwner</code> exposes a <code>Lifecycle</code> object that maintains a state machine (INITIALIZED → CREATED → STARTED → RESUMED → DESTROYED).</li>
+    <li><strong>Inverting Lifecycle Management:</strong> By implementing <code>DefaultLifecycleObserver</code>, external managers (e.g., Camera, Sensors, WebSockets) subscribe via <code>lifecycle.addObserver()</code> and manage their own setup/teardown.</li>
+    <li><strong>Evolution of Coroutine Lifecycle Collection:</strong>
+      <ul>
+        <li><code>lifecycleScope.launch</code> runs until <code>onDestroy</code> (wasting battery in background).</li>
+        <li><code>launchWhenStarted</code> suspended the consumer but kept upstream Flows emitting (deprecated).</li>
+        <li><code>repeatOnLifecycle(STARTED)</code> cancels the coroutine on <code>onStop</code> and restarts it on <code>onStart</code>, freeing all upstream resources.</li>
+      </ul>
+    </li>
+    <li><strong>Process-Level Lifecycle:</strong> <code>ProcessLifecycleOwner</code> tracks whole-app foreground/background transitions across all activities.</li>
+  </ol>
+
+  <h3>Must-Mention Points (Key Vocabulary)</h3>
+  <ul>
+    <li><code>LifecycleOwner</code>, <code>LifecycleObserver</code>, and <code>DefaultLifecycleObserver</code>.</li>
+    <li><code>lifecycleScope</code> vs <code>viewModelScope</code>.</li>
+    <li><code>repeatOnLifecycle</code> vs deprecated <code>launchWhenStarted</code>.</li>
+    <li><code>flowWithLifecycle</code> operator.</li>
+    <li><code>ProcessLifecycleOwner</code> for app-level backgrounding detection.</li>
+  </ul>
+
+  <h3>Likely Follow-Up Questions & Short Answers</h3>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: Why was launchWhenStarted deprecated in favor of repeatOnLifecycle?</h4>
+    <p>Because <code>launchWhenStarted</code> only pauses the consumer coroutine when stopped. It does not cancel the upstream Flow producer. For cold flows (like database or sensor streams), the producer keeps running in the background. <code>repeatOnLifecycle</code> properly cancels the coroutine, stopping the upstream producer.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <h4>Q: How do you detect when the entire application goes into the background?</h4>
+    <p>Observe <code>ProcessLifecycleOwner.get().lifecycle</code> with a <code>DefaultLifecycleObserver</code>. It dispatches <code>ON_START</code> when the first Activity becomes visible and <code>ON_STOP</code> with a small debounce when the last Activity is backgrounded.</p>
+  </div>
+  <div class="card">
+    <h4>Q: What is collectAsStateWithLifecycle in Jetpack Compose?</h4>
+    <p>It is the Compose equivalent of <code>repeatOnLifecycle</code>. It collects a <code>Flow</code> and represents its latest value as Compose <code>State</code>, automatically subscribing on <code>ON_START</code> and unsubscribing on <code>ON_STOP</code>.</p>
+  </div>
+
+  <div class="box good" style="margin-top:18px;">
+    <strong>Senior-Level Insight:</strong> "Senior Android engineers treat resource lifecycles as a battery and memory contract. If an app collects flows on <code>lifecycleScope.launch</code>, it is continuously processing background emissions while the user is in another app. Always enforce <code>repeatOnLifecycle(STARTED)</code> or <code>collectAsStateWithLifecycle()</code> in code reviews."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Revision Sheet (Quick Memory Anchors)</h2>
+  <ul>
+    <li><strong>LifecycleOwner:</strong> Produces <code>Lifecycle</code> events and tracks current state.</li>
+    <li><strong>DefaultLifecycleObserver:</strong> Preferred interface for lifecycle callbacks (replaces annotations).</li>
+    <li><strong>repeatOnLifecycle(STARTED):</strong> Cancels on <code>ON_STOP</code>, restarts on <code>ON_START</code>.</li>
+    <li><strong>launchWhenStarted:</strong> Deprecated (pauses consumer, keeps upstream flow alive).</li>
+    <li><strong>collectAsStateWithLifecycle():</strong> Compose-native lifecycle-safe flow collector.</li>
+    <li><strong>ProcessLifecycleOwner:</strong> Tracks app-wide foreground / background transitions.</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Quiz (10 Questions)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 1. What is a LifecycleOwner in Android?</summary>
+    <div class="ans">
+      A <code>LifecycleOwner</code> is an interface implemented by components that have an Android lifecycle (such as <code>ComponentActivity</code> and <code>Fragment</code>). It exposes a <code>getLifecycle()</code> method returning a <code>Lifecycle</code> object.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 2. Why is DefaultLifecycleObserver preferred over @OnLifecycleEvent?</summary>
+    <div class="ans">
+      <code>DefaultLifecycleObserver</code> uses direct interface method overrides, avoiding the runtime reflection overhead and annotation-processing compilation penalties of the deprecated <code>@OnLifecycleEvent</code> annotation.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">BASIC</span> 3. When does lifecycleScope get cancelled?</summary>
+    <div class="ans">
+      <code>lifecycleScope</code> is tied directly to the <code>LifecycleOwner</code> and is cancelled automatically when the lifecycle reaches the <code>Lifecycle.State.DESTROYED</code> state.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 4. What is the key danger of collecting a Flow inside lifecycleScope.launch directly?</summary>
+    <div class="ans">
+      <code>lifecycleScope.launch</code> continues collecting the Flow even when the Activity is in the background (stopped). If the UI receives state updates while stopped, it wastes CPU cycles, network data, and battery, and can cause crashes if performing Fragment transactions.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 5. Why was launchWhenStarted deprecated?</summary>
+    <div class="ans">
+      <code>launchWhenStarted</code> pauses the coroutine when the lifecycle drops below STARTED, but it does not cancel it. The upstream Flow continues emitting items in the background. <code>repeatOnLifecycle</code> was introduced to cancel and restart the coroutine block cleanly.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 6. How do you collect multiple Flows safely inside a single repeatOnLifecycle block?</summary>
+    <div class="ans">
+      Inside the <code>repeatOnLifecycle</code> block, launch separate child coroutines for each flow:<br/>
+      <code>repeatOnLifecycle(Lifecycle.State.STARTED) {<br/>
+      &nbsp;&nbsp;launch { flow1.collect { ... } }<br/>
+      &nbsp;&nbsp;launch { flow2.collect { ... } }<br/>
+      }</code>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-mid">INTERMEDIATE</span> 7. What is ProcessLifecycleOwner and when is its ON_STOP event dispatched?</summary>
+    <div class="ans">
+      <code>ProcessLifecycleOwner</code> tracks the entire application lifecycle. It dispatches <code>ON_STOP</code> after a short delay (approx. 700ms) after the last Activity has stopped, ensuring configuration changes (rotations) do not trigger false app-backgrounding events.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 8. What is the difference between repeatOnLifecycle and flowWithLifecycle?</summary>
+    <div class="ans">
+      <code>repeatOnLifecycle</code> is a suspend function that executes a block of code when the lifecycle reaches the target state. <code>flowWithLifecycle</code> is a Flow operator that applies <code>repeatOnLifecycle</code> under the hood to a single Flow stream, allowing functional chaining (e.g. <code>flow.flowWithLifecycle(lifecycle, STARTED).onEach { ... }.launchIn(lifecycleScope)</code>).
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 9. How does collectAsStateWithLifecycle() optimize recomposition in Jetpack Compose?</summary>
+    <div class="ans">
+      <code>collectAsStateWithLifecycle()</code> collects a <code>Flow</code> and converts it into Compose <code>State</code> only while the lifecycle is in the specified state (default <code>STARTED</code>). When the app is backgrounded, it cancels the collector, stopping recompositions and halting upstream emissions until the app is foregrounded.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="q-senior">SENIOR</span> 10. Explain how LifecycleRegistry synchronizes observer states during rapid lifecycle transitions.</summary>
+    <div class="ans">
+      <code>LifecycleRegistry</code> maintains a custom FastSafeIterable map of observers. When an observer is added, it steps the observer through historical states one by one until it catches up to the current state. If states transition backward (e.g. RESUMED → DESTROYED), it cascades down through intermediate states in reverse order, ensuring invariants and event ordering are strictly preserved.
+    </div>
+  </details>
+</section>
+
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

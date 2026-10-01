@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>8B – Clean Architecture | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .ascii{font-family:"JetBrains Mono","Fira Code",monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;font-size:12.5px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:14px 0;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">8B · Clean Architecture</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>8B</span> — Clean Architecture</h1>
+    <p class="hero-desc">Three concentric layers, the Dependency Rule, and the art of keeping your domain pure. The architecture standard for production Android apps.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 8B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1: Overview -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What is Clean Architecture?</h3>
+    <p>Clean Architecture (Robert C. Martin, 2012) organises code into <strong>concentric layers</strong> where <strong>dependencies only point inward</strong>. The innermost layer (Domain) has zero knowledge of Android, databases, or network — it is pure Kotlin business logic. Each outer layer depends on the layer inside it, never the reverse.</p>
+    <div class="ascii">
+┌──────────────────────────────────────────────────────┐
+│            PRESENTATION LAYER                        │
+│   ViewModel · UI State · Composable / Fragment       │
+│                                                      │
+│   ┌──────────────────────────────────────────────┐  │
+│   │           DOMAIN LAYER  (pure Kotlin)        │  │
+│   │   UseCase · Repository Interface             │  │
+│   │   Domain Models · Business Rules             │  │
+│   │                                              │  │
+│   │  ┌────────────────────────────────────────┐ │  │
+│   │  │         DATA LAYER                     │ │  │
+│   │  │  Repository Impl · Remote DS           │ │  │
+│   │  │  Local DS · DTO · Mapper               │ │  │
+│   │  └────────────────────────────────────────┘ │  │
+│   └──────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────┘
+         Dependencies flow INWARD only ──►
+    </div>
+    <h3>The Three Layers</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Layer</th><th>Contents</th><th>Dependencies</th></tr>
+      <tr><td>Presentation</td><td>ViewModel, UI State, Composables/Fragments/Activities</td><td>Domain layer only</td></tr>
+      <tr><td>Domain</td><td>UseCases, Repository interfaces, Domain models, Business rules</td><td><strong>None</strong> — pure Kotlin</td></tr>
+      <tr><td>Data</td><td>Repository implementations, Remote/Local data sources, DTOs, Mappers</td><td>Domain layer (implements interfaces)</td></tr>
+    </table></div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      The Domain layer is the most stable part of your app. It should compile without any Android SDK, Retrofit, or Room imports. If your UseCase imports <code>retrofit2.Response</code>, you have violated the Dependency Rule.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2: How It Works -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+    <h3>The Dependency Rule</h3>
+    <p>Source code dependencies must point <strong>inward only</strong>. A class in the Data layer can implement a Domain interface, but the Domain layer never imports anything from Data. This is enforced at compile time by structuring them as separate Gradle modules.</p>
+    <h3>Dependency Inversion in Practice</h3>
+    <p>The Domain layer <em>defines</em> the <code>PaymentRepository</code> interface. The Data layer <em>implements</em> it. The Domain UseCase receives it via constructor injection — it never knows whether it's talking to Room or Retrofit.</p>
+    <pre><code><span class="cm">// domain/repository/PaymentRepository.kt  (pure Kotlin interface)</span>
+<span class="kw">interface</span> <span class="cl">PaymentRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">processPayment</span>(request: <span class="cl">PaymentRequest</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentReceipt</span>&gt;
+    <span class="kw">fun</span> <span class="fn">getTransactionHistory</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt;
+}
+
+<span class="cm">// domain/model/PaymentRequest.kt  (Domain model — no JSON annotations)</span>
+<span class="kw">data class</span> <span class="cl">PaymentRequest</span>(
+    <span class="kw">val</span> fromAccountId: <span class="cl">String</span>,
+    <span class="kw">val</span> toAccountId: <span class="cl">String</span>,
+    <span class="kw">val</span> amount: <span class="cl">BigDecimal</span>,
+    <span class="kw">val</span> currency: <span class="cl">Currency</span>
+)
+
+<span class="cm">// domain/usecase/ProcessPaymentUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">ProcessPaymentUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repository: <span class="cl">PaymentRepository</span>,  <span class="cm">// interface, not impl</span>
+    <span class="kw">private val</span> validator: <span class="cl">PaymentValidator</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(request: <span class="cl">PaymentRequest</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentReceipt</span>&gt; {
+        validator.<span class="fn">validate</span>(request).<span class="fn">getOrElse</span> { <span class="kw">return</span> <span class="cl">Result</span>.<span class="fn">failure</span>(it) }
+        <span class="kw">return</span> repository.<span class="fn">processPayment</span>(request)
+    }
+}</code></pre>
+
+    <h3>DTO → Domain Model Mapper</h3>
+    <p>DTOs carry network/database-specific concerns (JSON field names, nullable API fields). Mappers convert them to clean domain models at the boundary.</p>
+    <pre><code><span class="cm">// data/remote/dto/TransactionDto.kt</span>
+<span class="kw">data class</span> <span class="cl">TransactionDto</span>(
+    <span class="an">@SerializedName</span>(<span class="str">"txn_id"</span>) <span class="kw">val</span> txnId: <span class="cl">String</span>,
+    <span class="an">@SerializedName</span>(<span class="str">"amount_cents"</span>) <span class="kw">val</span> amountCents: <span class="cl">Long</span>,
+    <span class="an">@SerializedName</span>(<span class="str">"status_code"</span>) <span class="kw">val</span> statusCode: <span class="cl">Int</span>?
+)
+
+<span class="cm">// data/mapper/TransactionMapper.kt</span>
+<span class="kw">fun</span> <span class="cl">TransactionDto</span>.<span class="fn">toDomain</span>(): <span class="cl">Transaction</span> = <span class="cl">Transaction</span>(
+    id = txnId,
+    amount = <span class="cl">BigDecimal</span>(amountCents).<span class="fn">movePointLeft</span>(<span class="nu">2</span>),
+    status = <span class="cl">TransactionStatus</span>.<span class="fn">fromCode</span>(statusCode ?: <span class="nu">0</span>)
+)</code></pre>
+
+    <h3>Repository Implementation (Data Layer)</h3>
+    <pre><code><span class="cm">// data/repository/PaymentRepositoryImpl.kt</span>
+<span class="kw">class</span> <span class="cl">PaymentRepositoryImpl</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> remoteDataSource: <span class="cl">PaymentRemoteDataSource</span>,
+    <span class="kw">private val</span> localDataSource: <span class="cl">PaymentLocalDataSource</span>
+) : <span class="cl">PaymentRepository</span> {
+
+    <span class="kw">override suspend fun</span> <span class="fn">processPayment</span>(request: <span class="cl">PaymentRequest</span>) =
+        <span class="fn">runCatching</span> {
+            remoteDataSource.<span class="fn">processPayment</span>(request.<span class="fn">toDto</span>()).<span class="fn">toDomain</span>()
+        }
+
+    <span class="kw">override fun</span> <span class="fn">getTransactionHistory</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; =
+        localDataSource.<span class="fn">getTransactions</span>(accountId).<span class="fn">map</span> { list -&gt;
+            list.<span class="fn">map</span> { it.<span class="fn">toDomain</span>() }
+        }
+}</code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">Unidirectional Data Flow</div>
+      UI → ViewModel → UseCase → Repository → DataSource. Data flows back up via <code>Flow</code>/<code>StateFlow</code>. No circular dependencies. Each step is independently testable with mocks.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3: When to Use -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128161;</div>3. When to Use</div>
+    <h3>Use Clean Architecture when:</h3>
+    <ul>
+      <li><strong>Team size &gt; 2</strong>: clear boundaries prevent merge conflicts and ownership disputes</li>
+      <li><strong>Long-lived app</strong>: the separation pays off over months, not weeks</li>
+      <li><strong>Multiple data sources</strong>: combining Room + Retrofit + third-party SDKs</li>
+      <li><strong>High test coverage requirement</strong>: UseCases are pure Kotlin — unit tests need no Android framework</li>
+      <li><strong>Feature parity across platforms</strong>: domain module can be shared with KMM (Kotlin Multiplatform Mobile)</li>
+    </ul>
+    <h3>Consider a simpler approach when:</h3>
+    <ul>
+      <li>Prototype or throwaway code — the boilerplate overhead isn't worth it</li>
+      <li>Single-feature, single-developer, short-lived app</li>
+      <li>Simple CRUD app with no business logic (a ViewModel directly calling a Repository may suffice)</li>
+    </ul>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pragmatic Note</div>
+      Many teams skip the UseCase layer for trivial screens (e.g., a settings toggle) and only introduce UseCases when business logic accumulates. That's fine — Clean Architecture is a spectrum, not a binary.
+    </div>
+    <h3>Module Structure (Gradle)</h3>
+    <div class="ascii">
+:app             (Android module — Hilt entry point, navigation)
+:feature:payments
+  :presentation  (Android module — ViewModel, Composables)
+  :domain        (pure Kotlin module — UseCases, interfaces, models)
+  :data          (Android module — Room, Retrofit, repositories)
+:core:network    (shared Retrofit/OkHttp setup)
+:core:database   (shared Room setup)
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4: Production Example -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>Banking App — Transfer Money Feature</h3>
+    <p>A complete vertical slice through all three layers for a funds transfer flow:</p>
+    <pre><code><span class="cm">// ── DOMAIN LAYER ──────────────────────────────────────────────</span>
+
+<span class="cm">// domain/model/TransferResult.kt</span>
+<span class="kw">sealed class</span> <span class="cl">TransferResult</span> {
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> receipt: <span class="cl">TransferReceipt</span>) : <span class="cl">TransferResult</span>()
+    <span class="kw">data class</span> <span class="cl">InsufficientFunds</span>(<span class="kw">val</span> available: <span class="cl">BigDecimal</span>) : <span class="cl">TransferResult</span>()
+    <span class="kw">data class</span> <span class="cl">DailyLimitExceeded</span>(<span class="kw">val</span> limit: <span class="cl">BigDecimal</span>) : <span class="cl">TransferResult</span>()
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> cause: <span class="cl">Throwable</span>) : <span class="cl">TransferResult</span>()
+}
+
+<span class="cm">// domain/usecase/TransferFundsUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">TransferFundsUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> accountRepo: <span class="cl">AccountRepository</span>,
+    <span class="kw">private val</span> transferRepo: <span class="cl">TransferRepository</span>,
+    <span class="kw">private val</span> limitsRepo: <span class="cl">LimitsRepository</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(params: <span class="cl">TransferParams</span>): <span class="cl">TransferResult</span> {
+        <span class="kw">val</span> balance = accountRepo.<span class="fn">getBalance</span>(params.fromAccountId)
+        <span class="kw">if</span> (balance &lt; params.amount) <span class="kw">return</span> <span class="cl">TransferResult</span>.<span class="cl">InsufficientFunds</span>(balance)
+
+        <span class="kw">val</span> dailyLimit = limitsRepo.<span class="fn">getDailyTransferLimit</span>(params.fromAccountId)
+        <span class="kw">val</span> usedToday = transferRepo.<span class="fn">getTodayTransferTotal</span>(params.fromAccountId)
+        <span class="kw">if</span> (usedToday + params.amount &gt; dailyLimit)
+            <span class="kw">return</span> <span class="cl">TransferResult</span>.<span class="cl">DailyLimitExceeded</span>(dailyLimit)
+
+        <span class="kw">return</span> <span class="fn">runCatching</span> { transferRepo.<span class="fn">execute</span>(params) }
+            .<span class="fn">fold</span>(
+                onSuccess = { <span class="cl">TransferResult</span>.<span class="cl">Success</span>(it) },
+                onFailure = { <span class="cl">TransferResult</span>.<span class="cl">Error</span>(it) }
+            )
+    }
+}</code></pre>
+
+    <pre><code><span class="cm">// ── PRESENTATION LAYER ────────────────────────────────────────</span>
+
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">TransferViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> transferFunds: <span class="cl">TransferFundsUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">TransferUiState</span>&gt;(<span class="cl">TransferUiState</span>.<span class="cl">Idle</span>)
+    <span class="kw">val</span> uiState = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">onTransfer</span>(params: <span class="cl">TransferParams</span>) {
+        <span class="fn">viewModelScope</span>.<span class="fn">launch</span> {
+            _uiState.<span class="fn">emit</span>(<span class="cl">TransferUiState</span>.<span class="cl">Loading</span>)
+            <span class="kw">val</span> result = <span class="fn">transferFunds</span>(params)
+            _uiState.<span class="fn">emit</span>(<span class="kw">when</span> (result) {
+                <span class="kw">is</span> <span class="cl">TransferResult</span>.<span class="cl">Success</span>          -&gt; <span class="cl">TransferUiState</span>.<span class="cl">Success</span>(result.receipt)
+                <span class="kw">is</span> <span class="cl">TransferResult</span>.<span class="cl">InsufficientFunds</span> -&gt; <span class="cl">TransferUiState</span>.<span class="cl">InsufficientFunds</span>
+                <span class="kw">is</span> <span class="cl">TransferResult</span>.<span class="cl">DailyLimitExceeded</span> -&gt; <span class="cl">TransferUiState</span>.<span class="cl">LimitExceeded</span>
+                <span class="kw">is</span> <span class="cl">TransferResult</span>.<span class="cl">Error</span>              -&gt; <span class="cl">TransferUiState</span>.<span class="cl">Error</span>(result.cause.message)
+            })
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5: Alternatives -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap"><table>
+      <tr><th>Architecture</th><th>Layers</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Clean Architecture</td><td>3 (Presentation/Domain/Data)</td><td>Testable, scalable, platform-agnostic domain</td><td>Boilerplate, learning curve</td></tr>
+      <tr><td>MVI + Repository</td><td>2 (UI/Data)</td><td>Simpler, less files</td><td>Business logic bleeds into ViewModel</td></tr>
+      <tr><td>MVVM (no UseCase)</td><td>2 (ViewModel/Repository)</td><td>Quick to set up, Google's starter recommendation</td><td>Repos become god objects over time</td></tr>
+      <tr><td>MVC (Activity)</td><td>1</td><td>No boilerplate</td><td>Untestable, spaghetti code</td></tr>
+    </table></div>
+    <h3>Clean Architecture vs "MVVM with Repository"</h3>
+    <p>Google's official guide shows MVVM + Repository without a Domain layer. That works for simple apps. As business rules grow, UseCases act as an extraction point — each one has a single responsibility, is independently testable, and prevents the ViewModel from becoming a god object.</p>
+    <div class="callout callout-green">
+      <div class="callout-label">KMM Advantage</div>
+      If you structure the Domain layer as a pure Kotlin module, it can be shared between Android and iOS via Kotlin Multiplatform. Business logic is written once; only the Presentation and Data layers differ per platform.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6: Pitfalls -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Common Violations</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Anti-Pattern: Domain importing Android/Retrofit</div>
+      <code>import retrofit2.Response</code> or <code>import android.content.Context</code> inside a UseCase or domain model instantly breaks the Dependency Rule and makes the domain untestable without Robolectric.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Anti-Pattern: Repository returning DTOs</div>
+      If <code>UserRepository.getUser()</code> returns <code>UserDto</code> (with JSON annotations), the mapping responsibility leaks into the Presentation layer. Always map to domain models at the Data/Domain boundary.
+    </div>
+    <h3>Best Practices</h3>
+    <ul>
+      <li><strong>One UseCase per action</strong>: <code>GetUserUseCase</code>, <code>UpdateProfileUseCase</code> — not a <code>UserUseCase</code> with ten methods</li>
+      <li><strong>Domain models have no annotations</strong>: no <code>@SerializedName</code>, no <code>@ColumnInfo</code>, no <code>@Parcelize</code> (those belong in Data/Presentation)</li>
+      <li><strong>UseCases are operator fun invoke</strong>: the idiomatic Kotlin style allows calling them like a function: <code>getUser(userId)</code></li>
+      <li><strong>Mappers as extension functions</strong>: <code>fun UserDto.toDomain()</code> keeps mapping code co-located with the DTO</li>
+      <li><strong>Repository interface in Domain, impl in Data</strong>: enforced by separate Gradle modules so you cannot accidentally import the wrong one</li>
+      <li><strong>Test UseCases with pure unit tests</strong>: no Mockk Android extensions needed — just mock the repository interface</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7: Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Clean Architecture splits an Android app into three layers: Presentation (ViewModel + UI), Domain (UseCases + Repository interfaces + domain models), and Data (Repository implementations + Room + Retrofit). The key rule is that dependencies only point inward — the Domain layer knows nothing about Android, databases, or network. This makes business logic independently testable and swappable."</div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">"On top of the three layers, I apply the Dependency Inversion Principle: the Domain layer defines repository interfaces, and the Data layer implements them. This means if we swap Retrofit for a GraphQL client, the Domain and Presentation layers don't change at all. I use the Mapper pattern to convert DTOs (which have JSON annotations) into clean domain models at the Data/Domain boundary — the domain model is annotation-free and testable without Android. UseCases are single-responsibility interactors — they orchestrate business rules, validate inputs, and delegate to repositories. The ViewModel only talks to UseCases and exposes a StateFlow of sealed UI states. The whole flow is unidirectional: UI → ViewModel → UseCase → Repository → DataSource, with data flowing back up via Flow."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Dependency Rule</strong>: source code dependencies only point inward — outer layers depend on inner, never the reverse</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Domain layer is pure Kotlin</strong>: no Android SDK, no Retrofit, no Room — compiles standalone</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>DIP</strong>: Domain defines <code>interface PaymentRepository</code>; Data implements it. ViewModel/UseCase depend on abstraction</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Mapper pattern</strong>: DTO (data concern) → Domain Model (business concern) at the Data layer boundary</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>UseCase = single responsibility</strong>: <code>operator fun invoke</code>, one business action, independently unit testable</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Unidirectional data flow</strong>: UI → ViewModel → UseCase → Repository → DS, results via Flow/StateFlow</div></div>
+      <div class="must-item"><div class="must-num">7</div><div><strong>Gradle modules</strong>: enforced at compile time — cannot import Data classes into Domain module</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Hexagonal Architecture / Ports and Adapters (same idea, different name — mention only if asked)</li>
+      <li>The full Gradle multi-module setup syntax (mention the concept, not the Gradle DSL)</li>
+      <li>KMM shared domain module (mention as a benefit, don't deep-dive unless asked)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>"Why not just use ViewModel + Repository?"</td><td>Works for simple apps, but repos become god objects. UseCases isolate business logic, making it testable and reusable across features.</td></tr>
+      <tr><td>"Isn't it too much boilerplate?"</td><td>The layers pay dividends in large teams: parallel development, isolated testing, and swappable data sources.</td></tr>
+      <tr><td>"What if a UseCase just delegates to a repository?"</td><td>That's fine — a passthrough UseCase still provides a stable interface and a place to add logic later without touching the ViewModel.</td></tr>
+      <tr><td>"How do you enforce the Dependency Rule?"</td><td>Separate Gradle modules: <code>:domain</code> is a pure Kotlin module with no Android dependencies. Any bad import causes a compile error.</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      Mention that the real value of Clean Architecture isn't the layers themselves — it's that it creates natural seams for testing. A UseCase with a mocked repository interface can be tested in &lt;1ms with no emulator. At scale, this means thousands of fast unit tests instead of slow integration tests. That's the business case for the boilerplate.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8: Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Layer Responsibilities</h4>
+        <pre><code>Presentation: ViewModel, UI State,
+  Composables — talks to UseCases
+
+Domain: UseCase, Interfaces,
+  Domain Models — PURE KOTLIN
+
+Data: Repository Impls, DTOs,
+  Mappers, Room, Retrofit</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Dependency Rule</h4>
+        <pre><code>Presentation
+  └─depends on─► Domain
+Data
+  └─implements─► Domain interfaces
+Domain
+  └─depends on─► NOTHING</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>UseCase Pattern</h4>
+        <pre><code>class GetUserUseCase @Inject constructor(
+    private val repo: UserRepository
+) {
+    suspend operator fun invoke(id: String) =
+        repo.getUser(id)
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Mapper Pattern</h4>
+        <pre><code>// In :data module
+fun UserDto.toDomain() = User(
+    id = userId,
+    name = fullName,
+    email = emailAddress
+)</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9: Interview Questions -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What are the three layers of Clean Architecture and what goes in each?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Presentation:</strong> ViewModel, UI State, Composables/Fragments — handles display logic and user events.<br><br>
+        <strong>Domain:</strong> UseCases, Repository interfaces, Domain models, business rules — pure Kotlin, no Android imports.<br><br>
+        <strong>Data:</strong> Repository implementations, DTOs, Mappers, Room DAOs, Retrofit API interfaces — bridges the domain to external systems.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> What is the Dependency Rule and why does it matter?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Source code dependencies must point <strong>inward only</strong>. Outer layers (Data, Presentation) can depend on inner layers (Domain), but Domain can never import anything from Data or Presentation. This means the business logic is decoupled from framework details, making it independently testable and replaceable.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-easy">Basic</span> Why should Domain models be free of JSON/Room annotations?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        Annotations like <code>@SerializedName</code> and <code>@ColumnInfo</code> are data concerns tied to specific frameworks. If you put them on domain models, your business logic becomes coupled to Gson and Room. When you switch serialisation libraries or databases, you'd have to modify domain models — violating OCP and the Dependency Rule. The solution is separate DTOs in the Data layer with mappers at the boundary.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> Explain the Mapper pattern with a concrete example.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        A mapper converts between layers' models. A <code>UserDto</code> from Retrofit has <code>@SerializedName</code> annotations and potentially nullable fields due to API inconsistency. The domain <code>User</code> has validated, non-null fields. An extension function <code>fun UserDto.toDomain(): User</code> in the Data layer performs this conversion — handling nulls, renaming fields, and transforming types — so the Domain and Presentation layers work with clean, safe models.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> When would you skip the UseCase layer?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        For screens with no business logic — like a settings toggle that just calls <code>repository.saveTheme(theme)</code> — a passthrough UseCase adds ceremony without benefit. In those cases, having the ViewModel call the repository directly is fine. The UseCase layer pays off when there's real orchestration: validating inputs, combining data from multiple repositories, handling business-specific error cases, or reusing the same logic across ViewModels.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How does Dependency Inversion work between Domain and Data?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        The Domain layer defines a <code>interface ProductRepository</code> with methods the UseCase needs. The Data layer provides <code>class ProductRepositoryImpl : ProductRepository</code>. Hilt binds the implementation to the interface via <code>@Binds</code>. The UseCase only knows about the interface — it never imports or instantiates the implementation. This means swapping Room for SQLDelight only requires changing the Data module; Domain and Presentation are untouched.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-medium">Intermediate</span> How do you handle errors across the layers?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        The Data layer catches network/database exceptions and converts them into domain errors — either via Kotlin's <code>Result&lt;T&gt;</code> or a custom sealed class. The UseCase propagates or transforms these into business-meaningful sealed results (e.g., <code>InsufficientFunds</code> instead of <code>HttpException(402)</code>). The ViewModel maps these to UI states. The Presentation layer never sees raw <code>IOException</code> — it sees domain-specific failure cases it can display meaningfully.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> How do you enforce Clean Architecture boundaries at scale?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Gradle modules</strong> are the primary enforcement mechanism — the <code>:domain</code> module declares no Android or framework dependencies, so any bad import fails the build. For monolithic single-module projects, tools like <strong>ArchUnit</strong> (via JVM tests) can assert that no class in the <code>domain</code> package imports anything from <code>data</code> or <code>presentation</code>. On large teams, a custom Lint rule or a modularisation guide in the team wiki prevents drift. The key is making violations visible at CI time, not code review time.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> Design a Clean Architecture structure for an e-commerce app with offline support.</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        <strong>Domain:</strong> <code>ProductRepository</code> interface with <code>getProducts(): Flow&lt;List&lt;Product&gt;&gt;</code>, <code>GetFeaturedProductsUseCase</code>, domain models <code>Product</code>, <code>Cart</code>, <code>Order</code>.<br><br>
+        <strong>Data:</strong> <code>ProductRepositoryImpl</code> that first emits Room data (instant), then fetches from Retrofit, maps DTOs, saves to Room — so the Flow automatically re-emits the updated list. Room is the single source of truth. TTL-based cache invalidation triggers background refresh.<br><br>
+        <strong>Presentation:</strong> <code>ProductListViewModel</code> collects the Flow, emits <code>UiState.Loading</code> / <code>UiState.Success(products)</code> / <code>UiState.Offline(cachedProducts)</code>.<br><br>
+        The offline-first pattern works naturally because Room's Flow re-emits whenever the local DB updates, regardless of whether the update came from the network or a local action.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQ(this)">
+        <span class="quiz-q-text"><span class="diff-badge diff-hard">Senior</span> A colleague says UseCases are just "extra classes that call repository methods". How do you respond?</span>
+        <span class="toggle-icon">&#8964;</span>
+      </div>
+      <div class="quiz-a">
+        They're right for trivial cases, and that's fine — not every UseCase needs to justify its existence. The value emerges when:<br><br>
+        1. <strong>Multiple ViewModels need the same logic</strong> — without a UseCase, you'd duplicate it or put it in the repository (wrong layer).<br>
+        2. <strong>Business rules accumulate</strong> — a "place order" flow that started as a single repo call now involves inventory check, payment processing, loyalty points, and audit logging. A UseCase is the right seam for that.<br>
+        3. <strong>Testing</strong> — a UseCase with mocked repos tests business logic at &lt;1ms, no emulator needed.<br><br>
+        The pragmatic approach: start without UseCases, extract them when ViewModels grow beyond display logic. The architecture supports that evolution.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100) + '%';
+  window.scrollTo(0,0);
+}
+function toggleQ(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

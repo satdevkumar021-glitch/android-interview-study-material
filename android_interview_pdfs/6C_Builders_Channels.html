@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>6C — Builders &amp; Channels | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">6C · Builders &amp; Channels</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Flow Builders</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Channel Types</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Backpressure</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>6C</span> — Builders &amp; Channels</h1>
+    <p class="hero-desc"><code>flow{}</code>, <code>flowOn</code>, <code>callbackFlow</code>, <code>channelFlow</code>. Channel types: Rendezvous, Buffered, Conflated, Unlimited. Backpressure strategies.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 6C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Flow builders</h3>
+    <ul>
+      <li><strong>flow { }</strong> — simplest builder; cold; sequential; cannot emit from a different coroutine</li>
+      <li><strong>flowOf(vararg)</strong> — emit a fixed set of values</li>
+      <li><strong>callbackFlow { }</strong> — bridge callback-based APIs (location, sensors, WebSocket) to Flow</li>
+      <li><strong>channelFlow { }</strong> — like callbackFlow but allows multiple concurrent emissions from different coroutines</li>
+      <li><strong>flowOn(dispatcher)</strong> — change the upstream context; does NOT affect the collector</li>
+    </ul>
+    <h3>Channels</h3>
+    <p>A Channel is a <strong>communication primitive</strong> between coroutines — like a queue with suspend-aware send/receive. Unlike Flow, channels are hot and stateful. They're the foundation of channelFlow and callbackFlow internally.</p>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Use <code>callbackFlow</code> to bridge legacy callback APIs (Bluetooth, location, Firebase) into the reactive Flow world. Use <code>flowOn</code> to change the dispatcher for upstream work without changing where the collector runs. Channels are low-level — in most Android code you don't need raw Channels; prefer Flow.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Flow Builders →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Flow Builders</div>
+
+    <h3>flow { } — basic cold builder</h3>
+    <pre><code><span class="cm">// Simple cold flow — sequential emissions</span>
+<span class="kw">fun</span> <span class="fn">countdownFlow</span>(): <span class="cl">Flow</span>&lt;<span class="cl">Int</span>&gt; = <span class="fn">flow</span> {
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">10</span> <span class="kw">downTo</span> <span class="nu">0</span>) {
+        <span class="fn">emit</span>(i)
+        <span class="fn">delay</span>(<span class="nu">1000</span>)
+    }
+}
+<span class="cm">// Constraint: cannot call emit() from a different coroutine inside flow{}</span></code></pre>
+
+    <h3>flowOn — change upstream context</h3>
+    <pre><code><span class="cm">// flowOn affects ONLY the upstream operators — NOT the collector</span>
+repo.<span class="fn">getItems</span>()                    <span class="cm">// runs on IO (set by flowOn)</span>
+    .<span class="fn">map</span> { it.<span class="fn">toUiModel</span>() }          <span class="cm">// also runs on IO</span>
+    .<span class="fn">flowOn</span>(<span class="cl">Dispatchers</span>.IO)          <span class="cm">// sets context for above ops</span>
+    .<span class="fn">collect</span> { <span class="fn">renderItem</span>(it) }       <span class="cm">// runs on collector's context (Main)</span>
+
+<span class="cm">// Multiple flowOn: each applies to everything above it</span>
+flow.<span class="fn">map</span> { <span class="cm">/* on Default */</span> }
+    .<span class="fn">flowOn</span>(<span class="cl">Dispatchers</span>.Default)
+    .<span class="fn">map</span> { <span class="cm">/* on IO */</span> }
+    .<span class="fn">flowOn</span>(<span class="cl">Dispatchers</span>.IO)
+    .<span class="fn">collect</span> { <span class="cm">/* on Main */</span> }</code></pre>
+
+    <h3>callbackFlow — bridge callbacks to Flow</h3>
+    <pre><code><span class="cm">// Bridge LocationManager callback to Flow</span>
+<span class="kw">fun</span> <span class="fn">locationFlow</span>(context: <span class="cl">Context</span>): <span class="cl">Flow</span>&lt;<span class="cl">Location</span>&gt; = <span class="fn">callbackFlow</span> {
+    <span class="kw">val</span> manager = context.<span class="fn">getSystemService</span>(<span class="cl">LocationManager</span>::<span class="kw">class</span>.java)
+
+    <span class="kw">val</span> listener = <span class="cl">LocationListener</span> { location ->
+        <span class="fn">trySend</span>(location)  <span class="cm">// non-suspend send (from callback thread)</span>
+    }
+
+    manager.<span class="fn">requestLocationUpdates</span>(
+        <span class="cl">LocationManager</span>.<span class="cl">GPS_PROVIDER</span>, <span class="nu">1000L</span>, <span class="nu">0f</span>, listener
+    )
+
+    <span class="cm">// awaitClose: runs when flow is cancelled / collector stops</span>
+    <span class="fn">awaitClose</span> {
+        manager.<span class="fn">removeUpdates</span>(listener)  <span class="cm">// cleanup!</span>
+    }
+}
+
+<span class="cm">// Usage</span>
+<span class="fn">locationFlow</span>(context)
+    .<span class="fn">collect</span> { location -> <span class="fn">updateMap</span>(location) }
+<span class="cm">// When collector cancels, awaitClose removes the listener</span></code></pre>
+
+    <h3>channelFlow — concurrent emissions</h3>
+    <pre><code><span class="cm">// channelFlow: allows emission from different coroutines</span>
+<span class="kw">fun</span> <span class="fn">parallelFetch</span>(ids: <span class="cl">List</span>&lt;<span class="cl">String</span>&gt;): <span class="cl">Flow</span>&lt;<span class="cl">Item</span>&gt; = <span class="fn">channelFlow</span> {
+    ids.<span class="fn">forEach</span> { id ->
+        <span class="fn">launch</span> {                    <span class="cm">// multiple coroutines emit concurrently</span>
+            <span class="kw">val</span> item = api.<span class="fn">fetchItem</span>(id)
+            <span class="fn">send</span>(item)               <span class="cm">// suspend-aware send</span>
+        }
+    }
+}
+<span class="cm">// Regular flow{} would throw: "Flow invariant is violated"</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Channel Types →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128202;</div>3. Channel Types</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Buffer size</th><th>Send behaviour</th><th>Receive behaviour</th><th>Use case</th></tr>
+      <tr><td>Rendezvous</td><td>0</td><td>Suspends until receiver ready</td><td>Suspends until sender ready</td><td>Strict handshake between coroutines</td></tr>
+      <tr><td>Buffered(n)</td><td>n</td><td>Suspends when buffer full</td><td>Suspends when buffer empty</td><td>Producer slightly faster than consumer</td></tr>
+      <tr><td>Conflated</td><td>1</td><td>Overwrites old value, never suspends</td><td>Gets latest</td><td>Sensor data — only latest matters</td></tr>
+      <tr><td>Unlimited</td><td>∞</td><td>Never suspends</td><td>Suspends when empty</td><td>Burst events; be careful of OOM</td></tr>
+    </table>
+    </div>
+    <pre><code><span class="cm">// Creating channels</span>
+<span class="kw">val</span> rendezvous = <span class="cl">Channel</span>&lt;<span class="cl">Int</span>&gt;()                    <span class="cm">// default: Rendezvous</span>
+<span class="kw">val</span> buffered = <span class="cl">Channel</span>&lt;<span class="cl">Int</span>&gt;(<span class="cl">Channel</span>.<span class="cl">BUFFERED</span>)       <span class="cm">// default 64</span>
+<span class="kw">val</span> conflated = <span class="cl">Channel</span>&lt;<span class="cl">Int</span>&gt;(<span class="cl">Channel</span>.<span class="cl">CONFLATED</span>)     <span class="cm">// overwrite old</span>
+<span class="kw">val</span> unlimited = <span class="cl">Channel</span>&lt;<span class="cl">Int</span>&gt;(<span class="cl">Channel</span>.<span class="cl">UNLIMITED</span>)     <span class="cm">// unbounded</span>
+
+<span class="cm">// Custom buffer size</span>
+<span class="kw">val</span> custom = <span class="cl">Channel</span>&lt;<span class="cl">Order</span>&gt;(capacity = <span class="nu">100</span>,
+    onBufferOverflow = <span class="cl">BufferOverflow</span>.<span class="cl">DROP_OLDEST</span>)
+</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Backpressure →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#9878;</div>4. Backpressure Strategies</div>
+    <p>Backpressure occurs when the producer emits faster than the consumer can process. Flow operators to handle it:</p>
+    <pre><code><span class="cm">// buffer: add a coroutine boundary between producer and consumer</span>
+<span class="cm">// Producer and consumer run concurrently</span>
+fastSensorFlow
+    .<span class="fn">buffer</span>(<span class="nu">64</span>)              <span class="cm">// up to 64 items buffered while consumer processes</span>
+    .<span class="fn">collect</span> { <span class="fn">slowProcess</span>(it) }
+
+<span class="cm">// conflate: keep only the latest value, drop intermediate</span>
+<span class="cm">// Consumer always gets freshest data</span>
+locationFlow
+    .<span class="fn">conflate</span>()              <span class="cm">// if consumer is busy, old locations are dropped</span>
+    .<span class="fn">collect</span> { <span class="fn">updateMap</span>(it) }
+
+<span class="cm">// collectLatest: cancel current processing when new value arrives</span>
+priceFlow
+    .<span class="fn">collectLatest</span> { price ->
+        <span class="fn">delay</span>(<span class="nu">1000</span>)          <span class="cm">// simulate slow rendering</span>
+        <span class="fn">renderPrice</span>(price)   <span class="cm">// if new price arrives, this is cancelled</span>
+    }</code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Strategy</th><th>How it works</th><th>Data loss?</th><th>Use case</th></tr>
+      <tr><td>buffer(n)</td><td>Concurrent producer/consumer with queue</td><td>No (suspends when full)</td><td>Bursty producer, need all items</td></tr>
+      <tr><td>conflate()</td><td>Keep only latest, drop intermediate</td><td>Yes (intermediate dropped)</td><td>UI refresh — only latest matters</td></tr>
+      <tr><td>collectLatest</td><td>Cancel current on new arrival</td><td>Yes (cancelled work)</td><td>Search, live preview</td></tr>
+      <tr><td>Channel(DROP_OLDEST)</td><td>Overwrite buffer with newer values</td><td>Yes (old values)</td><td>Sensor data, rate-limited events</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>Automotive: GPS sensor to location service via callbackFlow</h3>
+    <pre><code><span class="cm">// Bridge Android FusedLocationProvider to Flow</span>
+<span class="kw">fun</span> <span class="cl">FusedLocationProviderClient</span>.<span class="fn">locationFlow</span>(): <span class="cl">Flow</span>&lt;<span class="cl">Location</span>&gt; = <span class="fn">callbackFlow</span> {
+    <span class="kw">val</span> request = <span class="cl">LocationRequest</span>.<span class="fn">create</span>()
+        .<span class="fn">setInterval</span>(<span class="nu">1000</span>)
+        .<span class="fn">setPriority</span>(<span class="cl">PRIORITY_HIGH_ACCURACY</span>)
+
+    <span class="kw">val</span> callback = <span class="kw">object</span> : <span class="cl">LocationCallback</span>() {
+        <span class="kw">override fun</span> <span class="fn">onLocationResult</span>(result: <span class="cl">LocationResult</span>) {
+            result.lastLocation?.<span class="kw">let</span> { location ->
+                <span class="fn">trySend</span>(location)  <span class="cm">// non-blocking send from callback</span>
+            }
+        }
+    }
+
+    <span class="fn">requestLocationUpdates</span>(request, callback, <span class="cl">Looper</span>.<span class="fn">getMainLooper</span>())
+
+    <span class="fn">awaitClose</span> { <span class="fn">removeLocationUpdates</span>(callback) }
+}
+
+<span class="cm">// Processing pipeline with backpressure + context switch</span>
+<span class="kw">class</span> <span class="cl">NavigationViewModel</span>(
+    <span class="kw">private val</span> client: <span class="cl">FusedLocationProviderClient</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> route: <span class="cl">StateFlow</span>&lt;<span class="cl">RouteState</span>&gt; = client.<span class="fn">locationFlow</span>()
+        .<span class="fn">conflate</span>()                          <span class="cm">// only latest GPS position</span>
+        .<span class="fn">map</span> { location ->                   <span class="cm">// heavy route calculation</span>
+            routeEngine.<span class="fn">calculate</span>(location)
+        }
+        .<span class="fn">flowOn</span>(<span class="cl">Dispatchers</span>.Default)         <span class="cm">// route calc on CPU pool</span>
+        .<span class="fn">map</span> { route -> <span class="cl">RouteState</span>.<span class="cl">Active</span>(route) }
+        .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">RouteState</span>.<span class="cl">Error</span>(it)) }
+        .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5000</span>), <span class="cl">RouteState</span>.<span class="cl">Idle</span>)
+}</code></pre>
+
+    <h3>Banking: WebSocket price feed via callbackFlow</h3>
+    <pre><code><span class="kw">fun</span> <span class="fn">priceFlow</span>(symbol: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">Price</span>&gt; = <span class="fn">callbackFlow</span> {
+    <span class="kw">val</span> ws = webSocketClient.<span class="fn">connect</span>(symbol)
+
+    ws.<span class="fn">onMessage</span> { msg ->
+        <span class="kw">val</span> price = <span class="fn">parsePrice</span>(msg)
+        <span class="fn">trySend</span>(price)  <span class="cm">// may drop if buffer full</span>
+    }
+    ws.<span class="fn">onError</span> { e -> <span class="fn">close</span>(e) }
+
+    <span class="fn">awaitClose</span> { ws.<span class="fn">disconnect</span>() }
+}
+    .<span class="fn">buffer</span>(<span class="cl">Channel</span>.<span class="cl">CONFLATED</span>)   <span class="cm">// only latest price if consumer is slow</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Missing awaitClose in callbackFlow</div>
+      If you don't call <code>awaitClose { }</code> in a callbackFlow, the flow completes immediately after the block ends — before any callbacks fire. You also miss the chance to unregister the callback, causing memory leaks.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — emit() from different coroutine inside flow{}</div>
+      <code>flow { }</code> is single-coroutine only. Calling <code>emit()</code> from a coroutine launched inside <code>flow { }</code> throws "Flow invariant violated". Use <code>channelFlow { }</code> instead for concurrent emissions.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — flowOn affects upstream, not downstream</div>
+      A common mistake: putting <code>flowOn(IO)</code> after <code>collect { }</code>. <code>flowOn</code> only applies to operators above it. The collector always runs on the coroutine that called collect (e.g., viewModelScope's Main dispatcher).
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — trySend vs send in callbackFlow</div>
+      Use <code>trySend(value)</code> in callbacks — it's non-suspending and returns a ChannelResult. <code>send(value)</code> suspends until there's space in the buffer, which is not valid in a regular (non-suspending) callback. If you need to know if the send was dropped, check the result.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "callbackFlow is the standard way to bridge legacy callback APIs like location, sensors, or WebSocket to Kotlin Flow. It provides trySend() for non-suspending emission from callbacks and awaitClose() for cleanup. flowOn changes the upstream context without affecting the collector. Channels are the underlying mechanism — Rendezvous (no buffer), Buffered, Conflated (latest only), Unlimited."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "callbackFlow solves a fundamental problem: callback-based APIs (LocationManager, Bluetooth, Firebase Realtime) don't fit the sequential coroutine model. callbackFlow creates a Channel internally — trySend() puts values into it from callback threads, and collect() reads from it. awaitClose() is critical: it runs when the flow collector cancels, unregistering the callback to prevent leaks.<br><br>flowOn is more subtle than it appears: it only affects operators upstream (above it). Multiple flowOn operators create separate coroutine boundaries between sections. The collector always runs in its calling context — usually Main in a ViewModel.<br><br>For backpressure: buffer(n) allows the producer to run ahead by n items. conflate() drops intermediate values, keeping only the latest. For sensor data, conflate is usually right — processing stale GPS readings is wasteful. For financial transactions, buffer is right — you don't want to lose any transaction events."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>callbackFlow + awaitClose</strong> — always cleanup in awaitClose, never skip it</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>trySend (not send) in callbacks</strong> — callbacks are not suspend-aware</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>flowOn affects upstream only</strong> — collector runs on its own context</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Channel types</strong>: Rendezvous=0, Buffered, Conflated=1-latest, Unlimited</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>conflate() for sensor data</strong>; buffer() when all items matter</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What's the difference between callbackFlow and channelFlow?"</h4>
+    <p>A: <code>callbackFlow</code> and <code>channelFlow</code> are nearly identical in implementation. Both create a Channel and allow concurrent emissions. The key difference: <code>callbackFlow</code> checks that <code>awaitClose()</code> is called and throws a runtime error if it's missing. <code>channelFlow</code> does not enforce this. In practice, always use <code>callbackFlow</code> when bridging callbacks (the enforcement helps catch bugs), and <code>channelFlow</code> for internal concurrent producers.</p>
+    <h4>Q: "What does trySend return when the buffer is full?"</h4>
+    <p>A: It returns a <code>ChannelResult</code> — a failure result if the channel is full or closed. You can check <code>trySend(value).isFailure</code>. For a conflated channel, it never fails — it overwrites the old value. The caller in a callback should decide: log the drop, increment a dropped-events counter, or simply ignore it depending on the use case.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In an automotive app with 10+ sensor streams (GPS, accelerometer, LIDAR), use callbackFlow for each sensor and merge them with <code>merge()</code>. Apply <code>conflate()</code> on each sensor stream to drop stale readings, then <code>flowOn(Dispatchers.Default)</code> for sensor fusion processing. This gives you one clean reactive stream that always processes the freshest sensor data available.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>callbackFlow template</h4>
+        <pre><code>callbackFlow {
+  val cb = register { trySend(it) }
+  awaitClose { unregister(cb) }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>flowOn scope</h4>
+        <pre><code>flow { emit(item) }
+  .map { transform(it) } // ← IO
+  .flowOn(Dispatchers.IO)
+  .collect { render(it) } // ← Main</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Channel types</h4>
+        <pre><code>Rendezvous  capacity=0  handshake
+Buffered    capacity=64 queue
+Conflated   capacity=1  latest only
+Unlimited   capacity=∞  never suspends</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Backpressure</h4>
+        <pre><code>buffer(n)     // concurrent + queue
+conflate()    // drop old, keep latest
+collectLatest // cancel old on new</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is callbackFlow and when would you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>callbackFlow</code> is a Flow builder that creates a Channel internally, allowing you to bridge callback-based APIs (GPS, Bluetooth, WebSocket, Firebase) to the Kotlin Flow world. Callbacks call <code>trySend(value)</code> (non-suspending) to put values in the channel, and <code>awaitClose { }</code> handles cleanup when the flow is cancelled.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the purpose of awaitClose in callbackFlow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>awaitClose { }</code> does two things: (1) it keeps the callbackFlow alive — without it, the flow would complete immediately after the block, before any callbacks fire; (2) its lambda runs when the flow collector cancels, providing the cleanup hook to unregister the callback. Missing awaitClose causes both premature completion and listener leaks.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does flowOn do and where does it apply?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>flowOn(dispatcher)</code> changes the dispatcher for all operators upstream (above it in the chain). It does NOT affect the collector — the collector always runs on the coroutine that called <code>collect()</code>. It creates a coroutine boundary between the upstream and downstream sections, allowing them to run on different threads concurrently.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What are the 4 channel capacity types and when would you use each?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Rendezvous (0): strict handshake — sender and receiver must be ready simultaneously. Good for controlled producer-consumer pairs. Buffered: N items queued; sender suspends when full. Good for bursty producers that outpace consumers temporarily. Conflated: 1-element buffer, overwrites; sender never suspends. Good for state updates where only the latest matters (sensor data, UI state). Unlimited: unbounded queue; sender never suspends. Use carefully — can OOM with fast producers.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why can't you call emit() from a different coroutine inside flow { }?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>flow { }</code> is a sequential cold flow builder — it enforces that emissions come from a single coroutine, preserving sequential guarantees. Calling emit() from a launched coroutine inside flow{} would violate this contract, potentially causing concurrent emission which is not safe for all collectors. The runtime throws "Flow invariant violated" to catch this. Use <code>channelFlow { }</code> for concurrent emissions.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between buffer() and conflate() for backpressure?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>buffer(n)</code> allows the producer to run ahead of the consumer by up to n items — both run concurrently with a queue between them. No items are lost; sender suspends when buffer is full. <code>conflate()</code> is a special case: the producer and consumer run concurrently, but intermediate values are dropped — the consumer only ever processes the most recent value. Use buffer() when you need all items (events, orders); use conflate() when only the latest matters (GPS updates, price ticks).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you bridge a Bluetooth LE scan callback to a Flow in Android?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>fun bleScanFlow(scanner: BluetoothLeScanner): Flow&lt;ScanResult&gt; = callbackFlow { val callback = object : ScanCallback() { override fun onScanResult(callbackType: Int, result: ScanResult) { trySend(result) } override fun onScanFailed(errorCode: Int) { close(BleScanException(errorCode)) } }; scanner.startScan(callback); awaitClose { scanner.stopScan(callback) } }</code>. Key points: use trySend() (not send()), call close() on error, and always stopScan in awaitClose.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A GPS flow emitting 10 updates/second is connected to a route calculation that takes 500ms. What happens and how do you handle it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Without backpressure handling: the callbackFlow's internal channel buffers updates (default 64); once full, trySend() starts dropping updates silently. The route calculation falls further and further behind, processing stale GPS data. Fix: <code>callbackFlow { ... }.conflate()</code> — the producer runs at full speed but only the latest GPS update is processed by the route calculator. Since route calculation needs the current position, dropping intermediate positions is correct. Add <code>.flowOn(Dispatchers.Default)</code> to move the heavy calculation off Main.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain how flowOn creates a coroutine boundary and what happens to backpressure at that boundary.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>flowOn</code> creates a Channel between the upstream (new coroutine on the specified dispatcher) and the downstream (existing collector coroutine). This channel acts as a buffer between the two. By default, the channel is buffered (64 items). If the upstream produces faster than the downstream consumes, the buffer fills and the upstream suspends. This is similar to calling <code>.buffer(64).flowOn(dispatcher)</code> explicitly. You can control the buffer size using <code>buffer(n)</code> placed before <code>flowOn</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use a raw Channel instead of Flow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Raw Channel is appropriate when: (1) you need bidirectional communication between exactly two coroutines (producer-consumer pair, not broadcast); (2) you need to close the channel explicitly from the producer side with a result or error; (3) you're implementing a work queue where multiple producers send to one consumer (fan-in pattern). In most Android code, Flow provides a better abstraction with operators, lifecycle support, and backpressure. Use Channels for internal coroutine-to-coroutine communication; expose Flow for the outside world.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

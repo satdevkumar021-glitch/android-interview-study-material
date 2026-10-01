@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>7D — Compose Performance | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">7D · Compose Performance</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Stability System</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Unstable Types</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> LazyColumn &amp; remember</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Production Example</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>7D</span> — Compose Performance</h1>
+    <p class="hero-desc">Smart recomposition, stability system, @Stable/@Immutable, unstable List&lt;&gt;, LazyColumn keys, remember for expensive computations, derivedStateOf, lambda stability, Compose compiler metrics.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 7D</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What triggers recomposition — and what should NOT</h3>
+    <p>Recomposition is triggered by State changes. The performance question is: <strong>how much of the tree recomposes?</strong> Compose can skip composables where all parameters are equal — this is called <em>smart recomposition</em>. For a composable to be skippable, all its parameters must be <strong>stable</strong>.</p>
+    <h3>The stability contract</h3>
+    <ul>
+      <li><strong>Stable type</strong>: if <code>a == b</code> then <code>a</code> will never produce a different result for the same inputs — Compose can safely skip it</li>
+      <li><strong>Immutable type</strong>: stronger — value never changes after creation (primitives, String, @Immutable data class)</li>
+      <li><strong>Unstable type</strong>: Compose cannot trust equals() — cannot skip (List&lt;&gt;, MutableList, regular classes without @Stable)</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Every composable parameter that is an unstable type prevents the composable from being skippable — it MUST re-run on every parent recomposition, even if the actual value didn't change. In a 500-item list, this means 500 items recompose when the parent recomposes. Understanding stability is the key to Compose performance at scale.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Stability System →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Stability System</div>
+    <h3>@Stable annotation</h3>
+    <pre><code><span class="cm">// @Stable: promises that equals() is reliable AND observable</span>
+<span class="cm">// (Compose will be notified when observable properties change)</span>
+<span class="an">@Stable</span>
+<span class="kw">class</span> <span class="cl">UserState</span> {
+    <span class="kw">var</span> name by <span class="fn">mutableStateOf</span>(<span class="str">""</span>)  <span class="cm">// observable via State</span>
+    <span class="kw">var</span> email by <span class="fn">mutableStateOf</span>(<span class="str">""</span>)
+}
+<span class="cm">// Compose can skip composables with UserState params if the reference</span>
+<span class="cm">// is the same — it trusts the State fields to trigger recomposition</span></code></pre>
+
+    <h3>@Immutable annotation</h3>
+    <pre><code><span class="cm">// @Immutable: all public properties never change after construction</span>
+<span class="cm">// Strongest stability guarantee</span>
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">ProductUiModel</span>(
+    <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="kw">val</span> name: <span class="cl">String</span>,
+    <span class="kw">val</span> price: <span class="cl">Double</span>
+)
+<span class="cm">// data class is @Immutable IF all fields are val and stable types</span>
+<span class="cm">// Compose compiler may infer this automatically in some cases</span></code></pre>
+
+    <h3>What the compiler infers automatically</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Stability</th><th>Why</th></tr>
+      <tr><td>Int, String, Boolean, Float</td><td>Stable (immutable)</td><td>Primitives never change</td></tr>
+      <tr><td>data class with stable fields</td><td>Stable</td><td>Compiler infers if all fields are val + stable</td></tr>
+      <tr><td>List&lt;T&gt;, MutableList&lt;T&gt;</td><td>Unstable</td><td>Mutable interface, equals() unreliable</td></tr>
+      <tr><td>HashMap, ArrayList</td><td>Unstable</td><td>Mutable collections</td></tr>
+      <tr><td>ViewModel</td><td>Stable</td><td>Never changes reference in the composable</td></tr>
+      <tr><td>Regular class (non-data)</td><td>Unstable</td><td>No reliable equals() override</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Unstable Types →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#9888;</div>3. Unstable Types — The List Problem</div>
+    <h3>Why List&lt;T&gt; is unstable</h3>
+    <pre><code><span class="cm">// List&lt;T&gt; is an interface — Compose sees it as potentially mutable</span>
+<span class="cm">// Even if you pass a listOf(), Compose can't trust equals()</span>
+
+<span class="cm">// ❌ UNSTABLE: composable cannot be skipped</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductList</span>(products: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;) { <span class="cm">/* ... */</span> }
+<span class="cm">// Parent recomposes → ProductList ALWAYS recomposes, even if list unchanged</span>
+
+<span class="cm">// ✅ Fix 1: @Immutable wrapper</span>
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">ProductList</span>(<span class="kw">val</span> items: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;)
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductListScreen</span>(products: <span class="cl">ProductList</span>) { <span class="cm">/* stable ✅ */</span> }
+
+<span class="cm">// ✅ Fix 2: kotlinx.collections.immutable</span>
+<span class="kw">implementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7"</span>)
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductListScreen</span>(products: <span class="cl">ImmutableList</span>&lt;<span class="cl">Product</span>&gt;) { <span class="cm">/* stable ✅ */</span> }</code></pre>
+
+    <h3>Lambda stability</h3>
+    <pre><code><span class="cm">// Lambdas that capture unstable values are themselves unstable</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">Parent</span>() {
+    <span class="kw">val</span> list: <span class="cl">List</span>&lt;<span class="cl">String</span>&gt; = <span class="fn">remember</span> { <span class="fn">listOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>) }
+
+    <span class="cm">// ❌ Lambda captures unstable list — unstable lambda</span>
+    <span class="cl">Child</span>(onClick = { <span class="fn">process</span>(list) })
+}
+
+<span class="cm">// ✅ Fix: stabilize the list, or move lambda out of recomposition scope</span>
+<span class="kw">val</span> stableList: <span class="cl">ImmutableList</span>&lt;<span class="cl">String</span>&gt; = <span class="fn">remember</span> { <span class="fn">persistentListOf</span>(<span class="str">"a"</span>, <span class="str">"b"</span>) }
+<span class="cl">Child</span>(onClick = { <span class="fn">process</span>(stableList) })  <span class="cm">// ✅ stable</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: LazyColumn &amp; remember →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128204;</div>4. LazyColumn Keys &amp; remember</div>
+    <h3>LazyColumn keys — stable item identity</h3>
+    <pre><code><span class="cm">// ❌ Without key: index is the identity</span>
+<span class="cm">// Insert an item → all positions shift → all items recompose</span>
+<span class="cl">LazyColumn</span> {
+    items(products) { product ->
+        <span class="fn">ProductCard</span>(product)  <span class="cm">// identity = index in list</span>
+    }
+}
+
+<span class="cm">// ✅ With key: item.id is the identity</span>
+<span class="cm">// Insert an item → only new item created, others keep their composition</span>
+<span class="cl">LazyColumn</span> {
+    items(products, key = { it.id }) { product ->  <span class="cm">// stable String ID</span>
+        <span class="fn">ProductCard</span>(product)
+    }
+}
+<span class="cm">// Keys enable: correct animations, proper remember state per item,</span>
+<span class="cm">// efficient reuse of composition for unchanged items</span></code></pre>
+
+    <h3>remember for expensive computations in composables</h3>
+    <pre><code><span class="cm">// ❌ Expensive computation runs every recomposition</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ChartComposable</span>(data: <span class="cl">List</span>&lt;<span class="cl">DataPoint</span>&gt;) {
+    <span class="kw">val</span> chartPath = <span class="fn">buildBezierPath</span>(data)  <span class="cm">// ❌ O(n) on every recompose</span>
+    <span class="cl">Canvas</span> { <span class="fn">drawPath</span>(chartPath) }
+}
+
+<span class="cm">// ✅ Memoize with remember(key)</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ChartComposable</span>(data: <span class="cl">List</span>&lt;<span class="cl">DataPoint</span>&gt;) {
+    <span class="kw">val</span> chartPath = <span class="fn">remember</span>(data) {    <span class="cm">// ✅ only recomputes when data changes</span>
+        <span class="fn">buildBezierPath</span>(data)
+    }
+    <span class="cl">Canvas</span> { <span class="fn">drawPath</span>(chartPath) }
+}</code></pre>
+
+    <h3>Modifier.graphicsLayer — avoid recomposition for visual changes</h3>
+    <pre><code><span class="cm">// ❌ alpha in modifier triggers recomposition to update UI</span>
+<span class="cl">Box</span>(<span class="cl">Modifier</span>.<span class="fn">alpha</span>(animatedAlpha))  <span class="cm">// recomposes on alpha change</span>
+
+<span class="cm">// ✅ graphicsLayer: runs in draw phase, no recomposition</span>
+<span class="cl">Box</span>(
+    <span class="cl">Modifier</span>.<span class="fn">graphicsLayer</span>(alpha = animatedAlpha)
+) <span class="cm">// No recomposition — handled by render layer</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127981;</div>5. Production Example</div>
+    <h3>E-commerce: performant product list</h3>
+    <pre><code><span class="cm">// ✅ Stable state wrapper for list</span>
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">ProductScreenState</span>(
+    <span class="kw">val</span> products: <span class="cl">ImmutableList</span>&lt;<span class="cl">ProductUiModel</span>&gt; = <span class="fn">persistentListOf</span>(),
+    <span class="kw">val</span> isLoading: <span class="cl">Boolean</span> = <span class="kw">false</span>
+)
+
+<span class="an">@Immutable</span>
+<span class="kw">data class</span> <span class="cl">ProductUiModel</span>(
+    <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="kw">val</span> name: <span class="cl">String</span>,
+    <span class="kw">val</span> price: <span class="cl">String</span>,       <span class="cm">// Pre-formatted string — stable</span>
+    <span class="kw">val</span> imageUrl: <span class="cl">String</span>
+)
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductListScreen</span>(
+    state: <span class="cl">ProductScreenState</span>,    <span class="cm">// @Immutable → stable</span>
+    onAddToCart: (<span class="cl">String</span>) -> <span class="cl">Unit</span>  <span class="cm">// lambdas on stable types → stable</span>
+) {
+    <span class="cl">LazyColumn</span> {
+        items(
+            items = state.products,
+            key = { it.id }  <span class="cm">// stable String key</span>
+        ) { product ->
+            <span class="cm">// ProductCard: all params are @Immutable types → skippable</span>
+            <span class="fn">ProductCard</span>(
+                product = product,
+                onAddToCart = { onAddToCart(product.id) }
+            )
+        }
+    }
+}
+
+<span class="cm">// ✅ Skippable ProductCard — all params stable</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductCard</span>(
+    product: <span class="cl">ProductUiModel</span>,       <span class="cm">// @Immutable → stable</span>
+    onAddToCart: () -> <span class="cl">Unit</span>        <span class="cm">// no capture → stable</span>
+) {
+    <span class="cm">// derivedStateOf for expensive display computation</span>
+    <span class="kw">val</span> displayPrice by <span class="fn">remember</span>(product.price) {
+        <span class="fn">derivedStateOf</span> { <span class="fn">formatWithCurrency</span>(product.price) }
+    }
+    <span class="cm">/* ... */</span>
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — Passing List&lt;T&gt; to composables</div>
+      <code>List&lt;T&gt;</code> is unstable — any composable that takes it as a parameter cannot be skipped. In a list screen, this means every item recomposes whenever the parent updates. Use <code>ImmutableList&lt;T&gt;</code> (kotlinx.collections.immutable) or wrap in an <code>@Immutable</code> data class.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — Lambdas capturing non-stable values</div>
+      A lambda that captures a <code>List&lt;T&gt;</code> or any unstable value is itself unstable. This prevents the composable receiving it from skipping. Fix: ensure captured values are stable, or use <code>remember { { ... } }</code> to stabilize the lambda reference.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — LazyColumn without keys</div>
+      Without stable keys in LazyColumn, inserting or removing items causes all items to recompose and loses per-item state (expanded state, animations). Always provide <code>key = { item.id }</code>.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — Compose compiler metrics</div>
+      Enable compiler reports: <code>freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=build/compose_reports"]</code>. The output shows skippable vs restartable composables and identifies unstable parameters. Use this to find performance bottlenecks.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "Compose performance is about minimizing unnecessary recomposition. A composable is skippable only if all its parameters are stable — equals() is reliable and Compose trusts the value hasn't changed. The biggest issue is List&lt;T&gt;, which is unstable. Fix it with ImmutableList from kotlinx.collections.immutable or an @Immutable wrapper. LazyColumn keys give items stable identity. derivedStateOf prevents over-recomposition from high-frequency state changes."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The stability system is the performance foundation. A stable type means Compose can trust equals() — if a == b, the composable doesn't need to re-run. Primitives and Strings are stable. data classes with stable fields are stable. But List&lt;T&gt; is an interface — Compose cannot guarantee it's immutable, so it's marked unstable. This means a composable with a List parameter is non-skippable: it recomposes every time its parent recomposes, even if the list didn't change.<br><br>The fix is ImmutableList from kotlinx.collections.immutable, or wrapping in @Immutable data class. The @Immutable annotation is a promise — you're telling Compose 'trust this class, its contents won't change after construction.'<br><br>For LazyColumn: keys give items stable identity. Without keys, inserting at position 0 shifts everything, causing all 500 items to recompose. With keys, Compose moves items and only creates the new one.<br><br>Use the Compose compiler metrics to discover unstable parameters and non-skippable composables — it generates reports showing exactly which composables have issues."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Stable = trustworthy equals()</strong> → composable can be skipped on recompose</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>List&lt;T&gt; is unstable</strong> — use ImmutableList or @Immutable wrapper</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>LazyColumn keys</strong> — stable identity prevents full-list recompose</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>derivedStateOf</strong> — avoid over-recomposition from high-freq state (scroll, sensors)</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Compiler metrics</strong> — diagnose unstable params in production</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What is the difference between @Stable and @Immutable?"</h4>
+    <p>A: <code>@Immutable</code>: stronger contract — all public properties never change after construction. The compiler treats all fields as constants for stability purposes. <code>@Stable</code>: weaker — equals() is reliable AND changes to public properties are observable (via State/observable property). Use @Immutable for pure value objects (UI models). Use @Stable for observable state holders (StateHolder classes with mutableStateOf fields).</p>
+    <h4>Q: "How do you enable Compose compiler reports?"</h4>
+    <p>A: In your app's build.gradle: <code>kotlinOptions { freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${project.buildDir}/compose_reports"] }</code>. Run a build and inspect the `*-composables.txt` file — it shows each composable as skippable/restartable and lists stable/unstable parameters.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking transaction list with real-time updates, use <code>@Immutable data class TransactionUiModel</code> with pre-computed display strings (formatted amount, date string) rather than passing BigDecimal and Instant. This ensures all fields are stable primitives/strings, the composable is fully skippable, and formatting happens once in the ViewModel — not on every recomposition.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Stability rules</h4>
+        <pre><code>Stable:   primitives, String,
+          data class (all val+stable),
+          @Stable, @Immutable
+Unstable: List&lt;T&gt;, MutableList,
+          HashMap, regular class</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Fix unstable List</h4>
+        <pre><code>// Option 1: wrapper
+@Immutable data class Items(val list: List&lt;T&gt;)
+
+// Option 2: ImmutableList
+ImmutableList&lt;T&gt; // kotlinx.collections.immutable</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LazyColumn key</h4>
+        <pre><code>items(
+  items = list,
+  key = { it.id }  // ← always provide
+) { item -> ItemCard(item) }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Performance toolbox</h4>
+        <pre><code>derivedStateOf { } // for high-freq state
+remember(key) { }  // memoize expensive ops
+graphicsLayer { }  // draw-phase changes
+@Immutable class   // trust equals()
+compiler metrics   // diagnose issues</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does it mean for a composable to be "skippable"?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">A skippable composable can be skipped during recomposition if all its parameters are equal to their previous values. Compose checks each parameter using equals(). If all are equal, it assumes the output would be the same and skips executing the function — saving CPU time. For a composable to be skippable, all parameters must be stable types.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is List&lt;T&gt; unstable in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>List&lt;T&gt;</code> is a Kotlin interface. Compose cannot verify that the implementation won't change after the composable receives it — a mutable list could change without notifying Compose. Since Compose can't trust that equals() reliably indicates whether the content changed, it marks List as unstable. Any composable receiving a List parameter is non-skippable and will recompose whenever its parent recomposes.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between @Stable and @Immutable?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>@Immutable</code>: all public properties never change after construction — strongest guarantee. Every field is treated as a compile-time constant for stability. Use for value objects (UI models). <code>@Stable</code>: weaker — equals() is reliable AND any changes to public properties are observable (the Compose runtime will be notified). Use for mutable state holders that use mutableStateOf internally. In practice, most UI model classes should use @Immutable.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why should you always provide keys in LazyColumn?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Without keys, each item's identity is its index. Inserting an item at position 0 shifts all other items' indices — Compose thinks every item changed and recomposes all of them. Remember state per item is also lost. With <code>key = { item.id }</code>, each item has a stable identity. Compose can correctly identify which items moved, which are new, and which are unchanged — only recomposing what actually changed and preserving per-item state.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you fix the performance issue caused by passing List&lt;T&gt; to a composable?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Two approaches: (1) Use <code>ImmutableList&lt;T&gt;</code> from the kotlinx.collections.immutable library — it's a stable type by design. Convert in ViewModel: <code>_state.update { it.copy(products = newList.toImmutableList()) }</code>. (2) Wrap in an @Immutable data class: <code>@Immutable data class ProductListState(val items: List&lt;T&gt;)</code> — the annotation makes the wrapper stable, and the inner List is treated as immutable by contract.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When should you use Modifier.graphicsLayer vs setting a modifier property directly?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>Modifier.alpha(value)</code> updates a modifier that Compose reads during composition — if the alpha changes, a recomposition is needed to apply the new modifier. <code>Modifier.graphicsLayer { alpha = value }</code> applies the change in the draw phase — no recomposition required. For animated values that change every frame (alpha, scale, translation), graphicsLayer skips the composition phase entirely, giving better performance. For static properties that only change occasionally, direct modifiers are fine.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A product list screen shows 200 items. Typing in a search box causes all 200 items to flicker/recompose. What is the root cause and fix?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Root cause: either (1) ProductCard takes a List parameter (unstable, non-skippable), or (2) the state update changes the list reference even if content is the same, or (3) the search query state is being read by the parent that contains the LazyColumn, causing the LazyColumn's parent to recompose, and without stable/skippable ProductCard, all 200 items recompose. Fix: ensure ProductCard takes @Immutable ProductUiModel (not List). Hoist the search query state to a ViewModel so it doesn't live in the same composable as the list. Add stable keys to LazyColumn.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How do you use Compose compiler metrics to diagnose performance issues?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Add to app build.gradle: <code>kotlinOptions { freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${buildDir}/compose_reports", "-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${buildDir}/compose_metrics"] }</code>. Run an assembleDebug/Release. Open build/compose_reports/*-composables.txt. Each composable is marked: skippable/non-skippable, restartable/non-restartable. Non-skippable composables list their unstable parameters. The metrics JSON provides counts. Focus on non-skippable composables in hot paths (list items).</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain why a lambda that captures a non-stable type is itself unstable and how to fix it.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Compose compiler analyzes lambda capture sites. If a lambda captures an unstable value (e.g., <code>List&lt;T&gt;</code>), the compiler cannot guarantee the lambda's output is stable — calling it with the same "arguments" might produce different results because the captured state may have changed. The lambda is therefore marked unstable, preventing composables that receive it from skipping. Fix: (1) ensure the captured value is stable (ImmutableList, @Immutable class); (2) use <code>remember { { } }</code> to create a stable lambda reference; (3) in Compose 1.5+, lambdas with stable captures are automatically stabilized by the compiler.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">An automotive dashboard has a speedometer recomposing at 60fps. The needle is animated but the rest of the dashboard should not recompose. How do you architect this?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Isolate the high-frequency state. The speed value from sensors updates at 60fps — keep it in a separate StateFlow or animatable. The Speedometer composable reads this directly. Use <code>Modifier.graphicsLayer { rotationZ = needleAngle }</code> for the needle rotation — this runs in the draw phase without recomposition. For the rest of the dashboard (current music, temperature, warnings), use derivedStateOf for threshold-crossing booleans. Structure: DashboardScreen (reads all states) → SpeedGauge (reads only speed via derivedStateOf thresholds) + StaticDashboardPanels (@Stable, skippable). The needle rotation via graphicsLayer avoids even SpeedGauge recomposition at 60fps.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

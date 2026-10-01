@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>29A — Paging 3 | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">29A · Paging 3</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> PagingSource</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Pager &amp; PagingData</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> RemoteMediator</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Room + Paging</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Compose &amp; API Design</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>29A</span> — Paging 3</h1>
+    <p class="hero-desc">PagingSource, Pager configuration, PagingData streams, RemoteMediator for offline-first paging, Room + Paging integration, LazyPagingItems in Compose, and API pagination design.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 29A</span>
+      <span class="badge badge-tier3">&#9733; Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Paging 3 Architecture</h3>
+    <pre><code><span class="cm">Repository layer:</span>
+  PagingSource&lt;Key, Value&gt;  <span class="cm">← single data source (network OR database)</span>
+  RemoteMediator             <span class="cm">← network + database (offline-first)</span>
+  Pager(config, source)     <span class="cm">← orchestrates loading</span>
+    └── Flow&lt;PagingData&lt;T&gt;&gt; <span class="cm">← stream of paginated data</span>
+
+<span class="cm">ViewModel layer:</span>
+  Flow&lt;PagingData&lt;T&gt;&gt;.cachedIn(viewModelScope)
+
+<span class="cm">UI layer:</span>
+  LazyPagingItems&lt;T&gt;         <span class="cm">← Compose</span>
+  PagingDataAdapter           <span class="cm">← RecyclerView</span></code></pre>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Paging 3 is a reactive pagination library. The UI never directly requests pages — it signals loading triggers (prefetch distance reached), and the Pager + PagingSource respond asynchronously. The key design: <strong>PagingSource for single source, RemoteMediator for network+database (offline-first)</strong>. Room automatically generates PagingSource from @Query — no manual implementation needed.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: PagingSource →</button></div>
+  </div>
+
+  <!-- S2 PagingSource -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. PagingSource</div>
+    <pre><code><span class="cm">// PagingSource&lt;Key, Value&gt;</span>
+<span class="cm">// Key: type of page key (Int for offset, String for cursor)</span>
+<span class="cm">// Value: type of data items</span>
+<span class="kw">class</span> <span class="cl">ProductPagingSource</span>(
+    <span class="kw">private val</span> api: <span class="cl">ProductApiService</span>
+) : <span class="cl">PagingSource</span>&lt;<span class="cl">Int</span>, <span class="cl">Product</span>&gt;() {
+
+    <span class="kw">override suspend fun</span> <span class="fn">load</span>(params: <span class="cl">LoadParams</span>&lt;<span class="cl">Int</span>&gt;): <span class="cl">LoadResult</span>&lt;<span class="cl">Int</span>, <span class="cl">Product</span>&gt; {
+        <span class="kw">val</span> page = params.key ?: <span class="nu">1</span>  <span class="cm">// default to first page</span>
+        <span class="kw">return</span> <span class="kw">try</span> {
+            <span class="kw">val</span> response = api.<span class="fn">getProducts</span>(page = page, pageSize = params.loadSize)
+            <span class="cl">LoadResult</span>.<span class="cl">Page</span>(
+                data = response.products,
+                prevKey = <span class="kw">if</span> (page == <span class="nu">1</span>) <span class="kw">null else</span> page - <span class="nu">1</span>,
+                nextKey = <span class="kw">if</span> (response.isLastPage) <span class="kw">null else</span> page + <span class="nu">1</span>
+            )
+        } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+            <span class="cl">LoadResult</span>.<span class="cl">Error</span>(e)
+        }
+    }
+
+    <span class="cm">// Called when data is invalidated (refresh signal)</span>
+    <span class="kw">override fun</span> <span class="fn">getRefreshKey</span>(state: <span class="cl">PagingState</span>&lt;<span class="cl">Int</span>, <span class="cl">Product</span>&gt;): <span class="cl">Int</span>? {
+        <span class="cm">// Return the page key for the anchor position (item closest to viewport center)</span>
+        <span class="kw">return</span> state.anchorPosition?.<span class="fn">let</span> { anchor ->
+            state.<span class="fn">closestPageToPosition</span>(anchor)?.<span class="fn">let</span> { page ->
+                page.prevKey?.plus(<span class="nu">1</span>) ?: page.nextKey?.minus(<span class="nu">1</span>)
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>LoadResult Types</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Type</th><th>Meaning</th></tr>
+      <tr><td>LoadResult.Page(data, prevKey, nextKey)</td><td>Successful page load. null prevKey = no more previous pages. null nextKey = no more next pages.</td></tr>
+      <tr><td>LoadResult.Error(throwable)</td><td>Load failed. Paging delivers CombinedLoadStates.append/prepend.error to the UI.</td></tr>
+      <tr><td>LoadResult.Invalid</td><td>Source invalidated — Pager will create a new PagingSource</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Pager →</button>
+    </div>
+  </div>
+
+  <!-- S3 Pager & PagingData -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127381;</div>3. Pager &amp; PagingData</div>
+    <h3>Repository — creating the paged stream</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">ProductRepository</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> api: <span class="cl">ProductApiService</span>
+) {
+    <span class="kw">fun</span> <span class="fn">getProductsPaged</span>(): <span class="cl">Flow</span>&lt;<span class="cl">PagingData</span>&lt;<span class="cl">Product</span>&gt;&gt; = <span class="cl">Pager</span>(
+        config = <span class="cl">PagingConfig</span>(
+            pageSize = <span class="nu">20</span>,             <span class="cm">// items per page</span>
+            prefetchDistance = <span class="nu">5</span>,       <span class="cm">// load next page when 5 items from end</span>
+            initialLoadSize = <span class="nu">40</span>,       <span class="cm">// first load: 2× pageSize for faster initial display</span>
+            enablePlaceholders = <span class="kw">false</span>  <span class="cm">// set true for known total count</span>
+        ),
+        pagingSourceFactory = { <span class="cl">ProductPagingSource</span>(api) }
+    ).<span class="fn">flow</span>
+}</code></pre>
+
+    <h3>ViewModel — cache the flow</h3>
+    <pre><code><span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ProductViewModel</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    repository: <span class="cl">ProductRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> products: <span class="cl">Flow</span>&lt;<span class="cl">PagingData</span>&lt;<span class="cl">Product</span>&gt;&gt; = repository
+        .<span class="fn">getProductsPaged</span>()
+        .<span class="fn">cachedIn</span>(viewModelScope)  <span class="cm">// IMPORTANT: cache survives rotation</span>
+}</code></pre>
+    <div class="callout callout-yellow">
+      <div class="callout-label">cachedIn is Required</div>
+      Without <code>.cachedIn(viewModelScope)</code>, every collector (including rotation) restarts the flow from scratch — losing loaded pages. <code>cachedIn</code> stores the last emitted PagingData in the ViewModel scope, surviving recomposition and configuration changes.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← PagingSource</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: RemoteMediator →</button>
+    </div>
+  </div>
+
+  <!-- S4 RemoteMediator -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128257;</div>4. RemoteMediator (Offline-First)</div>
+    <h3>Architecture: Network + Database Paging</h3>
+    <pre><code><span class="cm">// RemoteMediator fetches from network, stores in Room</span>
+<span class="cm">// The UI always reads from Room (single source of truth)</span>
+<span class="cm">// RemoteMediator is the "middleware" that keeps Room fresh</span>
+
+<span class="an">@OptIn</span>(<span class="cl">ExperimentalPagingApi</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">ProductRemoteMediator</span>(
+    <span class="kw">private val</span> api: <span class="cl">ProductApiService</span>,
+    <span class="kw">private val</span> db: <span class="cl">AppDatabase</span>
+) : <span class="cl">RemoteMediator</span>&lt;<span class="cl">Int</span>, <span class="cl">ProductEntity</span>&gt;() {
+
+    <span class="kw">override suspend fun</span> <span class="fn">load</span>(
+        loadType: <span class="cl">LoadType</span>,        <span class="cm">// REFRESH, PREPEND, or APPEND</span>
+        state: <span class="cl">PagingState</span>&lt;<span class="cl">Int</span>, <span class="cl">ProductEntity</span>&gt;
+    ): <span class="cl">MediatorResult</span> {
+        <span class="kw">return try</span> {
+            <span class="kw">val</span> page = <span class="kw">when</span> (loadType) {
+                <span class="cl">LoadType</span>.REFRESH -> <span class="nu">1</span>     <span class="cm">// start from beginning</span>
+                <span class="cl">LoadType</span>.PREPEND -> <span class="kw">return</span> <span class="cl">MediatorResult</span>.<span class="cl">Success</span>(endOfPaginationReached = <span class="kw">true</span>)
+                <span class="cl">LoadType</span>.APPEND -> {
+                    <span class="kw">val</span> lastKey = db.remoteKeysDao().<span class="fn">getLastKey</span>()
+                        ?: <span class="kw">return</span> <span class="cl">MediatorResult</span>.<span class="cl">Success</span>(endOfPaginationReached = <span class="kw">true</span>)
+                    lastKey + <span class="nu">1</span>
+                }
+            }
+            <span class="kw">val</span> response = api.<span class="fn">getProducts</span>(page, state.config.pageSize)
+            db.<span class="fn">withTransaction</span> {
+                <span class="kw">if</span> (loadType == <span class="cl">LoadType</span>.REFRESH) {
+                    db.productDao().<span class="fn">clearAll</span>()   <span class="cm">// fresh data on refresh</span>
+                    db.remoteKeysDao().<span class="fn">clearAll</span>()
+                }
+                db.productDao().<span class="fn">insertAll</span>(response.products.<span class="fn">map</span> { it.<span class="fn">toEntity</span>() })
+                db.remoteKeysDao().<span class="fn">insert</span>(<span class="cl">RemoteKey</span>(page))
+            }
+            <span class="cl">MediatorResult</span>.<span class="cl">Success</span>(endOfPaginationReached = response.isLastPage)
+        } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+            <span class="cl">MediatorResult</span>.<span class="cl">Error</span>(e)
+        }
+    }
+}</code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">LoadType Meanings</div>
+      <strong>REFRESH</strong>: initial load or explicit refresh (e.g., swipe-to-refresh). Clear old data. <strong>PREPEND</strong>: load pages before the start. Typically return Success(endOfPaginationReached = true) for typical APIs. <strong>APPEND</strong>: load next page when user scrolls to end.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Pager</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Room + Paging →</button>
+    </div>
+  </div>
+
+  <!-- S5 Room + Paging -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128204;</div>5. Room + Paging Integration</div>
+    <h3>Room Auto-generates PagingSource</h3>
+    <pre><code><span class="cm">// Room DAO — return PagingSource directly</span>
+<span class="an">@Dao</span>
+<span class="kw">interface</span> <span class="cl">ProductDao</span> {
+    <span class="an">@Query</span>(<span class="str">"SELECT * FROM products ORDER BY name ASC"</span>)
+    <span class="kw">fun</span> <span class="fn">getProductsPaged</span>(): <span class="cl">PagingSource</span>&lt;<span class="cl">Int</span>, <span class="cl">ProductEntity</span>&gt;
+    <span class="cm">// Room generates the PagingSource implementation — no code needed</span>
+}
+
+<span class="cm">// Repository — combine Pager + RemoteMediator + Room</span>
+<span class="an">@OptIn</span>(<span class="cl">ExperimentalPagingApi</span>::<span class="kw">class</span>)
+<span class="kw">fun</span> <span class="fn">getProductsPaged</span>(): <span class="cl">Flow</span>&lt;<span class="cl">PagingData</span>&lt;<span class="cl">Product</span>&gt;&gt; = <span class="cl">Pager</span>(
+    config = <span class="cl">PagingConfig</span>(pageSize = <span class="nu">20</span>),
+    remoteMediator = <span class="cl">ProductRemoteMediator</span>(api, db),
+    pagingSourceFactory = { db.productDao().<span class="fn">getProductsPaged</span>() }
+).<span class="fn">flow</span>
+    .<span class="fn">map</span> { pagingData -> pagingData.<span class="fn">map</span> { it.<span class="fn">toDomain</span>() } }</code></pre>
+
+    <h3>Data Flow with RemoteMediator</h3>
+    <pre><code><span class="cm">User scrolls → Pager signals prefetch</span>
+  → <span class="cm">Room PagingSource serves cached items immediately (offline)</span>
+  → <span class="cm">RemoteMediator.load(APPEND) called</span>
+      → <span class="cm">Fetch from API</span>
+      → <span class="cm">Store in Room (transaction)</span>
+      → <span class="cm">Room PagingSource auto-invalidates</span>
+      → <span class="cm">UI receives new PagingData from Room</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← RemoteMediator</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Compose &amp; API Design →</button>
+    </div>
+  </div>
+
+  <!-- S6 Compose & API Design -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128640;</div>6. Compose &amp; API Pagination Design</div>
+    <h3>LazyPagingItems in Compose</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="cl">ProductListScreen</span>(viewModel: <span class="cl">ProductViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> lazyItems = viewModel.products.<span class="fn">collectAsLazyPagingItems</span>()
+
+    <span class="cl">LazyColumn</span> {
+        <span class="fn">items</span>(
+            count = lazyItems.itemCount,
+            key = lazyItems.<span class="fn">itemKey</span> { it.id }
+        ) { index ->
+            <span class="kw">val</span> product = lazyItems[index]  <span class="cm">// triggers load if null (placeholder)</span>
+            <span class="kw">if</span> (product != <span class="kw">null</span>) {
+                <span class="cl">ProductItem</span>(product = product)
+            }
+        }
+
+        <span class="cm">// Handle load states</span>
+        <span class="kw">when</span> (<span class="kw">val</span> loadState = lazyItems.loadState.append) {
+            <span class="kw">is</span> <span class="cl">LoadState</span>.<span class="cl">Loading</span> -> item { <span class="cl">LoadingSpinner</span>() }
+            <span class="kw">is</span> <span class="cl">LoadState</span>.<span class="cl">Error</span>  -> item { <span class="cl">ErrorRetryItem</span> { lazyItems.<span class="fn">retry</span>() } }
+            <span class="kw">else</span> -> {}
+        }
+    }
+}</code></pre>
+
+    <h3>API Pagination Design</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Style</th><th>Key</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Offset-based</td><td>page=2&amp;size=20</td><td>Simple, jump to any page</td><td>Data shift on insert/delete — items skipped or duplicated</td></tr>
+      <tr><td>Cursor-based</td><td>after=cursor_token</td><td>Consistent — no skips with real-time data</td><td>Can't jump to arbitrary page</td></tr>
+    </table></div>
+    <p>For real-time feeds (chat, social, catalog updates) <strong>cursor-based is strongly preferred</strong> — an item inserted at position 5 between page requests won't cause page 2 to duplicate the item that shifted from page 1.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Room + Paging</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Paging 3 has three core pieces: PagingSource defines how to load a page of data, Pager orchestrates loading based on config (pageSize, prefetchDistance), and PagingData is the immutable snapshot streamed as a Flow. For offline-first, RemoteMediator fetches from network, writes to Room, and Room's auto-generated PagingSource serves the UI. The ViewModel caches the flow with cachedIn(viewModelScope) so rotation doesn't reset pagination."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"PagingSource.load() is given LoadParams (key = current page, loadSize = how many to load) and returns LoadResult.Page(data, prevKey, nextKey) or LoadResult.Error. Pager wraps it with a PagingConfig — pageSize controls items per page, prefetchDistance triggers loading N items before the visible end, initialLoadSize is typically 2× pageSize for faster initial fill. For offline-first paging, RemoteMediator handles the network+database cycle: on REFRESH it clears Room and reloads; on APPEND it fetches the next page from API and inserts into Room. Room auto-generates PagingSource from a @Query returning PagingSource&lt;Int, Entity&gt; — when RemoteMediator writes new rows, Room invalidates the PagingSource and new data flows to the UI. In Compose, collectAsLazyPagingItems() + LazyColumn items(count) handles display including load state monitoring for spinners and retry buttons. Always use .cachedIn(viewModelScope) in the ViewModel — without it, every new subscriber (including orientation change) restarts paging from page 1."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>PagingSource.load() → LoadResult.Page(data, prevKey=null at start, nextKey=null at end)</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>cachedIn(viewModelScope) — survives rotation, prevents re-pagination</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>RemoteMediator = network + Room; pagingSourceFactory = Room's auto-generated PagingSource</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>LoadType: REFRESH (clear + reload), APPEND (next page), PREPEND (usually end-of-pagination)</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Cursor-based pagination preferred for real-time data — offset-based causes duplicates/skips</div></div>
+    </div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Understand that Room's PagingSource auto-invalidates when the database changes. This is the key to RemoteMediator working: you don't need to manually signal the UI to refresh — writing new rows to Room triggers PagingSource.invalidate(), which causes Pager to create a new PagingSource and the new data flows automatically. This is the reactive backbone of offline-first paging.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Compose &amp; API Design</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Paging Components</h4>
+        <pre><code>PagingSource  → load one page
+Pager         → orchestrates
+PagingData    → immutable snapshot
+RemoteMediator → net + db</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PagingConfig</h4>
+        <pre><code>pageSize         = 20
+prefetchDistance = 5
+initialLoadSize  = 40
+enablePlaceholders = false</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ViewModel</h4>
+        <pre><code>val products = repo
+  .getProductsPaged()
+  .cachedIn(viewModelScope)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Compose UI</h4>
+        <pre><code>val items = products
+  .collectAsLazyPagingItems()
+LazyColumn {
+  items(items.itemCount) { i ->
+    items[i]?.let { ProductItem(it) }
+  }
+}</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What are the three main components of Paging 3?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">PagingSource: defines how to load a single page of data — takes LoadParams (key, loadSize) and returns LoadResult.Page or LoadResult.Error. Pager: orchestrates loading, manages the RecycledViewPool, and emits Flow&lt;PagingData&lt;T&gt;&gt;. PagingData: an immutable snapshot of a page — consumed by LazyPagingItems in Compose or PagingDataAdapter in RecyclerView. RemoteMediator is optional — adds network+database (offline-first) support.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What does prevKey and nextKey represent in LoadResult.Page?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">prevKey: the key to load the page BEFORE this one. null = no more previous pages (start of data). nextKey: the key to load the page AFTER this one. null = no more next pages (end of data). For offset-based: prevKey = page - 1, nextKey = page + 1. When nextKey is null, Pager stops appending and marks endOfPaginationReached = true.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. Why is cachedIn(viewModelScope) necessary?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Without cachedIn, each new collector of the Flow starts fresh — meaning every screen rotation restarts paging from page 1. cachedIn stores the latest PagingData in the ViewModel's scope. New collectors (after rotation or recomposition) immediately receive the cached PagingData — the user stays on their position in the list. It's the equivalent of calling cachedIn that creates an ActiveFlow that survives config changes.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. What is RemoteMediator and how does it differ from PagingSource?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">PagingSource is a single data source — either network or database. RemoteMediator is the bridge between network and local database for offline-first: it fetches from the network, stores in Room, and the PagingSource reads from Room. The UI always reads from Room (single source of truth). RemoteMediator is triggered by Pager when more data is needed (based on distance to end). Room's PagingSource auto-invalidates when RemoteMediator writes new rows.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. How does Room auto-generate PagingSource?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Room's annotation processor generates a PagingSource implementation when a @Query method returns PagingSource&lt;Int, Entity&gt;. Room's implementation wraps the query in a paging strategy that: reads one page at a time (keyed by offset), observes the database for changes using InvalidationTracker, and calls PagingSource.invalidate() when the queried table changes. This auto-invalidation is what makes RemoteMediator + Room work — no manual notification required.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. What are the three LoadType values in RemoteMediator and when does each trigger?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">REFRESH: triggered on initial load or explicit refresh (swipe-to-refresh, invalidate()). Clear existing Room data and load page 1. APPEND: triggered when the user scrolls near the end of the list (within prefetchDistance items). Load the next page, append to Room. PREPEND: triggered when scrolling near the start. For most use cases, return MediatorResult.Success(endOfPaginationReached = true) since APIs typically don't support backward pagination.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you display loading and error states in Compose with Paging 3?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">LazyPagingItems exposes loadState: CombinedLoadStates with three properties: refresh (initial load), prepend (loading more at start), append (loading more at end). Each is a LoadState: Loading, NotLoading, or Error. In LazyColumn: observe lazyItems.loadState.refresh for initial loading spinners/errors. Add an item {} inside LazyColumn for append states — LoadState.Loading shows a spinner at the bottom; LoadState.Error shows a retry button that calls lazyItems.retry().</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. Why is cursor-based pagination better than offset-based for real-time data?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Offset-based: page 2 = items 21-40. If a new item is inserted at position 5 between loading page 1 and page 2, every item shifts by 1. The old item 20 is now item 21 — the first item of page 2, duplicating it. Or if an item is deleted, page 2 skips an item. Cursor-based: page 2 = "items after cursor X" where X is the ID/timestamp of the last item on page 1. Insertions elsewhere don't affect the cursor — you always get the next items relative to the stable anchor point. Essential for chat, social feeds, and any dataset with real-time mutations.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. How do you implement swipe-to-refresh with Paging 3?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Call lazyItems.refresh() to signal REFRESH to both the PagingSource and RemoteMediator. In Compose, wrap LazyColumn with PullToRefreshBox (Material3) or SwipeRefresh, binding isRefreshing to lazyItems.loadState.refresh is LoadState.Loading. The refresh() call triggers RemoteMediator.load(LoadType.REFRESH) → clears Room → fetches page 1 from API → Room auto-invalidates PagingSource → new data flows to UI. The isRefreshing indicator should go false when loadState.refresh is not Loading.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. What is PagingConfig.enablePlaceholders and when should you enable it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">When enablePlaceholders = true, Paging shows null items for positions that haven't loaded yet — the list appears full-length immediately with skeleton/shimmer items. Requires knowing the total item count (PagingSource must set itemsBefore/itemsAfter in LoadResult.Page). When false (default), the list grows as new pages are loaded — no placeholders. Enable placeholders when: total count is known from API, items have fixed height, and you want to show scrollbar position accurately. Disable when: total count is unknown, items have variable height, or you prefer growing lists.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

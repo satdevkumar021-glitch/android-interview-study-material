@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>5B — Builders &amp; Dispatchers | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">5B · Builders &amp; Dispatchers</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>5B</span> — Builders &amp; Dispatchers</h1>
+    <p class="hero-desc"><code>launch</code>, <code>async/await</code>, <code>withContext</code>, <code>runBlocking</code> — when each builder fits, plus dispatcher internals and thread pool selection.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 5B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Coroutine builders</h3>
+    <ul>
+      <li><strong>launch</strong> — fire-and-forget; returns a <code>Job</code>; exceptions propagate to parent</li>
+      <li><strong>async</strong> — concurrent with a result; returns <code>Deferred&lt;T&gt;</code>; call <code>.await()</code> to get value</li>
+      <li><strong>withContext</strong> — switch context in-place; suspends caller; sequential, not concurrent</li>
+      <li><strong>runBlocking</strong> — bridge blocking code to coroutines; blocks the calling thread; tests &amp; main() only</li>
+    </ul>
+    <h3>Dispatchers</h3>
+    <ul>
+      <li><strong>Dispatchers.Main</strong> — Android main looper thread; UI updates, observe LiveData/Flow</li>
+      <li><strong>Dispatchers.IO</strong> — shared pool up to 64 + nCPU threads; network, files, DB</li>
+      <li><strong>Dispatchers.Default</strong> — CPU-bound pool, nCPU threads; sorting, parsing, heavy computation</li>
+      <li><strong>Dispatchers.Unconfined</strong> — no thread pinning; resumes on whatever thread called it; avoid in production</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      <code>async</code> is not "async/await like JavaScript." It starts a coroutine immediately and concurrently. The concurrency happens at <code>async { }</code> creation, not at <code>.await()</code>. If you <code>val d = async { ... }; d.await()</code> sequentially, you get concurrency. If you do <code>withContext</code> instead of <code>async</code>, you get sequential switching — completely different performance characteristics.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>launch — fire-and-forget</h3>
+    <pre><code><span class="cm">// launch returns a Job immediately, runs the block concurrently</span>
+<span class="kw">val</span> job = viewModelScope.<span class="fn">launch</span> {
+    <span class="fn">loadUserData</span>()  <span class="cm">// runs concurrently with caller</span>
+}
+job.<span class="fn">cancel</span>()  <span class="cm">// can cancel it later</span>
+
+<span class="cm">// launch with a specific dispatcher</span>
+viewModelScope.<span class="fn">launch</span>(<span class="cl">Dispatchers</span>.IO) {
+    <span class="cm">// runs on IO pool from the start</span>
+}</code></pre>
+
+    <h3>async/await — concurrent result</h3>
+    <pre><code><span class="cm">// ✅ TRUE CONCURRENCY: both start simultaneously</span>
+<span class="kw">suspend fun</span> <span class="fn">loadDashboard</span>(): <span class="cl">Dashboard</span> = coroutineScope {
+    <span class="kw">val</span> userDeferred = <span class="fn">async</span> { api.<span class="fn">getUser</span>() }       <span class="cm">// starts now</span>
+    <span class="kw">val</span> ordersDeferred = <span class="fn">async</span> { api.<span class="fn">getOrders</span>() }   <span class="cm">// starts now</span>
+    <span class="cm">// Both running in parallel!</span>
+    <span class="cl">Dashboard</span>(userDeferred.<span class="fn">await</span>(), ordersDeferred.<span class="fn">await</span>())
+}
+
+<span class="cm">// ❌ WRONG: sequential despite async — each await blocks the next async</span>
+<span class="kw">val</span> user = <span class="fn">async</span> { api.<span class="fn">getUser</span>() }.<span class="fn">await</span>()    <span class="cm">// blocks here</span>
+<span class="kw">val</span> orders = <span class="fn">async</span> { api.<span class="fn">getOrders</span>() }.<span class="fn">await</span>() <span class="cm">// then runs</span></code></pre>
+
+    <h3>withContext — sequential context switch</h3>
+    <pre><code><span class="cm">// withContext suspends caller and resumes in new context</span>
+<span class="cm">// Returns the result directly — no Deferred needed</span>
+<span class="kw">suspend fun</span> <span class="fn">parseJson</span>(json: <span class="cl">String</span>): <span class="cl">User</span> =
+    <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.Default) {  <span class="cm">// CPU-bound parsing</span>
+        gson.<span class="fn">fromJson</span>(json, <span class="cl">User</span>::<span class="kw">class</span>.java)
+    }
+<span class="cm">// After withContext returns, we're back on the original dispatcher</span></code></pre>
+
+    <h3>runBlocking — bridge for tests &amp; main()</h3>
+    <pre><code><span class="cm">// Blocks current thread until all coroutines complete</span>
+<span class="cm">// ✅ OK in tests and top-level main()</span>
+<span class="kw">fun</span> <span class="fn">main</span>() = <span class="fn">runBlocking</span> {
+    <span class="fn">launch</span> { <span class="fn">doWork</span>() }
+}
+
+<span class="cm">// ❌ NEVER in Android production code — blocks main thread</span>
+<span class="kw">fun</span> <span class="fn">onClick</span>() = <span class="fn">runBlocking</span> { <span class="cm">/* FREEZE */</span> }</code></pre>
+
+    <h3>Dispatcher internals</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Dispatcher</th><th>Thread count</th><th>Backed by</th><th>Use case</th></tr>
+      <tr><td>Main</td><td>1</td><td>Android Looper</td><td>UI updates, state reads</td></tr>
+      <tr><td>IO</td><td>64 + nCPU (max)</td><td>Shared pool</td><td>Network, DB, files</td></tr>
+      <tr><td>Default</td><td>nCPU</td><td>Shared pool</td><td>CPU-heavy work</td></tr>
+      <tr><td>Unconfined</td><td>None</td><td>Caller's thread</td><td>Tests, special cases</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128337;</div>3. When to Use</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Builder</th><th>Returns</th><th>Use when</th><th>Avoid when</th></tr>
+      <tr><td>launch</td><td>Job</td><td>Fire-and-forget, side effects, UI triggers</td><td>You need the result</td></tr>
+      <tr><td>async</td><td>Deferred&lt;T&gt;</td><td>Parallel work that returns values</td><td>Sequential work (use withContext instead)</td></tr>
+      <tr><td>withContext</td><td>T</td><td>Switching dispatcher, sequential work</td><td>You need concurrency (use async)</td></tr>
+      <tr><td>runBlocking</td><td>T</td><td>Tests, main(), bridging legacy code</td><td>Any Android production code path</td></tr>
+    </table>
+    </div>
+    <h3>Dispatcher selection guide</h3>
+    <ul>
+      <li><strong>Main</strong>: any update to UI state, observing LiveData/Flow, any composable state change</li>
+      <li><strong>IO</strong>: Retrofit calls, Room queries, SharedPreferences, file reads, WebSocket connections</li>
+      <li><strong>Default</strong>: JSON parsing at scale, image processing, sorting large lists, regex matching</li>
+      <li><strong>limitedParallelism(n)</strong>: when you need fairness — e.g., 4 DB connection threads matching pool size</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <h3>E-commerce: parallel product + recommendations load</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">ProductViewModel</span>(
+    <span class="kw">private val</span> productRepo: <span class="cl">ProductRepository</span>,
+    <span class="kw">private val</span> recommendRepo: <span class="cl">RecommendationRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _state = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">ProductScreenState</span>&gt;(<span class="cl">Loading</span>)
+    <span class="kw">val</span> state = _state.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">loadProductScreen</span>(productId: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            _state.<span class="fn">value</span> = <span class="cl">Loading</span>
+            <span class="kw">try</span> {
+                <span class="cm">// coroutineScope creates a scope; both async blocks run in parallel</span>
+                <span class="kw">val</span> (product, recs) = coroutineScope {
+                    <span class="kw">val</span> productDef = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.IO) {
+                        productRepo.<span class="fn">getProduct</span>(productId)
+                    }
+                    <span class="kw">val</span> recsDef = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.IO) {
+                        recommendRepo.<span class="fn">getFor</span>(productId)
+                    }
+                    <span class="cm">// Destructuring: both awaited here</span>
+                    productDef.<span class="fn">await</span>() to recsDef.<span class="fn">await</span>()
+                }
+                <span class="cm">// Back on Main (viewModelScope default)</span>
+                _state.<span class="fn">value</span> = <span class="cl">Success</span>(product, recs)
+            } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+                _state.<span class="fn">value</span> = <span class="cl">Error</span>(e.<span class="fn">message</span>)
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Automotive: sensor data processing on Default</h3>
+    <pre><code><span class="cm">// Heavy sensor fusion — needs Default dispatcher</span>
+<span class="kw">suspend fun</span> <span class="fn">processSensorBatch</span>(readings: <span class="cl">List</span>&lt;<span class="cl">SensorReading</span>&gt;): <span class="cl">FusedData</span> =
+    <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.Default) {
+        <span class="cm">// CPU-intensive: Kalman filter, matrix operations</span>
+        readings
+            .<span class="fn">filter</span> { it.isValid() }
+            .<span class="fn">map</span> { <span class="fn">applySensorFusion</span>(it) }
+            .<span class="fn">reduce</span> { acc, data -> acc.<span class="fn">merge</span>(data) }
+    }</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Pattern</th><th>Concurrency?</th><th>Returns value?</th><th>Context switch?</th></tr>
+      <tr><td>launch</td><td>Yes (concurrent with caller)</td><td>No (Job)</td><td>Optional</td></tr>
+      <tr><td>async + await</td><td>Yes (sibling coroutines)</td><td>Yes (Deferred)</td><td>Optional</td></tr>
+      <tr><td>withContext</td><td>No (sequential)</td><td>Yes (direct)</td><td>Yes (required)</td></tr>
+      <tr><td>coroutineScope + async</td><td>Yes</td><td>Yes (structured)</td><td>Optional</td></tr>
+    </table>
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Common Confusion</div>
+      <code>withContext(Dispatchers.IO) { async { ... } }</code> — the inner <code>async</code> runs in the IO dispatcher but the <code>withContext</code> block still awaits the async before returning. The nesting gives you the dispatcher without adding parallelism.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1 — async without await loses exceptions</div>
+      If you create a <code>Deferred</code> and never call <code>.await()</code>, any exception thrown inside the async block is silently ignored until <code>await()</code> is called. Always <code>await()</code> inside a try/catch or use <code>coroutineScope</code>.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2 — withContext inside async adds unnecessary nesting</div>
+      <code>async { withContext(IO) { ... } }</code> — just use <code>async(Dispatchers.IO) { ... }</code>. The dispatcher can be passed directly to the builder.
+    </div>
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — runBlocking in tests with real delay()</div>
+      <code>runBlocking { delay(5000) }</code> actually waits 5 seconds in tests. Use <code>runTest</code> from <code>kotlinx-coroutines-test</code> which uses a virtual clock and skips delays.
+    </div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Best Practice — coroutineScope for structured parallel work</div>
+      Always wrap parallel <code>async</code> calls in <code>coroutineScope { }</code> or <code>supervisorScope { }</code> rather than launching them in the outer scope. This ensures all parallel work completes (or fails) before the enclosing function returns.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127919;</div>7. Interview Framework</div>
+    <h3>30-second answer</h3>
+    <div class="answer-box">
+      "There are four coroutine builders: <code>launch</code> for fire-and-forget, <code>async</code> for concurrent work with a result via Deferred, <code>withContext</code> for sequential context switching, and <code>runBlocking</code> for bridging blocking code — but only in tests and main(). For dispatchers: Main for UI, IO for blocking I/O, Default for CPU work."
+    </div>
+    <h3>2-minute answer</h3>
+    <div class="answer-box">
+      "The key distinction is between concurrency and context switching. <code>launch</code> and <code>async</code> create new coroutines that run concurrently with the caller. <code>withContext</code> suspends the current coroutine, switches context, does the work, and returns — no concurrency, but also no Deferred overhead.<br><br>For parallelism, you'd use multiple <code>async</code> blocks inside a <code>coroutineScope</code> and then <code>await()</code> all of them — this is the structured way to fan out and join. In production, I always wrap parallel <code>async</code> in <code>coroutineScope</code> so exceptions propagate correctly and cancellation works.<br><br>For dispatchers: IO and Default actually share one thread pool since 1.7, but IO allows up to 64 threads for I/O blocking, while Default caps at CPU count for CPU work. For even finer control, <code>limitedParallelism(n)</code> creates a view of the IO dispatcher with a cap — useful for matching a JDBC pool size."
+    </div>
+    <h3>Must-mention points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>launch = fire-and-forget (Job)</strong>; async = concurrent result (Deferred)</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>withContext ≠ async</strong> — sequential switch vs concurrent new coroutine</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>runBlocking = test/main only</strong> — never in Android Activity/Fragment/ViewModel</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>coroutineScope wrapping parallel async</strong> — structured fan-out</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>IO vs Default</strong> — blocking I/O vs CPU-bound; same pool, different concurrency cap</div></div>
+    </div>
+    <h3>Follow-up Q&amp;A</h3>
+    <h4>Q: "What's the difference between async and launch?"</h4>
+    <p>A: <code>launch</code> returns a <code>Job</code> — you can cancel it but not get a value back. <code>async</code> returns a <code>Deferred&lt;T&gt;</code> — call <code>.await()</code> to get the result or rethrow any exception. Both start immediately and run concurrently.</p>
+    <h4>Q: "When would you use withContext instead of async?"</h4>
+    <p>A: When you need a single result from a different context but don't need concurrency. For example, parsing JSON on Default from a Main coroutine: <code>val user = withContext(Default) { parse(json) }</code> — cleaner than <code>async(Default) { parse(json) }.await()</code> and semantically correct.</p>
+    <h3>Senior insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Insight</div>
+      In a banking app with multiple parallel API calls (balance, transactions, pending), use <code>supervisorScope</code> instead of <code>coroutineScope</code> when partial failures are acceptable — e.g., if transactions fail but balance loads, show what you have. With <code>coroutineScope</code>, any single failure cancels everything.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#128203;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Builder summary</h4>
+        <pre><code>launch { }     → Job (fire&forget)
+async { }      → Deferred&lt;T&gt;
+withContext(D) → T (inline switch)
+runBlocking { }→ T (blocks thread)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Parallel pattern</h4>
+        <pre><code>coroutineScope {
+  val a = async { fetchA() }
+  val b = async { fetchB() }
+  Result(a.await(), b.await())
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Dispatcher quick ref</h4>
+        <pre><code>Main    → UI (1 thread)
+IO      → I/O (64+nCPU max)
+Default → CPU (nCPU max)
+IO.limitedParallelism(4)
+        → custom pool view</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Common mistake</h4>
+        <pre><code>// ❌ Sequential — NOT parallel
+val a = async { .. }.await()
+val b = async { .. }.await()
+
+// ✅ Parallel
+val da = async { .. }
+val db = async { .. }
+da.await(); db.await()</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does launch return and when would you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>launch</code> returns a <code>Job</code>. Use it for fire-and-forget operations where you don't need a result — updating UI state from a ViewModel, sending analytics events, triggering a background sync. You can call <code>job.cancel()</code> to stop it early.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the difference between async and withContext?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>async</code> creates a new child coroutine that runs concurrently — it starts immediately and returns a <code>Deferred&lt;T&gt;</code> you later <code>await()</code>. <code>withContext</code> suspends the current coroutine, switches to the given context, does the work sequentially, then returns the result directly — no new coroutine, no Deferred. Use <code>async</code> for parallel work, <code>withContext</code> for dispatcher switching.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is runBlocking forbidden in Android production code?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>runBlocking</code> blocks the calling thread until all coroutines inside complete. If called on the main thread, it freezes the UI — causing ANR if it takes more than ~5 seconds. If called on a Dispatcher.IO thread, it wastes a thread from the pool. It is only appropriate in tests (<code>runTest</code> is better) and in non-Android main() entry points.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you run two API calls in parallel and wait for both results?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use <code>coroutineScope { }</code> with two <code>async</code> blocks: <code>val a = async { api.fetchA() }; val b = async { api.fetchB() }</code> — both start immediately and run in parallel. Then <code>val result = Result(a.await(), b.await())</code>. The <code>coroutineScope</code> wrapper ensures both complete before returning, and if either fails, both are cancelled.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is Dispatchers.Unconfined and when should you use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>Dispatchers.Unconfined</code> runs the coroutine on the current thread until the first suspension point, then resumes on whatever thread the suspending function uses. It has no thread confinement. In production, this is unpredictable — avoid it. In tests, it can be useful as it executes eagerly, similar to <code>UnconfinedTestDispatcher</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What happens if an async block throws and you never call await()?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The exception is stored in the <code>Deferred</code> and <em>only</em> re-thrown when <code>.await()</code> is called. If you never call <code>await()</code>, the exception is silently swallowed in most cases — except when using <code>coroutineScope</code> or when the Deferred is part of a structured scope that completes. This is a dangerous pattern; always ensure every <code>async</code> result is either awaited or explicitly cancelled.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is limitedParallelism() and when would you use it in production?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>Dispatchers.IO.limitedParallelism(n)</code> creates a view of the IO dispatcher that caps concurrent coroutines at <code>n</code>. Use it to match a resource pool size — e.g., if your JDBC connection pool has 4 connections, use <code>limitedParallelism(4)</code> for database coroutines. Without it, 64 IO threads compete for 4 connections, causing timeout cascades under load.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Design the concurrency strategy for a checkout flow that must: (1) validate stock, (2) charge payment, (3) update inventory, (4) send confirmation email — where steps 1+2 can be parallel but 3+4 depend on both completing successfully.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Use structured concurrency: <code>coroutineScope { val stockOk = async { validateStock() }; val charged = async { chargePayment() }; val (s, c) = stockOk.await() to charged.await() }</code>. If either fails, the other is cancelled. Then sequentially: <code>updateInventory(s, c); sendConfirmation(c)</code>. Steps 3 and 4 are sequential because inventory must be updated before confirmation is accurate. Wrap the whole thing in try/catch for rollback logic. Use <code>coroutineScope</code> not <code>supervisorScope</code> here — partial success in checkout is a business error.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Explain how the Kotlin compiler optimises withContext when called back-to-back on the same dispatcher.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">The Kotlin coroutine runtime performs <em>fast-path optimisation</em>: if the current dispatcher is already the target dispatcher, <code>withContext</code> does not create a new coroutine or do any thread switching — it executes inline. This means <code>withContext(Dispatchers.Main)</code> called from a Main dispatcher coroutine has near-zero overhead. The check happens in <code>ContinuationInterceptor.isDispatchNeeded()</code> — if it returns false, the block runs directly.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">A junior developer wrote: async(Dispatchers.IO) { fetchData() }.await() at the top level of a ViewModel function. What are the issues and how would you fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Issues: (1) <code>async { }.await()</code> immediately is functionally identical to <code>withContext</code> but creates unnecessary overhead (new coroutine, Deferred allocation). (2) If this is directly in a <code>suspend fun</code> or <code>launch</code> block without <code>coroutineScope</code>, exceptions from the async may not propagate correctly to the parent. Fix: replace with <code>withContext(Dispatchers.IO) { fetchData() }</code> — semantically identical but correct and efficient. If real parallelism is needed, wrap in <code>coroutineScope</code> and keep multiple <code>async</code> blocks un-awaited until all are launched.</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
+    </div>
+  </div>
+</main>
+</div>
+<script>
+function show(id, num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+  document.getElementById('progressFill').style.width = (num/9*100)+'%';
+  document.querySelector('.main').scrollTop = 0;
+}
+function toggleQuiz(el) {
+  const ans = el.nextElementSibling;
+  const icon = el.querySelector('.toggle-icon');
+  ans.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

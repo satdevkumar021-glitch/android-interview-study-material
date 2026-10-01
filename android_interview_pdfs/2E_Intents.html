@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2E – Intents</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
+  nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 20px 12px;}
+  nav a{display:block;padding:8px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(124,106,247,.07);}
+  main{flex:1;padding:40px 48px;max-width:920px;}
+  .hero{margin-bottom:36px;}
+  .hero h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .hero .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .badge{background:rgba(124,106,247,.18);color:var(--accent);border-radius:20px;padding:2px 12px;font-size:12px;font-weight:600;}
+  .badge.t2{background:rgba(86,207,178,.15);color:var(--accent2);}
+  section{margin-bottom:48px;}
+  section h2{font-size:19px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:18px;}
+  section h3{font-size:15px;font-weight:600;color:var(--warn);margin:18px 0 8px;}
+  section h4{font-size:14px;font-weight:600;color:var(--accent);margin:14px 0 6px;}
+  p{margin-bottom:12px;}
+  ul,ol{margin:8px 0 12px 20px;}
+  li{margin-bottom:5px;}
+  code{background:#252836;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:13px;font-family:'Cascadia Code','Fira Code',monospace;color:#e8d5a3;}
+  pre{background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6;color:#abb2bf;}
+  .kw{color:#c678dd;} .fn{color:#61afef;} .str{color:#98c379;} .cm{color:#5c6370;font-style:italic;} .num{color:#d19a66;} .type{color:#e5c07b;} .ann{color:#e06c75;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{background:var(--surface);color:var(--accent);text-align:left;padding:10px 12px;border:1px solid var(--border);}
+  td{padding:9px 12px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .box{border-radius:8px;padding:14px 18px;margin:12px 0;}
+  .box.info{background:rgba(124,106,247,.09);border-left:4px solid var(--accent);}
+  .box.warn{background:rgba(240,160,75,.09);border-left:4px solid var(--warn);}
+  .box.good{background:rgba(86,207,178,.09);border-left:4px solid var(--good);}
+  .box.danger{background:rgba(240,107,107,.09);border-left:4px solid var(--danger);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .card h4{margin-top:0;color:var(--accent2);}
+  details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+  details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;justify-content:space-between;}
+  details summary::after{content:'▶';font-size:11px;color:var(--muted);}
+  details[open] summary::after{content:'▼';}
+  details .ans{padding:14px 16px;border-top:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .ascii{font-family:monospace;background:#1c1f2e;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;color:#abb2bf;white-space:pre;overflow-x:auto;margin:12px 0;}
+  .q-label{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:8px;}
+  .q-basic{background:rgba(86,207,178,.2);color:var(--good);}
+  .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
+  .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
+  @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <h2>2E · Intents</h2>
+  <a href="#overview">1 · Overview</a>
+  <a href="#how">2 · How It Works</a>
+  <a href="#when">3 · When to Use</a>
+  <a href="#prod">4 · Production Example</a>
+  <a href="#alt">5 · Alternatives</a>
+  <a href="#pitfalls">6 · Pitfalls</a>
+  <a href="#interview">7 · Interview Framework</a>
+  <a href="#revision">8 · Revision Sheet</a>
+  <a href="#quiz">9 · Quiz</a>
+</nav>
+<main>
+<div class="hero">
+  <h1>2E — Intents</h1>
+  <div class="meta">
+    <span class="badge t2">Tier 2</span>
+    <span>Explicit · Implicit · Intent Filters · PendingIntent · Deep Links · App Links</span>
+  </div>
+</div>
+
+<!-- ═══ 1 · OVERVIEW ═══ -->
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p>An <strong>Intent</strong> is a messaging object used to request an action from another component — within your app or from the system/other apps. It is the primary mechanism for inter-component and inter-app communication on Android.</p>
+  <p><strong>What problem it solves:</strong> Android's sandboxed process model means apps cannot call each other's code directly. Intents provide a declarative, system-mediated way to say "I want to do X" without needing to know which app or component will handle it. The OS routes the Intent to the correct recipient based on intent filters declared in the manifest.</p>
+  <div class="box info">
+    <strong>Three uses of Intents:</strong>
+    <ul style="margin-top:8px;">
+      <li>Start an <strong>Activity</strong> (screen navigation)</li>
+      <li>Start or bind to a <strong>Service</strong></li>
+      <li>Deliver a <strong>Broadcast</strong> (system or app-wide event)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 2 · HOW IT WORKS ═══ -->
+<section id="how">
+  <h2>2 · How It Works</h2>
+
+  <h3>Explicit Intent</h3>
+  <p>Specifies the exact component (class) to start. Used for in-app navigation.</p>
+  <pre><code><span class="cm">// Start a specific Activity in the same app</span>
+<span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="kw">this</span>, <span class="type">OrderDetailActivity</span>::<span class="kw">class</span>.java).apply {
+    <span class="fn">putExtra</span>(<span class="str">"orderId"</span>, <span class="str">"ORD-123"</span>)
+    <span class="fn">putExtra</span>(<span class="str">"amount"</span>, <span class="num">99.99</span>)
+}
+<span class="fn">startActivity</span>(intent)
+
+<span class="cm">// Start a Service explicitly</span>
+<span class="kw">val</span> serviceIntent = <span class="type">Intent</span>(<span class="kw">this</span>, <span class="type">SyncService</span>::<span class="kw">class</span>.java)
+<span class="fn">startService</span>(serviceIntent)</code></pre>
+
+  <h3>Implicit Intent</h3>
+  <p>Does not specify a component. Declares an action; the OS resolves which app/component can handle it based on intent filters.</p>
+  <pre><code><span class="cm">// Share text — OS shows chooser of apps that handle ACTION_SEND</span>
+<span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="type">Intent</span>.<span class="type">ACTION_SEND</span>).apply {
+    type = <span class="str">"text/plain"</span>
+    <span class="fn">putExtra</span>(<span class="type">Intent</span>.<span class="type">EXTRA_TEXT</span>, <span class="str">"Check out this product!"</span>)
+}
+<span class="cm">// ✅ Always check if a handler exists before starting</span>
+<span class="kw">if</span> (intent.<span class="fn">resolveActivity</span>(packageManager) != <span class="kw">null</span>) {
+    <span class="fn">startActivity</span>(<span class="type">Intent</span>.<span class="fn">createChooser</span>(intent, <span class="str">"Share via"</span>))
+}
+
+<span class="cm">// Dial a phone number</span>
+<span class="kw">val</span> dialIntent = <span class="type">Intent</span>(<span class="type">Intent</span>.<span class="type">ACTION_DIAL, Uri</span>.<span class="fn">parse</span>(<span class="str">"tel:+1234567890"</span>))
+<span class="fn">startActivity</span>(dialIntent)</code></pre>
+
+  <h3>Intent Filters</h3>
+  <p>Declared in the manifest; tell the system what types of Intents a component can handle (for implicit Intents).</p>
+  <pre><code><span class="kw">&lt;activity</span> android:name=".ShareReceiverActivity" android:exported="true"<span class="kw">&gt;</span>
+    <span class="kw">&lt;intent-filter&gt;</span>
+        <span class="kw">&lt;action</span> android:name="android.intent.action.SEND" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;category</span> android:name="android.intent.category.DEFAULT" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;data</span> android:mimeType="text/plain" <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/intent-filter&gt;</span>
+<span class="kw">&lt;/activity&gt;</span></code></pre>
+
+  <h3>PendingIntent</h3>
+  <p>A <strong>PendingIntent</strong> is a token that grants another app (Notification system, AlarmManager, widget host) the ability to fire your Intent <em>at a future time</em>, with your app's permissions and identity — even if your app is not running.</p>
+  <div class="ascii">Your App          Android System         Notification Manager
+    │                    │                        │
+    ├─ createPendingIntent ──────────────────────►│
+    │  (stores Intent + your identity)            │
+    │                    │                        │
+    │             [User taps notification]        │
+    │                    │◄───────────────────────┤
+    │                    │  fires PendingIntent   │
+    ├◄───────────────────┤                        │
+    │ Activity started with your permissions      │</div>
+  <pre><code><span class="cm">// PendingIntent for notification tap — API 31+ requires FLAG_IMMUTABLE or FLAG_MUTABLE</span>
+<span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="kw">this</span>, <span class="type">OrderDetailActivity</span>::<span class="kw">class</span>.java).apply {
+    <span class="fn">putExtra</span>(<span class="str">"orderId"</span>, orderId)
+    flags = <span class="type">Intent</span>.<span class="type">FLAG_ACTIVITY_SINGLE_TOP</span>
+}
+<span class="kw">val</span> pendingIntent = <span class="type">PendingIntent</span>.<span class="fn">getActivity</span>(
+    context,
+    orderId.<span class="fn">hashCode</span>(),       <span class="cm">// requestCode — uniquely identifies this PendingIntent</span>
+    intent,
+    <span class="type">PendingIntent</span>.<span class="type">FLAG_UPDATE_CURRENT</span> <span class="fn">or</span> <span class="type">PendingIntent</span>.<span class="type">FLAG_IMMUTABLE</span>
+)
+
+<span class="cm">// Use in Notification</span>
+<span class="type">NotificationCompat</span>.<span class="type">Builder</span>(context, <span class="type">CHANNEL_ID</span>)
+    .<span class="fn">setContentIntent</span>(pendingIntent)
+    .<span class="fn">setAutoCancel</span>(<span class="kw">true</span>)
+    .</code></pre>
+
+  <h3>Deep Links and App Links</h3>
+  <table>
+    <tr><th>Type</th><th>Scheme</th><th>Verification?</th><th>Disambiguation?</th></tr>
+    <tr><td>Deep Link</td><td>Custom scheme (myapp://) or HTTP(S)</td><td>No</td><td>System may show chooser if multiple apps handle it</td></tr>
+    <tr><td>App Link (Android App Link)</td><td>HTTPS only</td><td>Yes — via Digital Asset Links JSON at server</td><td>No chooser — opens your app directly</td></tr>
+  </table>
+  <pre><code><span class="cm">&lt;!-- Manifest: handle https://example.com/orders/{id} --&gt;</span>
+<span class="kw">&lt;activity</span> android:name=".OrderDetailActivity" android:exported="true"<span class="kw">&gt;</span>
+    <span class="kw">&lt;intent-filter</span> android:autoVerify="true"<span class="kw">&gt;</span>  <span class="cm">&lt;!-- autoVerify = App Link --&gt;</span>
+        <span class="kw">&lt;action</span> android:name="android.intent.action.VIEW" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;category</span> android:name="android.intent.category.DEFAULT" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;category</span> android:name="android.intent.category.BROWSABLE" <span class="kw">/&gt;</span>
+        <span class="kw">&lt;data</span> android:scheme="https" android:host="example.com" android:pathPrefix="/orders" <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/intent-filter&gt;</span>
+<span class="kw">&lt;/activity&gt;</span>
+
+<span class="cm">// Handle in Activity</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="type">Bundle</span>?) {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="kw">val</span> orderId = intent?.data?.<span class="fn">lastPathSegment</span>  <span class="cm">// "ORD-123"</span>
+    orderId?.let { viewModel.<span class="fn">loadOrder</span>(it) }
+}</code></pre>
+</section>
+
+<!-- ═══ 3 · WHEN TO USE ═══ -->
+<section id="when">
+  <h2>3 · Why and When to Use Each</h2>
+  <table>
+    <tr><th>Type</th><th>Use when…</th><th>Do NOT use when…</th></tr>
+    <tr>
+      <td>Explicit Intent</td>
+      <td>In-app navigation between known components; starting your own Service</td>
+      <td>Cross-app actions where you don't know the target — use implicit</td>
+    </tr>
+    <tr>
+      <td>Implicit Intent</td>
+      <td>System actions (share, dial, map, camera); letting user choose which app handles the action</td>
+      <td>In-app navigation — use explicit (security risk to expose your internals)</td>
+    </tr>
+    <tr>
+      <td>PendingIntent</td>
+      <td>Notifications, AlarmManager, widgets — any deferred Intent fired by another process</td>
+      <td>Immediate in-app navigation — use startActivity() directly</td>
+    </tr>
+    <tr>
+      <td>Deep Link</td>
+      <td>Custom URL scheme for your app; marketing links; sharing app content</td>
+      <td>When you need guaranteed single-app routing — use App Links</td>
+    </tr>
+    <tr>
+      <td>App Link</td>
+      <td>HTTPS links that should always open your app (no chooser); bank account links; purchase confirmations</td>
+      <td>If you can't serve the verification JSON at the domain — use deep link</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 4 · PRODUCTION EXAMPLE ═══ -->
+<section id="prod">
+  <h2>4 · Production Example (Banking App)</h2>
+
+  <h3>FCM Notification with PendingIntent + TaskStackBuilder</h3>
+  <pre><code><span class="cm">// Notification for incoming payment — tap opens TransactionDetailActivity
+// with correct back stack (Home → Transactions → Detail)</span>
+<span class="kw">fun</span> <span class="fn">buildPaymentNotification</span>(context: <span class="type">Context</span>, txId: <span class="type">String</span>): <span class="type">Notification</span> {
+    <span class="cm">// TaskStackBuilder creates synthetic back stack for notification deep link</span>
+    <span class="kw">val</span> pendingIntent = <span class="type">TaskStackBuilder</span>.<span class="fn">create</span>(context).apply {
+        <span class="fn">addNextIntentWithParentStack</span>(
+            <span class="type">Intent</span>(context, <span class="type">TransactionDetailActivity</span>::<span class="kw">class</span>.java).apply {
+                <span class="fn">putExtra</span>(<span class="str">"transactionId"</span>, txId)
+            }
+        )
+    }.<span class="fn">getPendingIntent</span>(
+        txId.<span class="fn">hashCode</span>(),
+        <span class="type">PendingIntent</span>.<span class="type">FLAG_UPDATE_CURRENT</span> <span class="fn">or</span> <span class="type">PendingIntent</span>.<span class="type">FLAG_IMMUTABLE</span>
+    )
+
+    <span class="kw">return</span> <span class="type">NotificationCompat</span>.<span class="type">Builder</span>(context, <span class="type">CHANNEL_PAYMENTS</span>)
+        .<span class="fn">setSmallIcon</span>(<span class="type">R</span>.drawable.ic_payment)
+        .<span class="fn">setContentTitle</span>(<span class="str">"Payment received"</span>)
+        .<span class="fn">setContentText</span>(<span class="str">"Transaction #$txId"</span>)
+        .<span class="fn">setContentIntent</span>(pendingIntent)
+        .<span class="fn">setAutoCancel</span>(<span class="kw">true</span>)
+        .<span class="fn">build</span>()
+}</code></pre>
+
+  <h3>App Links — HTTPS Deep Link Handling</h3>
+  <pre><code><span class="cm">// Manifest: android:autoVerify="true" + HTTPS scheme + your domain
+// Server: /.well-known/assetlinks.json must return your app's SHA256 fingerprint</span>
+
+<span class="cm">// In Activity (or Navigation Component handles this automatically)</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="type">Bundle</span>?) {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="kw">val</span> action = intent.action
+    <span class="kw">val</span> data = intent.data
+
+    <span class="kw">if</span> (<span class="type">Intent</span>.<span class="type">ACTION_VIEW</span> == action &amp;&amp; data != <span class="kw">null</span>) {
+        <span class="kw">when</span> {
+            data.path?.startsWith(<span class="str">"/account"</span>) == <span class="kw">true</span> -> <span class="fn">navigateToAccount</span>()
+            data.path?.startsWith(<span class="str">"/transactions"</span>) == <span class="kw">true</span> -> {
+                <span class="kw">val</span> txId = data.<span class="fn">lastPathSegment</span>
+                <span class="fn">navigateToTransaction</span>(txId)
+            }
+        }
+    }
+}
+
+<span class="cm">// With Navigation Compose — declare deep links in NavGraph instead</span>
+<span class="fn">composable</span>(
+    route = <span class="str">"transaction/{id}"</span>,
+    deepLinks = <span class="fn">listOf</span>(<span class="fn">navDeepLink</span> {
+        uriPattern = <span class="str">"https://mybank.com/transactions/{id}"</span>
+    })
+) { backStackEntry ->
+    <span class="kw">val</span> id = backStackEntry.arguments?.<span class="fn">getString</span>(<span class="str">"id"</span>)
+    <span class="type">TransactionDetailScreen</span>(id)
+}</code></pre>
+
+  <h3>Implicit Intent — Share Bank Statement</h3>
+  <pre><code><span class="kw">fun</span> <span class="fn">shareStatement</span>(fileUri: <span class="type">Uri</span>) {
+    <span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="type">Intent</span>.<span class="type">ACTION_SEND</span>).apply {
+        type = <span class="str">"application/pdf"</span>
+        <span class="fn">putExtra</span>(<span class="type">Intent</span>.<span class="type">EXTRA_STREAM</span>, fileUri)
+        <span class="cm">// Grant temporary read permission to the receiving app</span>
+        addFlags(<span class="type">Intent</span>.<span class="type">FLAG_GRANT_READ_URI_PERMISSION</span>)
+    }
+    <span class="cm">// ✅ Use createChooser — always show picker even if one app handles it</span>
+    <span class="fn">startActivity</span>(<span class="type">Intent</span>.<span class="fn">createChooser</span>(intent, <span class="str">"Share statement"</span>))
+}</code></pre>
+</section>
+
+<!-- ═══ 5 · ALTERNATIVES ═══ -->
+<section id="alt">
+  <h2>5 · Alternatives and Trade-offs</h2>
+  <table>
+    <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+    <tr>
+      <td>Explicit Intent</td>
+      <td>Direct, fast, type-safe</td>
+      <td>Couples caller to exact class; breaks modularization if used across modules</td>
+      <td>In-app navigation where you own both sides</td>
+    </tr>
+    <tr>
+      <td>Implicit Intent</td>
+      <td>Decoupled; works across apps</td>
+      <td>No guarantee of handler; security risks if unvalidated; chooser UX</td>
+      <td>Cross-app actions: share, dial, open URL</td>
+    </tr>
+    <tr>
+      <td>Navigation Component</td>
+      <td>Type-safe Safe Args; centralized graph; deep link handling; no class coupling</td>
+      <td>Overhead for very simple apps; requires migration</td>
+      <td>In-app navigation in modern single-activity apps — preferred</td>
+    </tr>
+    <tr>
+      <td>Deep Link (custom scheme)</td>
+      <td>Simple; no server setup</td>
+      <td>Not unique — any app can declare same scheme; disambiguation dialog</td>
+      <td>Internal app links; dev/testing; when you don't control the domain</td>
+    </tr>
+    <tr>
+      <td>App Link (HTTPS + verification)</td>
+      <td>No disambiguation; OS opens your app directly; secure</td>
+      <td>Requires domain + server-side assetlinks.json; verification process</td>
+      <td>Production marketing links; push notification deep links; open from email</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══ 6 · PITFALLS ═══ -->
+<section id="pitfalls">
+  <h2>6 · Pitfalls and Best Practices</h2>
+
+  <h3>Implicit Intent with No Handler — Crash</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>❌ Bad — ActivityNotFoundException</h4>
+      <pre><code><span class="cm">// On devices without an email app — crashes</span>
+<span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="type">Intent</span>.<span class="type">ACTION_SENDTO</span>)
+intent.data = <span class="type">Uri</span>.<span class="fn">parse</span>(<span class="str">"mailto:support@bank.com"</span>)
+<span class="fn">startActivity</span>(intent)  <span class="cm">// CRASH if no handler</span></code></pre>
+    </div>
+    <div class="card">
+      <h4>✅ Good — check first</h4>
+      <pre><code><span class="kw">val</span> intent = <span class="type">Intent</span>(<span class="type">Intent</span>.<span class="type">ACTION_SENDTO</span>)
+intent.data = <span class="type">Uri</span>.<span class="fn">parse</span>(<span class="str">"mailto:support@bank.com"</span>)
+<span class="kw">if</span> (intent.<span class="fn">resolveActivity</span>(packageManager) != <span class="kw">null</span>) {
+    <span class="fn">startActivity</span>(intent)
+} <span class="kw">else</span> {
+    <span class="fn">showToast</span>(<span class="str">"No email app found"</span>)
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>PendingIntent — Missing FLAG_IMMUTABLE (API 31+)</h3>
+  <div class="box danger">
+    API 31+ requires PendingIntent to explicitly specify <code>FLAG_IMMUTABLE</code> or <code>FLAG_MUTABLE</code>. Omitting this throws <code>IllegalArgumentException</code>. Almost always use <code>FLAG_IMMUTABLE</code> unless the PendingIntent needs to be modified by the receiving app (e.g. Android Auto inline replies).
+  </div>
+
+  <h3>Other Critical Pitfalls</h3>
+  <ul>
+    <li><strong>Passing large objects via Intent extras</strong>: Intents go through the Binder IPC buffer (1 MB limit). Passing large Bitmaps or lists causes <code>TransactionTooLargeException</code>. Pass IDs and load data in the target component.</li>
+    <li><strong>Receiving implicit Intents in unexported components</strong>: On API 31+, any component with an intent-filter must declare <code>android:exported="true|false"</code> explicitly or the app won't install.</li>
+    <li><strong>Not using FLAG_GRANT_READ_URI_PERMISSION</strong>: When sharing files via FileProvider, the receiving app needs temporary permission to read the URI. Missing this causes permission denied on the target app.</li>
+    <li><strong>Deep link not handled after process death</strong>: If the Activity is killed and relaunched via a deep link, intent.data must be parsed in onCreate — not just in onNewIntent. Both paths must be handled.</li>
+    <li><strong>PendingIntent requestCode collision</strong>: Using the same requestCode for different PendingIntents causes FLAG_UPDATE_CURRENT to overwrite the previous one's extras. Use unique requestCodes (e.g., notification ID or entity ID hashCode).</li>
+  </ul>
+
+  <div class="box good">
+    <strong>Security best practice for implicit Intents received:</strong> Validate all data received via Intent. An implicit Intent can be sent by any app. Never trust extras without validation — especially in components marked <code>android:exported="true"</code>.
+  </div>
+</section>
+
+<!-- ═══ 7 · INTERVIEW ═══ -->
+<section id="interview">
+  <h2>7 · Interview Answer Framework</h2>
+
+  <h3>30-Second Answer</h3>
+  <div class="box info">
+    "Intents are the messaging system for starting Android components. Explicit Intents specify the exact component — used for in-app navigation. Implicit Intents declare an action and let the OS find an app to handle it — used for share, dial, open URL. PendingIntent wraps an Intent with your app's identity and permissions so another process can fire it later — used for notifications, AlarmManager, widgets. Deep links and App Links let external URLs open specific screens, with App Links requiring HTTPS domain verification to avoid the disambiguation chooser."
+  </div>
+
+  <h3>2-Minute Structured Answer</h3>
+  <div class="box good">
+    <strong>Explicit vs Implicit:</strong> Explicit Intent targets a specific class — used for in-app navigation. Implicit Intent declares an action (ACTION_SEND, ACTION_VIEW) — the OS resolves it via intent filters in the manifest. Always check resolveActivity() before firing an implicit Intent to avoid ActivityNotFoundException.<br/><br/>
+    <strong>Intent filters:</strong> Declared in manifest; specifies what action + category + data MIME type a component can handle. For security, components that should not be accessed externally must be <code>android:exported="false"</code>.<br/><br/>
+    <strong>PendingIntent:</strong> A deferred Intent that another process (notification manager, alarm manager) can fire with your app's identity. API 31+ requires FLAG_IMMUTABLE or FLAG_MUTABLE explicitly. Use TaskStackBuilder to create a proper back stack when the PendingIntent opens a deep-linked screen.<br/><br/>
+    <strong>Deep links vs App Links:</strong> Deep links use custom schemes or HTTPS but may show a chooser if multiple apps match. App Links use HTTPS with domain verification via assetlinks.json — no chooser, opens your app directly. For production push notification flows and marketing links, I always implement App Links.
+  </div>
+
+  <h3>Must-Mention Points</h3>
+  <ol>
+    <li>Explicit (known component) vs Implicit (declared action, OS resolves).</li>
+    <li>Intent filters in manifest — how implicit Intent routing works.</li>
+    <li>PendingIntent — deferred Intent, fired by another process, carries your identity.</li>
+    <li>FLAG_IMMUTABLE required on API 31+ for PendingIntent.</li>
+    <li>TransactionTooLargeException — never pass large data via extras; pass IDs.</li>
+    <li>Deep link vs App Link — HTTPS verification, no chooser with App Links.</li>
+    <li>TaskStackBuilder for synthetic back stack on notification deep links.</li>
+    <li>Always validate data received via exported components — any app can send Intents.</li>
+  </ol>
+
+  <h3>Do Not Go Deeper Unless Asked</h3>
+  <ul>
+    <li>Broadcast Intents and intent filters for receivers (covered in 16A)</li>
+    <li>FileProvider details for sharing files</li>
+    <li>Navigation Component deep link XML declaration details (18A)</li>
+    <li>AIDL for IPC (3C)</li>
+  </ul>
+
+  <h3>Likely Follow-up Questions</h3>
+  <table>
+    <tr><th>Question</th><th>Short Answer</th></tr>
+    <tr><td>What is a PendingIntent and why is it needed?</td><td>A token that grants another process (notification manager, alarm) the ability to execute a specific Intent with your app's identity and permissions, even if your app is not running. Without PendingIntent, other processes cannot start Activities or send broadcasts on your behalf.</td></tr>
+    <tr><td>What is the difference between a deep link and an App Link?</td><td>Deep link: any scheme (custom or HTTPS), may show disambiguation chooser if multiple apps match. App Link: HTTPS only, requires domain verification via Digital Asset Links — opens your app directly without a chooser.</td></tr>
+    <tr><td>Why can't you put a Bitmap in an Intent extra?</td><td>Intent extras go through Binder IPC, which has a ~1 MB transaction buffer. A Bitmap can easily exceed that, causing TransactionTooLargeException. Pass a file URI or resource ID instead.</td></tr>
+    <tr><td>What happens if resolveActivity() returns null?</td><td>No app on the device can handle this implicit Intent. startActivity() would throw ActivityNotFoundException. Must handle gracefully — show error or fallback (e.g., open a WebView for the URL instead).</td></tr>
+  </table>
+
+  <h3>Senior-Level Insight</h3>
+  <div class="box warn">
+    "In modern single-activity Compose apps, explicit Intents for in-app navigation are largely replaced by Navigation Component. But Intents are still critical for three scenarios: (1) cross-app communication via implicit Intents, (2) PendingIntents for FCM notifications — where TaskStackBuilder is essential to avoid broken back navigation, and (3) App Links for seamless HTTPS → app routing. The security angle is often overlooked: exported components with intent-filters are an attack surface — any app can fire an Intent at them. I always audit android:exported='true' components, validate all received data, and use FLAG_GRANT_READ_URI_PERMISSION instead of making file URIs globally readable."
+  </div>
+</section>
+
+<!-- ═══ 8 · REVISION SHEET ═══ -->
+<section id="revision">
+  <h2>8 · Quick Revision Sheet</h2>
+  <table>
+    <tr><th>Intent Type</th><th>Target</th><th>Use Case</th><th>Risk</th></tr>
+    <tr><td>Explicit</td><td>Exact class</td><td>In-app navigation, own Services</td><td>Couples to class name; breaks across modules</td></tr>
+    <tr><td>Implicit</td><td>Action/category/data</td><td>Share, dial, open URL</td><td>No handler crash; security if not validated</td></tr>
+    <tr><td>PendingIntent</td><td>Wraps Intent</td><td>Notifications, AlarmManager, widgets</td><td>requestCode collision; FLAG_MUTABLE misuse</td></tr>
+  </table>
+
+  <h3>PendingIntent Flags (API 31+ required)</h3>
+  <table>
+    <tr><th>Flag</th><th>Meaning</th></tr>
+    <tr><td>FLAG_IMMUTABLE</td><td>Receiving app cannot modify extras — use by default</td></tr>
+    <tr><td>FLAG_MUTABLE</td><td>Receiving app can modify (e.g. inline reply action) — use only when needed</td></tr>
+    <tr><td>FLAG_UPDATE_CURRENT</td><td>Update existing PendingIntent's extras with new Intent's extras</td></tr>
+    <tr><td>FLAG_CANCEL_CURRENT</td><td>Cancel existing PendingIntent and create new one</td></tr>
+    <tr><td>FLAG_ONE_SHOT</td><td>Can only be used once; after firing, becomes invalid</td></tr>
+  </table>
+
+  <h3>Deep Link vs App Link</h3>
+  <table>
+    <tr><th></th><th>Deep Link</th><th>App Link</th></tr>
+    <tr><td>Scheme</td><td>Any (myapp://, https://)</td><td>HTTPS only</td></tr>
+    <tr><td>Verification</td><td>None</td><td>assetlinks.json on domain</td></tr>
+    <tr><td>Chooser</td><td>May appear</td><td>Never (direct)</td></tr>
+    <tr><td>autoVerify</td><td>Not set</td><td>android:autoVerify="true"</td></tr>
+  </table>
+
+  <h3>Golden Rules</h3>
+  <ul>
+    <li>Always check <code>resolveActivity()</code> before firing implicit Intents</li>
+    <li>PendingIntent API 31+: always add <code>FLAG_IMMUTABLE</code> or <code>FLAG_MUTABLE</code></li>
+    <li>Use <code>TaskStackBuilder</code> for notification PendingIntents to ensure correct back stack</li>
+    <li>Never pass large objects (Bitmap, List) as Intent extras — pass IDs</li>
+    <li>Validate all data in exported components with intent-filters</li>
+    <li>Use <code>FLAG_GRANT_READ_URI_PERMISSION</code> when sharing files via FileProvider</li>
+  </ul>
+</section>
+
+<!-- ═══ 9 · QUIZ ═══ -->
+<section id="quiz">
+  <h2>9 · Interview Questions (Self-Check)</h2>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is the difference between an explicit and an implicit Intent?</summary>
+    <div class="ans">Explicit Intent specifies the exact component (Activity/Service class name) to start. Used for in-app navigation. Implicit Intent specifies an action (e.g. ACTION_SEND) and optional data type/category. The OS resolves which app/component can handle it based on manifest intent-filters. The system shows a chooser if multiple apps match.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What is a PendingIntent and when is it used?</summary>
+    <div class="ans">A PendingIntent is a token wrapping an Intent that grants another process the ability to execute it with your app's permissions, even when your app is not running. Used for: notification taps (NotificationCompat), scheduled alarms (AlarmManager), widget interactions, and deferred system actions. API 31+ requires FLAG_IMMUTABLE or FLAG_MUTABLE explicitly.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-basic">Basic</span> What happens if you try to start an implicit Intent with no handler?</summary>
+    <div class="ans">ActivityNotFoundException is thrown at runtime, crashing the app. Fix: always call intent.resolveActivity(packageManager) first and handle the null case gracefully. Note: On Android 11+ (API 30), resolveActivity() requires a &lt;queries&gt; element in the manifest for non-system apps to be visible.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is the difference between a deep link and an App Link?</summary>
+    <div class="ans">Deep link: any URI scheme (custom myapp:// or https://). No domain verification. The OS may show a disambiguation chooser if multiple apps match. Simple to implement.<br/>App Link: HTTPS URI only. Requires digital asset links verification — a JSON file at https://domain/.well-known/assetlinks.json that contains your app's SHA256 signing certificate. On verified devices, the OS opens your app directly with no chooser. Required: android:autoVerify="true" in the intent-filter.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> Why do you use TaskStackBuilder for notification PendingIntents?</summary>
+    <div class="ans">When a user taps a notification that opens a deep screen (e.g. TransactionDetailActivity), the app may not have a back stack. Without TaskStackBuilder, pressing Back would exit the app instead of going to the expected parent screen. TaskStackBuilder.create(context).addNextIntentWithParentStack(targetIntent) constructs a synthetic back stack based on the Activity's parentActivityName in the manifest. This creates the full stack [HomeActivity → TransactionsActivity → TransactionDetailActivity] even if the app was cold-started from the notification.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What security risk exists with exported Activities that have intent-filters?</summary>
+    <div class="ans">Any app on the device can send an Intent to any exported component. If your exported Activity reads Intent extras and uses them (SQL queries, file paths, URLs), a malicious app can send crafted extras to cause SQL injection, path traversal, or open unintended URLs (deep link hijacking). Fix: always validate and sanitize data received from Intents. Use android:permission to restrict access. Keep non-public components exported="false". Audit all intent-filter declarations.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-mid">Intermediate</span> What is FLAG_GRANT_READ_URI_PERMISSION and when is it needed?</summary>
+    <div class="ans">When you share a file via FileProvider (content:// URI), the receiving app doesn't normally have permission to read from your app's content provider. FLAG_GRANT_READ_URI_PERMISSION grants the target app temporary read access to that specific URI. Without it, the receiving app gets "Permission Denied". Used in ACTION_SEND with EXTRA_STREAM for file sharing, and when opening files in third-party viewers.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Scenario] Your FCM notification deep link opens the correct screen but pressing Back takes the user to an empty app/Home screen instead of the expected parent screens. How do you fix it?</summary>
+    <div class="ans">Use TaskStackBuilder to construct a proper back stack for the notification PendingIntent. Declare parentActivityName in the manifest for each Activity's logical parent.<br/><pre><code>// Manifest
+&lt;activity android:name=".TransactionDetailActivity"
+          android:parentActivityName=".TransactionsListActivity" /&gt;
+
+// PendingIntent creation
+val pendingIntent = TaskStackBuilder.create(context).apply {
+    addNextIntentWithParentStack(
+        Intent(context, TransactionDetailActivity::class.java)
+            .putExtra("txId", txId)
+    )
+}.getPendingIntent(
+    txId.hashCode(),
+    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+)</code></pre>Now pressing Back from TransactionDetailActivity goes to TransactionsListActivity (which goes to HomeActivity), matching the expected navigation flow.</div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Coding] Implement file sharing via FileProvider in a banking app (share PDF statement).</summary>
+    <div class="ans"><pre><code>// 1. Provider declared in manifest
+&lt;provider
+    android:name="androidx.core.content.FileProvider"
+    android:authorities="com.mybank.app.fileprovider"
+    android:exported="false"
+    android:grantUriPermissions="true"&gt;
+    &lt;meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" /&gt;
+&lt;/provider&gt;
+
+// 2. res/xml/file_paths.xml
+// &lt;files-path name="statements" path="statements/" /&gt;
+
+// 3. Sharing code
+fun shareStatement(statementFile: File) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "com.mybank.app.fileprovider",
+        statementFile
+    )
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)  // ✅ critical
+    }
+    context.startActivity(Intent.createChooser(intent, "Share statement"))
+}</code></pre></div>
+  </details>
+
+  <details>
+    <summary><span class="q-label q-senior">Senior/Scenario</span> [Debug] Your app crashes with TransactionTooLargeException when navigating to a product detail screen. What is the root cause and fix?</summary>
+    <div class="ans">Root cause: An oversized object (likely a Bitmap, large List, or Parcelable with many fields) is being passed via Intent extras. Intent extras are transmitted through the Binder IPC buffer which has a ~1 MB limit across the entire transaction queue.<br/><br/>Fix: Never pass large objects via Intent extras. Pass only an ID or key and load the data in the destination:<br/><pre><code>// ❌ Bad
+intent.putExtra("product", product)  // large Parcelable
+
+// ✅ Good — pass only the ID
+intent.putExtra("productId", product.id)
+// Load full product in destination ViewModel using the ID</code></pre>For shared ViewModel patterns (single-activity), the data is already in memory — no need to pass it via Intent at all.</div>
+  </details>
+
+  <hr style="border-color:var(--border);margin:32px 0;"/>
+  <h3 style="color:var(--warn);">Answer Key Summary</h3>
+  <ul>
+    <li>Can you explain explicit vs implicit Intent in one clear sentence each?</li>
+    <li>Can you explain PendingIntent and FLAG_IMMUTABLE requirement?</li>
+    <li>Can you implement TaskStackBuilder for notification deep links?</li>
+    <li>Do you know when to use App Links vs deep links?</li>
+    <li>Can you diagnose and fix TransactionTooLargeException?</li>
+  </ul>
+</section>
+</main>
+<script>
+  const links=document.querySelectorAll('nav a');
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+  },{threshold:0.3});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

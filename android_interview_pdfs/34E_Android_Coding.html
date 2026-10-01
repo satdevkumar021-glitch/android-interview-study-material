@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>34E — Android Coding | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.3);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-coding{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(62,207,142,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">34E · Android Coding</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Parallel API Calls</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Sequential API Calls</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Flow Transformations</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> LRU Cache</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Token Refresh Interceptor</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#128187; Android Coding</div>
+    <h1><span>34E</span> — Android Coding (Kotlin)</h1>
+    <p class="hero-desc">Parallel &amp; sequential coroutine APIs, Flow search debounce, LRU cache implementation, and the complete Token Refresh Interceptor with Mutex — production-ready Android code challenges.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 34E</span>
+      <span class="badge badge-coding">Android Coding</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Android-specific Coding Challenges</h3>
+    <p>These are the coding problems that appear at senior Android interviews — not LeetCode, but real patterns from production Android development. You must be able to write these from memory.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Challenge</th><th>Key concepts</th><th>Senior signal</th></tr>
+      <tr><td>Parallel API calls</td><td>async/await, coroutineScope, failure handling</td><td>Independent failure per request</td></tr>
+      <tr><td>Sequential API calls</td><td>withContext(IO), chained calls</td><td>Error propagation chain</td></tr>
+      <tr><td>Flow search debounce</td><td>debounce, flatMapLatest, catch, map</td><td>Cancel inflight on new input</td></tr>
+      <tr><td>LRU Cache</td><td>LinkedHashMap removeEldestEntry</td><td>Thread safety, eviction policy</td></tr>
+      <tr><td>Token refresh interceptor</td><td>Mutex, OkHttp Authenticator, double-check</td><td>Concurrent refresh prevention</td></tr>
+    </table></div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Parallel APIs →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9889;</div>2. Parallel API Calls</div>
+    <h3>Fetch user + orders simultaneously</h3>
+    <pre><code><span class="kw">data class</span> <span class="cl">User</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> name: <span class="cl">String</span>)
+<span class="kw">data class</span> <span class="cl">Order</span>(<span class="kw">val</span> orderId: <span class="cl">String</span>, <span class="kw">val</span> total: <span class="cl">Double</span>)
+<span class="kw">data class</span> <span class="cl">ProfilePage</span>(<span class="kw">val</span> user: <span class="cl">User</span>?, <span class="kw">val</span> orders: <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt;)
+
+<span class="cm">// ✅ Parallel: both requests start simultaneously</span>
+<span class="kw">suspend fun</span> <span class="fn">loadProfilePage</span>(
+    userId: <span class="cl">String</span>,
+    api: <span class="cl">ProfileApi</span>
+): <span class="cl">ProfilePage</span> = <span class="fn">coroutineScope</span> {
+    <span class="cm">// Launch both concurrently; runCatching per-request for independent failure</span>
+    <span class="kw">val</span> userDeferred = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.<span class="cl">IO</span>) {
+        <span class="fn">runCatching</span> { api.<span class="fn">getUser</span>(userId) }
+    }
+    <span class="kw">val</span> ordersDeferred = <span class="fn">async</span>(<span class="cl">Dispatchers</span>.<span class="cl">IO</span>) {
+        <span class="fn">runCatching</span> { api.<span class="fn">getOrders</span>(userId) }
+    }
+
+    <span class="kw">val</span> user   = userDeferred.<span class="fn">await</span>().<span class="fn">getOrNull</span>()
+    <span class="kw">val</span> orders = ordersDeferred.<span class="fn">await</span>().<span class="fn">getOrDefault</span>(<span class="fn">emptyList</span>())
+
+    <span class="cl">ProfilePage</span>(user, orders)
+}
+
+<span class="cm">// In ViewModel:</span>
+<span class="kw">class</span> <span class="cl">ProfileViewModel</span> <span class="kw">@Inject constructor</span>(<span class="kw">private val</span> repo: <span class="cl">ProfileRepository</span>) : <span class="cl">ViewModel</span>() {
+    <span class="kw">private val</span> _uiState = <span class="fn">MutableStateFlow</span>&lt;<span class="cl">ProfileUiState</span>&gt;(<span class="cl">ProfileUiState</span>.<span class="cl">Loading</span>)
+    <span class="kw">val</span> uiState = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">loadProfile</span>(userId: <span class="cl">String</span>) {
+        <span class="fn">viewModelScope</span>.<span class="fn">launch</span> {
+            _uiState.<span class="fn">value</span> = <span class="cl">ProfileUiState</span>.<span class="cl">Loading</span>
+            _uiState.<span class="fn">value</span> = <span class="fn">runCatching</span> { repo.<span class="fn">loadProfile</span>(userId) }
+                .<span class="fn">fold</span>(
+                    onSuccess = { <span class="cl">ProfileUiState</span>.<span class="cl">Success</span>(it) },
+                    onFailure = { <span class="cl">ProfileUiState</span>.<span class="cl">Error</span>(it.message ?: <span class="str">"Unknown error"</span>) }
+                )
+        }
+    }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Sequential APIs →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128257;</div>3. Sequential API Calls</div>
+    <h3>Fetch product, then fetch recommendations by category</h3>
+    <pre><code><span class="kw">data class</span> <span class="cl">Product</span>(<span class="kw">val</span> id: <span class="cl">String</span>, <span class="kw">val</span> name: <span class="cl">String</span>, <span class="kw">val</span> category: <span class="cl">String</span>)
+<span class="kw">data class</span> <span class="cl">Recommendation</span>(<span class="kw">val</span> productId: <span class="cl">String</span>)
+<span class="kw">data class</span> <span class="cl">ProductDetail</span>(<span class="kw">val</span> product: <span class="cl">Product</span>, <span class="kw">val</span> recs: <span class="cl">List</span>&lt;<span class="cl">Recommendation</span>&gt;)
+
+<span class="cm">// Sequential: step 2 depends on step 1 result</span>
+<span class="kw">suspend fun</span> <span class="fn">loadProductDetail</span>(
+    productId: <span class="cl">String</span>,
+    api: <span class="cl">ProductApi</span>
+): <span class="cl">ProductDetail</span> = <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.<span class="cl">IO</span>) {
+    <span class="cm">// Step 1: must complete before step 2</span>
+    <span class="kw">val</span> product = api.<span class="fn">getProduct</span>(productId)   <span class="cm">// throws on failure</span>
+
+    <span class="cm">// Step 2: uses product.category from step 1</span>
+    <span class="kw">val</span> recs = <span class="fn">runCatching</span> {
+        api.<span class="fn">getRecommendations</span>(product.category)
+    }.<span class="fn">getOrDefault</span>(<span class="fn">emptyList</span>())   <span class="cm">// optional — show product even if recs fail</span>
+
+    <span class="cl">ProductDetail</span>(product, recs)
+}
+
+<span class="cm">// Multi-step with explicit error handling</span>
+<span class="kw">suspend fun</span> <span class="fn">checkoutFlow</span>(cartId: <span class="cl">String</span>, api: <span class="cl">CheckoutApi</span>): <span class="cl">OrderConfirmation</span> {
+    <span class="kw">return</span> <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.<span class="cl">IO</span>) {
+        <span class="kw">val</span> cart        = api.<span class="fn">validateCart</span>(cartId)        <span class="cm">// throws → propagates</span>
+        <span class="kw">val</span> pricing     = api.<span class="fn">calculatePricing</span>(cart)      <span class="cm">// uses cart</span>
+        <span class="kw">val</span> paymentAuth = api.<span class="fn">authorizePayment</span>(pricing)   <span class="cm">// uses pricing</span>
+        api.<span class="fn">placeOrder</span>(cart, paymentAuth)                  <span class="cm">// final step</span>
+    }
+}
+<span class="cm">// Any step throwing cancels the whole coroutine — exception propagates to caller</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Flow Search →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128257;</div>4. Flow Transformations: Search Debounce</div>
+    <p>Classic pattern: user types in a search field → debounce 300ms → API call → map to UI state → handle errors → display results.</p>
+    <pre><code><span class="cm">// Complete search debounce implementation</span>
+<span class="kw">class</span> <span class="cl">SearchViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repository: <span class="cl">SearchRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="cm">// StateFlow for search query input</span>
+    <span class="kw">private val</span> _searchQuery = <span class="fn">MutableStateFlow</span>(<span class="str">""</span>)
+
+    <span class="cm">// Results flow: debounced, transformed, error-handled</span>
+    <span class="kw">val</span> searchResults: <span class="cl">StateFlow</span>&lt;<span class="cl">SearchUiState</span>&gt; = _searchQuery
+        .<span class="fn">debounce</span>(<span class="nu">300L</span>)           <span class="cm">// wait 300ms of inactivity before emitting</span>
+        .<span class="fn">distinctUntilChanged</span>()    <span class="cm">// skip if query didn't change</span>
+        .<span class="fn">filter</span> { it.<span class="fn">length</span> >= <span class="nu">2</span> } <span class="cm">// min 2 chars to avoid trivial searches</span>
+        .<span class="fn">flatMapLatest</span> { query ->   <span class="cm">// cancel previous search if new query arrives</span>
+            <span class="fn">flow</span> {
+                <span class="fn">emit</span>(<span class="cl">SearchUiState</span>.<span class="cl">Loading</span>)
+                <span class="kw">val</span> results = repository.<span class="fn">search</span>(query)
+                <span class="fn">emit</span>(<span class="cl">SearchUiState</span>.<span class="cl">Success</span>(results))
+            }.<span class="fn">catch</span> { e ->
+                <span class="fn">emit</span>(<span class="cl">SearchUiState</span>.<span class="cl">Error</span>(e.message ?: <span class="str">"Search failed"</span>))
+            }
+        }
+        .<span class="fn">stateIn</span>(
+            scope = viewModelScope,
+            started = <span class="cl">SharingStarted</span>.<span class="cl">WhileSubscribed</span>(<span class="nu">5000</span>),
+            initialValue = <span class="cl">SearchUiState</span>.<span class="cl">Idle</span>
+        )
+
+    <span class="kw">fun</span> <span class="fn">onSearchQueryChanged</span>(query: <span class="cl">String</span>) {
+        _searchQuery.<span class="fn">value</span> = query
+    }
+}
+
+<span class="cm">// UI State</span>
+<span class="kw">sealed class</span> <span class="cl">SearchUiState</span> {
+    <span class="kw">object</span> <span class="cl">Idle</span> : <span class="cl">SearchUiState</span>()
+    <span class="kw">object</span> <span class="cl">Loading</span> : <span class="cl">SearchUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> results: <span class="cl">List</span>&lt;<span class="cl">SearchResult</span>&gt;) : <span class="cl">SearchUiState</span>()
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">SearchUiState</span>()
+}
+
+<span class="cm">// Compose UI:</span>
+<span class="cm">// TextField(value = query, onValueChange = { viewModel.onSearchQueryChanged(it) })</span>
+<span class="cm">// when (uiState) { is Loading → CircularProgressIndicator(); is Success → ... }</span></code></pre>
+    <div class="callout callout-blue">
+      <div class="callout-label">flatMapLatest vs flatMapMerge</div>
+      flatMapLatest: cancels the previous inner Flow when a new value arrives — perfect for search (cancel inflight API call on new keystroke). flatMapMerge: runs all inner Flows concurrently — use for independent operations where you want all results. flatMapConcat: runs sequentially.
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: LRU Cache →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128193;</div>5. LRU Cache Implementation</div>
+    <p>Used in image caching explanation — implement a fixed-size cache that evicts the least recently used entry when full.</p>
+    <pre><code><span class="cm">// LRU Cache using LinkedHashMap</span>
+<span class="cm">// LinkedHashMap maintains insertion order by default</span>
+<span class="cm">// accessOrder=true makes it maintain ACCESS order (most recent last)</span>
+<span class="kw">class</span> <span class="cl">LruCache</span>&lt;K, V&gt;(<span class="kw">private val</span> maxSize: <span class="cl">Int</span>) {
+
+    <span class="kw">private val</span> cache = <span class="kw">object</span> : <span class="cl">LinkedHashMap</span>&lt;K, V&gt;(
+        <span class="cm">// initialCapacity, loadFactor, accessOrder=true (orders by access, not insertion)</span>
+        maxSize, <span class="nu">0.75f</span>, <span class="cm">/* accessOrder = */</span> <span class="kw">true</span>
+    ) {
+        <span class="kw">override fun</span> <span class="fn">removeEldestEntry</span>(eldest: <span class="cl">Map</span>.<span class="cl">Entry</span>&lt;K, V&gt;): <span class="cl">Boolean</span> {
+            <span class="kw">return</span> size > maxSize   <span class="cm">// evict oldest when over capacity</span>
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">get</span>(key: K): V? = cache[key]   <span class="cm">// also updates access order</span>
+
+    <span class="kw">fun</span> <span class="fn">put</span>(key: K, value: V) { cache[key] = value }
+
+    <span class="kw">fun</span> <span class="fn">remove</span>(key: K) = cache.<span class="fn">remove</span>(key)
+
+    <span class="kw">val</span> size <span class="kw">get</span>() = cache.size
+
+    <span class="kw">override fun</span> <span class="fn">toString</span>() = cache.<span class="fn">toString</span>()
+}
+
+<span class="cm">// Test</span>
+<span class="kw">val</span> lru = <span class="cl">LruCache</span>&lt;<span class="cl">Int</span>, <span class="cl">String</span>&gt;(<span class="nu">3</span>)
+lru.<span class="fn">put</span>(<span class="nu">1</span>, <span class="str">"one"</span>)
+lru.<span class="fn">put</span>(<span class="nu">2</span>, <span class="str">"two"</span>)
+lru.<span class="fn">put</span>(<span class="nu">3</span>, <span class="str">"three"</span>)
+lru.<span class="fn">get</span>(<span class="nu">1</span>)       <span class="cm">// access key 1 — moves to "most recently used"</span>
+lru.<span class="fn">put</span>(<span class="nu">4</span>, <span class="str">"four"</span>)  <span class="cm">// evicts key 2 (least recently used)</span>
+<span class="fn">println</span>(lru.<span class="fn">get</span>(<span class="nu">2</span>))  <span class="cm">// null — evicted</span>
+<span class="fn">println</span>(lru.<span class="fn">get</span>(<span class="nu">1</span>))  <span class="cm">// "one" — still in cache</span>
+
+<span class="cm">// Thread-safe wrapper if needed:</span>
+<span class="kw">class</span> <span class="cl">ThreadSafeLruCache</span>&lt;K, V&gt;(<span class="nu">maxSize</span>: <span class="cl">Int</span>) {
+    <span class="kw">private val</span> cache = <span class="cl">LruCache</span>&lt;K, V&gt;(maxSize)
+    <span class="kw">private val</span> lock = <span class="kw">Any</span>()
+    <span class="kw">fun</span> <span class="fn">get</span>(key: K): V? = <span class="fn">synchronized</span>(lock) { cache.<span class="fn">get</span>(key) }
+    <span class="kw">fun</span> <span class="fn">put</span>(key: K, value: V) = <span class="fn">synchronized</span>(lock) { cache.<span class="fn">put</span>(key, value) }
+}</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Token Refresh →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128274;</div>6. Token Refresh Interceptor (Complete Implementation)</div>
+    <p>The complete production-ready implementation of concurrent token refresh prevention with Mutex + OkHttp Authenticator.</p>
+    <pre><code><span class="cm">// ===== TokenManager: handles token storage and refresh =====</span>
+<span class="kw">class</span> <span class="cl">TokenManager</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> authApi: <span class="cl">AuthApi</span>,
+    <span class="kw">private val</span> tokenStorage: <span class="cl">TokenStorage</span>
+) {
+    <span class="kw">private val</span> mutex = <span class="cl">Mutex</span>()
+
+    <span class="kw">suspend fun</span> <span class="fn">getValidToken</span>(): <span class="cl">String</span> {
+        <span class="cm">// Fast path: return cached token if still valid</span>
+        tokenStorage.<span class="fn">getToken</span>()
+            ?.<span class="kw">let</span> { <span class="kw">if</span> (!<span class="fn">isExpired</span>(it)) <span class="kw">return</span> it }
+
+        <span class="cm">// Slow path: refresh needed. Only ONE coroutine refreshes at a time.</span>
+        mutex.<span class="fn">withLock</span> {
+            <span class="cm">// Double-check: another coroutine may have refreshed while we waited for lock</span>
+            tokenStorage.<span class="fn">getToken</span>()
+                ?.<span class="kw">let</span> { <span class="kw">if</span> (!<span class="fn">isExpired</span>(it)) <span class="kw">return</span> it }
+
+            <span class="cm">// Actually refresh</span>
+            <span class="kw">val</span> newTokens = authApi.<span class="fn">refreshToken</span>(tokenStorage.<span class="fn">getRefreshToken</span>()!!)
+            tokenStorage.<span class="fn">saveToken</span>(newTokens.accessToken)
+            tokenStorage.<span class="fn">saveRefreshToken</span>(newTokens.refreshToken)
+            <span class="kw">return</span> newTokens.accessToken
+        }
+    }
+
+    <span class="kw">private fun</span> <span class="fn">isExpired</span>(token: <span class="cl">String</span>): <span class="cl">Boolean</span> {
+        <span class="cm">// Parse JWT expiry from payload, compare with System.currentTimeMillis()</span>
+        <span class="kw">return try</span> {
+            <span class="kw">val</span> payload = token.<span class="fn">split</span>(<span class="str">"."</span>)[<span class="nu">1</span>]
+            <span class="kw">val</span> decoded = <span class="cl">Base64</span>.<span class="fn">decode</span>(payload, <span class="cl">Base64</span>.<span class="cl">URL_SAFE</span>)
+            <span class="kw">val</span> json = <span class="cl">JSONObject</span>(<span class="cl">String</span>(decoded))
+            <span class="kw">val</span> exp = json.<span class="fn">getLong</span>(<span class="str">"exp"</span>) * <span class="nu">1000L</span>
+            <span class="cl">System</span>.<span class="fn">currentTimeMillis</span>() >= exp - <span class="nu">30_000L</span>   <span class="cm">// 30s buffer</span>
+        } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="kw">true</span> }   <span class="cm">// if parse fails, assume expired</span>
+    }
+}
+
+<span class="cm">// ===== OkHttp Authenticator: handles 401 responses =====</span>
+<span class="kw">class</span> <span class="cl">TokenAuthenticator</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> tokenManager: <span class="cl">TokenManager</span>
+) : <span class="cl">Authenticator</span> {
+
+    <span class="kw">override fun</span> <span class="fn">authenticate</span>(route: <span class="cl">Route</span>?, response: <span class="cl">Response</span>): <span class="cl">Request</span>? {
+        <span class="cm">// Stop retry loop after 1 refresh attempt</span>
+        <span class="kw">if</span> (response.<span class="fn">responseCount</span>() >= <span class="nu">2</span>) <span class="kw">return null</span>
+
+        <span class="kw">val</span> newToken = <span class="fn">runBlocking</span> {
+            tokenManager.<span class="fn">getValidToken</span>()   <span class="cm">// Mutex inside prevents concurrent refreshes</span>
+        }
+
+        <span class="kw">return</span> response.request.<span class="fn">newBuilder</span>()
+            .<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $newToken"</span>)
+            .<span class="fn">build</span>()
+    }
+
+    <span class="kw">private fun</span> <span class="cl">Response</span>.<span class="fn">responseCount</span>(): <span class="cl">Int</span> {
+        <span class="kw">var</span> count = <span class="nu">1</span>; <span class="kw">var</span> prior = priorResponse
+        <span class="kw">while</span> (prior != <span class="kw">null</span>) { count++; prior = prior.priorResponse }
+        <span class="kw">return</span> count
+    }
+}
+
+<span class="cm">// ===== Add to OkHttp client =====</span>
+<span class="kw">val</span> okHttpClient = <span class="cl">OkHttpClient</span>.<span class="cl">Builder</span>()
+    .<span class="fn">authenticator</span>(tokenAuthenticator)
+    .<span class="fn">addInterceptor</span> { chain ->
+        <span class="cm">// Add current token to every request</span>
+        <span class="kw">val</span> token = <span class="fn">runBlocking</span> { tokenManager.<span class="fn">getValidToken</span>() }
+        chain.<span class="fn">proceed</span>(
+            chain.request().<span class="fn">newBuilder</span>()
+                .<span class="fn">header</span>(<span class="str">"Authorization"</span>, <span class="str">"Bearer $token"</span>)
+                .<span class="fn">build</span>()
+        )
+    }
+    .<span class="fn">build</span>()</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Android Coding Interview Template</div>
+      When given an Android coding challenge: (1) State the coroutine scope you'd use (viewModelScope/coroutineScope). (2) State the dispatcher (IO for network/DB). (3) Handle errors with runCatching or try/catch. (4) Always emit Loading state before async work. (5) Mention cancellation — what gets cancelled automatically vs what needs manual cleanup.
+    </div>
+    <h3>Key Points to Mention</h3>
+    <ul>
+      <li><strong>Parallel calls:</strong> coroutineScope { async + async }; if one fails independently, use runCatching per async</li>
+      <li><strong>Search debounce:</strong> debounce(300) → distinctUntilChanged → flatMapLatest (cancels previous on new input)</li>
+      <li><strong>LRU:</strong> LinkedHashMap with accessOrder=true + removeEldestEntry override; thread-safe with synchronized</li>
+      <li><strong>Token refresh:</strong> Mutex + double-check pattern prevents duplicate refreshes; OkHttp Authenticator handles 401</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Pattern</th><th>Key code</th></tr>
+      <tr><td>Parallel calls</td><td>coroutineScope { async(IO) { runCatching { ... } } × 2 }; await() each</td></tr>
+      <tr><td>Sequential calls</td><td>withContext(IO) { val a = api.A(); api.B(a.id) }</td></tr>
+      <tr><td>Flow debounce search</td><td>query.debounce(300).distinctUntilChanged().filter { it.length >= 2 }.flatMapLatest { search(it) }.catch { emit(Error) }</td></tr>
+      <tr><td>LRU Cache</td><td>LinkedHashMap(capacity, loadFactor, accessOrder=true); override removeEldestEntry</td></tr>
+      <tr><td>Token refresh</td><td>Mutex().withLock { check token valid again (double-check); refresh if needed }</td></tr>
+      <tr><td>OkHttp Authenticator</td><td>Override authenticate(): check responseCount(); runBlocking { tokenManager.getValidToken() }; retry with new token</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why use flatMapLatest for a search Flow instead of flatMapMerge?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">flatMapLatest cancels the previous inner coroutine/Flow when a new value arrives. For search: if the user types "an" then immediately "and", the "an" API call is cancelled and only "and" is executed. This prevents stale results from "an" arriving after "and" results, and saves bandwidth. flatMapMerge would run both concurrently — "an" results might arrive after "and" results and overwrite them, showing wrong data. flatMapConcat would queue them — search for "an" completes before "and" starts, causing unnecessary delay.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is the double-check pattern inside the Mutex necessary for token refresh?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">5 coroutines detect the token is expired and race to acquire the Mutex. Coroutine #1 acquires it, refreshes the token, saves it, and releases the lock. Coroutines #2–5 now acquire the lock one by one. Without double-check: each of #2–5 would refresh again (wasting 4 network calls, potentially invalidating the previous refresh). With double-check: #2 acquires lock, re-checks the cached token — it's now valid (refreshed by #1), returns immediately without refreshing. Same for #3, #4, #5.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What does SharingStarted.WhileSubscribed(5000) do in stateIn?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">WhileSubscribed(5000) keeps the upstream Flow active while there are active subscribers, and for 5000ms after the last subscriber unsubscribes. This handles screen rotation: when the Fragment's lifecycle reaches STOPPED and unsubscribes, the Flow keeps running for 5 seconds. If the user rotates quickly (within 5s), the new subscriber gets the same running Flow — no restart, no re-fetch. After 5s of no subscribers (user navigated away), the Flow stops collecting and cancels upstream.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does LinkedHashMap with accessOrder=true implement LRU behavior?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">With accessOrder=true, every get() or put() operation moves that entry to the tail (most recently used end) of the internal doubly-linked list. The head is always the least recently used entry. removeEldestEntry is called after each put() — returning true when size > maxSize removes the head (LRU entry) automatically. This gives O(1) get, put, and eviction. The LinkedHashMap maintains both a HashMap (O(1) lookup) and a doubly-linked list (access order) internally.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">When would you use coroutineScope vs supervisorScope for parallel API calls?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">coroutineScope: if any child fails (throws), ALL siblings are cancelled and the exception propagates. Use when all results are required — failure in one means the whole operation fails. supervisorScope: children fail independently — one failure doesn't cancel others. Use when requests are independent and you want partial results. For the profile page: if user is required but orders are optional, use supervisorScope with runCatching on the orders async. For a multi-step checkout where each step is required, use coroutineScope.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is runBlocking used in OkHttp Authenticator and is it safe?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">OkHttp interceptors and Authenticator run on OkHttp's thread pool — they are synchronous (blocking) APIs. There's no way to use suspend functions directly. runBlocking bridges the synchronous OkHttp world with the coroutine-based TokenManager. It's safe here because: OkHttp's thread pool is NOT the main thread, so blocking it is acceptable (no ANR risk). The thread is blocked for only the duration of the token refresh (~100ms). If you never call the Authenticator on the main thread (you shouldn't be), runBlocking is safe.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Implement a simple debounce function using coroutines (without using the debounce operator).</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun &lt;T&gt; debounce(delayMs: Long, scope: CoroutineScope, action: suspend (T) -> Unit): (T) -> Unit { var debounceJob: Job? = null; return { value: T -> debounceJob?.cancel(); debounceJob = scope.launch { delay(delayMs); action(value) } } }. Usage: val debouncedSearch = debounce(300L, viewModelScope) { query -> performSearch(query) }; textField.onTextChange { debouncedSearch(it) }. Each call cancels the previous pending job and schedules a new one. After 300ms of inactivity, the action fires.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How does the catch operator on a Flow differ from a try/catch around collect?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">catch {} is a Flow operator that only catches exceptions from upstream (emitters above it in the chain). It can emit recovery values with emit(). try/catch around collect{} catches exceptions from both upstream AND the collector (your UI code inside collect). Using catch in the repository/ViewModel layer keeps error handling upstream and allows the Flow to emit an error state instead of terminating. Place catch before terminal operators like collect or stateIn. If an exception occurs in collect{} (the UI code), catch won't catch it — use try/catch there.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you make the LRU cache coroutine-safe instead of using synchronized?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Replace synchronized(lock) with Mutex: class CoroutineLruCache&lt;K, V&gt;(maxSize: Int) { private val mutex = Mutex(); private val cache = LruCache&lt;K, V&gt;(maxSize); suspend fun get(key: K): V? = mutex.withLock { cache.get(key) }; suspend fun put(key: K, value: V) = mutex.withLock { cache.put(key, value) } }. Mutex is coroutine-aware — when withLock waits, it suspends the coroutine instead of blocking the thread. This is more efficient in a coroutine-heavy app. synchronized blocks the calling thread; Mutex suspends the coroutine and allows the thread to serve other coroutines while waiting.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write a Flow that retries a failed network call with exponential backoff.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun fetchWithRetry(maxRetries: Int = 3): Flow&lt;Result&gt; = flow { emit(api.fetchData()) }.retryWhen { cause, attempt -> if (attempt &lt; maxRetries && cause is IOException) { delay(2.0.pow(attempt.toInt()).toLong() * 1000L); true } else false }. The retryWhen operator: cause is the exception, attempt is 0-based retry count. delay grows: 1s, 2s, 4s. Returns true to retry, false to propagate. Add a jitter: + Random.nextLong(0, 500) to avoid thundering herd. Only retry on transient errors (IOException) not on server errors (HttpException with 4xx).</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>

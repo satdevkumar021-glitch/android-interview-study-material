@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>23A — Gradle / Build System | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier3{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-id{background:rgba(124,106,247,.12);color:var(--accent);border:1px solid rgba(124,106,247,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">23A · Gradle / Build System</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Gradle Lifecycle</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> AGP &amp; Build Files</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Build Variants &amp; Signing</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> KAPT vs KSP &amp; Caching</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>23A</span> — Gradle / Build System</h1>
+    <p class="hero-desc">Gradle lifecycle, Android Gradle Plugin, build types, product flavors, version catalogs, KAPT vs KSP, and build performance — everything a senior Android engineer must know about the build system.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 23A</span>
+      <span class="badge badge-tier3">&#9733; Tier 3</span>
+    </div>
+  </div>
+
+  <!-- S1 Overview -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What this unit covers</h3>
+    <ul>
+      <li><strong>Gradle lifecycle</strong>: initialization → configuration → execution phases</li>
+      <li><strong>Android Gradle Plugin (AGP)</strong>: what it adds on top of Gradle</li>
+      <li><strong>Build files</strong>: <code>build.gradle.kts</code>, <code>settings.gradle.kts</code>, <code>libs.versions.toml</code></li>
+      <li><strong>Build types &amp; product flavors</strong>: debug/release, free/paid, variants</li>
+      <li><strong>Annotation processing</strong>: KAPT vs KSP</li>
+      <li><strong>Build performance</strong>: build cache, incremental builds, common tasks</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Gradle is a <strong>programmatic build system</strong>, not declarative like Make. Every <code>build.gradle.kts</code> is Kotlin code executed at configuration time. Understanding the three phases (init → config → exec) is essential for writing correct, fast build scripts and debugging mysterious build failures.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Gradle Lifecycle →</button></div>
+  </div>
+
+  <!-- S2 Gradle Lifecycle -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Gradle Lifecycle</div>
+    <h3>Three Phases</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Phase</th><th>What happens</th><th>When it runs</th></tr>
+      <tr><td>Initialization</td><td>Gradle reads <code>settings.gradle.kts</code>; discovers which projects exist</td><td>Every build</td></tr>
+      <tr><td>Configuration</td><td>All <code>build.gradle.kts</code> scripts execute top-to-bottom; task graph built</td><td>Every build (even <code>./gradlew help</code>)</td></tr>
+      <tr><td>Execution</td><td>Only the requested tasks run in dependency order</td><td>Only needed tasks</td></tr>
+    </table></div>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Common Mistake</div>
+      Code at the top level of <code>build.gradle.kts</code> runs at <strong>configuration time</strong> — even if you never run that task. Heavy I/O or network calls in configuration scripts slow every single Gradle invocation. Always put work inside task actions.
+    </div>
+    <h3>settings.gradle.kts</h3>
+    <pre><code><span class="cm">// settings.gradle.kts — root project file (must exist)</span>
+<span class="fn">pluginManagement</span> {
+    repositories {
+        <span class="fn">google</span>(); <span class="fn">mavenCentral</span>(); <span class="fn">gradlePluginPortal</span>()
+    }
+}
+<span class="fn">dependencyResolutionManagement</span> {
+    repositoriesMode.<span class="fn">set</span>(<span class="cl">RepositoriesMode</span>.FAIL_ON_PROJECT_REPOS)
+    repositories { <span class="fn">google</span>(); <span class="fn">mavenCentral</span>() }
+}
+rootProject.name = <span class="str">"MyApp"</span>
+<span class="fn">include</span>(<span class="str">":app"</span>, <span class="str">":core:network"</span>, <span class="str">":feature:home"</span>)</code></pre>
+
+    <h3>Task Graph &amp; Dependency</h3>
+    <pre><code><span class="cm">// Tasks form a directed acyclic graph (DAG)</span>
+<span class="cm">// ./gradlew assembleDebug runs:</span>
+<span class="cm">//   compileDebugKotlin → processDebugResources → mergeDebugAssets</span>
+<span class="cm">//   → packageDebugResources → dexBuilderDebug → packageDebug</span>
+
+<span class="cm">// Common tasks:</span>
+<span class="cm">// assemble[Variant]     — builds APK</span>
+<span class="cm">// bundle[Variant]       — builds AAB</span>
+<span class="cm">// test[Variant]         — unit tests</span>
+<span class="cm">// connected[Variant]    — instrumented tests</span>
+<span class="cm">// lint[Variant]         — runs lint</span>
+<span class="cm">// clean                 — deletes build/ directories</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: AGP &amp; Build Files →</button>
+    </div>
+  </div>
+
+  <!-- S3 AGP & Build Files -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128196;</div>3. AGP &amp; Build Files</div>
+    <h3>Android Gradle Plugin (AGP)</h3>
+    <p>AGP is a Gradle plugin (applied as <code>com.android.application</code> or <code>com.android.library</code>) that adds Android-specific tasks: resource merging, manifest merging, DEX compilation, signing, and more. It wraps D8 (dexer) and R8 (shrinker/minifier).</p>
+    <pre><code><span class="cm">// build.gradle.kts (app module)</span>
+plugins {
+    <span class="fn">alias</span>(libs.plugins.android.application)
+    <span class="fn">alias</span>(libs.plugins.kotlin.android)
+    <span class="fn">alias</span>(libs.plugins.hilt)
+    <span class="fn">alias</span>(libs.plugins.ksp)
+}
+android {
+    namespace = <span class="str">"com.example.myapp"</span>
+    compileSdk = <span class="nu">35</span>
+    defaultConfig {
+        applicationId = <span class="str">"com.example.myapp"</span>
+        minSdk = <span class="nu">26</span>; targetSdk = <span class="nu">35</span>
+        versionCode = <span class="nu">1</span>; versionName = <span class="str">"1.0.0"</span>
+    }
+}</code></pre>
+
+    <h3>Version Catalog — libs.versions.toml</h3>
+    <p>Introduced in Gradle 7.4 / AGP 7.x. Centralizes all dependency versions and library aliases in one file.</p>
+    <pre><code><span class="cm"># gradle/libs.versions.toml</span>
+[versions]
+kotlin = <span class="str">"2.0.0"</span>
+agp    = <span class="str">"8.5.0"</span>
+hilt   = <span class="str">"2.51"</span>
+room   = <span class="str">"2.6.1"</span>
+
+[libraries]
+hilt-android         = { group = <span class="str">"com.google.dagger"</span>, name = <span class="str">"hilt-android"</span>,         version.ref = <span class="str">"hilt"</span> }
+hilt-compiler        = { group = <span class="str">"com.google.dagger"</span>, name = <span class="str">"hilt-compiler"</span>,        version.ref = <span class="str">"hilt"</span> }
+room-runtime         = { group = <span class="str">"androidx.room"</span>,     name = <span class="str">"room-runtime"</span>,         version.ref = <span class="str">"room"</span> }
+
+[plugins]
+android-application  = { id = <span class="str">"com.android.application"</span>, version.ref = <span class="str">"agp"</span>    }
+kotlin-android       = { id = <span class="str">"org.jetbrains.kotlin.android"</span>, version.ref = <span class="str">"kotlin"</span> }
+hilt                 = { id = <span class="str">"com.google.dagger.hilt.android"</span>, version.ref = <span class="str">"hilt"</span> }
+ksp                  = { id = <span class="str">"com.google.devtools.ksp"</span>, version.ref = <span class="str">"ksp"</span> }
+
+<span class="cm"># Usage in build.gradle.kts:</span>
+<span class="cm"># implementation(libs.hilt.android)</span>
+<span class="cm"># ksp(libs.hilt.compiler)</span></code></pre>
+
+    <h3>build.gradle.kts vs build.gradle (Groovy)</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>Kotlin Script (.kts)</th><th>Groovy (.gradle)</th></tr>
+      <tr><td>IDE support</td><td>Full auto-complete, type safety</td><td>Limited, dynamic typing</td></tr>
+      <tr><td>Performance</td><td>Slightly slower first compile (cached)</td><td>Faster to parse</td></tr>
+      <tr><td>Google recommendation</td><td>✅ Preferred</td><td>Legacy</td></tr>
+      <tr><td>Refactoring</td><td>Safe refactoring via IDE</td><td>Text-based only</td></tr>
+    </table></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Gradle Lifecycle</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Build Variants →</button>
+    </div>
+  </div>
+
+  <!-- S4 Build Variants & Signing -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127381;</div>4. Build Variants &amp; Signing</div>
+    <h3>Build Types</h3>
+    <pre><code>buildTypes {
+    <span class="fn">debug</span> {
+        applicationIdSuffix = <span class="str">".debug"</span>
+        isDebuggable = <span class="kw">true</span>
+        isMinifyEnabled = <span class="kw">false</span>
+    }
+    <span class="fn">release</span> {
+        isMinifyEnabled = <span class="kw">true</span>       <span class="cm">// enables R8 shrinking + obfuscation</span>
+        isShrinkResources = <span class="kw">true</span>
+        proguardFiles(
+            <span class="fn">getDefaultProguardFile</span>(<span class="str">"proguard-android-optimize.txt"</span>),
+            <span class="str">"proguard-rules.pro"</span>
+        )
+        signingConfig = signingConfigs.<span class="fn">getByName</span>(<span class="str">"release"</span>)
+    }
+}</code></pre>
+
+    <h3>Product Flavors</h3>
+    <pre><code>flavorDimensions += <span class="str">"env"</span>
+productFlavors {
+    <span class="fn">create</span>(<span class="str">"dev"</span>) {
+        dimension = <span class="str">"env"</span>
+        applicationIdSuffix = <span class="str">".dev"</span>
+        buildConfigField(<span class="str">"String"</span>, <span class="str">"BASE_URL"</span>, <span class="str">"\"https://dev.api.example.com\""</span>)
+    }
+    <span class="fn">create</span>(<span class="str">"prod"</span>) {
+        dimension = <span class="str">"env"</span>
+        buildConfigField(<span class="str">"String"</span>, <span class="str">"BASE_URL"</span>, <span class="str">"\"https://api.example.com\""</span>)
+    }
+}
+<span class="cm">// Variants: devDebug, devRelease, prodDebug, prodRelease</span></code></pre>
+
+    <h3>Signing Configuration</h3>
+    <pre><code>signingConfigs {
+    <span class="fn">create</span>(<span class="str">"release"</span>) {
+        <span class="cm">// Read from environment variables or local.properties (NEVER commit keystore)</span>
+        storeFile = <span class="fn">file</span>(System.<span class="fn">getenv</span>(<span class="str">"KEYSTORE_PATH"</span>) ?: <span class="str">"keystore/debug.jks"</span>)
+        storePassword = System.<span class="fn">getenv</span>(<span class="str">"STORE_PASSWORD"</span>)
+        keyAlias = System.<span class="fn">getenv</span>(<span class="str">"KEY_ALIAS"</span>)
+        keyPassword = System.<span class="fn">getenv</span>(<span class="str">"KEY_PASSWORD"</span>)
+    }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Security Warning</div>
+      Never commit your <code>.jks</code> keystore or plaintext passwords to version control. Use environment variables (for CI) or <code>local.properties</code> (gitignored) for local development.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← AGP &amp; Build Files</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: KAPT vs KSP →</button>
+    </div>
+  </div>
+
+  <!-- S5 KAPT vs KSP & Caching -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9889;</div>5. KAPT vs KSP &amp; Caching</div>
+    <h3>KAPT vs KSP</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Feature</th><th>KAPT</th><th>KSP</th></tr>
+      <tr><td>Speed</td><td>Slow — converts Kotlin to Java stubs first</td><td>~2× faster — processes Kotlin symbols directly</td></tr>
+      <tr><td>Language aware</td><td>Java-centric (annotation processing API)</td><td>Kotlin-native, understands suspend, sealed, etc.</td></tr>
+      <tr><td>Incremental</td><td>Limited incremental support</td><td>Full incremental processing</td></tr>
+      <tr><td>Support</td><td>Deprecated in AGP 8+</td><td>Recommended going forward</td></tr>
+      <tr><td>Users</td><td>Hilt (old), Room (old), Moshi</td><td>Hilt, Room, Retrofit KSP, Moshi KSP</td></tr>
+    </table></div>
+    <pre><code><span class="cm">// build.gradle.kts — switching from KAPT to KSP</span>
+plugins {
+    id(<span class="str">"com.google.devtools.ksp"</span>) version <span class="str">"2.0.0-1.0.21"</span>
+}
+dependencies {
+    <span class="cm">// KAPT (old):</span>
+    <span class="cm">// kapt(libs.hilt.compiler)</span>
+    <span class="cm">// kapt(libs.room.compiler)</span>
+
+    <span class="cm">// KSP (new):</span>
+    <span class="fn">ksp</span>(libs.hilt.compiler)
+    <span class="fn">ksp</span>(libs.room.compiler)
+}</code></pre>
+
+    <h3>Build Cache</h3>
+    <pre><code><span class="cm"># gradle.properties — enable build cache</span>
+org.gradle.caching=true
+org.gradle.parallel=true
+org.gradle.configureondemand=true
+org.gradle.jvmargs=-Xmx4g -XX:+UseG1GC
+
+<span class="cm"># Local build cache: ~/.gradle/caches/build-cache/</span>
+<span class="cm"># Remote build cache: configure in settings.gradle.kts</span>
+buildCache {
+    remote(<span class="cl">HttpBuildCache</span>::<span class="kw">class</span>) {
+        url = uri(<span class="str">"https://your-build-cache-server/"</span>)
+        isPush = System.<span class="fn">getenv</span>(<span class="str">"CI"</span>) != <span class="kw">null</span>   <span class="cm">// only push from CI</span>
+    }
+}</code></pre>
+
+    <h3>Incremental Builds</h3>
+    <p>Gradle tracks <strong>task inputs and outputs</strong>. If inputs haven't changed since last run, tasks are <code>UP-TO-DATE</code> and skipped. KSP supports incremental annotation processing — only re-processes files that changed.</p>
+    <div class="callout callout-blue">
+      <div class="callout-label">Performance Tips</div>
+      Use <code>./gradlew assembleDebug --scan</code> to get a build scan URL showing which tasks are slow. Common culprits: KAPT on large projects, full recompilation due to ABI changes, and disabled build cache.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Build Variants</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 Pitfalls -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+    <h3>Common Pitfalls</h3>
+    <ul>
+      <li><strong>Slow configuration</strong>: network/file I/O at top level of build script — wrap in task actions</li>
+      <li><strong>api vs implementation</strong>: using <code>api()</code> leaks transitive dependencies to consumers, increasing compilation scope. Use <code>implementation()</code> by default.</li>
+      <li><strong>Not using Version Catalog</strong>: version duplication across modules causes drift. Adopt <code>libs.versions.toml</code>.</li>
+      <li><strong>Committed keystore or passwords</strong>: security risk. Use environment variables or Gradle secrets plugins.</li>
+      <li><strong>KAPT in new projects</strong>: adds ~30–60 sec to large project builds. Migrate to KSP.</li>
+      <li><strong>Missing proguard rules</strong>: R8 may strip classes used via reflection (Retrofit, Gson, Moshi). Add keep rules.</li>
+    </ul>
+    <h3>Best Practices</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Practice</th><th>Why</th></tr>
+      <tr><td>Use <code>libs.versions.toml</code></td><td>Single source of truth for all versions</td></tr>
+      <tr><td>Prefer KSP over KAPT</td><td>2× faster, incremental, Kotlin-native</td></tr>
+      <tr><td>Enable build cache + parallel</td><td>Dramatically reduces CI build time</td></tr>
+      <tr><td>Use <code>implementation</code> not <code>api</code></td><td>Reduces recompilation scope across modules</td></tr>
+      <tr><td>Put signing creds in env vars</td><td>Security — never commit credentials</td></tr>
+      <tr><td>Profile with <code>--scan</code></td><td>Identify slow tasks before optimizing</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← KAPT vs KSP</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 Interview Framework -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">"Gradle has three phases: initialization reads settings.gradle, configuration executes all build scripts and builds the task graph, execution runs only the requested tasks. AGP adds Android-specific tasks on top. For performance I use KSP instead of KAPT — roughly 2× faster — along with build cache and parallel execution enabled in gradle.properties. Dependencies are centralized in libs.versions.toml."</div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">"The Gradle lifecycle is init → config → execute. A critical detail is that configuration runs on every Gradle invocation, so heavy work in build scripts always hurts. AGP wraps D8 and R8: D8 converts bytecode to DEX, R8 shrinks and obfuscates for release builds. I structure build variants with build types (debug/release) and product flavors (dev/staging/prod), giving me a matrix of variants. For annotation processing, KSP is the modern choice — it processes Kotlin symbols directly without the Java stub generation step KAPT requires. For large multi-module projects, enabling org.gradle.caching=true and parallel=true in gradle.properties can cut CI build time by 40–60% when combined with a remote build cache. Signing credentials never go in the repository; they come from environment variables in CI and local.properties locally."</div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Three Gradle phases: initialization, configuration, execution — configuration runs every time</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>AGP adds D8 (DEX compiler) + R8 (shrinker/obfuscator) — R8 enabled only in release builds</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>KSP over KAPT: 2× faster, incremental, Kotlin-native — KAPT deprecated in AGP 8+</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Version Catalog (libs.versions.toml) — single source of truth for all dependency versions</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Build cache + parallel compilation — critical for multi-module project build speed</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper On</h3>
+    <ul>
+      <li>Custom Gradle plugin development (unless interviewer asks)</li>
+      <li>Internal Gradle daemon implementation details</li>
+      <li>ProGuard rule syntax details (mention R8 uses it, don't recite rules)</li>
+    </ul>
+
+    <h3>Follow-up Q&amp;A</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Question</th><th>Key Answer</th></tr>
+      <tr><td>What's the difference between api and implementation?</td><td><code>api</code> exposes transitive deps to consumers (use for libraries); <code>implementation</code> hides them (default for apps)</td></tr>
+      <tr><td>How do you speed up slow builds?</td><td>Enable build cache, parallel, migrate to KSP, run <code>--scan</code> to profile</td></tr>
+      <tr><td>What does R8 do?</td><td>Shrinks (removes unused code), obfuscates (renames symbols), optimizes bytecode — all in one pass</td></tr>
+      <tr><td>How do you handle different API endpoints per environment?</td><td>Product flavors with <code>buildConfigField</code> — devDebug, stagingRelease, prodRelease variants</td></tr>
+    </table></div>
+
+    <h3>Senior Insight</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Differentiator</div>
+      Know that configuration-time performance matters: a slow build script slows every IDE sync and every CI pipeline check. Migrate KAPT → KSP, enable remote build cache, and use <code>--configuration-cache</code> (Gradle 8+) to serialize the task graph. This is the difference between a 2-minute CI build and an 8-minute one.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 Quick Revision -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Gradle Phases</h4>
+        <pre><code>Init    → settings.gradle.kts
+Config  → all build scripts run
+Execute → only requested tasks</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>gradle.properties</h4>
+        <pre><code>org.gradle.caching=true
+org.gradle.parallel=true
+org.gradle.jvmargs=-Xmx4g</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KSP vs KAPT</h4>
+        <pre><code>KAPT: Java stubs → slow
+KSP:  Kotlin symbols → 2× faster
+      incremental, Kotlin-native</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>Variant Matrix</h4>
+        <pre><code>flavors: dev | prod
+types:  debug | release
+→ devDebug, devRelease,
+  prodDebug, prodRelease</code></pre>
+      </div>
+    </div>
+    <h3>Key Terms</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>AGP</td><td>Android Gradle Plugin — adds Android build tasks</td></tr>
+      <tr><td>D8</td><td>DEX compiler — converts .class → .dex</td></tr>
+      <tr><td>R8</td><td>Shrinker + obfuscator + optimizer (release only)</td></tr>
+      <tr><td>KSP</td><td>Kotlin Symbol Processing — fast annotation processing</td></tr>
+      <tr><td>Version Catalog</td><td>libs.versions.toml — centralized dependency management</td></tr>
+      <tr><td>Build cache</td><td>Reuse task outputs across builds/machines</td></tr>
+      <tr><td>Build variant</td><td>flavor × buildType combination (e.g. prodRelease)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
+    </div>
+  </div>
+
+  <!-- S9 Quiz -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127358;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">1. What are the three phases of Gradle's build lifecycle?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Initialization (reads settings.gradle, discovers projects), Configuration (executes all build scripts, builds the task graph — runs every time), Execution (runs only the requested tasks in dependency order). Key point: configuration always runs, so heavy work there slows every Gradle invocation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">2. What is a build variant and how is it formed?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">A build variant is the cross-product of a product flavor and a build type. If you have flavors [dev, prod] and types [debug, release], you get four variants: devDebug, devRelease, prodDebug, prodRelease. Each variant can have its own source set, resources, and BuildConfig values.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">3. What is the Version Catalog (libs.versions.toml) and why use it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Basic</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">A TOML file in the gradle/ directory that centralizes all dependency versions, library coordinates, and plugin IDs. Modules reference them as libs.hilt.android or libs.plugins.ksp. Benefits: single source of truth for versions, no drift across modules, IDE auto-complete, and bundle grouping.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">4. What is the difference between KAPT and KSP?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">KAPT (Kotlin Annotation Processing Tool) converts Kotlin source to Java stubs before running Java annotation processors — this stub generation adds significant overhead. KSP (Kotlin Symbol Processing) processes Kotlin symbols directly, making it ~2× faster, fully incremental, and Kotlin-aware (understands suspend functions, sealed classes, etc.). KAPT is deprecated in AGP 8+. Migrate Room and Hilt to KSP.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">5. What does R8 do and when does it run?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">R8 is Google's code shrinker/obfuscator. It runs in a single pass doing tree-shaking (removes unused classes/methods), obfuscation (renames symbols to short names), and bytecode optimization. It only runs when isMinifyEnabled = true, typically for release builds. D8 converts bytecode to DEX; R8 is an enhanced D8 that also shrinks.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">6. What is the difference between api() and implementation() in Gradle dependencies?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">api() exposes the dependency on the compile classpath of consumers — it leaks transitively. implementation() hides it from consumers — they can't see or reference that dependency. In modules: use implementation by default to minimize recompilation scope. Use api only when the dependency is part of your module's public API surface (e.g., a library module returning types from that dependency).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">7. How do you handle release signing securely in CI?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Intermediate</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Store the keystore as a base64-encoded secret in CI (e.g. GitHub Secrets). In the CI pipeline, decode it to a file, then pass keystore path, alias, and passwords as environment variables. In build.gradle.kts, read them via System.getenv(). Never commit the .jks file or plain-text credentials. Alternatively, use the Gradle Secrets Plugin which reads from local.properties (gitignored) for local dev.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">8. Your CI build takes 12 minutes. How do you diagnose and fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">1) Run ./gradlew assembleDebug --scan to get a build scan — shows per-task timings. 2) Check if build cache is enabled (org.gradle.caching=true) and whether tasks are UP-TO-DATE or FROM-CACHE. 3) Identify KAPT tasks — migrate to KSP for 2× speedup. 4) Enable parallel execution (org.gradle.parallel=true). 5) Set up a remote build cache server so CI agents share cached task outputs. 6) Use configuration cache (Gradle 8+) to skip configuration phase on unchanged builds. Typically this reduces a 12-min build to 3–4 min.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">9. Why does configuration time matter even when you're not building?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Configuration runs on every Gradle invocation — including ./gradlew tasks, IDE sync, and lint. If build scripts do file I/O, network calls, or expensive computation at the top level (outside task actions), they slow every developer interaction. This is why lazy task configuration (tasks.register instead of tasks.create) and configuration cache exist. The configuration cache serializes the task graph and skips re-configuration when inputs are unchanged.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">10. How does the Gradle build cache differ from UP-TO-DATE checks?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Scenario</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">UP-TO-DATE: task skipped because its inputs/outputs haven't changed on the same machine since last run — it checks the local output directory. Build cache: task outputs stored by a hash of the inputs — can be reused across machines (remote cache) or after a clean. After ./gradlew clean, UP-TO-DATE won't help, but the build cache will still restore outputs FROM-CACHE. Remote build cache is essential for CI where workspaces are fresh each run.</div></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  function show(id, num) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    window.scrollTo(0,0);
+  }
+  function toggleQuiz(el) {
+    const ans = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    ans.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>1D — Kotlin OOP | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#4f9eff;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;min-height:100vh;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;letter-spacing:.05em;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(79,158,255,.12);color:var(--accent2);border:1px solid rgba(79,158,255,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  .tag-coding{background:rgba(79,158,255,.15);color:var(--accent2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">1D · Kotlin OOP</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>1D</span> — Kotlin OOP</h1>
+    <p class="hero-desc">Classes, constructors, init, inheritance, interfaces, abstract classes, visibility modifiers, and open/final/abstract — how Kotlin's OOP differs from Java and why it matters for Android architecture.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 1D</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>What it is</h3>
+    <p>Kotlin's OOP system is a safer, more concise evolution of Java's. Key differences: classes are <strong>final by default</strong> (must opt-in to inheritance with <code>open</code>), constructors are inline in the class header, interfaces can have default implementations and properties, and visibility modifiers have Android-relevant scoping differences.</p>
+    <h3>Why it matters for Android</h3>
+    <ul>
+      <li>Every Activity, Fragment, ViewModel, Repository, UseCase is a class — OOP fundamentals underpin every layer.</li>
+      <li>Clean Architecture is built on interfaces (abstractions) and classes (implementations) — understanding visibility and inheritance is mandatory.</li>
+      <li>Hilt DI relies on constructor injection — understanding primary constructors and <code>@Inject</code> is critical.</li>
+      <li>Compose uses <code>open</code>/<code>abstract</code> sparingly — final-by-default aligns with the immutability preference in reactive code.</li>
+    </ul>
+    <div class="callout callout-purple">
+      <div class="callout-label">Key Kotlin vs Java Difference</div>
+      In Java, classes are <strong>open (extensible) by default</strong>. In Kotlin, classes are <strong>final by default</strong>. You must explicitly mark a class <code>open</code> to allow subclassing. This is a deliberate design choice — it enforces the Effective Java principle "design and document for inheritance, or else prohibit it."
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. How It Works</div>
+
+    <h3>Classes and Primary Constructor</h3>
+    <pre><code><span class="cm">// Primary constructor in class header — no separate constructor block needed</span>
+<span class="kw">class</span> <span class="cl">UserRepository</span> <span class="kw">@Inject constructor</span>(   <span class="cm">// @Inject on primary constructor</span>
+    <span class="kw">private val</span> api: <span class="cl">UserApi</span>,
+    <span class="kw">private val</span> dao: <span class="cl">UserDao</span>
+) {
+    <span class="cm">// class body</span>
+}</code></pre>
+
+    <h3>init block</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">TokenManager</span>(<span class="kw">private val</span> prefs: <span class="cl">SharedPreferences</span>) {
+    <span class="kw">private val</span> encryptionKey: <span class="cl">String</span>
+
+    <span class="kw">init</span> {
+        <span class="cm">// Runs after primary constructor, before secondary constructors</span>
+        encryptionKey = prefs.<span class="fn">getString</span>(<span class="str">"enc_key"</span>, <span class="str">""</span>) <span class="kw">?:</span> <span class="fn">generateKey</span>()
+        <span class="fn">require</span>(encryptionKey.<span class="fn">isNotBlank</span>()) { <span class="str">"Encryption key must not be blank"</span> }
+    }
+}
+<span class="cm">// Multiple init blocks run top-to-bottom in declaration order</span></code></pre>
+
+    <h3>Secondary Constructors</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">ApiException</span>(<span class="kw">val</span> code: <span class="cl">Int</span>, message: <span class="cl">String</span>) : <span class="cl">Exception</span>(message) {
+    <span class="cm">// Secondary constructor — must delegate to primary via this()</span>
+    <span class="kw">constructor</span>(code: <span class="cl">Int</span>) : <span class="kw">this</span>(code, <span class="str">"HTTP error $code"</span>)
+}
+<span class="cm">// Prefer default arguments over secondary constructors in most cases</span></code></pre>
+
+    <h3>Inheritance</h3>
+    <pre><code><span class="cm">// Base class MUST be 'open' to be subclassed</span>
+<span class="kw">open class</span> <span class="cl">BaseViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">open fun</span> <span class="fn">onError</span>(e: <span class="cl">Throwable</span>) {  <span class="cm">// also 'open' for override</span>
+        <span class="cl">Timber</span>.<span class="fn">e</span>(e)
+    }
+}
+
+<span class="kw">class</span> <span class="cl">PaymentViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> useCase: <span class="cl">ProcessPaymentUseCase</span>
+) : <span class="cl">BaseViewModel</span>() {
+    <span class="kw">override fun</span> <span class="fn">onError</span>(e: <span class="cl">Throwable</span>) {
+        <span class="kw">super</span>.<span class="fn">onError</span>(e)              <span class="cm">// call super explicitly</span>
+        _uiState.value = <span class="cl">UiState</span>.<span class="cl">Error</span>(e.message)
+    }
+}</code></pre>
+
+    <h3>Interfaces</h3>
+    <pre><code><span class="cm">// Kotlin interfaces can have: abstract methods, default implementations, properties</span>
+<span class="kw">interface</span> <span class="cl">PaymentRepository</span> {
+    <span class="cm">// Abstract — must be implemented</span>
+    <span class="kw">suspend fun</span> <span class="fn">initiatePayment</span>(request: <span class="cl">PaymentRequest</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentResponse</span>&gt;
+
+    <span class="cm">// Default implementation — can be overridden but doesn't have to be</span>
+    <span class="kw">suspend fun</span> <span class="fn">cancelPayment</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">Unit</span>&gt; =
+        <span class="cl">Result</span>.<span class="fn">failure</span>(<span class="cl">UnsupportedOperationException</span>(<span class="str">"Cancel not supported"</span>))
+
+    <span class="cm">// Property in interface (no backing field)</span>
+    <span class="kw">val</span> maxRetries: <span class="cl">Int</span> <span class="kw">get</span>() = <span class="nu">3</span>
+}</code></pre>
+
+    <h3>Abstract Classes</h3>
+    <pre><code><span class="cm">// abstract class: cannot be instantiated, can have state (fields), constructors</span>
+<span class="kw">abstract class</span> <span class="cl">BaseUseCase</span>&lt;<span class="cl">P</span>, <span class="cl">R</span>&gt; {
+    <span class="kw">protected abstract suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">P</span>): <span class="cl">R</span>
+
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(params: <span class="cl">P</span>): <span class="cl">Result</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">try</span> {
+        <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">execute</span>(params))
+    } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+        <span class="cl">Result</span>.<span class="fn">failure</span>(e)
+    }
+}
+
+<span class="kw">class</span> <span class="cl">GetUserProfileUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">UserRepository</span>
+) : <span class="cl">BaseUseCase</span>&lt;<span class="cl">String</span>, <span class="cl">UserProfile</span>&gt;() {
+    <span class="kw">override suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">String</span>) = repo.<span class="fn">getUser</span>(params)
+}</code></pre>
+
+    <h3>Visibility Modifiers</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Modifier</th><th>Class member</th><th>Top-level</th><th>Android use</th></tr>
+      <tr><td><code>public</code></td><td>Visible everywhere (default)</td><td>Visible everywhere (default)</td><td>Public API — interface methods, ViewModel state</td></tr>
+      <tr><td><code>internal</code></td><td>Visible in same module</td><td>Visible in same module</td><td>Module-internal implementations — hide from other modules</td></tr>
+      <tr><td><code>protected</code></td><td>Visible in class + subclasses</td><td>Not allowed on top-level</td><td>Base class helpers used by subclasses only</td></tr>
+      <tr><td><code>private</code></td><td>Visible in the class only</td><td>Visible in the file only</td><td>Implementation details, backing StateFlow fields</td></tr>
+    </table>
+    </div>
+
+    <h3>open / final / abstract</h3>
+    <pre><code><span class="cm">// final (default) — cannot subclass</span>
+<span class="kw">class</span> <span class="cl">LoginUseCase</span> { }        <span class="cm">// final by default</span>
+
+<span class="cm">// open — opt-in to inheritance</span>
+<span class="kw">open class</span> <span class="cl">BaseActivity</span> : <span class="cl">AppCompatActivity</span>()
+
+<span class="cm">// abstract — cannot instantiate, must subclass</span>
+<span class="kw">abstract class</span> <span class="cl">BaseViewModel</span> : <span class="cl">ViewModel</span>()
+
+<span class="cm">// Members follow the same rule</span>
+<span class="kw">open class</span> <span class="cl">Foo</span> {
+    <span class="kw">open fun</span> <span class="fn">bar</span>()  = <span class="str">"open"</span>    <span class="cm">// can be overridden</span>
+    <span class="kw">final fun</span> <span class="fn">baz</span>() = <span class="str">"final"</span>   <span class="cm">// cannot be overridden in subclass</span>
+}</code></pre>
+
+    <h3>Key Terms</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Term</th><th>Kotlin default</th><th>Java default</th><th>Note</th></tr>
+      <tr><td>Class</td><td>final</td><td>open</td><td>Add <code>open</code> to allow subclassing</td></tr>
+      <tr><td>Method</td><td>final</td><td>open (virtual)</td><td>Add <code>open</code> to allow override</td></tr>
+      <tr><td>Visibility</td><td>public</td><td>package-private</td><td>Kotlin has no package-private; use <code>internal</code></td></tr>
+      <tr><td>Interface method</td><td>abstract (or default)</td><td>abstract (pre-Java 8)</td><td>Kotlin interfaces can have default impls</td></tr>
+      <tr><td>Abstract class</td><td>can have constructors + state</td><td>same</td><td>Interface cannot have constructor or backing fields</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div>3. Why and When to Use It</div>
+
+    <h3>Interface vs Abstract Class — Decision Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Use</th><th>When</th><th>Android Example</th></tr>
+      <tr><td><strong>Interface</strong></td><td>Define a contract with no state; multiple implementations; testability (mock/fake); DI abstraction layer</td><td><code>UserRepository</code>, <code>AuthService</code>, <code>AnalyticsTracker</code></td></tr>
+      <tr><td><strong>Abstract class</strong></td><td>Share state + behaviour across subclasses; template method pattern; partial implementation</td><td><code>BaseViewModel</code>, <code>BaseUseCase&lt;P,R&gt;</code>, <code>BaseFragment</code></td></tr>
+      <tr><td><strong>Open class</strong></td><td>Allow subclassing but provide a complete default implementation</td><td>Custom view base class, library classes that need extension</td></tr>
+      <tr><td><strong>Final class (default)</strong></td><td>Implementation classes that should not be subclassed (most use cases, use cases, ViewModels)</td><td><code>LoginUseCase</code>, <code>ProductRepositoryImpl</code></td></tr>
+    </table>
+    </div>
+
+    <h3>Visibility in Multi-Module Architecture</h3>
+    <div class="callout callout-blue">
+      <div class="callout-label">Production Rule</div>
+      In a multi-module app, <code>internal</code> is your friend. Mark implementation classes <code>internal</code> so the <code>:feature-payment</code> module cannot directly instantiate <code>PaymentRepositoryImpl</code> from <code>:data</code>. Only the interface (<code>PaymentRepository</code>) is <code>public</code>. Hilt binds them — the consumer never sees the implementation class.
+    </div>
+
+    <h3>When NOT to Use Inheritance</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Do NOT</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li>Use inheritance for code reuse alone — prefer composition or extension functions</li>
+        <li>Mark every class <code>open</code> "just in case" — final-by-default is a safety feature</li>
+        <li>Use abstract classes for pure contracts — that's what interfaces are for</li>
+        <li>Deep inheritance hierarchies — 2 levels max; beyond that, extract shared logic differently</li>
+      </ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Automotive app — a Clean Architecture payment module demonstrating interface, abstract class, open class, visibility modifiers, constructors, and init blocks together.
+    </div>
+
+    <h3>Interface — contract for DI</h3>
+    <pre><code><span class="cm">// domain/repository/PaymentRepository.kt  (public — crosses module boundary)</span>
+<span class="kw">interface</span> <span class="cl">PaymentRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">initiatePayment</span>(req: <span class="cl">PaymentRequest</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentResponse</span>&gt;
+    <span class="kw">suspend fun</span> <span class="fn">getPaymentStatus</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">PaymentStatus</span>&gt;
+}</code></pre>
+
+    <h3>Abstract Base UseCase — template method pattern</h3>
+    <pre><code><span class="cm">// domain/usecase/BaseUseCase.kt  (internal to :domain module)</span>
+<span class="kw">internal abstract class</span> <span class="cl">BaseUseCase</span>&lt;<span class="cl">in</span> <span class="cl">P</span>, <span class="kw">out</span> <span class="cl">R</span>&gt; {
+    <span class="kw">protected abstract suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">P</span>): <span class="cl">R</span>
+
+    <span class="cm">// Template method: wraps execute() with error handling</span>
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(params: <span class="cl">P</span>): <span class="cl">Result</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">try</span> {
+        <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">execute</span>(params))
+    } <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+        <span class="kw">throw</span> e   <span class="cm">// never swallow cancellation</span>
+    } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+        <span class="cl">Result</span>.<span class="fn">failure</span>(e)
+    }
+}</code></pre>
+
+    <h3>Concrete UseCase — final (default)</h3>
+    <pre><code><span class="cm">// domain/usecase/ProcessPaymentUseCase.kt</span>
+<span class="kw">class</span> <span class="cl">ProcessPaymentUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">PaymentRepository</span>,       <span class="cm">// depends on interface, not impl</span>
+    <span class="kw">private val</span> validator: <span class="cl">PaymentValidator</span>
+) : <span class="cl">BaseUseCase</span>&lt;<span class="cl">PaymentRequest</span>, <span class="cl">PaymentResponse</span>&gt;() {
+
+    <span class="kw">override suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">PaymentRequest</span>): <span class="cl">PaymentResponse</span> {
+        validator.<span class="fn">validate</span>(params)          <span class="cm">// throws on invalid — caught by base</span>
+        <span class="kw">return</span> repo.<span class="fn">initiatePayment</span>(params).<span class="fn">getOrThrow</span>()
+    }
+}</code></pre>
+
+    <h3>Repository Implementation — internal, hides from other modules</h3>
+    <pre><code><span class="cm">// data/repository/PaymentRepositoryImpl.kt</span>
+<span class="kw">internal class</span> <span class="cl">PaymentRepositoryImpl</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> api: <span class="cl">PaymentApi</span>,
+    <span class="kw">private val</span> dao: <span class="cl">PaymentDao</span>
+) : <span class="cl">PaymentRepository</span> {
+
+    <span class="kw">private val</span> cache = <span class="cl">HashMap</span>&lt;<span class="cl">String</span>, <span class="cl">PaymentStatus</span>&gt;()  <span class="cm">// private state</span>
+
+    <span class="kw">override suspend fun</span> <span class="fn">initiatePayment</span>(req: <span class="cl">PaymentRequest</span>) =
+        <span class="fn">safeApiCall</span> { api.<span class="fn">pay</span>(req.<span class="fn">toDto</span>()).<span class="fn">toDomain</span>() }
+
+    <span class="kw">override suspend fun</span> <span class="fn">getPaymentStatus</span>(id: <span class="cl">String</span>) =
+        <span class="fn">safeApiCall</span> { cache.<span class="fn">getOrPut</span>(id) { api.<span class="fn">getStatus</span>(id).<span class="fn">toDomain</span>() } }
+}</code></pre>
+
+    <h3>ViewModel — open base class pattern</h3>
+    <pre><code><span class="cm">// presentation/base/BaseViewModel.kt</span>
+<span class="kw">open class</span> <span class="cl">BaseViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">protected val</span> _error = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">String</span>&gt;()
+    <span class="kw">val</span> error = _error.<span class="fn">asSharedFlow</span>()
+
+    <span class="kw">protected open fun</span> <span class="fn">handleError</span>(e: <span class="cl">Throwable</span>) {
+        viewModelScope.<span class="fn">launch</span> { _error.<span class="fn">emit</span>(e.message <span class="kw">?:</span> <span class="str">"Unknown error"</span>) }
+    }
+}
+
+<span class="cm">// presentation/payment/PaymentViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">PaymentViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> processPayment: <span class="cl">ProcessPaymentUseCase</span>
+) : <span class="cl">BaseViewModel</span>() {
+
+    <span class="kw">private val</span> _state = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">PaymentUiState</span>&gt;(<span class="cl">PaymentUiState</span>.Idle)
+    <span class="kw">val</span> state = _state.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">pay</span>(req: <span class="cl">PaymentRequest</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            _state.value = <span class="cl">PaymentUiState</span>.Loading
+            <span class="fn">processPayment</span>(req)
+                .<span class="fn">onSuccess</span> { _state.value = <span class="cl">PaymentUiState</span>.<span class="cl">Success</span>(it) }
+                .<span class="fn">onFailure</span> { <span class="fn">handleError</span>(it) }  <span class="cm">// calls base class method</span>
+        }
+    }
+}</code></pre>
+
+    <h3>Key Architecture Points</h3>
+    <ul>
+      <li><code>PaymentRepository</code> is a <code>public interface</code> — crosses module boundaries; consumers depend on abstraction.</li>
+      <li><code>PaymentRepositoryImpl</code> is <code>internal</code> — hidden from feature modules; only Hilt wires it.</li>
+      <li><code>BaseUseCase</code> is <code>internal abstract</code> — template method pattern; error handling once, reused across all use cases.</li>
+      <li><code>BaseViewModel</code> is <code>open</code> with <code>protected open fun handleError</code> — subclasses can override but get sensible defaults.</li>
+      <li>No <code>!!</code>, no mutable public state, constructor injection throughout.</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div>5. Alternatives &amp; Trade-offs</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr><td>Interface + implementation</td><td>Testable, mockable, DI-friendly, loose coupling</td><td>More files; interface must be maintained in sync</td><td>Repository, Service, UseCase contracts — always for cross-layer boundaries</td></tr>
+      <tr><td>Abstract class</td><td>Share state + behaviour; template method; constructor params</td><td>Single inheritance limit; tighter coupling than interface</td><td>BaseViewModel, BaseUseCase — shared implementation, not pure contract</td></tr>
+      <tr><td>Open class</td><td>Full default implementation + extensibility</td><td>Subclasses may break parent invariants (fragile base class)</td><td>Library/base classes where extension is explicitly intended</td></tr>
+      <tr><td>Composition over inheritance</td><td>Flexible, no inheritance hierarchy, testable</td><td>More delegation boilerplate</td><td>Preferred over deep inheritance; Kotlin's <code>by</code> delegation helps</td></tr>
+      <tr><td>Extension functions</td><td>Add behaviour without subclassing, statically safe</td><td>No access to private members, no polymorphism</td><td>Utility methods on existing types</td></tr>
+    </table>
+    </div>
+    <h3>Interface vs Abstract Class — Quick Decider</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Need</th><th>Use</th></tr>
+      <tr><td>Multiple implementations + mockability</td><td>Interface</td></tr>
+      <tr><td>Shared state (fields) across subclasses</td><td>Abstract class</td></tr>
+      <tr><td>Constructor parameters in base</td><td>Abstract class</td></tr>
+      <tr><td>Multiple "contracts" on one class</td><td>Multiple interfaces</td></tr>
+      <tr><td>Default method logic + contract</td><td>Either (interface has defaults since Kotlin/Java 8)</td></tr>
+    </table>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Forgetting open on a class that needs to be subclassed</h3>
+    <pre><code><span class="cm">// ❌ BAD — Hilt proxy / Mockito subclassing will fail at runtime</span>
+<span class="kw">class</span> <span class="cl">BaseViewModel</span> : <span class="cl">ViewModel</span>()  <span class="cm">// final — cannot mock or proxy</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD</span>
+<span class="kw">open class</span> <span class="cl">BaseViewModel</span> : <span class="cl">ViewModel</span>()</code></pre>
+
+    <h3>Leaking implementation through public visibility</h3>
+    <pre><code><span class="cm">// ❌ BAD — implementation class is public; other modules can depend on it directly</span>
+<span class="kw">class</span> <span class="cl">UserRepositoryImpl</span> : <span class="cl">UserRepository</span> { ... }  <span class="cm">// public by default</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — internal hides it from other modules; only Hilt module sees it</span>
+<span class="kw">internal class</span> <span class="cl">UserRepositoryImpl</span> : <span class="cl">UserRepository</span> { ... }</code></pre>
+
+    <h3>init block ordering trap</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">Foo</span>(<span class="kw">val</span> x: <span class="cl">Int</span>) {
+    <span class="kw">val</span> doubled = x * <span class="nu">2</span>   <span class="cm">// ✅ property initializers run top-to-bottom</span>
+
+    <span class="kw">init</span> {
+        <span class="cm">// ❌ BAD: if 'tripled' is declared AFTER this init block,</span>
+        <span class="cm">// accessing it here throws UninitializedPropertyAccessException</span>
+        <span class="fn">println</span>(tripled)
+    }
+
+    <span class="kw">val</span> tripled = x * <span class="nu">3</span>   <span class="cm">// declared AFTER init — not yet initialized when init runs</span>
+}</code></pre>
+    <p>Property initializers and <code>init</code> blocks run in <strong>declaration order</strong>. Never access a property in an <code>init</code> block that is declared after it.</p>
+
+    <h3>Abstract class vs interface — wrong choice</h3>
+    <pre><code><span class="cm">// ❌ BAD — abstract class used as a pure contract (no state, no constructors)</span>
+<span class="kw">abstract class</span> <span class="cl">UserRepository</span> {
+    <span class="kw">abstract suspend fun</span> <span class="fn">getUser</span>(id: <span class="cl">String</span>): <span class="cl">User</span>
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — interface is the right tool for a pure contract</span>
+<span class="kw">interface</span> <span class="cl">UserRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">getUser</span>(id: <span class="cl">String</span>): <span class="cl">User</span>
+}
+<span class="cm">// Benefit: implementation can implement multiple interfaces; can be mocked</span></code></pre>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Classes are final by default — only add <code>open</code> when inheritance is deliberately designed and documented.</li>
+      <li>Keep implementation classes <code>internal</code> in multi-module apps — expose only interfaces across module boundaries.</li>
+      <li>Prefer interfaces for cross-layer contracts (Repository, Service); abstract classes for shared state (BaseViewModel).</li>
+      <li>Use <code>protected</code> for base class helpers intended only for subclasses — don't make them <code>public</code>.</li>
+      <li>Prefer constructor injection — Hilt's <code>@Inject constructor</code> documents all dependencies explicitly.</li>
+      <li>Declare properties before the <code>init</code> block that needs them — or initialize them in the <code>init</code> block itself.</li>
+      <li>Prefer composition over inheritance beyond 1–2 levels deep.</li>
+    </ol>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div>7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Kotlin's OOP differs from Java in one critical way: classes are final by default. You must explicitly mark a class <code>open</code> to allow subclassing. This enforces 'design for inheritance or prohibit it.' For contracts, I use interfaces — they support multiple implementations, default methods, and are mockable. For shared state and behaviour, I use abstract classes. Visibility-wise, I use <code>internal</code> heavily in multi-module apps to hide implementation classes from other modules, exposing only the interface."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Three areas stand out in Kotlin OOP compared to Java.<br><br>
+      First, final-by-default. In Java, any class can be subclassed unless you mark it <code>final</code>. In Kotlin it's the opposite — you have to opt-in with <code>open</code>. This is an intentional design decision that aligns with Clean Architecture: use cases, repository implementations, and most concrete classes should not be extended — they should be replaced or wrapped.<br><br>
+      Second, interface vs abstract class. I use interfaces for cross-layer contracts — <code>UserRepository</code>, <code>AnalyticsTracker</code> — because they're mockable, support multiple implementations, and implementations can implement multiple interfaces. I use abstract classes when I need shared state: a <code>BaseViewModel</code> with a <code>protected _error: SharedFlow</code>, or a <code>BaseUseCase&lt;P,R&gt;</code> that wraps execute() with error handling once for all use cases.<br><br>
+      Third, visibility in multi-module apps. <code>internal</code> is the key modifier. Repository implementations are <code>internal</code> — the feature module only sees the interface. Only Hilt's module sees the implementation. This enforces the Dependency Inversion Principle at the module level."
+    </div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>Classes are <strong>final by default</strong> in Kotlin — must explicitly mark <code>open</code> to allow inheritance</div></div>
+      <div class="must-item"><div class="must-num">2</div><div>Interface for pure contracts (no state); abstract class for shared state + behaviour (has constructor, fields)</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><code>internal</code> visibility = visible within the same Gradle module — key for multi-module encapsulation</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Kotlin has no package-private — use <code>internal</code> where Java would use package-private</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>Primary constructor in class header; <code>init</code> blocks run in declaration order after primary constructor</div></div>
+      <div class="must-item"><div class="must-num">6</div><div>Interface properties have no backing field — only an abstract getter (or custom getter with a default)</div></div>
+      <div class="must-item"><div class="must-num">7</div><div>Prefer composition over inheritance beyond 2 levels — Kotlin <code>by</code> delegation makes composition clean</div></div>
+    </div>
+
+    <h3>Do NOT Go Deeper Unless Asked</h3>
+    <ul>
+      <li>JVM bytecode for Kotlin interfaces with default methods (DefaultImpls class)</li>
+      <li>Kotlin's delegation (<code>by</code>) internals — covered in 1G</li>
+      <li>Data classes, sealed classes, objects — covered in 1E</li>
+    </ul>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr><td>Why are Kotlin classes final by default?</td><td>Enforces "design and document for inheritance, or prohibit it" (Effective Java Item 19). Prevents accidental subclassing that breaks invariants. Aligns with Kotlin's philosophy of explicit opt-in for unsafe operations.</td></tr>
+      <tr><td>Can an interface have a constructor in Kotlin?</td><td>No. Interfaces cannot have constructors or backing fields. If you need constructor parameters, use an abstract class. Interface properties are abstract getters (or have custom getters) — no stored state.</td></tr>
+      <tr><td>What's the difference between <code>internal</code> and <code>private</code>?</td><td><code>private</code> on a class member = visible only within that class. <code>private</code> on a top-level declaration = visible only within that file. <code>internal</code> = visible within the same Gradle module — used to hide implementation classes from other modules.</td></tr>
+      <tr><td>Can a Kotlin class implement multiple interfaces?</td><td>Yes — unlike abstract classes, a class can implement multiple interfaces. If two interfaces have the same default method, the implementing class must override it and explicitly call which super it wants.</td></tr>
+      <tr><td>What happens if two interfaces both provide a default for the same method?</td><td>Compile error — the implementing class must override the method and call <code>super&lt;InterfaceName&gt;.method()</code> to disambiguate.</td></tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "In a multi-module Clean Architecture, I combine Kotlin's visibility system with Hilt's DI to enforce the Dependency Inversion Principle at the build-system level. The <code>:data</code> module exposes only <code>public interface UserRepository</code>. The implementation <code>UserRepositoryImpl</code> is <code>internal</code> — literally impossible for the <code>:feature</code> module to reference it directly. Hilt's module in <code>:data</code> binds them. This means you get compile-time enforcement of 'depend on abstractions, not concretions' — not just a convention. That's a stronger guarantee than any code review."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>CLASS DEFAULTS</h4>
+        <pre><code>class Foo      // final, public
+open class Foo // extensible
+abstract class Foo // no instantiate
+// Members also final by default
+open fun bar() // can override
+final fun baz() // cannot override</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CONSTRUCTORS</h4>
+        <pre><code>class Foo(val x: Int) // primary
+// init runs after primary
+init { require(x > 0) }
+// secondary must delegate
+constructor(s: String) : this(s.toInt())
+// prefer default args over secondary</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>INTERFACE vs ABSTRACT</h4>
+        <pre><code>Interface:
+  - no constructor, no backing fields
+  - multiple implementations
+  - mockable / fake-able
+  - default methods OK
+
+Abstract class:
+  - has constructor + state
+  - single inheritance
+  - template method pattern</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>VISIBILITY</h4>
+        <pre><code>public    → everywhere (default)
+internal  → same Gradle module
+protected → class + subclasses
+private   → class only (or file)
+// No package-private in Kotlin
+// Use internal for module encap</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ANDROID PATTERNS</h4>
+        <pre><code>interface UserRepository   // contract
+internal class UserRepositoryImpl // hidden
+open class BaseViewModel          // extensible
+abstract class BaseUseCase<P,R>  // template
+@HiltViewModel class PayVM       // final+DI</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY GOTCHAS</h4>
+        <pre><code>final-by-default → add open to allow mock
+internal → same module, not same package
+init order = declaration order
+interface property = no backing field
+2 interfaces same default → must override
+composition > deep inheritance</code></pre>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions (Self-Check)</div>
+    <div class="callout callout-yellow"><div class="callout-label">How to use</div>Answer first, then reveal.</div>
+
+    <h3>Basic</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B1 — What is the default visibility of a Kotlin class and its members? How does it differ from Java?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">In Kotlin, the default visibility is <strong>public</strong> (unlike Java where it's package-private). However, classes in Kotlin are <strong>final by default</strong> (unlike Java where they're open/extensible). To allow subclassing in Kotlin you must mark the class <code>open</code>. Java requires <code>final</code> to prohibit subclassing — the opposite approach.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B2 — What is the <code>init</code> block? When does it run?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">The <code>init</code> block is a body of code that runs as part of the primary constructor, immediately after property initializers. Multiple <code>init</code> blocks are allowed — they run in top-to-bottom declaration order, interleaved with property initializers. Use it for validation (<code>require()</code>), complex initialization that can't be expressed in a single expression, or initialization that depends on constructor parameters.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">B3 — What is the difference between <code>interface</code> and <code>abstract class</code> in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Interface:</strong> no constructors, no backing fields (only abstract getters), can have default method implementations, a class can implement multiple interfaces.<br><br>
+        <strong>Abstract class:</strong> can have constructors, backing fields (actual state), both abstract and concrete methods. A class can only extend one abstract class.<br><br>
+        Use interface for pure contracts (testability, DI); use abstract class when shared state or constructor parameters are needed.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I1 — What does <code>internal</code> mean? How is it different from <code>private</code>? Give an Android multi-module example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><code>internal</code> means visible within the same Gradle module. <code>private</code> on a class member means visible only within that class; on a top-level declaration it means visible only within that file.<br><br>
+      Multi-module example: In <code>:data</code> module, <code>UserRepositoryImpl</code> is marked <code>internal</code>. The <code>:feature-profile</code> module cannot reference it directly even though it depends on <code>:data</code>. It can only use the <code>public interface UserRepository</code>. Hilt's module in <code>:data</code> (which is in the same module as the impl) binds the interface to the implementation.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I2 — (Coding) What is wrong with this code and how do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">class</span> <span class="cl">Config</span>(<span class="kw">val</span> env: <span class="cl">String</span>) {
+    <span class="kw">init</span> {
+        <span class="fn">println</span>(label)   <span class="cm">// ❌ — 'label' declared AFTER this init block</span>
+    }
+    <span class="kw">val</span> label = <span class="str">"$env config"</span>
+}</code></pre>
+      <strong>Problem:</strong> Property initializers and <code>init</code> blocks run in declaration order. <code>label</code> is declared after the <code>init</code> block, so when <code>init</code> runs, <code>label</code> has not been initialized yet → <code>UninitializedPropertyAccessException</code> at runtime.<br><br>
+      <strong>Fix:</strong> Move <code>label</code> before the <code>init</code> block, or access it in a later <code>init</code> block:
+<pre><code><span class="kw">class</span> <span class="cl">Config</span>(<span class="kw">val</span> env: <span class="cl">String</span>) {
+    <span class="kw">val</span> label = <span class="str">"$env config"</span>  <span class="cm">// declared first</span>
+    <span class="kw">init</span> { <span class="fn">println</span>(label) }    <span class="cm">// ✅ now initialized</span>
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I3 — Can a Kotlin class implement two interfaces that both define a default implementation for the same method? What happens?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Yes, a class can implement two such interfaces, but if both provide a default implementation for the same method, the implementing class <strong>must</strong> override that method — otherwise it's a compile error. Inside the override, you can delegate to either interface's default with <code>super&lt;InterfaceName&gt;.method()</code>:
+<pre><code><span class="kw">interface</span> <span class="cl">A</span> { <span class="kw">fun</span> <span class="fn">greet</span>() = <span class="fn">println</span>(<span class="str">"Hello from A"</span>) }
+<span class="kw">interface</span> <span class="cl">B</span> { <span class="kw">fun</span> <span class="fn">greet</span>() = <span class="fn">println</span>(<span class="str">"Hello from B"</span>) }
+<span class="kw">class</span> <span class="cl">C</span> : <span class="cl">A</span>, <span class="cl">B</span> {
+    <span class="kw">override fun</span> <span class="fn">greet</span>() { <span class="kw">super</span>&lt;<span class="cl">A</span>&gt;.<span class="fn">greet</span>() }  <span class="cm">// must disambiguate</span>
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">I4 — When would you use a secondary constructor vs default arguments in Kotlin?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">Almost always prefer <strong>default arguments</strong> — they're more concise, idiomatic, and work with named arguments. Secondary constructors should be used when: (1) the class needs completely different initialization paths that can't be captured by defaults (e.g., constructing from a JSON string vs individual fields); (2) interoperability with Java requires overloaded constructors (<code>@JvmOverloads</code> is the cleaner alternative); (3) you're subclassing a Java class with multiple constructors and need to delegate to different parent constructors.</div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S1 — (Scenario) A teammate made <code>UserRepositoryImpl</code> public. What are the risks? How do you enforce the right pattern?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Risks:</strong> (1) Feature modules can depend directly on the implementation — violating DIP. If the implementation changes (e.g., adding a constructor parameter), every direct user breaks. (2) Tests may use the concrete class instead of the interface, making them harder to fake. (3) The implementation's internal details (caching, retries) are now part of the "public API" — any refactor becomes a breaking change.<br><br>
+      <strong>Fix:</strong> Mark <code>UserRepositoryImpl</code> as <code>internal</code>. The Hilt module that binds it is in the same module so it still works. Add a lint rule or ArchUnit test to prevent cross-module direct usage of impl classes. In code review, flag any import of an <code>Impl</code> class in a feature module.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S2 — Design a <code>BaseUseCase</code> abstract class that wraps all use cases in a <code>Result</code> with correct CancellationException handling.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">abstract class</span> <span class="cl">BaseUseCase</span>&lt;<span class="kw">in</span> <span class="cl">P</span>, <span class="kw">out</span> <span class="cl">R</span>&gt; {
+    <span class="cm">// Subclasses implement this — business logic only</span>
+    <span class="kw">protected abstract suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">P</span>): <span class="cl">R</span>
+
+    <span class="cm">// Callers use invoke() — gets error handling for free</span>
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(params: <span class="cl">P</span>): <span class="cl">Result</span>&lt;<span class="cl">R</span>&gt; = <span class="kw">try</span> {
+        <span class="cl">Result</span>.<span class="fn">success</span>(<span class="fn">execute</span>(params))
+    } <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+        <span class="kw">throw</span> e  <span class="cm">// CRITICAL: never swallow coroutine cancellation</span>
+    } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+        <span class="cl">Result</span>.<span class="fn">failure</span>(e)
+    }
+}
+
+<span class="cm">// Usage:</span>
+<span class="kw">class</span> <span class="cl">GetUserUseCase</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">UserRepository</span>
+) : <span class="cl">BaseUseCase</span>&lt;<span class="cl">String</span>, <span class="cl">User</span>&gt;() {
+    <span class="kw">override suspend fun</span> <span class="fn">execute</span>(params: <span class="cl">String</span>) = repo.<span class="fn">getUser</span>(params)
+}</code></pre>
+      Key point: <code>CancellationException</code> must be rethrown — swallowing it breaks coroutine cancellation throughout the scope.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="tq(this)">
+        <div class="quiz-q-text">S3 — When would you choose composition over inheritance for a ViewModel scenario? Give a concrete example.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a"><strong>Scenario:</strong> You have <code>BaseViewModel</code> with error handling, and now you need two orthogonal concerns: pagination logic and analytics tracking. You could add both to the base class or create a deep hierarchy — but that couples all ViewModels to pagination and analytics whether they need it or not.<br><br>
+      <strong>Composition approach:</strong>
+<pre><code><span class="cm">// Each concern is a separate class injected via constructor</span>
+<span class="kw">class</span> <span class="cl">PaginationController</span>(<span class="kw">private val</span> pageSize: <span class="cl">Int</span> = <span class="nu">20</span>) {
+    <span class="kw">fun</span> <span class="fn">nextPage</span>() = ...
+}
+
+<span class="kw">class</span> <span class="cl">AnalyticsDelegate</span> <span class="kw">@Inject constructor</span>(<span class="kw">private val</span> tracker: <span class="cl">Tracker</span>) {
+    <span class="kw">fun</span> <span class="fn">trackScreen</span>(name: <span class="cl">String</span>) = tracker.<span class="fn">track</span>(name)
+}
+
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ProductListViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> pagination: <span class="cl">PaginationController</span>,  <span class="cm">// composed</span>
+    <span class="kw">private val</span> analytics: <span class="cl">AnalyticsDelegate</span>        <span class="cm">// composed</span>
+) : <span class="cl">ViewModel</span>() { ... }</code></pre>
+      This is testable (mock each dependency independently), avoids a bloated base class, and each concern is independently reusable. Kotlin's <code>by</code> delegation can make this even cleaner by auto-delegating interface calls.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+<script>
+  const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  function show(id,num){
+    S.forEach(s=>document.getElementById(s).classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progressFill').style.width=Math.round(num/S.length*100)+'%';
+    document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});
+  }
+  function tq(el){
+    const a=el.nextElementSibling,ic=el.querySelector('.toggle-icon'),o=a.classList.contains('open');
+    a.classList.toggle('open',!o);ic.classList.toggle('open',!o);
+  }
+</script>
+</body>
+</html>

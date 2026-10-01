@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>34C — Math &amp; Recursion Coding | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(79,158,255,.12);border:1px solid rgba(79,158,255,.3);color:#4f9eff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:660px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-coding{background:rgba(79,158,255,.12);color:#4f9eff;border:1px solid rgba(79,158,255,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:940px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(79,158,255,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:#4f9eff;background:rgba(79,158,255,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:#4f9eff;}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">34C · Math &amp; Recursion</div>
+  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Fibonacci</button>
+  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Factorial</button>
+  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Prime Numbers</button>
+  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Sieve of Eratosthenes</button>
+  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Recursion Patterns</button>
+  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
+  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag">&#128187; Coding</div>
+    <h1><span>34C</span> — Math &amp; Recursion Coding (Kotlin)</h1>
+    <p class="hero-desc">Fibonacci (4 approaches), factorial (tailrec), prime checking, Sieve of Eratosthenes — complete Kotlin solutions with complexity analysis and Kotlin's tailrec keyword.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 34C</span>
+      <span class="badge badge-coding">Coding</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+    <h3>Math & Recursion in Interviews</h3>
+    <p>These are foundational problems that test recursion understanding, dynamic programming (memoization), and Kotlin's <code>tailrec</code> keyword. Every Android engineer should be able to write all four Fibonacci variants.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Problem</th><th>Best Approach</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Fibonacci</td><td>Iterative or memoized</td><td>O(n)</td><td>O(1) iterative</td></tr>
+      <tr><td>Factorial</td><td>tailrec</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>isPrime</td><td>Check up to √n</td><td>O(√n)</td><td>O(1)</td></tr>
+      <tr><td>Sieve of Eratosthenes</td><td>Boolean array marking</td><td>O(n log log n)</td><td>O(n)</td></tr>
+    </table></div>
+    <div class="callout callout-blue">
+      <div class="callout-label">Kotlin tailrec</div>
+      Kotlin's <code>tailrec</code> keyword converts a tail-recursive function to an iterative loop at compile time, eliminating stack overflow risk. The function's recursive call must be the last operation. This is a Kotlin-specific interview point.
+    </div>
+    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Fibonacci →</button></div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128257;</div>2. Fibonacci — Four Approaches</div>
+    <h3>All four approaches in one unit</h3>
+    <pre><code><span class="cm">// fib(0)=0, fib(1)=1, fib(n)=fib(n-1)+fib(n-2)</span>
+
+<span class="cm">// ===== Approach 1: Naive Recursive — O(2^n) time, O(n) stack =====</span>
+<span class="kw">fun</span> <span class="fn">fibRecursive</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="kw">return</span> n.<span class="fn">toLong</span>()
+    <span class="kw">return</span> <span class="fn">fibRecursive</span>(n - <span class="nu">1</span>) + <span class="fn">fibRecursive</span>(n - <span class="nu">2</span>)
+}
+<span class="cm">// ❌ Extremely slow: fib(50) takes minutes. Recomputes same values repeatedly.</span>
+
+<span class="cm">// ===== Approach 2: Memoized (Top-down DP) — O(n) time, O(n) space =====</span>
+<span class="kw">fun</span> <span class="fn">fibMemo</span>(n: <span class="cl">Int</span>, memo: <span class="cl">HashMap</span>&lt;<span class="cl">Int</span>, <span class="cl">Long</span>&gt; = <span class="fn">hashMapOf</span>()): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="kw">return</span> n.<span class="fn">toLong</span>()
+    <span class="kw">return</span> memo.<span class="fn">getOrPut</span>(n) { <span class="fn">fibMemo</span>(n - <span class="nu">1</span>, memo) + <span class="fn">fibMemo</span>(n - <span class="nu">2</span>, memo) }
+}
+<span class="cm">// Each subproblem computed once and cached. O(n) calls, O(n) cache.</span>
+
+<span class="cm">// ===== Approach 3: Iterative (Bottom-up DP) — O(n) time, O(1) space =====</span>
+<span class="kw">fun</span> <span class="fn">fibIterative</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="kw">return</span> n.<span class="fn">toLong</span>()
+    <span class="kw">var</span> prev = <span class="nu">0L</span>; <span class="kw">var</span> curr = <span class="nu">1L</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">2</span>..n) {
+        <span class="kw">val</span> next = prev + curr
+        prev = curr
+        curr = next
+    }
+    <span class="kw">return</span> curr
+}
+<span class="cm">// Best for most cases: O(n) time, O(1) space — no call stack, no cache.</span>
+
+<span class="cm">// ===== Approach 4: Tail Recursive (Kotlin tailrec) — O(n) time, O(1) space =====</span>
+<span class="kw">tailrec fun</span> <span class="fn">fibTailRec</span>(n: <span class="cl">Int</span>, a: <span class="cl">Long</span> = <span class="nu">0L</span>, b: <span class="cl">Long</span> = <span class="nu">1L</span>): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n == <span class="nu">0</span>) <span class="kw">return</span> a
+    <span class="kw">return</span> <span class="fn">fibTailRec</span>(n - <span class="nu">1</span>, b, a + b)   <span class="cm">// recursive call is the LAST operation</span>
+}
+<span class="cm">// Kotlin compiler converts this to a loop — no stack overflow, no extra space.</span>
+<span class="cm">// fibTailRec(5) = fibTailRec(4, 1, 1) = fibTailRec(3, 1, 2) = ...</span>
+
+<span class="cm">// Test all four:</span>
+<span class="kw">for</span> (n <span class="kw">in</span> <span class="nu">0</span>..<span class="nu">10</span>) {
+    <span class="fn">println</span>(<span class="str">"fib($n) = ${fibIterative(n)}"</span>)
+}
+<span class="cm">// 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55</span></code></pre>
+    <div class="table-wrap"><table>
+      <tr><th>Approach</th><th>Time</th><th>Space</th><th>Use when</th></tr>
+      <tr><td>Naive recursive</td><td>O(2^n)</td><td>O(n) stack</td><td>Never in production</td></tr>
+      <tr><td>Memoized</td><td>O(n)</td><td>O(n) cache</td><td>When pattern extends to 2D DP</td></tr>
+      <tr><td>Iterative</td><td>O(n)</td><td>O(1)</td><td>Best general solution</td></tr>
+      <tr><td>tailrec</td><td>O(n)</td><td>O(1)</td><td>Show Kotlin knowledge</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s3',3)">Next: Factorial →</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128257;</div>3. Factorial</div>
+    <pre><code><span class="cm">// factorial(0)=1, factorial(n) = n * factorial(n-1)</span>
+
+<span class="cm">// Recursive — O(n) time, O(n) stack space (StackOverflowError for large n)</span>
+<span class="kw">fun</span> <span class="fn">factorialRecursive</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="kw">return</span> <span class="nu">1L</span>
+    <span class="kw">return</span> n * <span class="fn">factorialRecursive</span>(n - <span class="nu">1</span>)
+}
+
+<span class="cm">// Iterative — O(n) time, O(1) space</span>
+<span class="kw">fun</span> <span class="fn">factorialIterative</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> {
+    <span class="kw">var</span> result = <span class="nu">1L</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">2</span>..n) result *= i
+    <span class="kw">return</span> result
+}
+
+<span class="cm">// tailrec — O(n) time, O(1) space (Kotlin converts to loop)</span>
+<span class="kw">tailrec fun</span> <span class="fn">factorialTailRec</span>(n: <span class="cl">Int</span>, acc: <span class="cl">Long</span> = <span class="nu">1L</span>): <span class="cl">Long</span> {
+    <span class="kw">if</span> (n <= <span class="nu">1</span>) <span class="kw">return</span> acc
+    <span class="kw">return</span> <span class="fn">factorialTailRec</span>(n - <span class="nu">1</span>, acc * n)   <span class="cm">// accumulator carries partial result</span>
+}
+
+<span class="cm">// Kotlin fold — functional style</span>
+<span class="kw">fun</span> <span class="fn">factorialFold</span>(n: <span class="cl">Int</span>): <span class="cl">Long</span> = (<span class="nu">2</span>..n).<span class="fn">fold</span>(<span class="nu">1L</span>) { acc, i -> acc * i }
+
+<span class="fn">println</span>(<span class="fn">factorialTailRec</span>(<span class="nu">10</span>))  <span class="cm">// 3628800</span>
+<span class="fn">println</span>(<span class="fn">factorialFold</span>(<span class="nu">10</span>))    <span class="cm">// 3628800</span>
+
+<span class="cm">// Note: Long overflows at factorial(21). For larger n, use BigInteger:</span>
+<span class="kw">fun</span> <span class="fn">factorialBig</span>(n: <span class="cl">Int</span>): <span class="cl">java.math.BigInteger</span> =
+    (<span class="nu">2</span>..n).<span class="fn">fold</span>(<span class="cl">java.math.BigInteger</span>.<span class="cl">ONE</span>) { acc, i -> acc * <span class="cl">BigInteger</span>.<span class="fn">valueOf</span>(i.<span class="fn">toLong</span>()) }</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s4',4)">Next: Prime Numbers →</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128257;</div>4. Prime Numbers — isPrime</div>
+    <pre><code><span class="cm">// Brute force: check all divisors from 2 to n-1 → O(n)</span>
+<span class="kw">fun</span> <span class="fn">isPrimeBrute</span>(n: <span class="cl">Int</span>): <span class="cl">Boolean</span> {
+    <span class="kw">if</span> (n &lt; <span class="nu">2</span>) <span class="kw">return false</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">2</span> until n) {
+        <span class="kw">if</span> (n % i == <span class="nu">0</span>) <span class="kw">return false</span>
+    }
+    <span class="kw">return true</span>
+}
+
+<span class="cm">// Optimal: check up to √n — O(√n)</span>
+<span class="cm">// Key insight: if n has a factor > √n, it must also have a factor < √n</span>
+<span class="kw">fun</span> <span class="fn">isPrime</span>(n: <span class="cl">Int</span>): <span class="cl">Boolean</span> {
+    <span class="kw">if</span> (n &lt; <span class="nu">2</span>) <span class="kw">return false</span>
+    <span class="kw">if</span> (n == <span class="nu">2</span>) <span class="kw">return true</span>
+    <span class="kw">if</span> (n % <span class="nu">2</span> == <span class="nu">0</span>) <span class="kw">return false</span>   <span class="cm">// even numbers > 2 are not prime</span>
+    <span class="kw">val</span> sqrtN = <span class="cl">Math</span>.<span class="fn">sqrt</span>(n.<span class="fn">toDouble</span>()).<span class="fn">toInt</span>()
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">3</span>..sqrtN <span class="kw">step</span> <span class="nu">2</span>) {  <span class="cm">// only odd divisors</span>
+        <span class="kw">if</span> (n % i == <span class="nu">0</span>) <span class="kw">return false</span>
+    }
+    <span class="kw">return true</span>
+}
+
+<span class="cm">// Tests</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(<span class="nu">2</span>))   <span class="cm">// true</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(<span class="nu">7</span>))   <span class="cm">// true</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(<span class="nu">12</span>))  <span class="cm">// false (12 = 2×6 = 3×4)</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(<span class="nu">1</span>))   <span class="cm">// false (1 is not prime by definition)</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(<span class="nu">0</span>))   <span class="cm">// false</span>
+<span class="fn">println</span>(<span class="fn">isPrime</span>(-<span class="nu">5</span>))  <span class="cm">// false</span>
+
+<span class="cm">// Why √n? If n=36: divisors are 1,2,3,4,6,9,12,18,36. √36=6.</span>
+<span class="cm">// Every divisor > 6 pairs with one < 6. Checking only up to 6 is sufficient.</span></code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s5',5)">Next: Sieve →</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128257;</div>5. Sieve of Eratosthenes</div>
+    <p>Find all prime numbers up to N in O(n log log n) time — much faster than calling isPrime(n) for each number.</p>
+    <pre><code><span class="kw">fun</span> <span class="fn">sieveOfEratosthenes</span>(n: <span class="cl">Int</span>): <span class="cl">List</span>&lt;<span class="cl">Int</span>&gt; {
+    <span class="kw">if</span> (n &lt; <span class="nu">2</span>) <span class="kw">return</span> <span class="fn">emptyList</span>()
+
+    <span class="kw">val</span> isPrime = <span class="cl">BooleanArray</span>(n + <span class="nu">1</span>) { <span class="kw">true</span> }   <span class="cm">// assume all prime</span>
+    isPrime[<span class="nu">0</span>] = <span class="kw">false</span>
+    isPrime[<span class="nu">1</span>] = <span class="kw">false</span>
+
+    <span class="cm">// For each prime p, mark all multiples of p as not prime</span>
+    <span class="kw">var</span> p = <span class="nu">2</span>
+    <span class="kw">while</span> (p * p &lt;= n) {
+        <span class="kw">if</span> (isPrime[p]) {
+            <span class="kw">var</span> multiple = p * p   <span class="cm">// start from p² (smaller multiples already marked)</span>
+            <span class="kw">while</span> (multiple &lt;= n) {
+                isPrime[multiple] = <span class="kw">false</span>
+                multiple += p
+            }
+        }
+        p++
+    }
+
+    <span class="kw">return</span> isPrime.<span class="fn">indices</span>.<span class="fn">filter</span> { isPrime[it] }
+}
+
+<span class="fn">println</span>(<span class="fn">sieveOfEratosthenes</span>(<span class="nu">30</span>))
+<span class="cm">// [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]</span>
+
+<span class="cm">// How it works:</span>
+<span class="cm">// 1. Mark all numbers 2..n as prime</span>
+<span class="cm">// 2. Start with p=2 (first prime)</span>
+<span class="cm">// 3. Mark all multiples of 2 (4, 6, 8...) as not prime</span>
+<span class="cm">// 4. Move to next unmarked number (3) — it's prime</span>
+<span class="cm">// 5. Mark all multiples of 3 (9, 12, 15...) — start from p² because</span>
+<span class="cm">//    smaller multiples (2×3=6, already marked by 2)</span>
+<span class="cm">// 6. Continue until p > √n</span>
+
+<span class="cm">// Complexity: O(n log log n) — faster than n×isPrime which is O(n√n)</span>
+<span class="cm">// Space: O(n) for the boolean array</span>
+
+<span class="cm">// Count primes up to n (LeetCode 204)</span>
+<span class="kw">fun</span> <span class="fn">countPrimes</span>(n: <span class="cl">Int</span>): <span class="cl">Int</span> = <span class="fn">sieveOfEratosthenes</span>(n - <span class="nu">1</span>).size</code></pre>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s6',6)">Next: Recursion Patterns →</button>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128257;</div>6. Recursion Patterns</div>
+    <h3>GCD (Greatest Common Divisor) — Euclidean Algorithm</h3>
+    <pre><code><span class="kw">tailrec fun</span> <span class="fn">gcd</span>(a: <span class="cl">Int</span>, b: <span class="cl">Int</span>): <span class="cl">Int</span> =
+    <span class="kw">if</span> (b == <span class="nu">0</span>) a <span class="kw">else</span> <span class="fn">gcd</span>(b, a % b)
+<span class="cm">// gcd(48, 18) = gcd(18, 12) = gcd(12, 6) = gcd(6, 0) = 6</span>
+
+<span class="kw">fun</span> <span class="fn">lcm</span>(a: <span class="cl">Int</span>, b: <span class="cl">Int</span>): <span class="cl">Int</span> = a / <span class="fn">gcd</span>(a, b) * b</code></pre>
+
+    <h3>Power (Fast Exponentiation)</h3>
+    <pre><code><span class="cm">// Naive: O(n). Fast: O(log n) via divide-and-conquer</span>
+<span class="kw">fun</span> <span class="fn">power</span>(base: <span class="cl">Double</span>, exp: <span class="cl">Int</span>): <span class="cl">Double</span> = <span class="kw">when</span> {
+    exp == <span class="nu">0</span>     -> <span class="nu">1.0</span>
+    exp &lt; <span class="nu">0</span>      -> <span class="nu">1.0</span> / <span class="fn">power</span>(base, -exp)
+    exp % <span class="nu">2</span> == <span class="nu">0</span> -> { <span class="kw">val</span> half = <span class="fn">power</span>(base, exp / <span class="nu">2</span>); half * half }
+    <span class="kw">else</span>         -> base * <span class="fn">power</span>(base, exp - <span class="nu">1</span>)
+}
+<span class="cm">// power(2.0, 10) = power(2, 5)*power(2,5) = 2*(power(2,2)*power(2,2)) ...</span></code></pre>
+
+    <h3>Sum of Digits (Recursive)</h3>
+    <pre><code><span class="kw">tailrec fun</span> <span class="fn">digitSum</span>(n: <span class="cl">Int</span>, acc: <span class="cl">Int</span> = <span class="nu">0</span>): <span class="cl">Int</span> =
+    <span class="kw">if</span> (n == <span class="nu">0</span>) acc <span class="kw">else</span> <span class="fn">digitSum</span>(n / <span class="nu">10</span>, acc + n % <span class="nu">10</span>)
+
+<span class="cm">// Iterative equivalent:</span>
+<span class="kw">fun</span> <span class="fn">digitSumIter</span>(n: <span class="cl">Int</span>): <span class="cl">Int</span> = n.<span class="fn">toString</span>().<span class="fn">sumOf</span> { it - <span class="str">'0'</span> }</code></pre>
+
+    <h3>tailrec Requirements</h3>
+    <ul>
+      <li>The recursive call must be the <strong>last operation</strong> in the function</li>
+      <li>Cannot have multiple recursive calls (Fibonacci naive doesn't qualify)</li>
+      <li>Use an accumulator parameter to carry state forward</li>
+      <li>Compiler will warn if <code>tailrec</code> is used but the function is not actually tail-recursive</li>
+    </ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127942;</div>7. Interview Framework</div>
+    <div class="callout callout-purple">
+      <div class="callout-label">Recursion Interview Template</div>
+      <strong>1)</strong> Write the naive recursive solution first → <strong>2)</strong> Identify the overlapping subproblems → <strong>3)</strong> Add memoization or convert to iterative → <strong>4)</strong> Mention tailrec if applicable. Always state base cases first.
+    </div>
+    <h3>Fibonacci: What to Say</h3>
+    <p><em>"The naive recursive approach is O(2^n) — it recomputes fib(n-2) once per call to fib(n-1). I'll optimize with memoization: store computed values in a HashMap. This reduces it to O(n) time and O(n) space. For the best solution, the iterative approach uses just two variables — O(n) time, O(1) space. In Kotlin, I can also use tailrec to write it recursively without stack overflow."</em></p>
+    <h3>isPrime: The √n Explanation</h3>
+    <p><em>"Every composite number n has a factor ≤ √n. If we haven't found a factor by √n, there is none. This reduces the search from n to √n iterations — so isPrime(1,000,000) requires only 1,000 checks instead of 1,000,000."</em></p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div>8. Quick Revision Sheet</div>
+    <div class="table-wrap"><table>
+      <tr><th>Problem</th><th>Approach</th><th>Time</th><th>Space</th></tr>
+      <tr><td>fib(n) naive</td><td>Recursive: fib(n-1)+fib(n-2)</td><td>O(2^n)</td><td>O(n)</td></tr>
+      <tr><td>fib(n) memoized</td><td>HashMap.getOrPut; top-down DP</td><td>O(n)</td><td>O(n)</td></tr>
+      <tr><td>fib(n) iterative</td><td>Two variables prev/curr; swap in loop</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>fib(n) tailrec</td><td>tailrec fun fib(n, a=0, b=1)</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>factorial tailrec</td><td>tailrec fun fact(n, acc=1L)</td><td>O(n)</td><td>O(1)</td></tr>
+      <tr><td>isPrime</td><td>Check divisors 3..√n, step 2</td><td>O(√n)</td><td>O(1)</td></tr>
+      <tr><td>Sieve up to n</td><td>BooleanArray; mark multiples from p²</td><td>O(n log log n)</td><td>O(n)</td></tr>
+    </table></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
+      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Practice Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why is the naive recursive Fibonacci O(2^n) and how does memoization fix it?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Naive recursive Fibonacci calls fib(n-1) and fib(n-2), each of which calls fib(n-2) and fib(n-3), etc. The call tree has ~2^n nodes because the same subproblems are recomputed many times (fib(2) is computed exponentially many times). Memoization stores the result of each fib(k) after first computation. When fib(k) is needed again, it's returned in O(1) from the cache. Total unique subproblems: n. Total time: O(n).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is tailrec in Kotlin and what are its requirements?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">tailrec tells the Kotlin compiler to optimize a tail-recursive function into a loop (iterative code). This prevents StackOverflowError for deep recursion. Requirements: (1) The recursive call must be the last operation — the return value must be the direct result of the recursive call with no further operations. (2) Cannot be used with multiple recursive calls (like naive Fibonacci). (3) Use an accumulator parameter to carry partial results forward. The compiler emits a warning if the function is not actually tail-recursive despite the annotation.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why do we only need to check divisors up to √n to determine if n is prime?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Every composite number n = a × b where a ≤ b. If a > √n, then b > √n too, and a × b > n — contradiction. So at least one of a or b must be ≤ √n. Therefore, if we haven't found a divisor by √n, n has no divisors and is prime. Example: n=36, √36=6. Divisors: 2×18, 3×12, 4×9, 6×6. The smaller factor in each pair is ≤ 6. Checking 2,3,4,5,6 is sufficient.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Why does the Sieve start marking at p² instead of 2p?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">All multiples of p smaller than p² were already marked by smaller primes. For example, when p=5: 2×5=10 was marked by p=2; 3×5=15 was marked by p=3; 4×5=20 was marked by p=2. The first new multiple that hasn't been marked yet is 5×5=25. Starting from p² avoids redundant work. Combined with the outer loop stopping at √n, this makes the sieve efficient: O(n log log n).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write the iterative Fibonacci without looking at the solution.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun fib(n: Int): Long { if (n &lt;= 1) return n.toLong(); var prev = 0L; var curr = 1L; repeat(n - 1) { val next = prev + curr; prev = curr; curr = next }; return curr }. Key: two variables rolling window. Each iteration: next = prev + curr, then shift: prev = curr, curr = next. After n-1 iterations, curr = fib(n).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What happens when factorial(21) is computed with Long?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Long overflows silently. Long.MAX_VALUE = 9,223,372,036,854,775,807. factorial(20) = 2,432,902,008,176,640,000 (fits). factorial(21) = 51,090,942,171,709,440,000 > Long.MAX_VALUE → wraps to a negative number. To handle large factorials, use BigInteger: fun factBig(n: Int) = (2..n).fold(BigInteger.ONE) { acc, i -> acc * BigInteger.valueOf(i.toLong()) }. Always mention this overflow risk in an interview.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write the GCD function using the Euclidean algorithm.</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">tailrec fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b). The Euclidean algorithm: gcd(a, b) = gcd(b, a mod b). When b reaches 0, a is the GCD. Example: gcd(48, 18) = gcd(18, 12) = gcd(12, 6) = gcd(6, 0) = 6. This is tail-recursive — the recursive call is the last operation — so tailrec applies. O(log min(a,b)) time.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">How would you find all prime factors of a number?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">fun primeFactors(n: Int): List&lt;Int&gt; { val factors = mutableListOf&lt;Int&gt;(); var num = n; var d = 2; while (d * d &lt;= num) { while (num % d == 0) { factors.add(d); num /= d }; d++ }; if (num > 1) factors.add(num); return factors }. Repeatedly divide by smallest divisors. 60 = 2×30 = 2×2×15 = 2×2×3×5. O(√n) time. The final if (num > 1) handles the case where the remaining num is a prime greater than √original.</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What is the space complexity of memoized Fibonacci vs iterative, and when does it matter?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Memoized: O(n) space for the HashMap cache + O(n) call stack. Iterative: O(1) space — just two variables. It matters for very large n (e.g., fib(100,000)) where memoized might use 100,000 HashMap entries plus 100,000 stack frames (risk of StackOverflowError). Iterative is safe for any n. In practice, for the interview, mention both and recommend iterative or tailrec for production use. Memoized is valuable when extending to 2D DP problems (grid paths, coin change).</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Write a function to check if a number is a perfect square without using sqrt().</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▼</span></div>
+      </div>
+      <div class="quiz-a"><div class="answer-box">Binary search approach: fun isPerfectSquare(n: Int): Boolean { if (n &lt; 0) return false; if (n == 0 || n == 1) return true; var lo = 1L; var hi = n.toLong() / 2; while (lo &lt;= hi) { val mid = lo + (hi - lo) / 2; val sq = mid * mid; when { sq == n.toLong() → return true; sq &lt; n → lo = mid + 1; else → hi = mid - 1 } }; return false }. O(log n) time. Use Long to avoid overflow for large n. Alternative: bitwise — perfect squares have odd counts of their Goldbach decomposition, but binary search is cleaner.</div></div>
+    </div>
+
+    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
+  </div>
+</main>
+</div>
+<script>
+function show(id,n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
+  const pct=Math.round((n/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+}
+function toggleQuiz(el){
+  const a=el.nextElementSibling;
+  const icon=el.querySelector('.toggle-icon');
+  a.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+</script>
+</body>
+</html>
