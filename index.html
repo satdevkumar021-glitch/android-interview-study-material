@@ -501,6 +501,7 @@ img { max-width: 100%; }
     <div class="search-dropdown" id="search-dd"></div>
   </div>
   <div class="tb-right">
+    <a href="roadmap.html" style="text-decoration:none;display:flex;align-items:center;gap:6px;background:rgba(124,106,247,0.12);border:1px solid rgba(124,106,247,0.3);color:#7c6af7;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;white-space:nowrap;">🗺 Study Roadmap</a>
     <div class="tb-stat" id="tb-stat-done">
       <span class="dot dot-green"></span>
       <span id="stat-done-txt">0 done</span>
@@ -549,8 +550,11 @@ img { max-width: 100%; }
             <span class="gradient">Complete Study Hub</span>
           </div>
           <div class="hero-sub">
-            90 production-depth topics — from Kotlin internals to system design.
+            97 production-depth topics — from Kotlin internals to system design.
             Built for Senior Android roles at top companies.
+          </div>
+          <div style="margin-bottom:14px;">
+            <a href="roadmap.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.4);color:#7c6af7;font-size:13px;font-weight:700;padding:8px 18px;border-radius:8px;text-decoration:none;">🗺 View Study Roadmap (4/8/12-week plans) →</a>
           </div>
           <div class="hero-badges">
             <span class="hero-badge hb-t1">⚡ Tier 1 — Core Priority</span>
@@ -581,9 +585,9 @@ img { max-width: 100%; }
       <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card" data-icon="📚">
-          <div class="sc-val">90</div>
+          <div class="sc-val">97</div>
           <div class="sc-label">Total Topics</div>
-          <div class="sc-sub">Across 35 sections</div>
+          <div class="sc-sub">Across 41 sections</div>
         </div>
         <div class="stat-card" data-icon="✅">
           <div class="sc-val" id="sc-completed">0</div>
@@ -617,7 +621,7 @@ img { max-width: 100%; }
       <div class="section-cards" id="section-cards"></div>
 
       <!-- All topics compact list -->
-      <div class="section-heading">🗂 All 90 Topics</div>
+      <div class="section-heading">🗂 All 97 Topics</div>
       <div class="topic-chips-grid" id="topic-chips"></div>
 
     </div>
@@ -794,6 +798,31 @@ const SECTIONS = [
     ]},
   { id:'s35', icon:'🤝', title:'Behavioral & Leadership', tier:1,
     topics:[{id:'35A',name:'Behavioral & Senior Leadership',file:'android_interview_pdfs/35A_Behavioral_Senior_Leadership.html',tags:['STAR','production bug','architecture decision','mentoring']}]},
+  { id:'s36', icon:'🤖', title:'AI Integration & Tools', tier:1,
+    topics:[
+      {id:'36A',name:'AI Integration in Android',file:'android_interview_pdfs/36A_AI_Integration_Android.html',tags:['ML Kit','TFLite','Gemini API','Gemini Nano','MediaPipe','on-device AI']},
+      {id:'36B',name:'AI Developer Tools',file:'android_interview_pdfs/36B_AI_Dev_Tools.html',tags:['Copilot','Cursor','Gemini in Android Studio','MCP','AI code review']},
+    ]},
+  { id:'s37', icon:'✨', title:'Compose Animation', tier:1,
+    topics:[
+      {id:'37A',name:'Jetpack Compose Animation',file:'android_interview_pdfs/37A_Compose_Animation.html',tags:['animateAsState','updateTransition','AnimatedVisibility','spring','tween','AnimatedContent']},
+    ]},
+  { id:'s38', icon:'🌐', title:'Kotlin Multiplatform', tier:2,
+    topics:[
+      {id:'38A',name:'Kotlin Multiplatform (KMP/KMM)',file:'android_interview_pdfs/38A_Kotlin_Multiplatform.html',tags:['expect/actual','commonMain','Ktor','SQLDelight','iOS','KMM']},
+    ]},
+  { id:'s39', icon:'♿', title:'Accessibility', tier:2,
+    topics:[
+      {id:'39A',name:'Android Accessibility',file:'android_interview_pdfs/39A_Accessibility.html',tags:['TalkBack','Semantics API','contentDescription','WCAG','touch target','LiveRegion']},
+    ]},
+  { id:'s40', icon:'📱', title:'Android New APIs', tier:1,
+    topics:[
+      {id:'40A',name:'Android New APIs (12–16)',file:'android_interview_pdfs/40A_Android_New_APIs.html',tags:['Predictive Back','Photo Picker','edge-to-edge','POST_NOTIFICATIONS','foregroundServiceType','Android 14/15']},
+    ]},
+  { id:'s41', icon:'🔬', title:'Advanced Debugging', tier:2,
+    topics:[
+      {id:'41A',name:'Advanced Android Debugging',file:'android_interview_pdfs/41A_Advanced_Debugging.html',tags:['Perfetto','Memory Profiler','LeakCanary','StrictMode','Trace','App Startup','Baseline Profiles']},
+    ]},
 ];
 
 // Flat topic list

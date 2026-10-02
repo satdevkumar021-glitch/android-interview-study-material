@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>40A — Android New APIs (Android 12–16) | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">40A · Android New APIs (12–16)</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>40A</span> — Android New APIs (Android 12–16)</h1>
+    <p class="hero-desc">Key new APIs and behavioral changes in Android 12/13/14/15/16: Predictive Back, Photo Picker, Health Connect, per-app language, Credential Manager, edge-to-edge.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 40A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1 — Current APIs</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>Why This Matters</h3>
+    <p>Each Android release brings APIs and <strong>behavioral changes that break existing apps</strong>. Senior developers must know what changed, what broke, and how to adapt before bumping <code>targetSdkVersion</code>.</p>
+
+    <h3>Key Releases</h3>
+    <ul>
+      <li><strong>Android 12 (S) — API 31/32:</strong> Splash Screen API mandatory, exported attribute crash, exact alarms restricted</li>
+      <li><strong>Android 13 (T) — API 33:</strong> POST_NOTIFICATIONS runtime permission, photo picker, per-app language, granular media permissions</li>
+      <li><strong>Android 14 (U) — API 34:</strong> Foreground service type mandatory, predictive back, health connect, partial media access</li>
+      <li><strong>Android 15 (V) — API 35:</strong> Edge-to-edge enforcement, PDF viewer, improved NFC, app archiving</li>
+      <li><strong>Android 16 (W) — API 36 (upcoming):</strong> Further edge-to-edge hardening, adaptive refresh rate, Health &amp; Fitness API updates</li>
+    </ul>
+
+    <h3>Impact Areas</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Area</th><th>Key Changes</th></tr>
+      <tr><td>Privacy / Permissions</td><td>POST_NOTIFICATIONS, granular media, partial photo access</td></tr>
+      <tr><td>UI / UX</td><td>Splash Screen, edge-to-edge, predictive back gesture</td></tr>
+      <tr><td>Background Processing</td><td>Exact alarms restricted, foreground service types required</td></tr>
+      <tr><td>Security</td><td>android:exported required, Credential Manager</td></tr>
+    </table>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Every targetSdk bump is a <strong>compatibility contract update</strong>. You're telling Android "my app understands the behavioral changes up to API X". Never bump targetSdk without running the full behavioral-change checklist for that release.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works — API by API</div>
+
+    <h3>Android 12 — API 31/32</h3>
+    <h4>Splash Screen API (Mandatory)</h4>
+    <p>All apps launching on Android 12+ show a system splash screen. You must adopt the API to customize it; without it, the system generates a generic one from your app icon.</p>
+    <pre><code><span class="cm">// build.gradle</span>
+implementation(<span class="str">"androidx.core:core-splashscreen:1.0.1"</span>)
+
+<span class="cm">// themes.xml</span>
+&lt;style name=<span class="str">"Theme.App.Starting"</span> parent=<span class="str">"Theme.SplashScreen"</span>&gt;
+    &lt;item name=<span class="str">"windowSplashScreenBackground"</span>&gt;@color/splash_bg&lt;/item&gt;
+    &lt;item name=<span class="str">"windowSplashScreenAnimatedIcon"</span>&gt;@drawable/ic_logo&lt;/item&gt;
+    &lt;item name=<span class="str">"postSplashScreenTheme"</span>&gt;@style/Theme.App&lt;/item&gt;
+&lt;/style&gt;
+
+<span class="cm">// MainActivity.kt</span>
+<span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">val</span> splashScreen = <span class="fn">installSplashScreen</span>()
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="cm">// keep splash visible while loading data</span>
+        splashScreen.<span class="fn">setKeepOnScreenCondition</span> { viewModel.isLoading.value }
+        <span class="fn">setContent</span> { <span class="cl">MyApp</span>() }
+    }
+}</code></pre>
+
+    <h4>android:exported — Required (Crash Risk)</h4>
+    <p>Apps targeting API 31+ with Activities, Services, or BroadcastReceivers that have Intent filters <strong>must</strong> declare <code>android:exported</code> explicitly. Missing it causes a build failure or install crash.</p>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml — must be explicit --&gt;</span>
+&lt;activity
+    android:name=<span class="str">".MainActivity"</span>
+    android:exported=<span class="str">"true"</span>&gt;      <span class="cm">&lt;!-- launcher activity: true --&gt;</span>
+    &lt;intent-filter&gt;...&lt;/intent-filter&gt;
+&lt;/activity&gt;
+
+&lt;receiver
+    android:name=<span class="str">".MyReceiver"</span>
+    android:exported=<span class="str">"false"</span>&gt;    <span class="cm">&lt;!-- internal: false --&gt;</span>
+    &lt;intent-filter&gt;...&lt;/intent-filter&gt;
+&lt;/receiver&gt;</code></pre>
+
+    <h4>Exact Alarms — SCHEDULE_EXACT_ALARM</h4>
+    <p>Apps must request the <code>SCHEDULE_EXACT_ALARM</code> permission or use <code>canScheduleExactAlarms()</code> to check at runtime. Most apps should use inexact alarms instead.</p>
+
+    <h3>Android 13 — API 33</h3>
+    <h4>POST_NOTIFICATIONS — Runtime Permission</h4>
+    <pre><code><span class="cm">// Request POST_NOTIFICATIONS before showing any notification</span>
+<span class="kw">val</span> notificationPermission = <span class="fn">rememberLauncherForActivityResult</span>(
+    <span class="cl">ActivityResultContracts</span>.<span class="cl">RequestPermission</span>()
+) { isGranted ->
+    <span class="kw">if</span> (!isGranted) <span class="fn">showPermissionRationale</span>()
+}
+
+<span class="fn">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+    <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.TIRAMISU) {
+        notificationPermission.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS)
+    }
+}</code></pre>
+
+    <h4>Photo / Video Picker (System Picker)</h4>
+    <pre><code><span class="cm">// Uses system picker — no READ_MEDIA_* permission needed</span>
+<span class="kw">val</span> photoPicker = <span class="fn">rememberLauncherForActivityResult</span>(
+    <span class="cl">ActivityResultContracts</span>.<span class="cl">PickVisualMedia</span>()
+) { uri ->
+    uri<span class="kw">?.</span><span class="fn">let</span> { <span class="fn">handleSelectedPhoto</span>(it) }
+}
+
+photoPicker.<span class="fn">launch</span>(<span class="cl">PickVisualMediaRequest</span>(<span class="cl">ActivityResultContracts</span>.<span class="cl">PickVisualMedia</span>.ImageOnly))</code></pre>
+
+    <h4>Granular Media Permissions</h4>
+    <p><code>READ_EXTERNAL_STORAGE</code> is deprecated on API 33+. Use granular permissions instead:</p>
+    <ul>
+      <li><code>READ_MEDIA_IMAGES</code> — access images</li>
+      <li><code>READ_MEDIA_VIDEO</code> — access videos</li>
+      <li><code>READ_MEDIA_AUDIO</code> — access audio</li>
+    </ul>
+
+    <h4>Per-App Language</h4>
+    <pre><code><span class="cm">// Set per-app locale (API 33+ native, backported via AppCompat)</span>
+<span class="cl">AppCompatDelegate</span>.<span class="fn">setApplicationLocales</span>(
+    <span class="cl">LocaleListCompat</span>.<span class="fn">forLanguageTags</span>(<span class="str">"hi"</span>)  <span class="cm">// Hindi</span>
+)
+<span class="cm">// System language picker in Settings > App language from Android 13+</span></code></pre>
+
+    <h3>Android 14 — API 34</h3>
+    <h4>Foreground Service Type — Required</h4>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml — must declare type --&gt;</span>
+&lt;service
+    android:name=<span class="str">".SyncService"</span>
+    android:foregroundServiceType=<span class="str">"dataSync"</span>
+    android:exported=<span class="str">"false"</span> /&gt;
+
+<span class="cm">// Service.kt — must pass type when starting</span>
+<span class="kw">class</span> <span class="cl">SyncService</span> : <span class="cl">Service</span>() {
+    <span class="kw">override fun</span> <span class="fn">onStartCommand</span>(intent: <span class="cl">Intent</span>?, flags: <span class="cl">Int</span>, startId: <span class="cl">Int</span>): <span class="cl">Int</span> {
+        <span class="kw">val</span> notification = <span class="fn">buildForegroundNotification</span>()
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            <span class="fn">startForeground</span>(NOTIF_ID, notification,
+                <span class="cl">ServiceInfo</span>.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } <span class="kw">else</span> {
+            <span class="fn">startForeground</span>(NOTIF_ID, notification)
+        }
+        <span class="kw">return</span> START_STICKY
+    }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Breaking Change</div>
+      Missing <code>foregroundServiceType</code> on Android 14+ throws <code>ForegroundServiceStartNotAllowedException</code> or <code>MissingForegroundServiceTypeException</code>. This silently broke many apps upgrading to targetSdk 34.
+    </div>
+
+    <h4>Predictive Back Gesture</h4>
+    <pre><code><span class="cm">// Fragment with unsaved changes — intercept back gesture</span>
+<span class="kw">class</span> <span class="cl">PaymentFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="kw">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="cl">View</span>, savedInstanceState: <span class="cl">Bundle</span>?) {
+        requireActivity().onBackPressedDispatcher
+            .<span class="fn">addCallback</span>(viewLifecycleOwner) {
+                <span class="kw">if</span> (hasUnsavedChanges) {
+                    <span class="fn">showDiscardDialog</span>()
+                } <span class="kw">else</span> {
+                    isEnabled = <span class="kw">false</span>
+                    requireActivity().onBackPressedDispatcher.<span class="fn">onBackPressed</span>()
+                }
+            }
+    }
+}</code></pre>
+
+    <h4>Health Connect</h4>
+    <pre><code><span class="cm">// Read steps from Health Connect</span>
+<span class="kw">val</span> client = <span class="cl">HealthConnectClient</span>.<span class="fn">getOrCreate</span>(context)
+
+<span class="kw">val</span> response = client.<span class="fn">readRecords</span>(
+    <span class="cl">ReadRecordsRequest</span>(
+        recordType = <span class="cl">StepsRecord</span>::<span class="kw">class</span>,
+        timeRangeFilter = <span class="cl">TimeRangeFilter</span>.<span class="fn">between</span>(start, end)
+    )
+)
+<span class="kw">val</span> totalSteps = response.records.<span class="fn">sumOf</span> { it.count }</code></pre>
+
+    <h3>Android 15 — API 35</h3>
+    <h4>Edge-to-Edge (Mandatory)</h4>
+    <pre><code><span class="cm">// Must call enableEdgeToEdge() — content renders behind system bars</span>
+<span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">enableEdgeToEdge</span>()  <span class="cm">// WindowCompat.setDecorFitsSystemWindows(window, false)</span>
+        <span class="fn">setContent</span> {
+            <span class="cl">MyTheme</span> {
+                <span class="cl">Scaffold</span>(
+                    modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()
+                ) { innerPadding ->
+                    <span class="cm">// innerPadding applies WindowInsets for system bars</span>
+                    <span class="cl">MyApp</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+<span class="cm">// For View-based layouts — handle insets manually</span>
+<span class="cl">ViewCompat</span>.<span class="fn">setOnApplyWindowInsetsListener</span>(binding.root) { view, insets ->
+    <span class="kw">val</span> systemBars = insets.<span class="fn">getInsets</span>(<span class="cl">WindowInsetsCompat</span>.<span class="cl">Type</span>.<span class="fn">systemBars</span>())
+    view.<span class="fn">setPadding</span>(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+    insets
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. When to Use — Migration Priority</div>
+
+    <h3>Must Fix (Breaking / App Crash)</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>API / Change</th><th>Target SDK</th><th>What Breaks Without It</th></tr>
+      <tr><td><code>android:exported</code></td><td>31+</td><td>App won't install or crashes on launch</td></tr>
+      <tr><td><code>foregroundServiceType</code></td><td>34+</td><td><code>ForegroundServiceStartNotAllowedException</code></td></tr>
+      <tr><td>Edge-to-edge insets</td><td>35+</td><td>UI hidden behind nav bar / status bar</td></tr>
+      <tr><td><code>POST_NOTIFICATIONS</code> permission</td><td>33+</td><td>All push notifications silently dropped</td></tr>
+      <tr><td>Granular media permissions</td><td>33+</td><td><code>SecurityException</code> on media access</td></tr>
+    </table>
+    </div>
+
+    <h3>Should Migrate (UX Degradation)</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>API / Change</th><th>Why</th></tr>
+      <tr><td>Splash Screen API</td><td>Without it, system generates generic splash — no branding control</td></tr>
+      <tr><td>Photo Picker</td><td>Avoids requesting broad storage permission; better UX</td></tr>
+      <tr><td>Predictive Back</td><td>Without it, no back-preview animation on Android 14+</td></tr>
+      <tr><td>Per-app language</td><td>Users can set language in Settings — if not supported, setting has no effect</td></tr>
+    </table>
+    </div>
+
+    <h3>When to Use Each API</h3>
+    <ul>
+      <li><strong>Photo Picker:</strong> Any feature requiring user to select media — use it instead of file picker + storage permission. Backported to Android 4.4.</li>
+      <li><strong>Health Connect:</strong> Fitness/health features. Replaces Google Fit API. Use <code>androidx.health.connect</code>.</li>
+      <li><strong>Credential Manager:</strong> Login flows. Replaces SmartLock, Autofill with single unified API supporting passkeys, passwords, federated login.</li>
+      <li><strong>Per-app language:</strong> Any app with language selection feature. Use <code>AppCompatDelegate.setApplicationLocales()</code>.</li>
+      <li><strong>Predictive Back:</strong> Any screen with custom back handling (forms, media playback, wizards).</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Senior Practice</div>
+      Create a per-release migration checklist tied to your CI pipeline. Each <code>targetSdk</code> bump should trigger a specific test suite covering the behavioral changes of that API level.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example — targetSdk 33→35 Migration</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      E-commerce app migrating from targetSdk 33 to targetSdk 35. Shows every required change, in order of priority.
+    </div>
+
+    <h3>Step 1 — Update build.gradle</h3>
+    <pre><code>android {
+    compileSdk = <span class="nu">35</span>
+    defaultConfig {
+        targetSdk = <span class="nu">35</span>
+        minSdk = <span class="nu">24</span>
+    }
+}</code></pre>
+
+    <h3>Step 2 — Fix android:exported (API 31, already done at SDK 33, verify all components)</h3>
+    <pre><code><span class="cm">&lt;!-- Verify every component with an intent-filter has explicit exported --&gt;</span>
+&lt;activity android:name=<span class="str">".DeepLinkActivity"</span> android:exported=<span class="str">"true"</span>&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=<span class="str">"android.intent.action.VIEW"</span>/&gt;
+        &lt;category android:name=<span class="str">"android.intent.category.DEFAULT"</span>/&gt;
+        &lt;data android:scheme=<span class="str">"myapp"</span>/&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;</code></pre>
+
+    <h3>Step 3 — Add Foreground Service Types (API 34)</h3>
+    <pre><code><span class="cm">&lt;!-- Order sync service --&gt;</span>
+&lt;service android:name=<span class="str">".OrderSyncService"</span>
+         android:foregroundServiceType=<span class="str">"dataSync"</span>
+         android:exported=<span class="str">"false"</span>/&gt;
+
+<span class="cm">&lt;!-- Location-tracking delivery service --&gt;</span>
+&lt;service android:name=<span class="str">".DeliveryTrackingService"</span>
+         android:foregroundServiceType=<span class="str">"location"</span>
+         android:exported=<span class="str">"false"</span>/&gt;</code></pre>
+
+    <h3>Step 4 — Enable Edge-to-Edge (API 35)</h3>
+    <pre><code><span class="cm">// MainActivity.kt</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="fn">enableEdgeToEdge</span>()
+    <span class="fn">setContent</span> {
+        <span class="cl">ShopTheme</span> {
+            <span class="cl">Scaffold</span>(
+                topBar = { <span class="cl">ShopTopBar</span>() },
+                bottomBar = { <span class="cl">BottomNavBar</span>() },
+                modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()
+            ) { innerPadding ->
+                <span class="cl">NavHost</span>(
+                    navController = navController,
+                    modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(innerPadding)
+                ) { ... }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Step 5 — Migrate Product Image Picker to Photo Picker</h3>
+    <pre><code><span class="cm">// Before (Android 13 — required READ_MEDIA_IMAGES permission)</span>
+<span class="cm">// val pickImage = registerForActivityResult(GetContent()) { uri -> ... }</span>
+
+<span class="cm">// After — no storage permission needed</span>
+<span class="kw">val</span> photoPicker = <span class="fn">rememberLauncherForActivityResult</span>(
+    <span class="cl">ActivityResultContracts</span>.<span class="cl">PickMultipleVisualMedia</span>(maxItems = <span class="nu">5</span>)
+) { uris ->
+    viewModel.<span class="fn">onProductImagesSelected</span>(uris)
+}
+
+<span class="cm">// Launch with image+video filter, or image only</span>
+photoPicker.<span class="fn">launch</span>(<span class="cl">PickVisualMediaRequest</span>(
+    <span class="cl">ActivityResultContracts</span>.<span class="cl">PickVisualMedia</span>.ImageOnly
+))</code></pre>
+
+    <h3>Step 6 — Request POST_NOTIFICATIONS on First Launch</h3>
+    <pre><code><span class="cm">// In onboarding flow or post-login</span>
+<span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.TIRAMISU) {
+    <span class="kw">when</span> {
+        <span class="fn">ContextCompat</span>.<span class="fn">checkSelfPermission</span>(
+            context, <span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS
+        ) == <span class="cl">PackageManager</span>.PERMISSION_GRANTED -> {
+            <span class="cm">// Already granted — proceed</span>
+        }
+        <span class="fn">shouldShowRequestPermissionRationale</span>(<span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS) -> {
+            <span class="fn">showNotificationRationaleDialog</span>()
+        }
+        <span class="kw">else</span> -> {
+            notificationPermissionLauncher.<span class="fn">launch</span>(<span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS)
+        }
+    }
+}</code></pre>
+
+    <h3>Migration Checklist Summary</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Item</th><th>API</th><th>Status Signal</th></tr>
+      <tr><td><code>android:exported</code> on all components</td><td>31+</td><td>Build fails / install crash</td></tr>
+      <tr><td><code>foregroundServiceType</code> declared</td><td>34+</td><td>Runtime exception</td></tr>
+      <tr><td><code>enableEdgeToEdge()</code> + inset handling</td><td>35+</td><td>UI clipped by bars</td></tr>
+      <tr><td><code>POST_NOTIFICATIONS</code> requested</td><td>33+</td><td>Silent push failure</td></tr>
+      <tr><td>Photo Picker (replaces file picker)</td><td>13+</td><td>Permission denied</td></tr>
+      <tr><td>Splash Screen API adopted</td><td>12+</td><td>Generic branding</td></tr>
+      <tr><td>Predictive Back callbacks added</td><td>14+</td><td>No back preview animation</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Verdict</th></tr>
+      <tr>
+        <td>Legacy permission model (<code>READ_EXTERNAL_STORAGE</code>)</td>
+        <td>Familiar, one permission for all files</td>
+        <td>Deprecated on API 33+; SecurityException on newer devices; poor privacy UX</td>
+        <td><strong>Migrate to granular permissions + Photo Picker</strong></td>
+      </tr>
+      <tr>
+        <td>New Photo Picker</td>
+        <td>No storage permission needed; system-managed UI; privacy-safe; backported to API 19</td>
+        <td>Limited to images/videos; no custom UI; multi-select capped at 100</td>
+        <td><strong>Use for all media selection</strong></td>
+      </tr>
+      <tr>
+        <td>Old splash screen (themed window background)</td>
+        <td>Simple — just a color or image</td>
+        <td>On Android 12+, system always shows its own splash before yours: double-splash flicker</td>
+        <td><strong>Adopt Splash Screen API</strong></td>
+      </tr>
+      <tr>
+        <td>Old back handling (<code>onBackPressed()</code>)</td>
+        <td>Simple single-method override</td>
+        <td>Deprecated in API 33; no predictive back gesture preview; will be removed</td>
+        <td><strong>Use OnBackPressedCallback</strong></td>
+      </tr>
+      <tr>
+        <td>Predictive Back (OnBackPressedCallback)</td>
+        <td>Future-proof; supports back preview animation; lifecycle-aware</td>
+        <td>Slightly more code; requires enabling gesture in developer options for preview in API 33</td>
+        <td><strong>Adopt now</strong></td>
+      </tr>
+      <tr>
+        <td>SmartLock / Credentials API (legacy)</td>
+        <td>Widely deployed</td>
+        <td>Deprecated; no passkey support; fragmented</td>
+        <td><strong>Migrate to Credential Manager</strong></td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Common Interviewer Comparisons</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Expect These</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Photo Picker vs File Picker + READ_MEDIA_IMAGES</strong> — Photo Picker requires no permission; always prefer it for user media selection</li>
+        <li><strong>onBackPressed() vs OnBackPressedCallback</strong> — callback is lifecycle-aware, handles predictive back, not deprecated</li>
+        <li><strong>enableEdgeToEdge() vs fitsSystemWindows</strong> — edge-to-edge gives full control; fitsSystemWindows is a coarser tool that can conflict</li>
+        <li><strong>targetSdk vs compileSdk vs minSdk</strong> — compileSdk: what APIs you can reference; targetSdk: behavioral changes you opt into; minSdk: minimum device version</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Pitfall 1 — Forgetting android:exported</h3>
+    <pre><code><span class="cm">// ❌ BAD — crashes on Android 12+ if component has intent-filter</span>
+&lt;activity android:name=<span class="str">".DeepLinkActivity"</span>&gt;
+    &lt;intent-filter&gt;...&lt;/intent-filter&gt;
+&lt;/activity&gt;</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — always explicit</span>
+&lt;activity android:name=<span class="str">".DeepLinkActivity"</span> android:exported=<span class="str">"true"</span>&gt;
+    &lt;intent-filter&gt;...&lt;/intent-filter&gt;
+&lt;/activity&gt;</code></pre>
+    <p><strong>Why it matters:</strong> Apps targeting API 31+ that have components with intent-filters but no <code>exported</code> attribute fail at build time or crash on install. Many third-party libraries also add receivers — check merged manifest after adding deps.</p>
+
+    <h3>Pitfall 2 — Missing foregroundServiceType</h3>
+    <pre><code><span class="cm">// ❌ BAD — throws MissingForegroundServiceTypeException on API 34+</span>
+&lt;service android:name=<span class="str">".UploadService"</span>/&gt;
+
+<span class="kw">class</span> <span class="cl">UploadService</span> : <span class="cl">Service</span>() {
+    <span class="kw">override fun</span> <span class="fn">onStartCommand</span>(...): <span class="cl">Int</span> {
+        <span class="fn">startForeground</span>(ID, notification)  <span class="cm">// crashes on API 34+</span>
+        ...
+    }
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — type in manifest + type in startForeground()</span>
+&lt;service android:name=<span class="str">".UploadService"</span>
+         android:foregroundServiceType=<span class="str">"dataSync"</span>/&gt;
+
+<span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+    <span class="fn">startForeground</span>(ID, notification, <span class="cl">ServiceInfo</span>.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+} <span class="kw">else</span> {
+    <span class="fn">startForeground</span>(ID, notification)
+}</code></pre>
+
+    <h3>Pitfall 3 — Not Handling Edge-to-Edge on Android 15+</h3>
+    <pre><code><span class="cm">// ❌ BAD — content hidden behind navigation bar on API 35+</span>
+<span class="cm">// No inset handling → bottom content clipped</span>
+
+<span class="cm">// ✅ GOOD — Scaffold handles insets in Compose</span>
+<span class="cl">Scaffold</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()) { innerPadding ->
+    <span class="cl">LazyColumn</span>(contentPadding = innerPadding) { ... }
+}
+
+<span class="cm">// ✅ GOOD — View-based: apply insets explicitly</span>
+<span class="cl">ViewCompat</span>.<span class="fn">setOnApplyWindowInsetsListener</span>(recyclerView) { v, insets ->
+    <span class="kw">val</span> nav = insets.<span class="fn">getInsets</span>(<span class="cl">WindowInsetsCompat</span>.<span class="cl">Type</span>.<span class="fn">systemBars</span>())
+    v.<span class="fn">setPadding</span>(<span class="nu">0</span>, <span class="nu">0</span>, <span class="nu">0</span>, nav.bottom)
+    insets
+}</code></pre>
+
+    <h3>Pitfall 4 — Not Requesting POST_NOTIFICATIONS</h3>
+    <p>On Android 13+, <strong>all notifications are silently dropped</strong> without the runtime permission, even if the channel is created. There is no crash, no error — push messages just don't appear. Test on API 33+ emulator.</p>
+
+    <h3>Pitfall 5 — Using READ_EXTERNAL_STORAGE on API 33+</h3>
+    <pre><code><span class="cm">// ❌ BAD — READ_EXTERNAL_STORAGE denied on API 33+</span>
+<span class="kw">if</span> (Build.VERSION.SDK_INT &lt; <span class="cl">Build</span>.VERSION_CODES.TIRAMISU) {
+    <span class="cm">// you're fine on 32-</span>
+} <span class="kw">else</span> {
+    <span class="cm">// must use READ_MEDIA_IMAGES / READ_MEDIA_VIDEO, or Photo Picker</span>
+}</code></pre>
+
+    <h3>Pitfall 6 — Bumping targetSdk Without Testing</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Never Do This</div>
+      Bumping <code>targetSdk</code> to comply with Play Store requirements without running a behavioral-change test pass. Google requires targetSdk 34 from August 2024, but each release has its own breaking behaviors. Always test on a physical device or emulator running that exact API level.
+    </div>
+
+    <h3>Best Practices</h3>
+    <ol>
+      <li>Check merged manifest after adding any dependency — third-party libs add components.</li>
+      <li>Use <code>ActivityResultContracts</code> for all permission requests — lifecycle-safe.</li>
+      <li>Always call <code>enableEdgeToEdge()</code> at the top of <code>onCreate()</code>, before <code>setContent()</code>.</li>
+      <li>Test every targetSdk bump on an emulator running that exact API level.</li>
+      <li>Maintain a migration checklist document per major Android release version.</li>
+      <li>Add <code>Lint</code> checks to CI: many of these issues are caught by AndroidLint with proper targetSdk set.</li>
+    </ol>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "I track each Android release for breaking changes. Key recent ones: <code>android:exported</code> crash on 12, notification permission on 13, foreground service type on 14, and edge-to-edge enforcement on 15. Each targetSdk bump triggers a dedicated test pass covering that release's behavioral changes."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Android 12 introduced the mandatory splash screen API and required all components with intent-filters to declare <code>android:exported</code> — missing it crashes the app. Android 13 added <code>POST_NOTIFICATIONS</code> as a runtime permission — without it, push notifications are silently dropped. It also replaced <code>READ_EXTERNAL_STORAGE</code> with granular <code>READ_MEDIA_IMAGES</code> and introduced the system photo picker which requires no permission at all.<br><br>
+      Android 14 was a particularly breaking release: foreground services now require a <code>foregroundServiceType</code> in the manifest and in the <code>startForeground()</code> call — missing it throws an exception. It also introduced the Predictive Back gesture, requiring apps to adopt <code>OnBackPressedCallback</code> instead of overriding <code>onBackPressed()</code>.<br><br>
+      Android 15 made edge-to-edge mandatory: app content renders behind system bars and you must use <code>WindowInsets</code> to prevent overlaps. In Compose, <code>Scaffold</code> handles this automatically via <code>innerPadding</code>.<br><br>
+      I maintain a per-release migration checklist and tie targetSdk bumps to a specific test suite in CI that covers each behavioral change."
+    </div>
+
+    <h3>Must-Mention Points (7)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>android:exported (API 31)</strong> — required for all components with intent-filters; crashes without it</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>POST_NOTIFICATIONS (API 33)</strong> — runtime permission; notifications silently dropped without it</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Foreground service type (API 34)</strong> — must declare in manifest AND pass in startForeground(); exception thrown without</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Predictive Back (API 34)</strong> — use OnBackPressedCallback; onBackPressed() deprecated in API 33</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Edge-to-edge (API 35)</strong> — mandatory; use enableEdgeToEdge() + WindowInsets handling</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Photo Picker</strong> — backported to API 19; no storage permission needed; always prefer over file picker for media</div></div>
+      <div class="must-item"><div class="must-num">7</div><div><strong>Credential Manager</strong> — unified API replacing SmartLock; supports passkeys, passwords, federated (Google Sign-In)</div></div>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I maintain a per-release migration checklist in our CI/CD pipeline — each <code>targetSdk</code> bump triggers a specific test suite covering the behavioral changes of that release. We also use the merged manifest view and lint checks to catch missing <code>exported</code> attributes from third-party libraries before they reach production. For Android 15 edge-to-edge, I ran a full screenshot regression test across all screens because overlapping system bar UI is not always caught by unit tests."
+    </div>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr>
+        <td>Difference between compileSdk and targetSdk?</td>
+        <td><code>compileSdk</code>: which API level you compile against (can use those APIs). <code>targetSdk</code>: behavioral changes you opt into. You can compileSdk 35 but targetSdk 33 to avoid behavioral changes while still accessing new APIs with version checks.</td>
+      </tr>
+      <tr>
+        <td>What is a foreground service type?</td>
+        <td>A declaration of what the service does (location, camera, mediaPlayback, dataSync, etc.) so Android can enforce appropriate restrictions and show correct permission to users.</td>
+      </tr>
+      <tr>
+        <td>How do you support both old and new back gesture?</td>
+        <td>Use <code>OnBackPressedCallback</code> via <code>onBackPressedDispatcher</code> — it works on all API levels, supports predictive back on 14+, and handles lifecycle automatically.</td>
+      </tr>
+      <tr>
+        <td>Photo Picker vs ACTION_GET_CONTENT?</td>
+        <td>Photo Picker: no permission, sandboxed system UI, works for images/video, backported. GET_CONTENT: requires READ_MEDIA permission, shows all file types, not sandboxed. Prefer Photo Picker for media.</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <h3>Per-Release Change Table</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Release</th><th>API</th><th>Must-Know Change</th><th>Crash Risk</th></tr>
+      <tr><td>Android 12</td><td>31/32</td><td>android:exported required; Splash Screen API; exact alarms restricted</td><td>&#128308; High</td></tr>
+      <tr><td>Android 13</td><td>33</td><td>POST_NOTIFICATIONS permission; granular media; per-app language; photo picker</td><td>&#128992; Medium</td></tr>
+      <tr><td>Android 14</td><td>34</td><td>foregroundServiceType required; predictive back; Health Connect; partial media</td><td>&#128308; High</td></tr>
+      <tr><td>Android 15</td><td>35</td><td>Edge-to-edge mandatory; PDF viewer; NFC improvements; app archiving</td><td>&#128992; Medium</td></tr>
+      <tr><td>Android 16</td><td>36</td><td>Further edge-to-edge hardening; adaptive refresh; Health &amp; Fitness updates</td><td>&#128994; Low (preview)</td></tr>
+    </table>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>FOREGROUND SERVICE (API 34+)</h4>
+        <pre><code>&lt;service
+  android:foregroundServiceType=
+    "dataSync"/&gt;
+
+startForeground(ID, notif,
+  FOREGROUND_SERVICE_TYPE_DATA_SYNC)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>EDGE-TO-EDGE (API 35+)</h4>
+        <pre><code>enableEdgeToEdge()
+setContent {
+  Scaffold { innerPadding ->
+    MyApp(Modifier.padding(innerPadding))
+  }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>POST_NOTIFICATIONS (API 33+)</h4>
+        <pre><code>if (SDK_INT >= TIRAMISU) {
+  launcher.launch(
+    Manifest.permission.POST_NOTIFICATIONS
+  )
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PHOTO PICKER</h4>
+        <pre><code>val picker = rememberLauncher(
+  PickVisualMedia()
+) { uri -> handle(uri) }
+
+picker.launch(PickVisualMediaRequest(
+  PickVisualMedia.ImageOnly
+))</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PREDICTIVE BACK</h4>
+        <pre><code>onBackPressedDispatcher
+  .addCallback(viewLifecycleOwner) {
+    if (dirty) showDialog()
+    else {
+      isEnabled = false
+      dispatcher.onBackPressed()
+    }
+  }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>android:exported</h4>
+        <pre><code>&lt;!-- Every component with
+     an intent-filter MUST
+     have exported declared --&gt;
+android:exported="true"  // launcher
+android:exported="false" // internal</code></pre>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What change in Android 12 most commonly crashes apps that bump to targetSdk 31?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        The missing <code>android:exported</code> attribute. Android 12 requires all Activities, Services, and BroadcastReceivers that have intent-filters to explicitly declare <code>android:exported="true"</code> or <code>android:exported="false"</code>. If omitted, the app fails at build time (or install time) with a manifest validation error. Many apps were broken because third-party libraries also added receivers without this attribute — check the merged manifest.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What happens if you don't request POST_NOTIFICATIONS on Android 13+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        All notifications from your app are silently dropped. There is no crash, no exception, no error in logcat — they simply don't appear. This includes push notifications from FCM. The user also won't see any prompt asking for permission; you must explicitly request <code>Manifest.permission.POST_NOTIFICATIONS</code> at runtime, just like location or camera. Apps that don't do this will have silent push failures on Android 13+ devices.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What is the advantage of using the Photo Picker over requesting READ_MEDIA_IMAGES?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        The Photo Picker requires <strong>no storage permission at all</strong>. It's a system-managed picker where the user selects media in a sandboxed UI — your app only receives the URI(s) for the specifically selected items, not broad access to the device gallery. It's better for privacy, better UX, and is backported to Android 4.4 (API 19) via Google Play Services. <code>READ_MEDIA_IMAGES</code> grants access to the entire images directory which is broader than needed for a single media selection.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — What is a foreground service type and why is it required on Android 14+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        A foreground service type declares what job the service is doing: <code>location</code>, <code>camera</code>, <code>microphone</code>, <code>dataSync</code>, <code>mediaPlayback</code>, <code>phoneCall</code>, <code>connectedDevice</code>, <code>health</code>. Android uses this to enforce appropriate policies — for example, a service claiming <code>location</code> type must hold the location permission.<br><br>
+        On Android 14+, failing to declare the type in the manifest AND pass it to <code>startForeground()</code> throws <code>MissingForegroundServiceTypeException</code>. You must also declare the corresponding permission (e.g., <code>FOREGROUND_SERVICE_DATA_SYNC</code>) in the manifest. The goal is to prevent apps from abusing foreground services as a background execution workaround.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — How does edge-to-edge enforcement in Android 15 differ from just calling enableEdgeToEdge() on earlier versions?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        On Android 14 and below, <code>enableEdgeToEdge()</code> is opt-in — the window still fits system windows by default, so content doesn't go behind bars unless you call <code>WindowCompat.setDecorFitsSystemWindows(window, false)</code> or <code>enableEdgeToEdge()</code>.<br><br>
+        On Android 15 targeting API 35, edge-to-edge is <strong>enforced by default</strong> — <code>setDecorFitsSystemWindows(true)</code> no longer works. Content always extends behind system bars regardless of window flags. Apps that don't handle <code>WindowInsets</code> will have UI elements hidden behind the navigation bar or status bar. This is a silent visual bug, not a crash — making it dangerous in production.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — What replaced READ_EXTERNAL_STORAGE on Android 13+ and how do you handle backward compatibility?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        On Android 13+, <code>READ_EXTERNAL_STORAGE</code> was replaced by granular media permissions:<br>
+        • <code>READ_MEDIA_IMAGES</code> for image access<br>
+        • <code>READ_MEDIA_VIDEO</code> for video access<br>
+        • <code>READ_MEDIA_AUDIO</code> for audio access<br><br>
+        For backward compatibility:<br>
+<pre><code>if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    requestPermissions(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO)
+} else {
+    requestPermissions(READ_EXTERNAL_STORAGE)
+}</code></pre>
+        However, for media selection, prefer the Photo Picker entirely — it requires no permission on any API level and is the recommended approach.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — <span class="tag-coding">Coding</span> Fix this service so it works on Android 14+ without crashing:</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Problem code:</strong>
+        <pre><code><span class="cm">// AndroidManifest:</span>
+&lt;service android:name=<span class="str">".FileUploadService"</span>/&gt;
+
+<span class="cm">// Service:</span>
+<span class="kw">override fun</span> <span class="fn">onStartCommand</span>(...): <span class="cl">Int</span> {
+    <span class="fn">startForeground</span>(NOTIF_ID, notification)
+    <span class="kw">return</span> START_STICKY
+}</code></pre>
+        <strong>Fixed code:</strong>
+        <pre><code><span class="cm">// AndroidManifest: add type + permission</span>
+&lt;uses-permission android:name=
+  <span class="str">"android.permission.FOREGROUND_SERVICE_DATA_SYNC"</span>/&gt;
+&lt;service
+    android:name=<span class="str">".FileUploadService"</span>
+    android:foregroundServiceType=<span class="str">"dataSync"</span>
+    android:exported=<span class="str">"false"</span>/&gt;
+
+<span class="cm">// Service: pass type on API 34+</span>
+<span class="kw">override fun</span> <span class="fn">onStartCommand</span>(...): <span class="cl">Int</span> {
+    <span class="kw">val</span> notification = <span class="fn">buildNotification</span>()
+    <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        <span class="fn">startForeground</span>(NOTIF_ID, notification,
+            <span class="cl">ServiceInfo</span>.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+    } <span class="kw">else</span> {
+        <span class="fn">startForeground</span>(NOTIF_ID, notification)
+    }
+    <span class="kw">return</span> START_STICKY
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — <span class="tag-scenario">Scenario</span> Your app has a 1-star review surge after a Play Store update: "Notifications stopped working." App targets SDK 33. What happened and how do you debug?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Root Cause:</strong> The app bumped targetSdk from 32 to 33 without requesting <code>POST_NOTIFICATIONS</code>. When targeting API 33+, existing users who installed prior to the update do not automatically get the permission — their permission state is <code>DENIED</code> (not granted). The app never shows a permission dialog because no code requests it.<br><br>
+        <strong>Debug Steps:</strong><br>
+        1. Confirm on a test device running API 33+: <code>adb shell dumpsys package &lt;app_id&gt; | grep POST_NOTIFICATIONS</code> — will show DENIED<br>
+        2. Check FCM delivery report in Firebase Console — messages delivered but not displayed<br>
+        3. Check notification channel creation logs — channels exist but permission is denied<br><br>
+        <strong>Fix:</strong> Add <code>POST_NOTIFICATIONS</code> request in the main Activity or onboarding flow. For existing users, show an in-app banner explaining why notifications were silently disabled and directing them to grant permission. Handle the case where <code>shouldShowRequestPermissionRationale()</code> returns false (user previously denied permanently) by linking to app Settings.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — <span class="tag-scenario">Scenario</span> After bumping targetSdk to 35, QA reports all screen bottoms are clipped on Android 15 devices. The same build works fine on Android 14. What is the cause and fix?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Cause:</strong> Android 15 enforces edge-to-edge by default for apps targeting API 35. Content now renders behind the navigation bar. Previously, <code>setDecorFitsSystemWindows(true)</code> (the default) prevented this. On API 35, this flag is ignored — content always goes edge-to-edge regardless.<br><br>
+        <strong>Fix Strategy:</strong><br>
+        1. Call <code>enableEdgeToEdge()</code> in every Activity's <code>onCreate()</code> before <code>setContent()</code><br>
+        2. In Compose: use <code>Scaffold</code>'s <code>innerPadding</code> to pad all scrollable content and bottom bars<br>
+        3. In View-based layouts: use <code>ViewCompat.setOnApplyWindowInsetsListener</code> to apply <code>WindowInsetsCompat.Type.systemBars()</code> padding<br>
+        4. Watch for custom bottom sheets, FABs, and floating elements — they need explicit bottom inset padding<br>
+        5. Run screenshot tests across all major screens against an API 35 emulator in CI<br><br>
+        <strong>Key insight:</strong> This is a silent visual bug — it doesn't crash, won't show up in ANR/crash reports, and only appears on Android 15 devices. Screenshot regression tests are the only way to catch it systematically.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — How would you design a permission request flow that handles all the POST_NOTIFICATIONS edge cases on Android 13+?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>States to handle:</strong><br>
+        1. <strong>Already granted</strong> — do nothing, proceed<br>
+        2. <strong>Not yet asked</strong> — request permission directly<br>
+        3. <strong>Denied once</strong> — <code>shouldShowRequestPermissionRationale()</code> returns true — show rationale dialog explaining why notifications are important, then request again<br>
+        4. <strong>Permanently denied</strong> — <code>shouldShowRequestPermissionRationale()</code> returns false AND permission denied — can't re-request; direct user to <code>Settings > App > Notifications</code><br>
+        5. <strong>API &lt; 33</strong> — permission auto-granted, skip entire flow<br><br>
+<pre><code><span class="kw">fun</span> <span class="fn">handleNotificationPermission</span>(activity: <span class="cl">ComponentActivity</span>) {
+    <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT < <span class="cl">Build</span>.VERSION_CODES.TIRAMISU) <span class="kw">return</span>
+    <span class="kw">val</span> perm = <span class="cl">Manifest</span>.permission.POST_NOTIFICATIONS
+    <span class="kw">when</span> {
+        <span class="fn">checkSelfPermission</span>(perm) == PERMISSION_GRANTED -> { <span class="cm">/* ok */</span> }
+        <span class="fn">shouldShowRequestPermissionRationale</span>(perm) ->
+            <span class="fn">showRationaleDialog</span>(onConfirm = { launcher.<span class="fn">launch</span>(perm) })
+        <span class="kw">else</span> -> launcher.<span class="fn">launch</span>(perm)
+    }
+}</code></pre>
+        Track whether the user has been asked before in SharedPreferences to distinguish "never asked" from "permanently denied."
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>37A — Jetpack Compose Animation | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">37A · Jetpack Compose Animation</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>37A</span> — Jetpack Compose Animation</h1>
+    <p class="hero-desc">Complete guide to Compose animation APIs: animateAsState, updateTransition, AnimatedVisibility, AnimatedContent, rememberInfiniteTransition, and Motion.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 37A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1 — Highest Priority</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>Why Compose Animation is Fundamentally Different</h3>
+    <p>In the legacy View system, animations relied on imperative property manipulators like <code>ObjectAnimator</code>, <code>ValueAnimator</code>, or static XML files in <code>res/anim</code>. These animators directly mutated View properties over time, often out of sync with business state and prone to memory leaks if listeners were not cleaned up.</p>
+    <p>Jetpack Compose replaces this with a <strong>declarative, state-driven model</strong>. UI in Compose is a pure function of state: <code>UI = f(State)</code>. When state changes from value <em>A</em> to value <em>B</em>, Compose animation APIs intercept that transition and generate a stream of intermediate interpolated values over time, driving smooth frame-by-frame recompositions or draw invalidations automatically.</p>
+
+    <h3>Two Architectural Tiers</h3>
+    <p>Compose animation APIs are split into two primary layers based on abstraction and control:</p>
+    <ul>
+      <li><strong>High-Level APIs:</strong> Pre-packaged composables and modifiers for structural layout transitions. These include <code>AnimatedVisibility</code> (enter/exit layout nodes), <code>AnimatedContent</code> (content swaps), <code>Crossfade</code>, and the <code>Modifier.animateContentSize()</code> modifier.</li>
+      <li><strong>Low-Level APIs:</strong> Value-interpolation primitives for custom parameters. These include <code>animate*AsState</code> (fire-and-forget single value), <code>updateTransition</code> (synchronized multi-property state machines), <code>Animatable</code> (coroutine-based imperative control with gestures/cancellation), and <code>rememberInfiniteTransition</code> (continuous repeating cycles).</li>
+    </ul>
+
+    <h3>What Problem It Solves</h3>
+    <ul>
+      <li><strong>Declarative Consistency:</strong> Animations are tied directly to state — no detached animators mutating UI nodes out-of-band.</li>
+      <li><strong>Lifecycle & Coroutine Safety:</strong> Animations automatically respect composable lifecycles, cancel on disposal, and clean up coroutine scopes without manual listener detachments.</li>
+      <li><strong>Interruptibility:</strong> Compose handles interrupted target states seamlessly (e.g. reversing mid-flight) using physics-based velocity tracking rather than jarring resets.</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Never "run" an animation imperatively in Compose. Instead, <strong>describe the target state</strong> and provide an <code>AnimationSpec</code>. Compose calculates the delta, tracks velocity, and manages the interpolation loop within the snapshot state system.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works</div>
+
+    <h3>High-Level Animation APIs</h3>
+
+    <h4>1. AnimatedVisibility</h4>
+    <pre><code><span class="cl">AnimatedVisibility</span>(
+    visible = isVisible,
+    enter = <span class="fn">fadeIn</span>(animationSpec = <span class="fn">tween</span>(<span class="nu">300</span>)) + <span class="fn">expandVertically</span>(),
+    exit = <span class="fn">fadeOut</span>() + <span class="fn">shrinkVertically</span>()
+) {
+    <span class="cl">BannerCard</span>()
+}</code></pre>
+    <p>Animates the appearance and disappearance of composable content. It inserts and removes elements from the composition tree while coordinating custom enter/exit transitions (such as <code>slideIn</code>, <code>expandIn</code>, <code>scaleIn</code>, <code>fadeIn</code>).</p>
+
+    <h4>2. AnimatedContent</h4>
+    <pre><code><span class="cl">AnimatedContent</span>(
+    targetState = selectedTab,
+    transitionSpec = {
+        <span class="kw">if</span> (targetState &gt; initialState) {
+            <span class="fn">slideInHorizontally</span> { width -&gt; width } + <span class="fn">fadeIn</span>() <span class="fn">togetherWith</span>
+                <span class="fn">slideOutHorizontally</span> { width -&gt; -width } + <span class="fn">fadeOut</span>()
+        } <span class="kw">else</span> {
+            <span class="fn">slideInHorizontally</span> { width -&gt; -width } + <span class="fn">fadeIn</span>() <span class="fn">togetherWith</span>
+                <span class="fn">slideOutHorizontally</span> { width -&gt; width } + <span class="fn">fadeOut</span>()
+        }
+    },
+    label = <span class="str">"tab_content_animation"</span>
+) { tab -&gt;
+    <span class="cl">TabScreen</span>(tab)
+}</code></pre>
+    <p>Seamlessly transitions between different composables as state changes, providing coordinated entry and exit specs with size transforms.</p>
+
+    <h4>3. Modifier.animateContentSize()</h4>
+    <pre><code><span class="cl">Column</span>(
+    modifier = <span class="cl">Modifier</span>
+        .<span class="fn">animateContentSize</span>(
+            animationSpec = <span class="fn">spring</span>(
+                dampingRatio = <span class="cl">Spring</span>.<span class="cl">DampingRatioLowBouncy</span>,
+                stiffness = <span class="cl">Spring</span>.<span class="cl">StiffnessLow</span>
+            )
+        )
+) {
+    <span class="cl">Text</span>(text = description, maxLines = <span class="kw">if</span> (expanded) <span class="cl">Int</span>.<span class="cl">MAX_VALUE</span> <span class="kw">else</span> <span class="nu">2</span>)
+}</code></pre>
+    <p>Modifier that listens to internal layout measurement changes and animates bounds changes smoothly without requiring explicit height math.</p>
+
+    <h3>Low-Level Animation APIs</h3>
+
+    <h4>1. animate*AsState</h4>
+    <pre><code><span class="kw">val</span> alpha: <span class="cl">Float</span> <span class="kw">by</span> <span class="fn">animateFloatAsState</span>(
+    targetValue = <span class="kw">if</span> (enabled) <span class="nu">1f</span> <span class="kw">else</span> <span class="nu">0.38f</span>,
+    animationSpec = <span class="fn">tween</span>(durationMillis = <span class="nu">250</span>),
+    label = <span class="str">"button_alpha"</span>
+)
+<span class="kw">val</span> elevation: <span class="cl">Dp</span> <span class="kw">by</span> <span class="fn">animateDpAsState</span>(
+    targetValue = <span class="kw">if</span> (isPressed) <span class="nu">8.dp</span> <span class="kw">else</span> <span class="nu">2.dp</span>,
+    label = <span class="str">"card_elevation"</span>
+)</code></pre>
+    <p>The simplest way to animate a single value (Float, Dp, Color, Offset, Int, Rect). Returns a <code>State&lt;T&gt;</code> that continuously recomposes/invalidates reading scopes with interpolated values until reaching the target.</p>
+
+    <h4>2. updateTransition</h4>
+    <pre><code><span class="kw">val</span> transition = <span class="fn">updateTransition</span>(targetState = buttonState, label = <span class="str">"box_state_transition"</span>)
+
+<span class="kw">val</span> scale <span class="kw">by</span> transition.<span class="fn">animateFloat</span>(label = <span class="str">"scale"</span>) { state -&gt;
+    <span class="kw">when</span> (state) {
+        <span class="cl">BoxState</span>.<span class="cl">Collapsed</span> -&gt; <span class="nu">0.8f</span>
+        <span class="cl">BoxState</span>.<span class="cl">Expanded</span> -&gt; <span class="nu">1.2f</span>
+    }
+}
+<span class="kw">val</span> cornerRadius <span class="kw">by</span> transition.<span class="fn">animateDp</span>(label = <span class="str">"corner_radius"</span>) { state -&gt;
+    <span class="kw">when</span> (state) {
+        <span class="cl">BoxState</span>.<span class="cl">Collapsed</span> -&gt; <span class="nu">4.dp</span>
+        <span class="cl">BoxState</span>.<span class="cl">Expanded</span> -&gt; <span class="nu">24.dp</span>
+    }
+}</code></pre>
+    <p>Manages multiple animated properties derived from a single state machine. Keeps all properties perfectly synchronized during state switches, reversals, and inspectable in Android Studio Animation Preview.</p>
+
+    <h4>3. Animatable</h4>
+    <pre><code><span class="kw">val</span> offset = <span class="fn">remember</span> { <span class="cl">Animatable</span>(<span class="nu">0f</span>) }
+
+<span class="cl">LaunchedEffect</span>(trigger) {
+    offset.<span class="fn">animateTo</span>(
+        targetValue = <span class="nu">300f</span>,
+        animationSpec = <span class="fn">spring</span>(dampingRatio = <span class="cl">Spring</span>.<span class="cl">DampingRatioHighBouncy</span>)
+    )
+}</code></pre>
+    <p>Coroutine-based value holder supporting imperative fine-grained control: <code>animateTo</code>, <code>snapTo</code>, velocity inheritance, and gesture-driven flings.</p>
+
+    <h4>4. rememberInfiniteTransition</h4>
+    <pre><code><span class="kw">val</span> infiniteTransition = <span class="fn">rememberInfiniteTransition</span>(label = <span class="str">"radar_pulse"</span>)
+<span class="kw">val</span> radius <span class="kw">by</span> infiniteTransition.<span class="fn">animateFloat</span>(
+    initialValue = <span class="nu">20f</span>,
+    targetValue = <span class="nu">100f</span>,
+    animationSpec = <span class="fn">infiniteRepeatable</span>(
+        animation = <span class="fn">tween</span>(<span class="nu">1500</span>, easing = <span class="cl">LinearEasing</span>),
+        repeatMode = <span class="cl">RepeatMode</span>.<span class="cl">Restart</span>
+    ),
+    label = <span class="str">"pulse_radius"</span>
+)</code></pre>
+    <p>Manages non-stop repeating animations like pulsing badges, radar waves, and loading shimmers.</p>
+
+    <h3>AnimationSpec Ecosystem</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>AnimationSpec</th><th>Description</th><th>Use Case</th></tr>
+      <tr>
+        <td><code>spring(dampingRatio, stiffness)</code></td>
+        <td>Physics-based mass-spring simulation; natural, velocity-preserving, no fixed duration.</td>
+        <td>Touch interactions, interactive gestures, button presses (default in Compose).</td>
+      </tr>
+      <tr>
+        <td><code>tween(durationMillis, delay, easing)</code></td>
+        <td>Time-based duration with easing curves (<code>FastOutSlowInEasing</code>, <code>LinearOutSlowInEasing</code>).</td>
+        <td>Alpha fades, structural transitions with strict timing contracts.</td>
+      </tr>
+      <tr>
+        <td><code>keyframes { durationMillis = 500; 0f at 0; 0.8f at 200 with FastOutSlowInEasing }</code></td>
+        <td>Multi-point timeline curves with custom per-segment easings.</td>
+        <td>Multi-stage choreography, complex geometric shakes/wiggles.</td>
+      </tr>
+      <tr>
+        <td><code>snap(delayMillis)</code></td>
+        <td>Instant value shift after optional delay.</td>
+        <td>Resetting state immediately or testing zero-animation modes.</td>
+      </tr>
+      <tr>
+        <td><code>repeatable / infiniteRepeatable</code></td>
+        <td>Loops a child spec for count or infinitely (<code>RepeatMode.Restart</code> or <code>Reverse</code>).</td>
+        <td>Loaders, background ambient effects, spinners.</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Compose Animation Architecture</h3>
+    <div class="ascii-box">State Change → animate*AsState → AnimationSpec (tween/spring/keyframes) → recomposition with interpolated value → UI update
+updateTransition → multiple child animations → synchronized state machine</div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. Why and When to Use It</div>
+
+    <h3>API Selection Decision Matrix</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Requirement</th><th>Recommended API</th><th>Reason</th></tr>
+      <tr><td>Show / hide composables conditionally</td><td><code>AnimatedVisibility</code></td><td>Handles enter/exit layout tree inclusion, measure, clip, and fade automatically.</td></tr>
+      <tr><td>Morph or crossfade full screen/state content</td><td><code>AnimatedContent</code> / <code>Crossfade</code></td><td>Coordinates entry of new content while animating away previous content.</td></tr>
+      <tr><td>Animate single numeric or color property</td><td><code>animate*AsState</code></td><td>Lowest friction; declarative fire-and-forget state interpolation.</td></tr>
+      <tr><td>Coordinate multiple properties from one state</td><td><code>updateTransition</code></td><td>Avoids desynchronization; guarantees all sub-properties evaluate atomically.</td></tr>
+      <tr><td>Continuous loading shimmer, rotation, pulse</td><td><code>rememberInfiniteTransition</code></td><td>Lifecycle-bound endless loop that halts when composable exits composition.</td></tr>
+      <tr><td>Swipe-to-dismiss, fling, drag gestures</td><td><code>Animatable</code></td><td>Suspends in coroutine; allows imperative <code>snapTo</code> during drag and <code>animateTo</code> on release.</td></tr>
+      <tr><td>Container expands when text or child grows</td><td><code>Modifier.animateContentSize()</code></td><td>Zero boilerplate; automatic layout bounds animation.</td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to Animate</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Avoid Animation Here</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Purely Functional State Swaps:</strong> Instant critical data updates (e.g. error alerts, emergency security prompts) where animation latency slows user safety.</li>
+        <li><strong>Every List Item Scroll:</strong> Triggering heavy layout animations on fast scrolling <code>LazyColumn</code> causes frame drops and jank.</li>
+        <li><strong>Accessibility "Reduce Motion" Active:</strong> When users have enabled reduced motion in OS accessibility settings, heavy scale/slide animations must fall back to snap or subtle alpha fades.</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      E-commerce app: Animated Add-to-Cart CTA button transitioning smoothly between Idle, Loading, and Success states with physics spring width and color changes, combined with an infinite loading shimmer box.
+    </div>
+
+    <h3>Complete Implementation</h3>
+    <pre><code><span class="kw">import</span> androidx.compose.animation.*
+<span class="kw">import</span> androidx.compose.animation.core.*
+<span class="kw">import</span> androidx.compose.foundation.background
+<span class="kw">import</span> androidx.compose.foundation.layout.*
+<span class="kw">import</span> androidx.compose.foundation.shape.RoundedCornerShape
+<span class="kw">import</span> androidx.compose.material.icons.Icons
+<span class="kw">import</span> androidx.compose.material.icons.filled.Check
+<span class="kw">import</span> androidx.compose.material3.*
+<span class="kw">import</span> androidx.compose.runtime.*
+<span class="kw">import</span> androidx.compose.ui.Modifier
+<span class="kw">import</span> androidx.compose.ui.graphics.Brush
+<span class="kw">import</span> androidx.compose.ui.graphics.Color
+<span class="kw">import</span> androidx.compose.ui.unit.dp
+<span class="kw">import</span> kotlinx.coroutines.delay
+
+<span class="cm">// State for animation</span>
+<span class="kw">enum class</span> <span class="cl">CartButtonState</span> { Idle, Loading, Success }
+
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AddToCartButton</span>(
+    onAddToCart: () -&gt; <span class="cl">Unit</span>,
+    modifier: <span class="cl">Modifier</span> = <span class="cl">Modifier</span>
+) {
+    <span class="kw">var</span> buttonState <span class="kw">by</span> <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="cl">CartButtonState</span>.<span class="cl">Idle</span>) }
+    <span class="kw">val</span> transition = <span class="fn">updateTransition</span>(targetState = buttonState, label = <span class="str">"cart_button"</span>)
+
+    <span class="kw">val</span> buttonWidth <span class="kw">by</span> transition.<span class="fn">animateDp</span>(
+        label = <span class="str">"width"</span>,
+        transitionSpec = { <span class="fn">spring</span>(dampingRatio = <span class="cl">Spring</span>.<span class="cl">DampingRatioMediumBouncy</span>) }
+    ) { state -&gt;
+        <span class="kw">when</span> (state) {
+            <span class="cl">CartButtonState</span>.<span class="cl">Idle</span> -&gt; <span class="nu">160.dp</span>
+            <span class="cl">CartButtonState</span>.<span class="cl">Loading</span> -&gt; <span class="nu">56.dp</span>
+            <span class="cl">CartButtonState</span>.<span class="cl">Success</span> -&gt; <span class="nu">56.dp</span>
+        }
+    }
+
+    <span class="kw">val</span> buttonColor <span class="kw">by</span> transition.<span class="fn">animateColor</span>(label = <span class="str">"color"</span>) { state -&gt;
+        <span class="kw">when</span> (state) {
+            <span class="cl">CartButtonState</span>.<span class="cl">Idle</span> -&gt; <span class="cl">MaterialTheme</span>.colorScheme.primary
+            <span class="cl">CartButtonState</span>.<span class="cl">Loading</span> -&gt; <span class="cl">MaterialTheme</span>.colorScheme.surfaceVariant
+            <span class="cl">CartButtonState</span>.<span class="cl">Success</span> -&gt; <span class="cl">Color</span>(<span class="nu">0xFF3ECF8E</span>)
+        }
+    }
+
+    <span class="cl">Button</span>(
+        onClick = {
+            <span class="kw">if</span> (buttonState == <span class="cl">CartButtonState</span>.<span class="cl">Idle</span>) {
+                buttonState = <span class="cl">CartButtonState</span>.<span class="cl">Loading</span>
+                <span class="fn">onAddToCart</span>() <span class="cm">// ViewModel handles actual API call</span>
+            }
+        },
+        modifier = modifier.<span class="fn">width</span>(buttonWidth),
+        colors = <span class="cl">ButtonDefaults</span>.<span class="fn">buttonColors</span>(containerColor = buttonColor),
+        shape = <span class="fn">RoundedCornerShape</span>(<span class="nu">50</span>)
+    ) {
+        transition.<span class="cl">AnimatedContent</span> { state -&gt;
+            <span class="kw">when</span> (state) {
+                <span class="cl">CartButtonState</span>.<span class="cl">Idle</span> -&gt; <span class="cl">Text</span>(<span class="str">"Add to Cart"</span>)
+                <span class="cl">CartButtonState</span>.<span class="cl">Loading</span> -&gt; <span class="cl">CircularProgressIndicator</span>(
+                    modifier = <span class="cl">Modifier</span>.<span class="fn">size</span>(<span class="nu">20.dp</span>),
+                    strokeWidth = <span class="nu">2.dp</span>,
+                    color = <span class="cl">MaterialTheme</span>.colorScheme.onSurfaceVariant
+                )
+                <span class="cl">CartButtonState</span>.<span class="cl">Success</span> -&gt; <span class="cl">Icon</span>(<span class="cl">Icons</span>.<span class="cl">Default</span>.<span class="cl">Check</span>, contentDescription = <span class="str">"Added"</span>)
+            }
+        }
+    }
+
+    <span class="cm">// Observe ViewModel success, update state</span>
+    <span class="cl">LaunchedEffect</span>(buttonState) {
+        <span class="kw">if</span> (buttonState == <span class="cl">CartButtonState</span>.<span class="cl">Loading</span>) {
+            <span class="fn">delay</span>(<span class="nu">2000</span>) <span class="cm">// Simulated or driven by ViewModel Flow</span>
+            buttonState = <span class="cl">CartButtonState</span>.<span class="cl">Success</span>
+            <span class="fn">delay</span>(<span class="nu">1500</span>)
+            buttonState = <span class="cl">CartButtonState</span>.<span class="cl">Idle</span>
+        }
+    }
+}
+
+<span class="cm">// Infinite loading shimmer effect</span>
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ShimmerBox</span>(modifier: <span class="cl">Modifier</span> = <span class="cl">Modifier</span>) {
+    <span class="kw">val</span> infiniteTransition = <span class="fn">rememberInfiniteTransition</span>(label = <span class="str">"shimmer"</span>)
+    <span class="kw">val</span> shimmerTranslate <span class="kw">by</span> infiniteTransition.<span class="fn">animateFloat</span>(
+        initialValue = <span class="nu">0f</span>,
+        targetValue = <span class="nu">1000f</span>,
+        animationSpec = <span class="fn">infiniteRepeatable</span>(
+            animation = <span class="fn">tween</span>(<span class="nu">1200</span>, easing = <span class="cl">LinearEasing</span>),
+            repeatMode = <span class="cl">RepeatMode</span>.<span class="cl">Restart</span>
+        ),
+        label = <span class="str">"shimmer_translate"</span>
+    )
+    <span class="cl">Box</span>(
+        modifier = modifier.<span class="fn">background</span>(
+            brush = <span class="cl">Brush</span>.<span class="fn">horizontalGradient</span>(
+                colors = <span class="fn">listOf</span>(<span class="cl">Color</span>(<span class="nu">0x20FFFFFF</span>), <span class="cl">Color</span>(<span class="nu">0x60FFFFFF</span>), <span class="cl">Color</span>(<span class="nu">0x20FFFFFF</span>)),
+                startX = shimmerTranslate - <span class="nu">200f</span>,
+                endX = shimmerTranslate + <span class="nu">200f</span>
+            )
+        )
+    )
+}</code></pre>
+
+    <h3>Key Lines Explained</h3>
+    <ul>
+      <li><code>updateTransition(targetState = buttonState, label = "cart_button")</code> — Binds width, color, and content transitions into a single unified state machine.</li>
+      <li><code>transition.animateDp(transitionSpec = { spring(...) })</code> — Applies spring physics to the width transition, giving a natural bounce when expanding/collapsing.</li>
+      <li><code>transition.AnimatedContent { state -&gt; ... }</code> — Nesting <code>AnimatedContent</code> inside <code>updateTransition</code> guarantees child icon/text swap runs in sync with width morphing.</li>
+      <li><code>rememberInfiniteTransition(label = "shimmer")</code> — Runs a continuous gradient offset loop for placeholder shimmer without creating thread leaks.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>API / Approach</th><th>Pros</th><th>Cons</th><th>When to Pick</th></tr>
+      <tr>
+        <td><code>animate*AsState</code></td>
+        <td>Minimal code, declarative, automatic target tracking.</td>
+        <td>Independent animations can drift if state changes rapidly; single property only.</td>
+        <td>Single property animation (alpha, elevation, padding).</td>
+      </tr>
+      <tr>
+        <td><code>updateTransition</code></td>
+        <td>Atomic multi-property sync, inspector tooling support, nested child transitions.</td>
+        <td>Slightly more boilerplate setup than <code>animate*AsState</code>.</td>
+        <td>Complex components with 2+ coordinated animated properties.</td>
+      </tr>
+      <tr>
+        <td><code>Animatable</code></td>
+        <td>Full coroutine control, imperative <code>snapTo</code>/<code>animateTo</code>, gesture tracking.</td>
+        <td>Must be orchestrated inside coroutines/effects manually.</td>
+        <td>Touch gestures, physics flings, manual drag-and-drop.</td>
+      </tr>
+      <tr>
+        <td><code>AnimatedVisibility</code></td>
+        <td>Declarative enter/exit, automated layout add/remove, customizable spec combos.</td>
+        <td>Content remains in composition until exit finishes (can affect layout tree if unkeyed).</td>
+        <td>Conditionally showing or hiding UI elements.</td>
+      </tr>
+      <tr>
+        <td><code>rememberInfiniteTransition</code></td>
+        <td>Clean declarative looping, lifecycle safe, zero coroutine cancellation boilerplate.</td>
+        <td>Runs indefinitely; requires careful use to prevent GPU drain.</td>
+        <td>Shimmers, loading spinners, background pulses.</td>
+      </tr>
+      <tr>
+        <td>Legacy View <code>ObjectAnimator</code></td>
+        <td>XML reuse in old View hierarchies.</td>
+        <td>Not lifecycle-safe, breaks Compose declarative paradigm, risks memory leaks.</td>
+        <td>Never in pure Jetpack Compose codebases.</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Comparison Insights</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Architectural Trade-Off</div>
+      <p><strong><code>updateTransition</code> vs Multiple <code>animate*AsState</code>:</strong> While writing three <code>animate*AsState</code> calls looks simpler, they operate as three independent state listeners. If state switches mid-animation, their individual velocity calculations can desynchronize, causing visual jitter. <code>updateTransition</code> treats the state change as an atomic event across all properties.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>1. Omitting the label Parameter</h3>
+    <pre><code><span class="cm">// ❌ BAD — Anonymous animation; impossible to inspect in Android Studio Animation Preview</span>
+<span class="kw">val</span> alpha <span class="kw">by</span> <span class="fn">animateFloatAsState</span>(targetValue = <span class="kw">if</span> (visible) <span class="nu">1f</span> <span class="kw">else</span> <span class="nu">0f</span>)</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Clearly labeled for tooling, layout inspector, and debugging</span>
+<span class="kw">val</span> alpha <span class="kw">by</span> <span class="fn">animateFloatAsState</span>(
+    targetValue = <span class="kw">if</span> (visible) <span class="nu">1f</span> <span class="kw">else</span> <span class="nu">0f</span>,
+    label = <span class="str">"header_fade_alpha"</span>
+)</code></pre>
+
+    <h3>2. Unnecessary High-Frequency Tree Recomposition</h3>
+    <pre><code><span class="cm">// ❌ BAD — Animating offset directly causes entire outer container to recompose each frame</span>
+<span class="kw">val</span> offset <span class="kw">by</span> <span class="fn">animateDpAsState</span>(targetValue = targetOffset, label = <span class="str">"offset"</span>)
+<span class="cl">HeavyCardContainer</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">offset</span>(y = offset))</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Lambda-based graphicsLayer / offset bypasses recomposition and goes straight to draw/layout phase</span>
+<span class="kw">val</span> offset <span class="kw">by</span> <span class="fn">animateDpAsState</span>(targetValue = targetOffset, label = <span class="str">"offset"</span>)
+<span class="cl">HeavyCardContainer</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">graphicsLayer</span> { translationY = offset.<span class="fn">toPx</span>() })</code></pre>
+
+    <h3>3. Using rememberInfiniteTransition for One-Shot Animations</h3>
+    <pre><code><span class="cm">// ❌ BAD — rememberInfiniteTransition keeps burning frame ticks indefinitely</span>
+<span class="kw">val</span> anim = <span class="fn">rememberInfiniteTransition</span>() <span class="cm">// Used to trigger a single bounce</span></code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Use Animatable or LaunchedEffect for one-shot events</span>
+<span class="kw">val</span> scale = <span class="fn">remember</span> { <span class="cl">Animatable</span>(<span class="nu">1f</span>) }
+<span class="cl">LaunchedEffect</span>(trigger) {
+    scale.<span class="fn">animateTo</span>(<span class="nu">1.2f</span>, <span class="fn">spring</span>())
+    scale.<span class="fn">animateTo</span>(<span class="nu">1.0f</span>, <span class="fn">spring</span>())
+}</code></pre>
+
+    <h3>4. AnimatedVisibility Inside LazyColumn Items Without Keys</h3>
+    <pre><code><span class="cm">// ❌ BAD — Reordering or item removal confuses animation state mapping</span>
+<span class="cl">LazyColumn</span> {
+    <span class="fn">items</span>(itemList) { item -&gt;
+        <span class="cl">AnimatedVisibility</span>(visible = item.isVisible) { ... }
+    }
+}</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Explicit stable key maintains item animation identity</span>
+<span class="cl">LazyColumn</span> {
+    <span class="fn">items</span>(items = itemList, key = { it.id }) { item -&gt;
+        <span class="cl">AnimatedVisibility</span>(visible = item.isVisible) { ... }
+    }
+}</code></pre>
+
+    <h3>5. Ignoring System Accessibility Motion Settings</h3>
+    <pre><code><span class="cm">// ❌ BAD — Forces large disorienting animations on motion-sensitive users</span>
+<span class="kw">val</span> slideOffset <span class="kw">by</span> <span class="fn">animateDpAsState</span>(targetValue = <span class="nu">500.dp</span>, label = <span class="str">"slide"</span>)</code></pre>
+    <pre><code><span class="cm">// ✅ GOOD — Check reduceMotion and swap physics springs for instant snaps or gentle fades</span>
+<span class="kw">val</span> spec = <span class="kw">if</span> (isReduceMotionEnabled) <span class="fn">snap</span>() <span class="kw">else</span> <span class="fn">spring</span>()</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "Jetpack Compose uses a declarative, state-driven animation system where animations bridge transitions from a current state to a target state automatically. Instead of mutating Views imperatively, Compose offers two layers: high-level APIs like AnimatedVisibility and AnimatedContent for layout entry/exit choreography, and low-level APIs like animate*AsState and updateTransition for single and multi-property interpolation. All animations are coroutine-safe, interruptible, and parameterized via AnimationSpecs like spring physics or time-based tweens."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "In Jetpack Compose, animation is a first-class citizen of the reactive state model. When state changes, Compose calculates the delta and interpolates values frame by frame, triggering recompositions or draw invalidations.<br><br>
+      Architecturally, I think of Compose animation in two tiers. On the high level, we have composables that manage structural layout shifts: <code>AnimatedVisibility</code> handles adding/removing elements with enter/exit specs, and <code>AnimatedContent</code> coordinates transitions between distinct screens or UI modes.<br><br>
+      On the lower level, we manipulate raw animated properties. For single values like alpha or elevation, <code>animateFloatAsState</code> or <code>animateDpAsState</code> provides fire-and-forget convenience. When multiple properties must animate in perfect lockstep — such as an Add-to-Cart button changing width, color, and icon together — I use <code>updateTransition</code> to eliminate race conditions and keep transitions synchronized.<br><br>
+      For interactive physics and gestures, <code>Animatable</code> provides imperative suspend functions with velocity tracking. Underpinning all of these are <code>AnimationSpec</code> configurations: I default to <code>spring()</code> for touch interactions because physics springs handle mid-animation direction changes without visual hitching, and reserve <code>tween()</code> for fixed duration fades.<br><br>
+      Finally, for production performance, I always attach descriptive <code>label</code> parameters for the Android Studio Animation Preview, route high-frequency animations through <code>Modifier.graphicsLayer</code> to skip recomposition phases, and respect accessibility <code>reduceMotion</code> settings."
+    </div>
+
+    <h3>Must-Mention Points (Show Deep Knowledge)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>State-Driven Model:</strong> Declarative animation transitions from current state to target state rather than imperative property mutation.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Two Tiers of APIs:</strong> High-level layout transitions (<code>AnimatedVisibility</code>, <code>AnimatedContent</code>) vs low-level value interpolation (<code>animate*AsState</code>, <code>updateTransition</code>, <code>Animatable</code>).</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>updateTransition Synchronization:</strong> Use <code>updateTransition</code> for coordinated multi-property state machines to prevent race conditions between independent animations.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>AnimationSpec Physics vs Time:</strong> <code>spring()</code> provides natural velocity-preserving interruptions; <code>tween()</code> is fixed duration with easing curves.</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Inspection Tooling:</strong> Always provide the <code>label</code> parameter to unlock Android Studio Animation Inspector and Layout Inspector debugging.</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Performance & Accessibility:</strong> Defer reads to draw phase via <code>Modifier.graphicsLayer</code> to bypass recomposition, and respect system <code>reduceMotion</code> accessibility preferences.</div></div>
+    </div>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr>
+        <td>How do you prevent animation from causing full recomposition of a Composable?</td>
+        <td>Read the animated state inside a lambda modifier like <code>Modifier.graphicsLayer { alpha = animatedAlpha }</code> or <code>Modifier.offset { IntOffset(x, y) }</code>. This bypasses the Recomposition and Layout phases directly to the Draw phase.</td>
+      </tr>
+      <tr>
+        <td>What happens if targetState changes while an animation is in progress?</td>
+        <td>Compose animation APIs are interruptible. They smoothly retarget the trajectory from the current velocity and value without snapping back to initial values.</td>
+      </tr>
+      <tr>
+        <td>When should you choose <code>Animatable</code> over <code>animate*AsState</code>?</td>
+        <td>When you need imperative coroutine control (e.g. <code>snapTo()</code> on touch drag, <code>animateTo()</code> with initial velocity on release, or manual sequential chaining).</td>
+      </tr>
+      <tr>
+        <td>Why is <code>spring()</code> preferred over <code>tween()</code> for UI interactions?</td>
+        <td>Springs are physics-based and maintain continuous velocity across interrupts, eliminating unnatural abrupt direction changes when users tap rapidly.</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I reach for <code>updateTransition</code> over multiple <code>animateAsState</code> calls whenever two or more values must stay in sync — race conditions between separate animations produce jank. Furthermore, in production design systems, I encapsulate transitions into reusable child transition extensions and enforce a global accessibility check that replaces spring dynamics with <code>snap()</code> when <code>reduceMotion</code> is enabled in system accessibility settings."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>HIGH-LEVEL APIS</h4>
+        <pre><code>AnimatedVisibility(visible) { ... }
+AnimatedContent(targetState) { ... }
+Modifier.animateContentSize()
+Crossfade(targetState) { ... }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LOW-LEVEL VALUE APIS</h4>
+        <pre><code>animateFloatAsState(target, label = "")
+animateDpAsState(target, label = "")
+animateColorAsState(target, label = "")
+val t = updateTransition(targetState)
+val anim = remember { Animatable(0f) }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ANIMATION SPECS</h4>
+        <pre><code>spring(dampingRatio, stiffness) // physics
+tween(durationMillis, easing)   // time
+keyframes { 0f at 0; 1f at 150 }
+infiniteRepeatable(animation, RepeatMode)
+snap(delayMillis)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>INFINITE LOOPS</h4>
+        <pre><code>val inf = rememberInfiniteTransition(label)
+val x by inf.animateFloat(
+    initialValue = 0f, targetValue = 1f,
+    animationSpec = infiniteRepeatable(
+        tween(1000), RepeatMode.Reverse
+    ), label = "loop"
+)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>PERFORMANCE RULE</h4>
+        <pre><code>// Prefer draw/graphicsLayer lambda:
+Modifier.graphicsLayer {
+    alpha = animatedAlpha
+    translationX = animatedX.toPx()
+} // Skips Recomposition!</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>ACCESSIBILITY & TOOLING</h4>
+        <pre><code>// 1. Always supply label = "name"
+// 2. Fall back to snap() on reduceMotion:
+val spec = if (reduceMotion) snap()
+           else spring()</code></pre>
+      </div>
+    </div>
+
+    <h3>API Decision Tree</h3>
+    <div class="ascii-box">Is it adding/removing Composable from tree?
+  ├── YES → AnimatedVisibility
+  └── NO  → Switching between different Composable screens/views?
+        ├── YES → AnimatedContent / Crossfade
+        └── NO  → Container changing size automatically?
+              ├── YES → Modifier.animateContentSize()
+              └── NO  → Value animation:
+                    ├── Single value? → animate*AsState
+                    ├── Multiple synchronized values? → updateTransition
+                    ├── Continuous endless loop? → rememberInfiniteTransition
+                    └── Gesture / Coroutine Imperative? → Animatable</div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — How does Compose animation differ from the traditional View animation system?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Traditional View animations use imperative animators (<code>ObjectAnimator</code>, <code>ValueAnimator</code>) or static XML files that mutate view properties directly, requiring manual lifecycle listener management. Compose animation is <strong>declarative and state-driven</strong>: UI is a function of state, and animations simply interpolate intermediate values when target state changes. They are coroutine-safe, automatically cancel upon composable disposal, and handle interrupts gracefully.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What is the purpose of <code>animateFloatAsState</code> and its sister APIs?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>animate*AsState</code> functions are low-level fire-and-forget APIs for animating a single value (Float, Dp, Color, Offset, Size, Int). When the provided <code>targetValue</code> changes, Compose automatically starts an animation toward the new target and returns a <code>State&lt;T&gt;</code> that updates continuously throughout the animation.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What is the difference between <code>AnimatedVisibility</code> and <code>Crossfade</code>?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>AnimatedVisibility</code> animates the entry and exit of a single composable (expanding, sliding, fading in/out) as a boolean visibility state changes. <code>Crossfade</code> transitions between two or more distinct pieces of content based on a state key using a smooth opacity fade.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — When would you use <code>updateTransition</code> instead of multiple <code>animate*AsState</code> calls?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Use <code>updateTransition</code> when two or more animated properties (e.g., width, color, elevation, scale) are driven by the same state change and must remain strictly synchronized. Separate <code>animate*AsState</code> calls execute independent animations that can desynchronize or suffer from race conditions when interrupted. <code>updateTransition</code> also enables Android Studio Animation Inspector tooling and allows creating nested child transitions.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — Compare <code>spring()</code> vs <code>tween()</code> AnimationSpec. When should each be chosen?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>spring(dampingRatio, stiffness):</strong> Physics-based simulation. Has no fixed duration; preserves velocity when interrupted mid-flight, making UI feel natural and responsive. Preferred for touch and user interaction responses.<br><br>
+        <strong>tween(durationMillis, delay, easing):</strong> Time-based animation with a fixed duration and easing curve. Best for pure time-based transitions like opacity crossfades, content reveals, or timed splash transitions.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — Why is it critical to provide the <code>label</code> parameter in Compose animation functions?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        The <code>label</code> parameter assigns a human-readable identifier to the animation. This identifier surfaces in Android Studio's <strong>Animation Preview</strong> and Layout Inspector, allowing developers to inspect curves, pause, scrub, and debug multi-state transitions frame by frame. Without labels, tooling displays generic names that make debugging complex transitions difficult.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — Coding: Implement a pulsing notification badge using <code>rememberInfiniteTransition</code>.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">PulsingBadge</span>(modifier: <span class="cl">Modifier</span> = <span class="cl">Modifier</span>) {
+    <span class="kw">val</span> infiniteTransition = <span class="fn">rememberInfiniteTransition</span>(label = <span class="str">"badge_pulse_transition"</span>)
+
+    <span class="kw">val</span> scale <span class="kw">by</span> infiniteTransition.<span class="fn">animateFloat</span>(
+        initialValue = <span class="nu">1.0f</span>,
+        targetValue = <span class="nu">1.4f</span>,
+        animationSpec = <span class="fn">infiniteRepeatable</span>(
+            animation = <span class="fn">tween</span>(durationMillis = <span class="nu">800</span>, easing = <span class="cl">FastOutSlowInEasing</span>),
+            repeatMode = <span class="cl">RepeatMode</span>.<span class="cl">Reverse</span>
+        ),
+        label = <span class="str">"badge_scale"</span>
+    )
+
+    <span class="kw">val</span> alpha <span class="kw">by</span> infiniteTransition.<span class="fn">animateFloat</span>(
+        initialValue = <span class="nu">1.0f</span>,
+        targetValue = <span class="nu">0.3f</span>,
+        animationSpec = <span class="fn">infiniteRepeatable</span>(
+            animation = <span class="fn">tween</span>(durationMillis = <span class="nu">800</span>, easing = <span class="cl">FastOutSlowInEasing</span>),
+            repeatMode = <span class="cl">RepeatMode</span>.<span class="cl">Reverse</span>
+        ),
+        label = <span class="str">"badge_alpha"</span>
+    )
+
+    <span class="cl">Box</span>(
+        modifier = modifier
+            .<span class="fn">graphicsLayer</span> {
+                scaleX = scale
+                scaleY = scale
+                <span class="kw">this</span>.alpha = alpha
+            }
+            .<span class="fn">size</span>(<span class="nu">12.dp</span>)
+            .<span class="fn">background</span>(<span class="cl">Color</span>.<span class="cl">Red</span>, shape = <span class="cl">CircleShape</span>)
+    )
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — Debug Scenario: A list of animated cards experiences severe frame drops and jank during scrolling. How do you diagnose and fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Diagnosis:</strong><br>
+        1. <strong>Recomposition Phase Overload:</strong> Animated state values (like animated float or Dp) are being read in the composable's body during the Recomposition phase, triggering full subtree recomposition on every single frame tick (60–120 fps).<br>
+        2. <strong>Missing LazyColumn Keys:</strong> List items lack stable keys, forcing Compose to recreate animation state as items recycle.<br><br>
+        <strong>Fixes:</strong><br>
+        • Defer state reads to the Draw/Layout phase by using lambda modifiers such as <code>Modifier.graphicsLayer { translationY = animatedY }</code> or <code>Modifier.offset { IntOffset(0, animatedY.toInt()) }</code> instead of <code>Modifier.offset(y = animatedY.dp)</code>.<br>
+        • Provide unique, stable keys in <code>items(list, key = { it.id })</code>.<br>
+        • Use <code>derivedStateOf</code> to clamp animation thresholds and prevent excessive state notifications.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — How would you build a gesture-driven swipe-to-dismiss card that tracks user finger drags in real time and snaps back or flings away on release?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Use <code>Animatable(0f)</code> inside a coroutine scope:<br>
+        1. <strong>On Drag:</strong> In <code>pointerInput</code> with <code>detectHorizontalDragGestures</code>, call <code>offsetX.snapTo(offsetX.value + dragAmount)</code> to instantly track touch movement without animation lag.<br>
+        2. <strong>On Drag End / Release:</strong> Evaluate swipe velocity and distance against a threshold.<br>
+        3. If threshold is passed, call <code>offsetX.animateTo(targetValue = screenWidth, initialVelocity = flingVelocity)</code> to fling off-screen and trigger item dismissal.<br>
+        4. If below threshold, call <code>offsetX.animateTo(targetValue = 0f, animationSpec = spring())</code> to snap back smoothly with physics damping.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — How do you support the Android OS "Reduce Motion" accessibility setting across an entire Compose app design system?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Create a custom <code>CompositionLocal</code> (e.g. <code>LocalReduceMotion</code>) that observes system accessibility settings (via <code>Settings.Global.TRANSITION_ANIMATION_SCALE</code> or window manager settings). In your design system's motion tokens or animation specs, wrap transitions to check <code>LocalReduceMotion.current</code>:
+<pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">adaptiveSpring</span>(): <span class="cl">AnimationSpec</span>&lt;<span class="cl">T</span>&gt; {
+    <span class="kw">val</span> reduceMotion = <span class="cl">LocalReduceMotion</span>.current
+    <span class="kw">return</span> <span class="kw">if</span> (reduceMotion) <span class="fn">snap</span>() <span class="kw">else</span> <span class="fn">spring</span>()
+}</code></pre>
+        This cleanly replaces complex bouncing scale/slide transitions with instant snaps or subtle opacity crossfades without modifying individual feature composables.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>39A — Android Accessibility | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-tier2 { background: rgba(245,200,66,0.12); color: var(--yellow); border: 1px solid rgba(245,200,66,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">39A · Android Accessibility</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>39A</span> — Android Accessibility</h1>
+    <p class="hero-desc">Building accessible Android apps: TalkBack, semantics in Compose, content descriptions, focus management, and WCAG compliance.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 39A</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 — Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>Why Accessibility Matters</h3>
+    <p>Approximately <strong>15% of users worldwide have some form of disability</strong> — visual, motor, auditory, or cognitive. In regulated markets (banking, government, healthcare), accessibility is not optional — it is a <strong>legal requirement</strong> under laws such as the Americans with Disabilities Act (ADA), the European Accessibility Act, and EN 301 549. Accessibility audits can block app store releases and result in legal liability.</p>
+
+    <h3>Android Accessibility Services</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Service</th><th>Purpose</th><th>Users</th></tr>
+      <tr><td>TalkBack</td><td>Screen reader — reads UI aloud via text-to-speech</td><td>Visually impaired / blind</td></tr>
+      <tr><td>Switch Access</td><td>Navigate via physical switches or keyboard instead of touch</td><td>Motor disabilities</td></tr>
+      <tr><td>BrailleBack</td><td>Refreshable braille display integration</td><td>Blind / deafblind</td></tr>
+      <tr><td>Voice Access</td><td>Control device entirely by voice commands</td><td>Motor disabilities</td></tr>
+      <tr><td>Select to Speak</td><td>User selects portion of screen to read aloud</td><td>Low vision / dyslexia</td></tr>
+    </table>
+    </div>
+
+    <h3>Two Implementation Layers</h3>
+    <ul>
+      <li><strong>View system</strong> — <code>android:contentDescription</code>, <code>android:importantForAccessibility</code>, <code>ViewCompat.setAccessibilityDelegate()</code></li>
+      <li><strong>Jetpack Compose</strong> — Semantics API: <code>Modifier.semantics { }</code> — adds structured metadata to composables for accessibility services</li>
+    </ul>
+
+    <h3>Standards &amp; Guidelines</h3>
+    <ul>
+      <li><strong>WCAG 2.1</strong> (Web Content Accessibility Guidelines) — the international standard; Android apps are measured against AA compliance</li>
+      <li><strong>Google Material Design accessibility guidelines</strong> — minimum touch target, colour contrast ratios, typography scaling</li>
+      <li><strong>Key WCAG principles</strong>: Perceivable, Operable, Understandable, Robust (POUR)</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Accessibility is not a feature to add at the end — it is an <strong>architectural property</strong> of the component library. If every Button, Card, TextField, and Icon component in your design system has semantics baked in, every screen that uses them is automatically accessible. The right level to enforce it is at the component level, not the screen level.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works</div>
+
+    <h3>TalkBack — How It Reads the Screen</h3>
+    <p>TalkBack is an <strong>AccessibilityService</strong> that listens to accessibility events from the Android framework. The framework exposes the UI as an <strong>AccessibilityNodeInfo tree</strong> — a hierarchical representation of every interactive or meaningful element on screen. TalkBack traverses this tree and reads each node's label, role, and state aloud.</p>
+
+    <div class="ascii-box">User swipes right on screen
+         │
+         ▼
+   TalkBack service receives
+   AccessibilityEvent (TYPE_VIEW_FOCUSED)
+         │
+         ▼
+   Queries AccessibilityNodeInfo tree
+         │
+         ▼
+   ┌──────────────────────────────────┐
+   │     AccessibilityNodeInfo        │
+   │  contentDescription: "Add item"  │
+   │  role: Button                    │
+   │  state: enabled                  │
+   └──────────────────────────────────┘
+         │
+         ▼
+   ┌───────────────────────┐   ┌───────────────────────┐
+   │  Compose Semantics    │   │  View contentDesc     │
+   │  Modifier.semantics{} │   │  android:contentDesc  │
+   └───────────────────────┘   └───────────────────────┘
+         │
+         ▼
+   Text-to-speech: "Add item, Button"</div>
+
+    <h3>Compose Semantics API</h3>
+    <p><code>Modifier.semantics { }</code> adds metadata to a composable node in the accessibility tree. Key properties:</p>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Semantics Property</th><th>Purpose</th><th>Example</th></tr>
+      <tr><td><code>contentDescription</code></td><td>Label read by TalkBack; overrides visual text</td><td>"Add John Smith to cart"</td></tr>
+      <tr><td><code>stateDescription</code></td><td>Describes current state</td><td>"Selected" / "Expanded"</td></tr>
+      <tr><td><code>role</code></td><td>What kind of element it is</td><td><code>Role.Button</code>, <code>Role.Checkbox</code></td></tr>
+      <tr><td><code>heading</code></td><td>Marks as section heading for navigation</td><td><code>heading()</code></td></tr>
+      <tr><td><code>onClick</code></td><td>Action label for click</td><td><code>onClick("Submit payment") { ... }</code></td></tr>
+      <tr><td><code>liveRegion</code></td><td>Announces dynamic content changes</td><td><code>LiveRegionMode.Polite</code></td></tr>
+      <tr><td><code>invisibleToUser</code></td><td>Hides from accessibility tree</td><td>For decorative elements</td></tr>
+    </table>
+    </div>
+
+    <h3>mergeDescendants vs clearAndSetSemantics</h3>
+    <pre><code><span class="cm">// mergeDescendants = true — combine all child nodes into one TalkBack announcement</span>
+<span class="kw">Card</span>(
+    modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">true</span>) {}
+) {
+    <span class="cm">// TalkBack reads ALL children as one unit: "iPhone 15 Pro, $999, in stock"</span>
+    <span class="cl">Text</span>(<span class="str">"iPhone 15 Pro"</span>)
+    <span class="cl">Text</span>(<span class="str">"$999"</span>)
+    <span class="cl">Text</span>(<span class="str">"In stock"</span>)
+}
+
+<span class="cm">// clearAndSetSemantics — replace ALL descendant semantics with your own</span>
+<span class="cl">Box</span>(
+    modifier = <span class="cl">Modifier</span>.<span class="fn">clearAndSetSemantics</span> {
+        contentDescription = <span class="str">"iPhone 15 Pro, 999 dollars, in stock"</span>
+        role = <span class="cl">Role</span>.Button
+    }
+) {
+    <span class="cm">// children are invisible to TalkBack — only the custom description is announced</span>
+}</code></pre>
+
+    <h3>Full Compose Semantics Example</h3>
+    <pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductCard</span>(product: <span class="cl">Product</span>, onAddToCart: () -> <span class="cl">Unit</span>) {
+    <span class="cl">Card</span>(
+        modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">true</span>) {
+            <span class="cm">// Merge all child semantics into one node for TalkBack</span>
+        }
+    ) {
+        <span class="cl">Image</span>(
+            painter = <span class="fn">rememberAsyncImagePainter</span>(product.imageUrl),
+            <span class="cm">// Never null for meaningful images — describes what the image shows</span>
+            contentDescription = <span class="str">"${product.name}, ${product.price}"</span>
+        )
+        <span class="cl">Text</span>(product.name)  <span class="cm">// auto-read by TalkBack via default semantics</span>
+        <span class="cl">Button</span>(
+            onClick = onAddToCart,
+            modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+                <span class="cm">// Override generic "Button" announcement with actionable description</span>
+                contentDescription = <span class="str">"Add ${product.name} to cart"</span>
+            }
+        ) {
+            <span class="cm">// null contentDescription = decorative — TalkBack ignores it</span>
+            <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Add, contentDescription = <span class="kw">null</span>)
+        }
+    }
+}
+
+<span class="cm">// Live region — announces dynamic content changes to TalkBack without user focus</span>
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SearchResults</span>(isLoading: <span class="cl">Boolean</span>, results: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;) {
+    <span class="cl">Box</span>(
+        modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+            <span class="kw">if</span> (isLoading) liveRegion = <span class="cl">LiveRegionMode</span>.Polite
+            contentDescription = <span class="kw">if</span> (isLoading)
+                <span class="str">"Loading results"</span>
+            <span class="kw">else</span>
+                <span class="str">"${results.size} results found"</span>
+        }
+    ) { <span class="cm">/* content */</span> }
+}</code></pre>
+
+    <h3>View System Accessibility</h3>
+    <pre><code><span class="cm">&lt;!-- XML View — basic accessibility --&gt;</span>
+&lt;<span class="cl">ImageButton</span>
+    android:contentDescription="@string/add_to_cart_btn"
+    android:importantForAccessibility="yes" /&gt;
+
+<span class="cm">&lt;!-- Mark as not important — decorative divider --&gt;</span>
+&lt;<span class="cl">View</span>
+    android:importantForAccessibility="no" /&gt;</code></pre>
+
+    <pre><code><span class="cm">// ViewCompat.setAccessibilityDelegate — custom node info (View system)</span>
+<span class="cl">ViewCompat</span>.<span class="fn">setAccessibilityDelegate</span>(checkboxView, <span class="kw">object</span> : <span class="cl">AccessibilityDelegateCompat</span>() {
+    <span class="kw">override fun</span> <span class="fn">onInitializeAccessibilityNodeInfo</span>(
+        host: <span class="cl">View</span>,
+        info: <span class="cl">AccessibilityNodeInfoCompat</span>
+    ) {
+        <span class="kw">super</span>.<span class="fn">onInitializeAccessibilityNodeInfo</span>(host, info)
+        info.<span class="fn">setCheckable</span>(<span class="kw">true</span>)
+        info.<span class="fn">setChecked</span>(isChecked)
+        info.contentDescription = <span class="str">"Accept terms and conditions, checkbox"</span>
+    }
+})</code></pre>
+
+    <h3>Focus Management in Compose</h3>
+    <pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">LoginForm</span>() {
+    <span class="kw">val</span> emailFocusRequester = <span class="fn">remember</span> { <span class="cl">FocusRequester</span>() }
+    <span class="kw">val</span> passwordFocusRequester = <span class="fn">remember</span> { <span class="cl">FocusRequester</span>() }
+
+    <span class="cl">TextField</span>(
+        modifier = <span class="cl">Modifier</span>
+            .<span class="fn">focusRequester</span>(emailFocusRequester)
+            .<span class="fn">focusProperties</span> {
+                next = passwordFocusRequester  <span class="cm">// explicit tab order</span>
+            },
+        label = { <span class="cl">Text</span>(<span class="str">"Email"</span>) }
+    )
+    <span class="cl">TextField</span>(
+        modifier = <span class="cl">Modifier</span>.<span class="fn">focusRequester</span>(passwordFocusRequester),
+        label = { <span class="cl">Text</span>(<span class="str">"Password"</span>) }
+    )
+
+    <span class="cm">// Request focus on first field when screen opens</span>
+    <span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+        emailFocusRequester.<span class="fn">requestFocus</span>()
+    }
+}</code></pre>
+
+    <h3>Minimum Touch Target</h3>
+    <p>WCAG 2.5.5 and Material Design both require a minimum touch target of <strong>48dp × 48dp</strong> for interactive elements. In Compose:</p>
+    <pre><code><span class="cm">// Compose — ensure minimum interactive size even if visual size is smaller</span>
+<span class="cl">Icon</span>(
+    imageVector = <span class="cl">Icons</span>.Default.Close,
+    contentDescription = <span class="str">"Dismiss"</span>,
+    modifier = <span class="cl">Modifier</span>
+        .<span class="fn">minimumInteractiveComponentSize</span>()  <span class="cm">// enforces 48dp minimum</span>
+        .<span class="fn">clickable</span> { onDismiss() }
+)
+
+<span class="cm">// Alternative: explicit minimum size</span>
+<span class="cl">IconButton</span>(
+    onClick = onDismiss,
+    modifier = <span class="cl">Modifier</span>.<span class="fn">size</span>(<span class="nu">48</span>.dp)  <span class="cm">// 48dp × 48dp</span>
+) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Close, contentDescription = <span class="str">"Dismiss"</span>)
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. When to Use It</div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">Always — No Exceptions</div>
+      Accessibility is not optional. Every interactive element must be accessible. The question is <em>how thoroughly</em> to implement it, not <em>whether</em> to implement it.
+    </div>
+
+    <h3>Minimum Accessibility Requirements (Every App)</h3>
+    <ul>
+      <li>Every <strong>interactive element</strong> (Button, IconButton, custom click target) must have a <code>contentDescription</code> or readable text label</li>
+      <li>Every <strong>meaningful image</strong> must have a descriptive <code>contentDescription</code></li>
+      <li>Every <strong>decorative image/icon</strong> must have <code>contentDescription = null</code></li>
+      <li>All touch targets must be at minimum <strong>48dp × 48dp</strong></li>
+      <li>Colour contrast ratio: at least <strong>4.5:1</strong> for normal text, <strong>3:1</strong> for large text (WCAG AA)</li>
+    </ul>
+
+    <h3>High-Priority Scenarios</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>App Category</th><th>Why Critical</th><th>Specific Requirements</th></tr>
+      <tr><td>Banking / Fintech</td><td>Legal requirement; accessibility audits block releases</td><td>Forms, error announcements, balance screens, transaction lists</td></tr>
+      <tr><td>Government</td><td>Mandated under Section 508 (US) / EN 301 549 (EU)</td><td>Full WCAG 2.1 AA compliance</td></tr>
+      <tr><td>Healthcare</td><td>Patient safety; users may have stress-induced motor issues</td><td>Large targets, clear labels, no time limits</td></tr>
+      <tr><td>E-commerce</td><td>Revenue impact — inaccessible checkout = lost sales</td><td>Cart, checkout flow, product descriptions</td></tr>
+      <tr><td>Custom UI components</td><td>Default composables lose semantics when wrapped</td><td>Always add semantics to custom components</td></tr>
+    </table>
+    </div>
+
+    <h3>When to Pay Extra Attention</h3>
+    <ul>
+      <li><strong>Custom composables</strong> — any composable that wraps basic components MUST add semantics; custom drawing (Canvas) loses all accessibility by default</li>
+      <li><strong>Icon-only buttons</strong> — all icon buttons MUST have a meaningful <code>contentDescription</code></li>
+      <li><strong>Loading states</strong> — use <code>LiveRegionMode.Polite</code> so TalkBack announces when content loads</li>
+      <li><strong>Error states</strong> — inline validation errors must be announced; use <code>error</code> semantics or LiveRegion</li>
+      <li><strong>Animations</strong> — respect <code>LocalReduceMotion</code> for users with vestibular disorders</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app fund transfer form: proper focus order, field-level error announcements via LiveRegion, loading state feedback, and accessible confirmation screen. This is exactly what banking compliance auditors check.
+    </div>
+
+    <h3>Accessible Fund Transfer Form</h3>
+    <pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">TransferFundsScreen</span>(viewModel: <span class="cl">TransferViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> uiState <span class="kw">by</span> viewModel.uiState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="kw">val</span> amountFocusRequester = <span class="fn">remember</span> { <span class="cl">FocusRequester</span>() }
+    <span class="kw">val</span> recipientFocusRequester = <span class="fn">remember</span> { <span class="cl">FocusRequester</span>() }
+
+    <span class="cl">Column</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(<span class="nu">16</span>.dp)) {
+
+        <span class="cm">// Heading — TalkBack users navigate by headings (swipe with 2 fingers)</span>
+        <span class="cl">Text</span>(
+            text = <span class="str">"Transfer Funds"</span>,
+            style = <span class="cl">MaterialTheme</span>.typography.headlineMedium,
+            modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> { heading() }
+        )
+
+        <span class="cm">// Amount field with explicit focus order</span>
+        <span class="cl">OutlinedTextField</span>(
+            value = uiState.amount,
+            onValueChange = viewModel::onAmountChanged,
+            label = { <span class="cl">Text</span>(<span class="str">"Amount"</span>) },
+            isError = uiState.amountError != <span class="kw">null</span>,
+            supportingText = {
+                uiState.amountError<span class="kw">?.</span><span class="fn">let</span> { error ->
+                    <span class="cm">// Error text is announced via LiveRegion — appears without user navigating to it</span>
+                    <span class="cl">Text</span>(
+                        text = error,
+                        color = <span class="cl">MaterialTheme</span>.colorScheme.error,
+                        modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+                            liveRegion = <span class="cl">LiveRegionMode</span>.Assertive  <span class="cm">// interrupt TalkBack immediately</span>
+                        }
+                    )
+                }
+            },
+            keyboardOptions = <span class="cl">KeyboardOptions</span>(keyboardType = <span class="cl">KeyboardType</span>.Decimal),
+            modifier = <span class="cl">Modifier</span>
+                .<span class="fn">fillMaxWidth</span>()
+                .<span class="fn">focusRequester</span>(amountFocusRequester)
+                .<span class="fn">focusProperties</span> { next = recipientFocusRequester }
+                .<span class="fn">semantics</span> {
+                    contentDescription = <span class="str">"Transfer amount in pounds"</span>
+                }
+        )
+
+        <span class="cm">// Recipient field</span>
+        <span class="cl">OutlinedTextField</span>(
+            value = uiState.recipient,
+            onValueChange = viewModel::onRecipientChanged,
+            label = { <span class="cl">Text</span>(<span class="str">"Recipient account number"</span>) },
+            modifier = <span class="cl">Modifier</span>
+                .<span class="fn">fillMaxWidth</span>()
+                .<span class="fn">focusRequester</span>(recipientFocusRequester)
+        )
+
+        <span class="cm">// Loading state announced via LiveRegion — no user action required</span>
+        <span class="kw">if</span> (uiState.isLoading) {
+            <span class="cl">Box</span>(
+                modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+                    liveRegion = <span class="cl">LiveRegionMode</span>.Polite
+                    contentDescription = <span class="str">"Processing your transfer, please wait"</span>
+                }
+            ) {
+                <span class="cl">CircularProgressIndicator</span>()
+            }
+        }
+
+        <span class="cm">// Submit button — full contextual description</span>
+        <span class="cl">Button</span>(
+            onClick = viewModel::submitTransfer,
+            enabled = uiState.isSubmitEnabled,
+            modifier = <span class="cl">Modifier</span>
+                .<span class="fn">fillMaxWidth</span>()
+                .<span class="fn">minimumInteractiveComponentSize</span>()
+                .<span class="fn">semantics</span> {
+                    contentDescription = <span class="kw">if</span> (uiState.isSubmitEnabled)
+                        <span class="str">"Transfer ${uiState.amount} pounds to ${uiState.recipient}"</span>
+                    <span class="kw">else</span>
+                        <span class="str">"Transfer button, disabled. Please fill in all required fields."</span>
+                }
+        ) {
+            <span class="cl">Text</span>(<span class="str">"Transfer"</span>)
+        }
+
+        <span class="cm">// Success state — announced when it appears</span>
+        uiState.successMessage<span class="kw">?.</span><span class="fn">let</span> { msg ->
+            <span class="cl">Text</span>(
+                text = msg,
+                color = <span class="cl">MaterialTheme</span>.colorScheme.primary,
+                modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+                    liveRegion = <span class="cl">LiveRegionMode</span>.Polite
+                }
+            )
+        }
+    }
+
+    <span class="cm">// Move focus to amount field when screen opens</span>
+    <span class="cl">LaunchedEffect</span>(<span class="cl">Unit</span>) {
+        amountFocusRequester.<span class="fn">requestFocus</span>()
+    }
+}</code></pre>
+
+    <h3>What the Accessibility Auditor Will Check</h3>
+    <ul>
+      <li>All fields have descriptive labels — not just "Edit text"</li>
+      <li>Error messages are announced without user manually navigating to them</li>
+      <li>Loading state is communicated — TalkBack doesn't fall silent during async operations</li>
+      <li>Submit button describes its action with the actual data, not just "Button"</li>
+      <li>Disabled state is described with a reason</li>
+      <li>Focus order matches visual top-to-bottom reading order</li>
+      <li>Success/failure state is announced after the action completes</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Use For</th><th>Pros</th><th>Cons</th></tr>
+      <tr>
+        <td>Compose Semantics API</td>
+        <td>All new Compose UI</td>
+        <td>Declarative, inline with UI code, first-class Compose support</td>
+        <td>Learning curve; easy to forget on custom composables</td>
+      </tr>
+      <tr>
+        <td>android:contentDescription (Views)</td>
+        <td>Legacy View system / XML layouts</td>
+        <td>Simple, well-documented, static strings easy</td>
+        <td>Dynamic content requires code; limited expressiveness vs Semantics API</td>
+      </tr>
+      <tr>
+        <td>AccessibilityDelegate (Views)</td>
+        <td>Complex custom Views needing full control</td>
+        <td>Full control over AccessibilityNodeInfo; supports custom actions</td>
+        <td>Verbose boilerplate; error-prone; harder to maintain</td>
+      </tr>
+      <tr>
+        <td>Custom AccessibilityService</td>
+        <td>Building assistive tech, not regular apps</td>
+        <td>Full access to all UI nodes system-wide</td>
+        <td>Not for app accessibility — this is for building tools like TalkBack itself</td>
+      </tr>
+      <tr>
+        <td>Accessibility Scanner (Google)</td>
+        <td>Audit tool, not implementation</td>
+        <td>Automated detection of missing labels, small touch targets, contrast issues</td>
+        <td>Only finds obvious issues; does not test dynamic content, focus order, LiveRegions</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Testing Tools</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Testing Priority</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>TalkBack (manual)</strong> — the gold standard; turn it on and navigate your app with swipe gestures only. No tool replaces this.</li>
+        <li><strong>Accessibility Scanner</strong> — automated audit for quick wins (contrast, target size, missing labels)</li>
+        <li><strong>Layout Inspector</strong> (Android Studio) — inspect semantic tree in Compose UI</li>
+        <li><strong>Compose UI testing with SemanticsNodeInteraction</strong> — automated tests for semantics</li>
+        <li><strong>Switch Access</strong> — manual test for keyboard/switch navigation order</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Icon Buttons with Null contentDescription</h3>
+    <pre><code><span class="cm">// ❌ BAD — TalkBack reads "Button" — useless, cannot differentiate</span>
+<span class="cl">IconButton</span>(onClick = { <span class="fn">navigateBack</span>() }) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.ArrowBack, contentDescription = <span class="kw">null</span>)
+}
+
+<span class="cm">// ✅ GOOD — TalkBack reads "Navigate back, Button"</span>
+<span class="cl">IconButton</span>(onClick = { <span class="fn">navigateBack</span>() }) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.ArrowBack, contentDescription = <span class="str">"Navigate back"</span>)
+}</code></pre>
+
+    <h3>contentDescription = "" vs contentDescription = null</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">⚠ Critical Distinction</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><code>contentDescription = null</code> on an <strong>Image</strong> → TalkBack announces nothing (correct for decorative images)</li>
+        <li><code>contentDescription = ""</code> (empty string) → TalkBack may say "Image" or announce an empty label — ambiguous; avoid</li>
+        <li><code>contentDescription = null</code> on an <strong>IconButton</strong> → TalkBack announces "Button" without a label — NOT accessible</li>
+        <li>Rule: <strong>null = decorative, skip entirely. Non-null = meaningful, read aloud.</strong></li>
+      </ul>
+    </div>
+
+    <pre><code><span class="cm">// Decorative icon inside a button that already has text</span>
+<span class="cl">Button</span>(onClick = { <span class="fn">submit</span>() }) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Send, contentDescription = <span class="kw">null</span>)  <span class="cm">// ✅ decorative — button text provides label</span>
+    <span class="cl">Text</span>(<span class="str">"Send"</span>)
+}
+
+<span class="cm">// Icon-only button — MUST have contentDescription</span>
+<span class="cl">IconButton</span>(onClick = { <span class="fn">deleteItem</span>() }) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Delete, contentDescription = <span class="str">"Delete item"</span>)  <span class="cm">// ✅ required</span>
+}</code></pre>
+
+    <h3>Duplicate Announcements from mergeDescendants + explicit contentDescription</h3>
+    <pre><code><span class="cm">// ❌ BAD — TalkBack reads "John Smith" then also "John Smith profile, Button" = double reading</span>
+<span class="cl">Card</span>(
+    modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">true</span>) {
+        contentDescription = <span class="str">"John Smith profile, Button"</span>
+    }
+) {
+    <span class="cl">Text</span>(<span class="str">"John Smith"</span>)   <span class="cm">// this text will ALSO be merged in</span>
+}
+
+<span class="cm">// ✅ GOOD — use clearAndSetSemantics to fully control the announcement</span>
+<span class="cl">Card</span>(
+    modifier = <span class="cl">Modifier</span>.<span class="fn">clearAndSetSemantics</span> {
+        contentDescription = <span class="str">"John Smith profile"</span>
+        role = <span class="cl">Role</span>.Button
+    }
+) {
+    <span class="cl">Text</span>(<span class="str">"John Smith"</span>)   <span class="cm">// invisible to TalkBack — clearAndSetSemantics takes over</span>
+}</code></pre>
+
+    <h3>Custom Touch Targets Below 48dp</h3>
+    <pre><code><span class="cm">// ❌ BAD — 24dp icon with no touch target expansion</span>
+<span class="cl">Icon</span>(
+    imageVector = <span class="cl">Icons</span>.Default.MoreVert,
+    contentDescription = <span class="str">"More options"</span>,
+    modifier = <span class="cl">Modifier</span>.<span class="fn">size</span>(<span class="nu">24</span>.dp).<span class="fn">clickable</span> { <span class="fn">showMenu</span>() }
+)
+
+<span class="cm">// ✅ GOOD — minimumInteractiveComponentSize() or size(48.dp)</span>
+<span class="cl">IconButton</span>(
+    onClick = { <span class="fn">showMenu</span>() },
+    modifier = <span class="cl">Modifier</span>.<span class="fn">minimumInteractiveComponentSize</span>()
+) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.MoreVert, contentDescription = <span class="str">"More options"</span>)
+}</code></pre>
+
+    <h3>Do Not Override Focus Order Unless Necessary</h3>
+    <p>Focus order should match visual reading order (top-left to bottom-right). Overriding it creates disorientation for TalkBack and Switch Access users. Only override focus order when the visual layout genuinely differs from the logical reading order (e.g., RTL layouts, custom dialogs).</p>
+
+    <h3>Color Contrast &amp; "Color Alone" Anti-pattern</h3>
+    <pre><code><span class="cm">// ❌ BAD — uses only color to distinguish transaction types</span>
+<span class="cl">Text</span>(
+    text = transaction.description,
+    color = <span class="kw">if</span> (transaction.type == <span class="cl">TransactionType</span>.CREDIT) <span class="cl">Color</span>.Green <span class="kw">else</span> <span class="cl">Color</span>.Red
+)
+
+<span class="cm">// ✅ GOOD — color + explicit semantics + icon</span>
+<span class="cl">Row</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">true</span>) {}) {
+    <span class="cl">Icon</span>(
+        imageVector = <span class="kw">if</span> (isCredit) <span class="cl">Icons</span>.Default.Add <span class="kw">else</span> <span class="cl">Icons</span>.Default.Remove,
+        contentDescription = <span class="kw">if</span> (isCredit) <span class="str">"Credit"</span> <span class="kw">else</span> <span class="str">"Debit"</span>
+    )
+    <span class="cl">Text</span>(
+        text = transaction.description,
+        color = <span class="kw">if</span> (isCredit) creditGreen <span class="kw">else</span> debitRed  <span class="cm">// must be 4.5:1 contrast ratio</span>
+    )
+}</code></pre>
+
+    <h3>Always Test with TalkBack On</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Rule</div>
+      Accessibility Scanner finds structural issues. TalkBack finds UX issues. You need both. Every new screen or component must be tested by a developer with TalkBack enabled using only swipe gestures — no looking at the screen while navigating. If you can't navigate to every interactive element and understand what it does, it is not accessible.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "In Compose, accessibility is implemented through the Semantics API — <code>Modifier.semantics { }</code> attaches metadata to composables that TalkBack and other accessibility services read via the AccessibilityNodeInfo tree. The three key rules are: every interactive element needs a meaningful <code>contentDescription</code>, all touch targets must be at least 48dp, and dynamic content changes should use LiveRegion so TalkBack announces them without requiring user focus. I always test with TalkBack on — Accessibility Scanner catches structural issues but not UX issues."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "Android accessibility works through an AccessibilityNodeInfo tree — the framework exposes every UI element as a node with properties like label, role, and state. Services like TalkBack traverse that tree to read the screen aloud. In Compose, the Semantics API populates those node properties declaratively via <code>Modifier.semantics { }</code>.<br><br>
+      The key semantics properties are: <code>contentDescription</code> (what TalkBack reads), <code>role</code> (Button, Checkbox, Heading), <code>stateDescription</code> (Selected/Expanded), and <code>liveRegion</code> for dynamic content. <code>mergeDescendants = true</code> combines multiple child nodes into one TalkBack announcement — important for cards and list items. <code>clearAndSetSemantics</code> replaces all descendant semantics with a single custom description.<br><br>
+      For banking apps specifically, focus management matters: <code>FocusRequester</code> controls which field gets focus when a screen opens, and <code>focusProperties</code> sets the tab order. Error messages on form fields must use <code>LiveRegionMode.Assertive</code> so they're announced immediately when they appear. Loading states use <code>LiveRegionMode.Polite</code> — announced after TalkBack finishes its current sentence.<br><br>
+      For the View system, it's <code>android:contentDescription</code> in XML and <code>ViewCompat.setAccessibilityDelegate()</code> for dynamic or complex cases. The minimum touch target is 48dp — enforced with <code>Modifier.minimumInteractiveComponentSize()</code> in Compose."
+    </div>
+
+    <h3>Must-Mention Points (Show Deep Knowledge)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Semantics API in Compose</strong> — <code>Modifier.semantics { }</code> populates AccessibilityNodeInfo; this is how TalkBack gets its data</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>mergeDescendants</strong> — merges child composable nodes into one TalkBack announcement; essential for cards and list items</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>contentDescription null vs empty string</strong> — <code>null</code> = decorative, skip; <code>""</code> = ambiguous/announces nothing; non-null = meaningful, must describe the element</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>48dp minimum touch target</strong> — WCAG 2.5.5 requirement; use <code>Modifier.minimumInteractiveComponentSize()</code> in Compose</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>LiveRegion for dynamic content</strong> — <code>LiveRegionMode.Polite</code> for loading/results; <code>Assertive</code> for errors; TalkBack announces without user focusing</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Always test with TalkBack</strong> — automated scanners miss focus order issues, live region timing, and navigation flow problems</div></div>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I treat accessibility as architecture, not afterthought. In our component library, every <code>AppButton</code>, <code>AppCard</code>, and <code>AppTextField</code> has semantics baked into the component definition — so every screen that uses them is automatically accessible without developers thinking about it. The cost is paid once at the component level. The places where I'm most vigilant are icon-only buttons (always need <code>contentDescription</code>), custom composables using Canvas or manual drawing (always need explicit semantics), and form validation errors (must use LiveRegion so TalkBack announces them without the user navigating to them). For banking, I also ensure all accessibility attributes survive configuration changes and screen rotation — a common audit failure point."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>SEMANTICS API CHEATSHEET</h4>
+        <pre><code>Modifier.semantics {
+  contentDescription = "..."
+  stateDescription = "Selected"
+  role = Role.Button
+  heading()
+  liveRegion = LiveRegionMode.Polite
+  onClick("label") { ... }
+}
+
+Modifier.semantics(mergeDescendants=true){}
+Modifier.clearAndSetSemantics { ... }</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CONTENT DESCRIPTION RULES</h4>
+        <pre><code>null         = decorative, skip
+""           = avoid (ambiguous)
+"Back"       = minimal (bad)
+"Go back to account list" = good
+
+Icon inside Button with Text:
+  → Icon contentDesc = null ✅
+  → Text provides the label
+
+Icon-only Button:
+  → MUST have contentDesc ✅</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>TOUCH TARGET RULES</h4>
+        <pre><code>Minimum: 48dp × 48dp
+
+IconButton(
+  modifier = Modifier
+    .minimumInteractiveComponentSize()
+) { Icon(...) }
+
+// or explicit:
+Modifier.size(48.dp)
+
+Spacing between targets: ≥ 8dp</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LIVE REGION MODES</h4>
+        <pre><code>LiveRegionMode.Polite
+  → Announces after TalkBack
+    finishes current speech
+  → Use for: loading states,
+    search results, success msg
+
+LiveRegionMode.Assertive
+  → Interrupts immediately
+  → Use for: errors, warnings,
+    critical status changes</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>TALKBACK GESTURES (TEST WITH)</h4>
+        <pre><code>Swipe right    → next element
+Swipe left     → previous element
+Double tap     → activate
+2-finger swipe → scroll
+2-finger tap   → pause reading
+Volume up+down → accessibility menu
+Swipe up+right → headings / links
+              (custom navigation)</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>COLOUR CONTRAST MINIMUMS</h4>
+        <pre><code>Normal text:  4.5:1 ratio (AA)
+Large text:   3.0:1 ratio (AA)
+  (18px+ or 14px+ bold)
+UI components: 3.0:1 ratio
+Focus indicator: 3.0:1
+
+Tools: Accessibility Scanner,
+Android Studio colour picker,
+contrast checker (Web)</code></pre>
+      </div>
+    </div>
+
+    <h3>Quick Reference: Compose vs View System</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Compose</th><th>View System</th></tr>
+      <tr><td>Label</td><td><code>Modifier.semantics { contentDescription }</code></td><td><code>android:contentDescription</code></td></tr>
+      <tr><td>Role</td><td><code>semantics { role = Role.Button }</code></td><td>Inferred from View type</td></tr>
+      <tr><td>Live region</td><td><code>semantics { liveRegion = LiveRegionMode.Polite }</code></td><td><code>ViewCompat.setAccessibilityLiveRegion()</code></td></tr>
+      <tr><td>Merge children</td><td><code>semantics(mergeDescendants = true)</code></td><td><code>importantForAccessibility="no"</code> on children</td></tr>
+      <tr><td>Heading</td><td><code>semantics { heading() }</code></td><td><code>ViewCompat.setAccessibilityHeading()</code></td></tr>
+      <tr><td>Decorative</td><td><code>contentDescription = null</code></td><td><code>importantForAccessibility="no"</code></td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What is TalkBack and how does it access the UI content of an Android app?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        TalkBack is Android's built-in screen reader — an AccessibilityService that reads UI elements aloud using text-to-speech for visually impaired users. It does not directly read pixels; instead, the Android framework exposes the UI as an <strong>AccessibilityNodeInfo tree</strong> — a hierarchical structure where each node represents an interactive or meaningful UI element with properties like <code>contentDescription</code>, role, state, and bounds. TalkBack subscribes to accessibility events, queries this tree, and reads the relevant node properties aloud. In Compose, the <code>Modifier.semantics { }</code> API populates these node properties.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What is the difference between <code>contentDescription = null</code> and <code>contentDescription = ""</code> on an Image composable?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong><code>contentDescription = null</code></strong> marks the image as decorative. TalkBack completely ignores it and does not announce it. This is the correct choice for purely decorative images that add no informational value (background illustrations, decorative borders).<br><br>
+        <strong><code>contentDescription = ""</code></strong> (empty string) has ambiguous behaviour — on some Android versions TalkBack may still say "Image" or announce something empty, creating a confusing pause. It should be avoided.<br><br>
+        <strong>Rule:</strong> Use <code>null</code> for decorative; use a descriptive string for meaningful images. Never use an empty string.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What is the minimum touch target size per WCAG and how do you enforce it in Compose?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        The minimum interactive target size is <strong>48dp × 48dp</strong>, per WCAG 2.5.5 and Google Material Design guidelines. This ensures that users with motor impairments can reliably tap the target.<br><br>
+        In Compose, enforce it with:<br>
+        1. <code>Modifier.minimumInteractiveComponentSize()</code> — automatically ensures the touch target is at least 48dp without changing the visual size of the element<br>
+        2. <code>Modifier.size(48.dp)</code> — explicitly sets the composable size<br>
+        3. Wrapping in <code>IconButton</code> — its default size is 48dp × 48dp<br><br>
+        Note: the visual size of the icon can remain 24dp while the touch target is 48dp — the extra space is transparent but tappable.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — Explain <code>mergeDescendants</code> vs <code>clearAndSetSemantics</code>. When would you use each?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>mergeDescendants = true:</strong> Combines all child semantic nodes into a single TalkBack announcement. The parent node becomes the focus point and TalkBack reads all children's text and descriptions as one unit. Use this for cards, list items, and compound components where children individually would produce too many separate TalkBack stops. The child semantics are still present — they're just merged up into the parent.<br><br>
+        <strong>clearAndSetSemantics { }:</strong> Completely replaces the semantics of the node AND all its descendants with the semantics you define in the block. Children's text and descriptions are invisible to TalkBack. Use this when you need full control over what TalkBack says and the default merged output would still be wrong or incomplete — for example, a product card with a price like "$12.99" that TalkBack would read as "Dollar 12 period 99" — you want to set <code>contentDescription = "12 pounds 99"</code> explicitly.<br><br>
+        Key difference: <code>mergeDescendants</code> preserves child semantics but consolidates focus; <code>clearAndSetSemantics</code> discards child semantics entirely and replaces with custom content.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — What is a LiveRegion? When should you use <code>Polite</code> vs <code>Assertive</code>?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        A <strong>LiveRegion</strong> tells accessibility services to automatically announce when the content of that node changes — without the user navigating to it. This is essential for dynamic UI states that appear after user actions (loading completion, error messages, search results count).<br><br>
+        <strong>LiveRegionMode.Polite:</strong> The announcement is queued and delivered after TalkBack finishes whatever it is currently saying. Use for non-critical updates — loading states, result counts, success confirmations. The user's current focus is not interrupted.<br><br>
+        <strong>LiveRegionMode.Assertive:</strong> The announcement interrupts TalkBack immediately, even if it is mid-sentence. Use only for urgent, time-sensitive information — form validation errors, security alerts, session expiry warnings. Overusing Assertive is disruptive and will frustrate users.<br><br>
+        Rule of thumb: <em>Polite for informational updates, Assertive for errors and warnings.</em>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — How do you test accessibility in Compose UI tests (automated)?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Compose UI testing exposes the semantic tree via <code>ComposeTestRule</code>. You can query nodes by semantic properties and assert their values:<br><br>
+<pre><code>@Test
+fun submitButton_hasCorrectContentDescription() {
+    composeTestRule.setContent {
+        TransferButton(amount = "50", recipient = "John")
+    }
+    composeTestRule
+        .onNodeWithContentDescription("Transfer 50 pounds to John")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+}
+
+@Test
+fun errorMessage_isAnnounced() {
+    composeTestRule.setContent { AmountField(error = "Amount required") }
+    composeTestRule
+        .onNodeWithText("Amount required")
+        .assertIsDisplayed()
+    // Verify LiveRegion property via semantics:
+    composeTestRule
+        .onNodeWithText("Amount required")
+        .assert(hasScrollAction().not()) // sanity check
+}</code></pre>
+        Key test methods: <code>onNodeWithContentDescription()</code>, <code>onNodeWithText()</code>, <code>assertHasClickAction()</code>, <code>onNode(hasSemantics { ... })</code>. Use <code>printToLog()</code> to dump the semantic tree for debugging.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — [Coding] Add proper semantics to a row of icon buttons: Delete, Edit, and Share. Each has only an icon and no text.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ActionButtons</span>(
+    itemName: <span class="cl">String</span>,
+    onDelete: () -> <span class="cl">Unit</span>,
+    onEdit: () -> <span class="cl">Unit</span>,
+    onShare: () -> <span class="cl">Unit</span>
+) {
+    <span class="cl">Row</span>(
+        modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">false</span>) {},
+        horizontalArrangement = <span class="cl">Arrangement</span>.<span class="fn">spacedBy</span>(<span class="nu">8</span>.dp)
+    ) {
+        <span class="cl">IconButton</span>(
+            onClick = onDelete,
+            modifier = <span class="cl">Modifier</span>.<span class="fn">minimumInteractiveComponentSize</span>()
+        ) {
+            <span class="cm">// Context-aware: includes item name so user knows what they're deleting</span>
+            <span class="cl">Icon</span>(
+                imageVector = <span class="cl">Icons</span>.Default.Delete,
+                contentDescription = <span class="str">"Delete $itemName"</span>
+            )
+        }
+        <span class="cl">IconButton</span>(
+            onClick = onEdit,
+            modifier = <span class="cl">Modifier</span>.<span class="fn">minimumInteractiveComponentSize</span>()
+        ) {
+            <span class="cl">Icon</span>(
+                imageVector = <span class="cl">Icons</span>.Default.Edit,
+                contentDescription = <span class="str">"Edit $itemName"</span>
+            )
+        }
+        <span class="cl">IconButton</span>(
+            onClick = onShare,
+            modifier = <span class="cl">Modifier</span>.<span class="fn">minimumInteractiveComponentSize</span>()
+        ) {
+            <span class="cl">Icon</span>(
+                imageVector = <span class="cl">Icons</span>.Default.Share,
+                contentDescription = <span class="str">"Share $itemName"</span>
+            )
+        }
+    }
+}</code></pre>
+        Key points: each button's <code>contentDescription</code> includes the item name for context — TalkBack reads "Delete Invoice #1234" not just "Delete". <code>minimumInteractiveComponentSize()</code> ensures 48dp targets. Each button is a separate TalkBack focus point (not merged) so users can individually navigate to each action.
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — [Scenario] A user reports: "TalkBack reads the product price as 'Button 12 99' on the product card. It should say 'Product: Wireless Headphones, Price: 12 pounds 99'." The card is a <code>Card</code> composable with <code>Image</code>, two <code>Text</code>s (name and price), and an <code>IconButton</code>. How do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Root causes:</strong><br>
+        1. The price Text "£12.99" is being read character-by-character because TalkBack doesn't know it's a monetary amount<br>
+        2. The <code>IconButton</code> inside is probably not merged correctly — creating a "Button" announcement<br>
+        3. <code>mergeDescendants = true</code> on the card merges ALL children including the button, producing "Button 12 99"<br><br>
+        <strong>Fix — use <code>clearAndSetSemantics</code> on the card, and handle the button separately:</strong>
+<pre><code><span class="cl">Card</span>(
+    modifier = <span class="cl">Modifier</span>
+        .<span class="fn">clickable</span> { onCardClick() }
+        .<span class="fn">clearAndSetSemantics</span> {
+            <span class="cm">// Full control — format price for correct TalkBack reading</span>
+            contentDescription = <span class="str">"Product: ${product.name}, " +
+                "Price: ${product.priceLabel}"</span>  <span class="cm">// priceLabel = "12 pounds 99"</span>
+            role = <span class="cl">Role</span>.Button
+        }
+) {
+    <span class="cl">Image</span>(
+        painter = <span class="fn">rememberAsyncImagePainter</span>(product.imageUrl),
+        contentDescription = <span class="kw">null</span>  <span class="cm">// card description covers it</span>
+    )
+    <span class="cl">Text</span>(product.name)
+    <span class="cl">Text</span>(product.priceLabel)
+    <span class="cm">// Add to cart button — OUTSIDE the clearAndSetSemantics scope or wrapped separately</span>
+    <span class="cl">IconButton</span>(onClick = onAddToCart) {
+        <span class="cl">Icon</span>(
+            <span class="cl">Icons</span>.Default.Add,
+            contentDescription = <span class="str">"Add ${product.name} to cart"</span>
+        )
+    }
+}</code></pre>
+        <strong>Alternative:</strong> Keep <code>mergeDescendants = true</code> on the outer card but exclude the IconButton by wrapping it in a non-merged container. The best production pattern is <code>clearAndSetSemantics</code> for the card content + a separate <code>IconButton</code> outside that block with its own <code>contentDescription</code>. Also: <code>priceLabel</code> should be a formatted string like "12 pounds 99" not "£12.99" — the screen reader cannot reliably parse currency symbols.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — A banking app fails an EU accessibility audit. The auditor's report says: "Form validation errors are not announced when they appear; users must manually navigate to discover them." How do you fix this architecturally?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>The problem:</strong> Validation errors appear on screen but TalkBack does not announce them because the error message node does not have a <code>LiveRegion</code> set. TalkBack only reads nodes when the user navigates to them — it doesn't spontaneously read new content unless it's a LiveRegion.<br><br>
+        <strong>Architectural fix — add at the component library level so all forms are covered automatically:</strong>
+<pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AppTextField</span>(
+    value: <span class="cl">String</span>,
+    onValueChange: (<span class="cl">String</span>) -> <span class="cl">Unit</span>,
+    label: <span class="cl">String</span>,
+    error: <span class="cl">String</span>? = <span class="kw">null</span>,
+    modifier: <span class="cl">Modifier</span> = <span class="cl">Modifier</span>
+) {
+    <span class="cl">Column</span>(modifier = modifier) {
+        <span class="cl">OutlinedTextField</span>(
+            value = value,
+            onValueChange = onValueChange,
+            label = { <span class="cl">Text</span>(label) },
+            isError = error != <span class="kw">null</span>
+        )
+        <span class="kw">if</span> (error != <span class="kw">null</span>) {
+            <span class="cl">Text</span>(
+                text = error,
+                color = <span class="cl">MaterialTheme</span>.colorScheme.error,
+                style = <span class="cl">MaterialTheme</span>.typography.bodySmall,
+                modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> {
+                    <span class="cm">// Assertive: interrupts TalkBack to announce error immediately</span>
+                    liveRegion = <span class="cl">LiveRegionMode</span>.Assertive
+                    contentDescription = <span class="str">"Error: $error"</span>
+                }
+            )
+        }
+    }
+}</code></pre>
+        <strong>Additional steps:</strong><br>
+        1. After form submission fails, move TalkBack focus to the first error field using <code>FocusRequester.requestFocus()</code><br>
+        2. Add a summary live region at the top: "3 errors found. Please correct the highlighted fields."<br>
+        3. Ensure the <code>error</code> parameter is not a static string — it must change when the error appears (empty/null → error text) for LiveRegion to trigger<br>
+        4. Write Compose UI tests that verify <code>onNodeWithText(errorMessage).assertIsDisplayed()</code> after submission<br>
+        5. Test manually with TalkBack: submit invalid form, verify error is announced without touching the screen
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — How do you handle accessibility for a completely custom composable drawn with Canvas (a custom chart, a signature pad, a progress ring)?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>The problem:</strong> Canvas drawing produces no AccessibilityNodeInfo entries — TalkBack sees nothing. Custom Canvas composables are completely invisible to accessibility services by default.<br><br>
+        <strong>Solution: add explicit semantics to the Canvas composable:</strong>
+<pre><code><span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AccountBalanceChart</span>(
+    dataPoints: <span class="cl">List</span>&lt;<span class="cl">Float</span>&gt;,
+    currency: <span class="cl">String</span>,
+    modifier: <span class="cl">Modifier</span> = <span class="cl">Modifier</span>
+) {
+    <span class="kw">val</span> latestValue = dataPoints.<span class="fn">lastOrNull</span>() <span class="kw">?:</span> <span class="nu">0f</span>
+    <span class="kw">val</span> trend = <span class="kw">if</span> (dataPoints.<span class="fn">last</span>() > dataPoints.<span class="fn">first</span>()) <span class="str">"upward"</span> <span class="kw">else</span> <span class="str">"downward"</span>
+
+    <span class="cl">Canvas</span>(
+        modifier = modifier.<span class="fn">semantics</span> {
+            <span class="cm">// Describe the chart content meaningfully</span>
+            contentDescription = <span class="str">"Balance trend chart. " +
+                "Current balance: $latestValue $currency. " +
+                "Trend over last 30 days: $trend."</span>
+            <span class="cm">// Mark as an image role so TalkBack announces it correctly</span>
+            role = <span class="cl">Role</span>.Image
+        }
+    ) {
+        <span class="cm">// canvas drawing code</span>
+    }
+}
+
+<span class="cm">// For interactive Canvas (e.g., signature pad):</span>
+<span class="cl">Canvas</span>(
+    modifier = <span class="cl">Modifier</span>
+        .<span class="fn">semantics</span> {
+            contentDescription = <span class="str">"Signature pad. Draw your signature here."</span>
+            role = <span class="cl">Role</span>.Image
+            onClick(<span class="str">"Clear signature"</span>) { <span class="fn">clearSignature</span>(); <span class="kw">true</span> }
+        }
+        .<span class="fn">pointerInput</span>(<span class="cl">Unit</span>) { <span class="cm">/* gesture handling */</span> }
+) { <span class="cm">/* canvas drawing */</span> }
+</code></pre>
+        <strong>Key rules for Canvas accessibility:</strong><br>
+        1. Always add <code>Modifier.semantics { contentDescription = "..." }</code> — describe what the canvas shows, not how it's drawn<br>
+        2. For decorative charts/illustrations: <code>contentDescription = null</code> if the data is described elsewhere on screen<br>
+        3. For interactive canvas elements: add <code>onClick</code> action in semantics<br>
+        4. For complex data visualisation: consider providing a text alternative (toggle button to switch to data table view) — much more useful than a long description
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

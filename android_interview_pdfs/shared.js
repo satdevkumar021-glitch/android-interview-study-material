@@ -116,6 +116,13 @@
     {id:'34D',name:'Data Structures & Search',file:'34D_Data_Structures_Search.html',tier:1},
     {id:'34E',name:'Android Coding',file:'34E_Android_Coding.html',tier:1},
     {id:'35A',name:'Behavioral & Senior Leadership',file:'35A_Behavioral_Senior_Leadership.html',tier:1},
+    {id:'36A',name:'AI Integration in Android',file:'36A_AI_Integration_Android.html',tier:1},
+    {id:'36B',name:'AI Developer Tools',file:'36B_AI_Dev_Tools.html',tier:1},
+    {id:'37A',name:'Jetpack Compose Animation',file:'37A_Compose_Animation.html',tier:1},
+    {id:'38A',name:'Kotlin Multiplatform (KMP/KMM)',file:'38A_Kotlin_Multiplatform.html',tier:2},
+    {id:'39A',name:'Android Accessibility',file:'39A_Accessibility.html',tier:2},
+    {id:'40A',name:'Android New APIs (12–16)',file:'40A_Android_New_APIs.html',tier:1},
+    {id:'41A',name:'Advanced Android Debugging',file:'41A_Advanced_Debugging.html',tier:2},
   ];
 
   // ── Progress helpers ────────────────────────────────────────────

@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>38A — Kotlin Multiplatform (KMP/KMM) | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-tier2 { background: rgba(245,200,66,0.12); color: var(--yellow); border: 1px solid rgba(245,200,66,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">38A · Kotlin Multiplatform</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>38A</span> — Kotlin Multiplatform (KMP/KMM)</h1>
+    <p class="hero-desc">Sharing Kotlin code across Android, iOS, Web, and Desktop using expect/actual, shared modules, and platform-specific implementations.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 38A</span>
+      <span class="badge badge-tier2">&#11088; Tier 2 — Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>What is KMP?</h3>
+    <p><strong>Kotlin Multiplatform (KMP)</strong> allows you to share Kotlin code across multiple platforms — Android, iOS, Web, and Desktop — while retaining full access to native APIs and native UI on each platform. You write business logic once in Kotlin and compile it to the appropriate target format per platform.</p>
+
+    <h3>KMP vs KMM</h3>
+    <p><strong>KMM (Kotlin Multiplatform Mobile)</strong> is a subset of KMP focused specifically on Android and iOS mobile development. KMM is now stabilised under the broader KMP umbrella. When interviewers say "KMM", they mean KMP applied to mobile.</p>
+
+    <h3>How the Shared Module Compiles</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Target Platform</th><th>Compiled To</th><th>Runtime</th></tr>
+      <tr><td>Android</td><td>JVM bytecode (.jar / .aar)</td><td>Dalvik / ART</td></tr>
+      <tr><td>iOS</td><td>Native binary via Kotlin/Native → .xcframework</td><td>Objective-C / Swift interop</td></tr>
+      <tr><td>Web (JS)</td><td>JavaScript</td><td>Browser / Node.js</td></tr>
+      <tr><td>Desktop (JVM)</td><td>JVM bytecode</td><td>JVM</td></tr>
+    </table>
+    </div>
+
+    <h3>What IS Shared</h3>
+    <ul>
+      <li><strong>Domain layer</strong> — use cases, business logic, domain models</li>
+      <li><strong>Data layer</strong> — repositories, data sources, API clients (Ktor), database (SQLDelight)</li>
+      <li><strong>Networking logic</strong> — request/response mapping, error handling</li>
+      <li><strong>Coroutines &amp; Flow</strong> — <code>kotlinx.coroutines-core</code> is fully multiplatform</li>
+      <li><strong>Serialization</strong> — <code>kotlinx.serialization</code> is multiplatform</li>
+    </ul>
+
+    <h3>What is NOT Shared</h3>
+    <ul>
+      <li><strong>UI layer</strong> — Jetpack Compose is Android-only; iOS uses SwiftUI or UIKit</li>
+      <li><strong>Platform-specific APIs</strong> — camera, GPS, biometrics — abstracted via expect/actual</li>
+      <li><strong>DI frameworks</strong> — Hilt is Android-only; iOS uses manual DI or Koin</li>
+      <li><strong>Navigation</strong> — Navigation Compose (Android) vs NavigationStack (iOS)</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      KMP is not "write once run anywhere" (that's Flutter). It is <strong>"share logic, native UI"</strong>. You eliminate duplicate business logic (~60% of codebase) while each platform retains its native look, feel, and performance. The correct mental model is: <em>shared kernel + native shell per platform</em>.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works</div>
+
+    <h3>expect / actual — The Core Mechanism</h3>
+    <p>The <code>expect</code> / <code>actual</code> mechanism is how KMP handles platform-specific code. You declare an <code>expect</code> declaration in <code>commonMain</code> and provide an <code>actual</code> implementation in each platform source set.</p>
+
+    <pre><code><span class="cm">// commonMain — declare the contract</span>
+<span class="kw">expect class</span> <span class="cl">PlatformLogger</span>() {
+    <span class="kw">fun</span> <span class="fn">log</span>(message: <span class="cl">String</span>)
+}
+
+<span class="cm">// androidMain — Android implementation</span>
+<span class="kw">actual class</span> <span class="cl">PlatformLogger</span> <span class="kw">actual constructor</span>() {
+    <span class="kw">actual fun</span> <span class="fn">log</span>(message: <span class="cl">String</span>) = <span class="cl">Log</span>.<span class="fn">d</span>(<span class="str">"KMP"</span>, message)
+}
+
+<span class="cm">// iosMain — iOS implementation</span>
+<span class="kw">actual class</span> <span class="cl">PlatformLogger</span> <span class="kw">actual constructor</span>() {
+    <span class="kw">actual fun</span> <span class="fn">log</span>(message: <span class="cl">String</span>) = <span class="fn">NSLog</span>(message)
+}</code></pre>
+
+    <h3>Source Sets</h3>
+    <div class="ascii-box">┌─────────────────────────────────────────────┐
+│              commonMain                     │
+│    Domain Layer + Data Layer + Models       │
+│    Ktor · SQLDelight · Coroutines · Flow    │
+└──────────────┬──────────────────┬───────────┘
+               │                  │
+    ┌──────────▼──────┐   ┌───────▼──────────┐
+    │   androidMain   │   │    iosMain        │
+    │  Android APIs   │   │  Apple APIs       │
+    │  actual impls   │   │  actual impls     │
+    └──────────┬──────┘   └───────┬───────────┘
+               │                  │
+    ┌──────────▼──────┐   ┌───────▼───────────┐
+    │  Android App    │   │   iOS App          │
+    │  Compose UI     │   │   SwiftUI / UIKit  │
+    │  Hilt DI        │   │   .xcframework     │
+    └─────────────────┘   └────────────────────┘</div>
+
+    <h3>Gradle Setup</h3>
+    <pre><code><span class="cm">// build.gradle.kts (shared module)</span>
+<span class="fn">plugins</span> {
+    <span class="fn">kotlin</span>(<span class="str">"multiplatform"</span>)
+    <span class="fn">id</span>(<span class="str">"com.android.library"</span>)
+}
+
+<span class="fn">kotlin</span> {
+    <span class="fn">androidTarget</span>()
+    <span class="fn">iosX64</span>()
+    <span class="fn">iosArm64</span>()
+    <span class="fn">iosSimulatorArm64</span>()
+
+    <span class="fn">sourceSets</span> {
+        <span class="kw">val</span> commonMain <span class="kw">by</span> <span class="fn">getting</span> {
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-core:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:runtime:2.0.1"</span>)
+                <span class="fn">implementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"</span>)
+                <span class="fn">implementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2"</span>)
+            }
+        }
+        <span class="kw">val</span> androidMain <span class="kw">by</span> <span class="fn">getting</span> {
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-android:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:android-driver:2.0.1"</span>)
+            }
+        }
+        <span class="kw">val</span> iosMain <span class="kw">by</span> <span class="fn">getting</span> {
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-darwin:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:native-driver:2.0.1"</span>)
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Key Multiplatform Libraries</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Library</th><th>Purpose</th><th>Android engine</th><th>iOS engine</th></tr>
+      <tr><td>Ktor</td><td>HTTP networking</td><td>OkHttp</td><td>NSURLSession (Darwin)</td></tr>
+      <tr><td>SQLDelight</td><td>SQL database</td><td>SQLiteDriver (Android)</td><td>NativeSqliteDriver</td></tr>
+      <tr><td>kotlinx.coroutines</td><td>Async programming</td><td>Coroutines (JVM)</td><td>Kotlin/Native coroutines</td></tr>
+      <tr><td>kotlinx.serialization</td><td>JSON parsing</td><td>Multiplatform</td><td>Multiplatform</td></tr>
+      <tr><td>Koin</td><td>DI (not Hilt)</td><td>Multiplatform</td><td>Multiplatform</td></tr>
+    </table>
+    </div>
+
+    <h3>Shared Repository Pattern</h3>
+    <pre><code><span class="cm">// commonMain — shared domain + data</span>
+<span class="kw">class</span> <span class="cl">UserRepository</span>(
+    <span class="kw">private val</span> apiClient: <span class="cl">UserApiClient</span>,  <span class="cm">// Ktor</span>
+    <span class="kw">private val</span> database: <span class="cl">UserDatabase</span>      <span class="cm">// SQLDelight</span>
+) {
+    <span class="kw">suspend fun</span> <span class="fn">getUser</span>(id: <span class="cl">String</span>): <span class="cl">User</span> = apiClient.<span class="fn">fetchUser</span>(id)
+    <span class="kw">fun</span> <span class="fn">observeUsers</span>(): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">User</span>&gt;&gt; = database.<span class="fn">selectAll</span>()
+}
+
+<span class="cm">// Flow works on ALL platforms — collect in Android ViewModel or iOS via coroutine scope</span></code></pre>
+
+    <h3>iOS Integration</h3>
+    <p>KMP generates an <code>.xcframework</code> from the shared module. iOS app adds it via Xcode or CocoaPods, then consumes Kotlin classes directly in Swift:</p>
+    <pre><code><span class="cm">// Swift (iOS) — consuming KMP shared module</span>
+<span class="kw">import</span> shared
+
+<span class="kw">let</span> repo = UserRepository(apiClient: apiClient, database: database)
+<span class="kw">let</span> user = <span class="kw">try await</span> repo.<span class="fn">getUser</span>(id: <span class="str">"u_123"</span>)
+<span class="cm">// Kotlin suspend functions become async/await in Swift automatically</span></code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. When to Use It</div>
+
+    <h3>Use KMP When</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Good Fit</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Same business logic needed on Android AND iOS</strong> — account management, transaction processing, validation rules</li>
+        <li><strong>Team has strong Kotlin expertise</strong> — KMP is Kotlin-first; no new language to learn for Android devs</li>
+        <li><strong>New projects</strong> — far easier to start KMP-first than to retrofit it</li>
+        <li><strong>You want native UI performance</strong> — no bridge overhead, native rendering</li>
+        <li><strong>You need platform-specific features</strong> — camera, push, biometrics stay native</li>
+        <li><strong>You want to keep separate Android/iOS teams</strong> — both teams consume the shared module as a library</li>
+      </ul>
+    </div>
+
+    <h3>Do NOT Use KMP When</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Poor Fit</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>UI-heavy apps</strong> where most complexity is in animation, custom UI — little shareable logic</li>
+        <li><strong>Small teams without iOS experience</strong> — KMP generates native iOS code that someone must integrate and test on iOS</li>
+        <li><strong>Legacy apps with deep Java integration</strong> — retrofitting KMP is complex; not worth it for maintenance projects</li>
+        <li><strong>Team is primarily React/JS</strong> — consider React Native instead</li>
+        <li><strong>Tight delivery timelines with no KMP experience</strong> — initial setup and iOS toolchain adds friction</li>
+      </ul>
+    </div>
+
+    <h3>KMP vs Flutter Decision Matrix</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Factor</th><th>KMP</th><th>Flutter</th></tr>
+      <tr><td>UI sharing</td><td>No — native UI per platform</td><td>Yes — single UI (Canvas-rendered)</td></tr>
+      <tr><td>Native feel</td><td>Full native (Compose / SwiftUI)</td><td>Very close but not native widgets</td></tr>
+      <tr><td>Language</td><td>Kotlin (Android team strength)</td><td>Dart (new language to learn)</td></tr>
+      <tr><td>Code sharing</td><td>Logic only (~60%)</td><td>Logic + UI (~90%)</td></tr>
+      <tr><td>iOS team involvement</td><td>Still needs Swift dev for UI</td><td>Flutter dev handles both</td></tr>
+      <tr><td>Ecosystem maturity</td><td>Stable (JetBrains, JetBrains-backed)</td><td>Mature (Google-backed)</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Banking app: shared account balance and transaction domain layer. The KMP shared module is consumed by the Android app (Hilt + Compose) and the iOS app (SwiftUI), eliminating duplicate repository and API code.
+    </div>
+
+    <h3>1. build.gradle.kts — Shared KMP Module</h3>
+    <pre><code><span class="cm">// shared/build.gradle.kts</span>
+<span class="fn">plugins</span> {
+    <span class="fn">kotlin</span>(<span class="str">"multiplatform"</span>)
+    <span class="fn">id</span>(<span class="str">"com.android.library"</span>)
+    <span class="fn">kotlin</span>(<span class="str">"plugin.serialization"</span>)
+    <span class="fn">id</span>(<span class="str">"app.cash.sqldelight"</span>)
+}
+
+<span class="fn">kotlin</span> {
+    <span class="fn">androidTarget</span> {
+        <span class="fn">compilations</span>.all {
+            <span class="fn">kotlinOptions</span> { jvmTarget = <span class="str">"17"</span> }
+        }
+    }
+
+    <span class="kw">val</span> iosTargets = <span class="fn">listOf</span>(
+        <span class="fn">iosX64</span>(), <span class="fn">iosArm64</span>(), <span class="fn">iosSimulatorArm64</span>()
+    )
+    iosTargets.<span class="fn">forEach</span> { target ->
+        target.<span class="fn">binaries</span>.<span class="fn">framework</span> {
+            baseName = <span class="str">"shared"</span>
+            isStatic = <span class="kw">true</span>
+        }
+    }
+
+    <span class="fn">sourceSets</span> {
+        <span class="kw">val</span> commonMain <span class="kw">by</span> <span class="fn">getting</span> {
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-core:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-content-negotiation:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-serialization-kotlinx-json:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:runtime:2.0.1"</span>)
+                <span class="fn">implementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"</span>)
+                <span class="fn">implementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2"</span>)
+            }
+        }
+        <span class="kw">val</span> androidMain <span class="kw">by</span> <span class="fn">getting</span> {
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-android:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:android-driver:2.0.1"</span>)
+            }
+        }
+        <span class="kw">val</span> iosMain <span class="kw">by</span> <span class="fn">creating</span> {
+            <span class="fn">dependsOn</span>(commonMain)
+            <span class="fn">dependencies</span> {
+                <span class="fn">implementation</span>(<span class="str">"io.ktor:ktor-client-darwin:2.3.7"</span>)
+                <span class="fn">implementation</span>(<span class="str">"app.cash.sqldelight:native-driver:2.0.1"</span>)
+            }
+        }
+    }
+}
+
+<span class="fn">sqldelight</span> {
+    <span class="fn">databases</span> {
+        <span class="fn">create</span>(<span class="str">"BankingDatabase"</span>) {
+            packageName.<span class="fn">set</span>(<span class="str">"com.banking.db"</span>)
+        }
+    }
+}</code></pre>
+
+    <h3>2. Shared Domain Model + Repository Interface (commonMain)</h3>
+    <pre><code><span class="cm">// commonMain/domain/model/Account.kt</span>
+<span class="kw">data class</span> <span class="cl">Account</span>(
+    <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="kw">val</span> accountNumber: <span class="cl">String</span>,
+    <span class="kw">val</span> balance: <span class="cl">Double</span>,
+    <span class="kw">val</span> currency: <span class="cl">String</span>
+)
+
+<span class="kw">data class</span> <span class="cl">Transaction</span>(
+    <span class="kw">val</span> id: <span class="cl">String</span>,
+    <span class="kw">val</span> amount: <span class="cl">Double</span>,
+    <span class="kw">val</span> description: <span class="cl">String</span>,
+    <span class="kw">val</span> timestamp: <span class="cl">Long</span>,
+    <span class="kw">val</span> type: <span class="cl">TransactionType</span>
+)
+
+<span class="kw">enum class</span> <span class="cl">TransactionType</span> { CREDIT, DEBIT }
+
+<span class="cm">// commonMain/domain/repository/AccountRepository.kt</span>
+<span class="kw">interface</span> <span class="cl">AccountRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">getAccount</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">Account</span>&gt;
+    <span class="kw">fun</span> <span class="fn">observeTransactions</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt;
+    <span class="kw">suspend fun</span> <span class="fn">transferFunds</span>(fromId: <span class="cl">String</span>, toId: <span class="cl">String</span>, amount: <span class="cl">Double</span>): <span class="cl">Result</span>&lt;<span class="cl">Unit</span>&gt;
+}
+
+<span class="cm">// commonMain/data/repository/AccountRepositoryImpl.kt</span>
+<span class="kw">class</span> <span class="cl">AccountRepositoryImpl</span>(
+    <span class="kw">private val</span> apiClient: <span class="cl">AccountApiClient</span>,
+    <span class="kw">private val</span> localDb: <span class="cl">BankingDatabase</span>
+) : <span class="cl">AccountRepository</span> {
+
+    <span class="kw">override suspend fun</span> <span class="fn">getAccount</span>(id: <span class="cl">String</span>): <span class="cl">Result</span>&lt;<span class="cl">Account</span>&gt; =
+        <span class="fn">runCatching</span> { apiClient.<span class="fn">fetchAccount</span>(id) }
+
+    <span class="kw">override fun</span> <span class="fn">observeTransactions</span>(accountId: <span class="cl">String</span>): <span class="cl">Flow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; =
+        localDb.transactionQueries.<span class="fn">selectByAccount</span>(accountId).<span class="fn">asFlow</span>().<span class="fn">mapToList</span>()
+
+    <span class="kw">override suspend fun</span> <span class="fn">transferFunds</span>(
+        fromId: <span class="cl">String</span>, toId: <span class="cl">String</span>, amount: <span class="cl">Double</span>
+    ): <span class="cl">Result</span>&lt;<span class="cl">Unit</span>&gt; = <span class="fn">runCatching</span> {
+        apiClient.<span class="fn">transfer</span>(<span class="cl">TransferRequest</span>(fromId, toId, amount))
+    }
+}</code></pre>
+
+    <h3>3. Android-Specific Driver Implementation (androidMain)</h3>
+    <pre><code><span class="cm">// androidMain/di/DatabaseDriverFactory.kt</span>
+<span class="kw">actual class</span> <span class="cl">DatabaseDriverFactory</span> <span class="kw">actual constructor</span>(
+    <span class="kw">private val</span> context: <span class="cl">Context</span>
+) {
+    <span class="kw">actual fun</span> <span class="fn">createDriver</span>(): <span class="cl">SqlDriver</span> =
+        <span class="cl">AndroidSqliteDriver</span>(<span class="cl">BankingDatabase</span>.Schema, context, <span class="str">"banking.db"</span>)
+}
+
+<span class="cm">// androidMain/di/NetworkModule.kt (Hilt)</span>
+<span class="kw">@Module</span>
+<span class="kw">@InstallIn</span>(<span class="cl">SingletonComponent</span>::<span class="kw">class</span>)
+<span class="kw">object</span> <span class="cl">KmpModule</span> {
+
+    <span class="kw">@Provides @Singleton</span>
+    <span class="kw">fun</span> <span class="fn">provideAccountRepository</span>(
+        <span class="kw">@ApplicationContext</span> context: <span class="cl">Context</span>
+    ): <span class="cl">AccountRepository</span> {
+        <span class="kw">val</span> driver = <span class="cl">DatabaseDriverFactory</span>(context).<span class="fn">createDriver</span>()
+        <span class="kw">val</span> database = <span class="cl">BankingDatabase</span>(driver)
+        <span class="kw">val</span> httpClient = <span class="cl">HttpClient</span>(<span class="cl">Android</span>) {
+            <span class="fn">install</span>(<span class="cl">ContentNegotiation</span>) { <span class="fn">json</span>() }
+        }
+        <span class="kw">return</span> <span class="cl">AccountRepositoryImpl</span>(
+            <span class="cl">AccountApiClient</span>(httpClient),
+            database
+        )
+    }
+}</code></pre>
+
+    <h3>4. Android ViewModel Consuming Shared Module</h3>
+    <pre><code><span class="cm">// androidApp/presentation/AccountViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">AccountViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> repository: <span class="cl">AccountRepository</span>  <span class="cm">// from KMP shared module</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _account = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">AccountUiState</span>&gt;(<span class="cl">AccountUiState</span>.Loading)
+    <span class="kw">val</span> account: <span class="cl">StateFlow</span>&lt;<span class="cl">AccountUiState</span>&gt; = _account.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">val</span> transactions: <span class="cl">StateFlow</span>&lt;<span class="cl">List</span>&lt;<span class="cl">Transaction</span>&gt;&gt; =
+        repository.<span class="fn">observeTransactions</span>(<span class="str">"acc_001"</span>)  <span class="cm">// KMP Flow → StateFlow</span>
+            .<span class="fn">stateIn</span>(viewModelScope, <span class="cl">SharingStarted</span>.WhileSubscribed(<span class="nu">5000</span>), <span class="fn">emptyList</span>())
+
+    <span class="kw">fun</span> <span class="fn">loadAccount</span>(id: <span class="cl">String</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            repository.<span class="fn">getAccount</span>(id)
+                .<span class="fn">onSuccess</span> { _account.value = <span class="cl">AccountUiState</span>.<span class="cl">Success</span>(it) }
+                .<span class="fn">onFailure</span> { _account.value = <span class="cl">AccountUiState</span>.<span class="cl">Error</span>(it.message) }
+        }
+    }
+}</code></pre>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th><th>When to pick</th></tr>
+      <tr>
+        <td>Kotlin Multiplatform (KMP)</td>
+        <td>Native UI, native perf, Kotlin-first, share ~60% of code</td>
+        <td>iOS team still needed for UI; complex initial setup; Kotlin/Native GC differences</td>
+        <td>Kotlin-expert teams needing Android + iOS, native feel required</td>
+      </tr>
+      <tr>
+        <td>Flutter</td>
+        <td>Single codebase including UI (~90% share), one dev team</td>
+        <td>Not native widgets; new language (Dart); plugin ecosystem gaps</td>
+        <td>Small team, startup speed, OK with near-native look</td>
+      </tr>
+      <tr>
+        <td>React Native</td>
+        <td>Large ecosystem, web devs reuse JS skills</td>
+        <td>Bridge overhead, performance issues, JS threading model</td>
+        <td>Web-first org, large JS team, moderate performance requirements</td>
+      </tr>
+      <tr>
+        <td>Xamarin / .NET MAUI</td>
+        <td>C# team, Microsoft ecosystem</td>
+        <td>Largely replaced by MAUI; smaller community vs Flutter/KMP</td>
+        <td>.NET org already using C#</td>
+      </tr>
+      <tr>
+        <td>Native only (separate codebases)</td>
+        <td>Maximum control, no shared-code constraints</td>
+        <td>Full duplication of logic; 2× maintainability cost</td>
+        <td>Small platform differences, teams with different expertise</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>KMP vs Flutter — The Senior Answer</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">When asked "KMP or Flutter?"</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>KMP</strong> if: Kotlin-first team, banking/fintech needing native compliance, separate Android/iOS teams already exist, native platform features are central</li>
+        <li><strong>Flutter</strong> if: startup speed matters, small team, UI is consistent across platforms, team doesn't have iOS expertise for KMP integration</li>
+        <li><strong>The real answer</strong>: "it depends on team expertise and how much of the app is shareable logic vs. platform-specific UI"</li>
+      </ul>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>iOS Binary Size Increase</h3>
+    <p>Kotlin/Native includes the Kotlin runtime in the generated <code>.xcframework</code>, increasing binary size by 2–5 MB. Mitigate with:</p>
+    <ul>
+      <li>Use <code>isStatic = true</code> (static framework) to allow Xcode linker to dead-strip unused code</li>
+      <li>Enable <code>linkerOpts("-dead_strip")</code> in release builds</li>
+      <li>Measure with <code>xcrun bitcode_strip</code> and monitor size in CI</li>
+    </ul>
+
+    <h3>Coroutine Threading on iOS (Legacy Issue)</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">⚠ Known Pitfall</div>
+      In older Kotlin/Native (pre-1.6), objects passed between threads had to be frozen (immutable), which broke standard coroutine patterns. Since Kotlin 1.6+ with the new memory model (<code>kotlin.native.binary.memoryModel=experimental</code> / default since 1.7.20), this is resolved. If you see <code>InvalidMutabilityException</code> or <code>FreezingException</code>, upgrade Kotlin and enable the new memory model.
+    </div>
+
+    <pre><code><span class="cm">// gradle.properties — new memory model (required pre-1.7.20)</span>
+kotlin.native.binary.memoryModel=experimental</code></pre>
+
+    <h3>expect/actual Boilerplate</h3>
+    <p>Every platform-specific class needs an <code>expect</code> declaration plus <code>actual</code> implementations for <em>every</em> target. With many targets (Android, iOS, Web, Desktop), this multiplies quickly. Strategies:</p>
+    <ul>
+      <li>Minimise expect/actual surface: push platform code to the edges, share as much as possible</li>
+      <li>Use interfaces in <code>commonMain</code> + factory pattern rather than expect/actual classes</li>
+      <li>Use <code>expect fun</code> for simple utilities rather than whole classes</li>
+    </ul>
+
+    <h3>SQLDelight is More Complex than Room</h3>
+    <p>SQLDelight uses SQL schema files (<code>.sq</code>) and generates typed Kotlin queries — more explicit than Room annotations. Setup gotchas:</p>
+    <ul>
+      <li>Driver must be provided per-platform via expect/actual or DI — not automatic</li>
+      <li>Migrations must be written in SQL, not Kotlin DSL like Room</li>
+      <li>Debugging SQL is done via the generated code, not Room's easy <code>@Database</code> inspector</li>
+    </ul>
+
+    <h3>Ktor Requires More Configuration than Retrofit</h3>
+    <pre><code><span class="cm">// commonMain — Ktor client (more verbose than Retrofit)</span>
+<span class="kw">val</span> client = <span class="cl">HttpClient</span> {
+    <span class="fn">install</span>(<span class="cl">ContentNegotiation</span>) {
+        <span class="fn">json</span>(<span class="cl">Json</span> { ignoreUnknownKeys = <span class="kw">true</span> })
+    }
+    <span class="fn">install</span>(<span class="cl">HttpTimeout</span>) {
+        requestTimeoutMillis = <span class="nu">30_000</span>
+    }
+    <span class="fn">install</span>(<span class="cl">Logging</span>) {
+        level = <span class="cl">LogLevel</span>.ALL
+    }
+}
+
+<span class="cm">// vs Retrofit — @GET, @POST annotations generate everything</span>
+<span class="cm">// Ktor: manual request building, explicit endpoint calls</span></code></pre>
+
+    <h3>Memory Management — Kotlin/Native GC</h3>
+    <p>Kotlin/Native uses a different garbage collector than JVM. With the new memory model (Kotlin 1.7.20+), it is a tracing GC that runs concurrently. Key differences:</p>
+    <ul>
+      <li>No generational GC — full heap traversal; can pause on large heaps</li>
+      <li>Cycle detection is not automatic in all cases with the new MM; avoid reference cycles in long-lived objects</li>
+      <li>Finalizers behave differently — do not rely on <code>finalize()</code> for cleanup; use explicit resource management</li>
+    </ul>
+
+    <h3>Best Practices</h3>
+    <ol>
+      <li>Keep <code>commonMain</code> pure — no platform imports, no Android/iOS-specific APIs</li>
+      <li>Use interfaces in <code>commonMain</code>, expect/actual only for primitives (date, UUID, dispatcher)</li>
+      <li>Use <code>Dispatchers.Default</code> in shared code — not <code>Dispatchers.Main</code> (platform-specific)</li>
+      <li>Test <code>commonMain</code> with <code>kotlin.test</code> — runs on both JVM and native</li>
+      <li>Wrap coroutine scopes for iOS consumption (KMP-NativeCoroutines or SKIE library helps)</li>
+      <li>Measure iOS binary size in CI — set a size budget and fail builds that exceed it</li>
+    </ol>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "KMP lets you share business logic — domain models, repositories, networking, and data layers — across Android and iOS using a single Kotlin codebase. The expect/actual mechanism handles platform differences. On Android it compiles to JVM bytecode, on iOS it generates an xcframework via Kotlin/Native. The UI stays native — Compose on Android, SwiftUI on iOS. You share roughly 60% of the codebase while keeping full native performance."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "KMP is Kotlin's multiplatform build system. You define a shared module with three main source sets: <code>commonMain</code> holds the platform-agnostic code — domain models, use cases, repositories — and <code>androidMain</code> / <code>iosMain</code> hold platform-specific implementations.<br><br>
+      The core mechanism is expect/actual: in <code>commonMain</code> you declare an <code>expect</code> class or function — a contract — and each platform source set provides the <code>actual</code> implementation. This is how you abstract things like logging, date formatting, and database drivers.<br><br>
+      For networking, we use Ktor instead of Retrofit — it's multiplatform and uses OkHttp on Android and NSURLSession on iOS under the hood. For persistence, SQLDelight replaces Room and compiles to platform-native SQLite drivers. Coroutines and Flow work on all platforms, which means shared repositories can expose reactive streams that both Android ViewModels and iOS Swift code can observe.<br><br>
+      The iOS side: KMP generates an .xcframework. The iOS app adds it and consumes Kotlin classes directly in Swift — Kotlin suspend functions map to Swift async/await automatically. The trade-off is that you still need an iOS developer for the SwiftUI layer and for iOS CI/CD integration. KMP is the right choice when the team is Kotlin-first and needs iOS without a full Flutter rewrite."
+    </div>
+
+    <h3>Must-Mention Points (Show Deep Knowledge)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>commonMain / androidMain / iosMain</strong> source sets — the fundamental structure of any KMP project</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>expect/actual</strong> — how platform-specific implementations are declared and provided; the contract mechanism</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Ktor + SQLDelight</strong> — the standard multiplatform networking and database stack replacing Retrofit + Room</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Flow works cross-platform</strong> — <code>kotlinx.coroutines-core</code> is multiplatform; reactive streams shared in <code>commonMain</code></div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>iOS generates .xcframework</strong> — consumed by iOS app via Xcode or CocoaPods; Kotlin suspend → Swift async/await</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>UI is NOT shared</strong> — Compose is Android-only; iOS uses SwiftUI. KMP is "shared logic, native UI"</div></div>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "KMP is the pragmatic choice for teams that are Kotlin-first and need iOS without a full Flutter rewrite — you keep native performance and UI while eliminating roughly 60% of duplicate business logic. The key architectural decision is where to draw the expect/actual boundary: I prefer pushing it to infrastructure primitives only — database drivers, platform dispatchers, UUID generation — and keeping all domain and data logic truly shared in <code>commonMain</code>. The biggest footgun is treating KMP as a way to avoid iOS expertise entirely; you still need a Swift developer for the SwiftUI shell and for navigating Xcode toolchain issues."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>EXPECT / ACTUAL SYNTAX</h4>
+        <pre><code>// commonMain
+expect class PlatformDate() {
+  fun now(): String
+}
+
+// androidMain
+actual class PlatformDate actual constructor() {
+  actual fun now() =
+    SimpleDateFormat("yyyy-MM-dd")
+      .format(Date())
+}
+
+// iosMain
+actual class PlatformDate actual constructor() {
+  actual fun now(): String {
+    val formatter = NSDateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    return formatter.stringFromDate(NSDate())
+  }
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>SOURCE SETS</h4>
+        <pre><code>commonMain   → all platforms
+androidMain  → Android specifics
+iosMain      → iOS specifics
+commonTest   → shared unit tests
+androidTest  → Android instrumented
+iosTest      → iOS native tests</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY MULTIPLATFORM LIBRARIES</h4>
+        <pre><code>Networking  → Ktor (not Retrofit)
+Database    → SQLDelight (not Room)
+DI          → Koin (not Hilt)
+Coroutines  → kotlinx.coroutines-core
+Serialization → kotlinx.serialization
+DateTime    → kotlinx.datetime</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>BUILD.GRADLE.KTS SNIPPET</h4>
+        <pre><code>kotlin("multiplatform")
+
+kotlin {
+  androidTarget()
+  iosX64()
+  iosArm64()
+  iosSimulatorArm64()
+
+  sourceSets {
+    val commonMain by getting { ... }
+    val androidMain by getting { ... }
+    val iosMain by creating {
+      dependsOn(commonMain) }
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Quick Reference Table</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Concept</th><th>Android Equivalent</th><th>KMP Equivalent</th></tr>
+      <tr><td>Networking</td><td>Retrofit + OkHttp</td><td>Ktor (multiplatform)</td></tr>
+      <tr><td>Database</td><td>Room</td><td>SQLDelight</td></tr>
+      <tr><td>DI</td><td>Hilt</td><td>Koin or manual</td></tr>
+      <tr><td>Platform code</td><td>Always Android</td><td>expect/actual per target</td></tr>
+      <tr><td>iOS output</td><td>N/A</td><td>.xcframework</td></tr>
+      <tr><td>Swift interop</td><td>N/A</td><td>Kotlin suspend → Swift async</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What is the difference between KMP and KMM?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>KMP (Kotlin Multiplatform)</strong> is the broad technology for sharing Kotlin code across Android, iOS, Web, and Desktop targets. <strong>KMM (Kotlin Multiplatform Mobile)</strong> was the name for the mobile-focused subset (Android + iOS only), which JetBrains has since merged back under the KMP umbrella. In 2023, JetBrains officially stabilised KMP and retired the KMM branding — they are now the same thing. When interviewers say KMM they mean KMP targeting Android and iOS.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What is the purpose of the <code>expect</code> / <code>actual</code> mechanism?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>expect</code> declares a contract in <code>commonMain</code> — a class or function that the compiler knows must exist on every platform, but whose implementation differs. Each platform source set (<code>androidMain</code>, <code>iosMain</code>) provides an <code>actual</code> implementation. The compiler enforces that every declared <code>expect</code> has a matching <code>actual</code> on every declared target — if one is missing, it is a compile error. This allows <code>commonMain</code> to call platform-specific APIs (logging, date, UUID) without knowing the platform.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What is shared in a KMP project? What is NOT shared?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Shared (commonMain):</strong> domain models, use cases, repositories, networking (Ktor), database access (SQLDelight), coroutines, Flow, serialization, business logic, validation rules.<br><br>
+        <strong>NOT shared:</strong> UI (Compose is Android-only; iOS uses SwiftUI), dependency injection (Hilt is Android-only), platform-specific APIs (camera, GPS, biometrics), navigation, platform lifecycle management. These stay native and either have an expect/actual abstraction or live entirely in the platform-specific app.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — Why is Ktor used instead of Retrofit in KMP? Why is SQLDelight used instead of Room?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Ktor vs Retrofit:</strong> Retrofit is built on OkHttp which is JVM/Android-only. Ktor is multiplatform by design — it uses OkHttp as its engine on Android and NSURLSession (Darwin engine) on iOS. Since <code>commonMain</code> must compile to both JVM and Kotlin/Native, only Ktor works there. Retrofit would fail to compile on iOS targets.<br><br>
+        <strong>SQLDelight vs Room:</strong> Room uses annotation processing and Android-only SQLite APIs. SQLDelight is multiplatform — it generates platform-typed Kotlin code from SQL schema files, and uses platform-appropriate drivers: <code>AndroidSqliteDriver</code> on Android and <code>NativeSqliteDriver</code> on iOS. Room would fail on Kotlin/Native targets.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — How does an iOS app consume a KMP shared module? How do Kotlin coroutines work from Swift?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        KMP generates an <code>.xcframework</code> (or <code>.framework</code>) from the shared module during the Gradle build. The iOS team adds this framework to the Xcode project either directly or via CocoaPods/SPM. Kotlin classes and functions are exposed to Swift as Objective-C interop — Kotlin data classes become Swift structs/classes, Kotlin interfaces become Swift protocols.<br><br>
+        Kotlin <strong>suspend functions</strong> are not directly callable from Swift (which has no concept of Kotlin coroutines). The recommended solutions:<br>
+        • <strong>KMP-NativeCoroutines</strong> library: generates Swift async/await wrappers automatically<br>
+        • <strong>SKIE</strong> (Swift Kotlin Interface Enhancer) by Touchlab: produces idiomatic Swift API<br>
+        • Manual: wrap suspend functions in a <code>CoroutineScope</code> with a callback/completion handler<br><br>
+        With modern libraries, <code>suspend fun getUser(): User</code> becomes <code>async func getUser() async throws -> User</code> in Swift.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — What is the new Kotlin/Native memory model and why does it matter for KMP?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Before Kotlin 1.6, Kotlin/Native used a "frozen" memory model — objects passed between threads had to be explicitly frozen (made immutable), and mutable state was not allowed to be shared across threads. This broke coroutine patterns that rely on shared mutable state between <code>withContext</code> switches and was a major source of <code>InvalidMutabilityException</code> and <code>FreezingException</code> crashes on iOS.<br><br>
+        Since Kotlin 1.7.20, the new memory model is the default. It uses a concurrent tracing garbage collector and allows mutable state to be shared across threads (same as JVM semantics). This makes standard coroutine patterns, StateFlow, and mutable ViewModel-like classes work correctly on iOS. Migration: ensure Kotlin 1.7.20+ and remove any <code>.freeze()</code> calls from your shared code.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — [Coding] Write an <code>expect</code> / <code>actual</code> for getting the current platform's date as a formatted string (<code>yyyy-MM-dd</code>). Provide commonMain, androidMain, and iosMain.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="cm">// commonMain/PlatformDate.kt</span>
+<span class="kw">expect fun</span> <span class="fn">currentDateString</span>(): <span class="cl">String</span>
+
+<span class="cm">// androidMain/PlatformDate.kt</span>
+<span class="kw">import</span> java.text.SimpleDateFormat
+<span class="kw">import</span> java.util.Date
+<span class="kw">import</span> java.util.Locale
+
+<span class="kw">actual fun</span> <span class="fn">currentDateString</span>(): <span class="cl">String</span> =
+    <span class="cl">SimpleDateFormat</span>(<span class="str">"yyyy-MM-dd"</span>, <span class="cl">Locale</span>.getDefault()).<span class="fn">format</span>(<span class="cl">Date</span>())
+
+<span class="cm">// iosMain/PlatformDate.kt</span>
+<span class="kw">import</span> platform.Foundation.NSDate
+<span class="kw">import</span> platform.Foundation.NSDateFormatter
+
+<span class="kw">actual fun</span> <span class="fn">currentDateString</span>(): <span class="cl">String</span> {
+    <span class="kw">val</span> formatter = <span class="cl">NSDateFormatter</span>()
+    formatter.dateFormat = <span class="str">"yyyy-MM-dd"</span>
+    <span class="kw">return</span> formatter.<span class="fn">stringFromDate</span>(<span class="cl">NSDate</span>())
+}</code></pre>
+        Note: in production you would prefer <code>kotlinx.datetime</code> library which is multiplatform and handles this in <code>commonMain</code> without expect/actual: <code>Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()</code>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — [Scenario] An iOS engineer reports: app crashes with <code>FreezingException: freezing of kotlin.coroutines.CancellableContinuation</code> when calling a shared Flow from Swift. What is happening and how do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>What is happening:</strong> This is the old Kotlin/Native memory model issue. When code tries to pass a <code>CancellableContinuation</code> (internal coroutine state) across threads — which Kotlin/Native's old model requires to be frozen/immutable before crossing thread boundaries — the freeze operation fails because coroutine internals are mutable.<br><br>
+        <strong>Root causes:</strong><br>
+        1. The project is using Kotlin &lt; 1.7.20 (old memory model default)<br>
+        2. Or: using old coroutines-native-mt version instead of standard coroutines<br><br>
+        <strong>Fix:</strong><br>
+        1. Upgrade to Kotlin 1.7.20+ — new memory model is default, this exception class is gone<br>
+        2. Use standard <code>kotlinx.coroutines-core</code> (not the deprecated <code>-native-mt</code> variant)<br>
+        3. Use KMP-NativeCoroutines or SKIE to generate safe Swift wrappers<br>
+        4. If temporarily stuck on older Kotlin: wrap the Flow collection in <code>@OptIn(ExperimentalCoroutinesApi::class)</code> and use <code>flowOn(Dispatchers.Main)</code> to ensure single-thread execution<br><br>
+        <strong>Long-term:</strong> Standardise on Kotlin 1.9+ and the new memory model — the old model is removed.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — A senior engineer wants to add KMP to an existing 3-year-old Android app that has a large Java legacy codebase. What is your advice? Is it worth it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Honest assessment — it depends:</strong><br><br>
+        <strong>Arguments for:</strong> If the team needs to deliver an iOS app, KMP avoids rewriting the entire business logic. The shared layer can be extracted incrementally — start with domain models and repository interfaces, then migrate implementations one by one.<br><br>
+        <strong>Arguments against:</strong><br>
+        1. Java interop with KMP is imperfect — Java classes can be used from <code>commonMain</code> only if they're pure JVM targets; Kotlin/Native can't use Java directly<br>
+        2. Legacy Java code must be converted to Kotlin before moving to <code>commonMain</code><br>
+        3. Room, Retrofit, Hilt — all Android-only — must be replaced or abstracted<br>
+        4. Significant iOS infrastructure investment (xcframework builds, iOS CI, Swift team)<br><br>
+        <strong>Recommended approach if proceeding:</strong><br>
+        1. Audit what is truly shareable (pure domain + data logic) vs. Android-specific<br>
+        2. Convert Java domain/data layer to Kotlin first<br>
+        3. Extract shared module incrementally — start with domain models only<br>
+        4. Replace Room with SQLDelight and Retrofit with Ktor one module at a time<br>
+        5. Set a 6-month migration target with clear milestones<br><br>
+        <strong>If there is no immediate iOS requirement:</strong> do not add KMP to a legacy Java app for its own sake — the migration cost exceeds the benefit.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — How do you test shared KMP code? What test frameworks are available in <code>commonMain</code>?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>kotlin.test</strong> is the multiplatform test framework — it provides <code>@Test</code>, <code>assertEquals</code>, <code>assertTrue</code>, <code>assertFails</code>. Tests in <code>commonTest</code> run on all platforms:<br>
+        • <code>./gradlew testDebugUnitTest</code> — runs on JVM (Android unit tests)<br>
+        • <code>./gradlew iosX64Test</code> — runs on Kotlin/Native (iOS simulator)<br><br>
+        <strong>For coroutines testing:</strong> <code>kotlinx.coroutines.test</code> (<code>TestScope</code>, <code>runTest</code>) is multiplatform since coroutines 1.6.<br><br>
+        <strong>For mocking:</strong> Mockito and MockK do not work on Kotlin/Native. Use either:<br>
+        • Manual fakes/stubs (recommended for shared code)<br>
+        • <code>Mockative</code> — a KMP-compatible mocking library using KSP<br><br>
+        <strong>Best practice:</strong> Test use cases and repositories with fake data sources in <code>commonTest</code>. Platform-specific tests (database driver, HTTP engine) go in <code>androidTest</code> / <code>iosTest</code>. This keeps the most important business logic tested cross-platform.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

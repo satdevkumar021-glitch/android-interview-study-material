@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Android Interview Prep — Study Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#070910;--bg2:#0c0e16;--bg3:#0f1117;--surface:#13161f;--surface2:#191c28;--surface3:#1f2232;
+  --border:#252840;--border2:#2e3250;--text:#eaecf4;--text2:#c4c8de;--muted:#7880a0;--muted2:#525870;
+  --accent:#7c6af7;--accent2:#a78bfa;--green:#3ecf8e;--orange:#f59e0b;--red:#f87171;--blue:#60a5fa;
+  --t1:#f87171;--t2:#3ecf8e;--t3:#f59e0b;
+  --font:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.65;}
+a{color:inherit;text-decoration:none;}
+::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::selection{background:rgba(124,106,247,.3);}
+
+/* TOP NAV */
+.topnav{position:sticky;top:0;z-index:100;background:rgba(7,9,16,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 24px;height:54px;}
+.tn-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;
+  background:linear-gradient(135deg,#7c6af7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tn-back{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
+.tn-back:hover{color:var(--accent);border-color:var(--accent);}
+.tn-title{font-size:14px;font-weight:700;color:var(--text2);}
+
+/* PAGE */
+.page{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
+
+/* HERO */
+.hero{text-align:center;margin-bottom:52px;padding:48px 32px;
+  background:linear-gradient(145deg,#13161f,#191c28);
+  border:1px solid var(--border2);border-radius:20px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,106,247,.12) 0%,transparent 70%);pointer-events:none;}
+.hero h1{font-size:36px;font-weight:900;letter-spacing:-.5px;line-height:1.2;margin-bottom:12px;}
+.hero h1 span{background:linear-gradient(135deg,#7c6af7,#3ecf8e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:16px;color:var(--muted);max-width:540px;margin:0 auto 24px;}
+.hero-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.pill{font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;border:1px solid;}
+.pill-green{border-color:rgba(62,207,142,.4);color:var(--green);background:rgba(62,207,142,.08);}
+.pill-purple{border-color:rgba(124,106,247,.4);color:var(--accent);background:rgba(124,106,247,.1);}
+.pill-orange{border-color:rgba(245,158,11,.4);color:var(--orange);background:rgba(245,158,11,.08);}
+
+/* PLAN SELECTOR */
+.plan-selector{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:4px;gap:4px;margin-bottom:40px;}
+.plan-btn{flex:1;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);
+  color:var(--muted);background:none;transition:all .2s;text-align:center;}
+.plan-btn.active{background:rgba(124,106,247,.2);color:var(--accent);}
+.plan-btn span{display:block;font-size:10px;font-weight:500;color:var(--muted2);margin-top:2px;}
+
+/* PLAN CONTENT */
+.plan-content{display:none;}
+.plan-content.active{display:block;}
+
+/* WEEK SECTION */
+.week-block{margin-bottom:32px;}
+.week-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.week-badge{background:linear-gradient(135deg,#7c6af7,#a78bfa);color:#fff;
+  font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;white-space:nowrap;}
+.week-title{font-size:18px;font-weight:800;flex:1;}
+.week-goal{font-size:12px;color:var(--muted);background:var(--surface2);
+  border:1px solid var(--border2);border-radius:8px;padding:4px 10px;white-space:nowrap;}
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+
+/* Topic card in roadmap */
+.rt-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.rt-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;}
+.rt-card:hover{transform:translateY(-2px);border-color:rgba(124,106,247,.4);}
+.rt-card .rc-id{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.rt-card .rc-name{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3;}
+.rt-card .rc-time{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.rt-card .rc-why{font-size:11px;color:var(--muted2);margin-top:4px;line-height:1.4;}
+.rt-card .rc-tier{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;
+  padding:2px 6px;border-radius:4px;}
+
+/* Daily schedule */
+.daily-schedule{background:var(--surface);border:1px solid var(--border2);border-radius:14px;
+  padding:24px;margin:24px 0;}
+.ds-title{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;}
+.ds-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.ds-time{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);
+  min-width:70px;background:rgba(124,106,247,.1);padding:3px 8px;border-radius:5px;text-align:center;}
+.ds-activity{flex:1;}
+.ds-act-title{font-size:13px;font-weight:600;}
+.ds-act-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Tips section */
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;}
+.tip-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:18px;}
+.tip-icon{font-size:24px;margin-bottom:8px;}
+.tip-title{font-size:14px;font-weight:700;margin-bottom:6px;}
+.tip-body{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* Progress tracker */
+.phase-bar{display:flex;gap:4px;margin-bottom:32px;}
+.phase-seg{flex:1;height:8px;border-radius:4px;position:relative;}
+.phase-seg::after{content:attr(data-label);position:absolute;top:12px;left:50%;
+  transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--muted);white-space:nowrap;}
+
+/* Section heading */
+.sh{font-size:18px;font-weight:800;margin:36px 0 16px;display:flex;align-items:center;gap:10px;}
+.sh::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Topic checklist */
+.checklist{list-style:none;}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:13px;}
+.checklist li:last-child{border-bottom:none;}
+.cl-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);
+  flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.cl-done .cl-check{background:var(--green);border-color:var(--green);color:#000;}
+.cl-content{flex:1;}
+.cl-name{font-weight:600;}
+.cl-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Interview day */
+.interview-timeline{position:relative;padding-left:32px;margin:20px 0;}
+.interview-timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--border2);}
+.it-item{position:relative;margin-bottom:20px;}
+.it-dot{position:absolute;left:-27px;top:4px;width:14px;height:14px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);}
+.it-time{font-size:10px;font-weight:800;color:var(--accent);font-family:var(--mono);margin-bottom:4px;}
+.it-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.it-body{font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* CTA */
+.cta-box{background:linear-gradient(135deg,rgba(124,106,247,.15),rgba(62,207,142,.08));
+  border:1px solid rgba(124,106,247,.3);border-radius:16px;padding:32px;text-align:center;margin-top:48px;}
+.cta-box h2{font-size:22px;font-weight:800;margin-bottom:8px;
+  background:linear-gradient(135deg,#7c6af7,#3ecf8e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cta-box p{color:var(--muted);font-size:14px;margin-bottom:20px;}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,#7c6af7,#a78bfa);color:#fff;
+  border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:var(--font);text-decoration:none;transition:opacity .2s;}
+.cta-btn:hover{opacity:.88;}
+
+@media(max-width:640px){
+  .hero h1{font-size:24px;}
+  .page{padding:24px 16px 60px;}
+  .plan-btn span{display:none;}
+  .week-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <span class="tn-brand">🤖 Android Prep</span>
+  <a href="../index.html" class="tn-back">← Home</a>
+  <span class="tn-title">📍 Study Roadmap</span>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Your Android Interview<br/><span>Study Roadmap</span></h1>
+    <p class="hero-sub">A structured, week-by-week plan to go from wherever you are now to Senior Android Interview Ready — no fluff, no guesswork.</p>
+    <div class="hero-pills">
+      <span class="pill pill-green">✅ 4-Week Intensive</span>
+      <span class="pill pill-purple">📅 8-Week Balanced</span>
+      <span class="pill pill-orange">🔄 12-Week Deep Dive</span>
+    </div>
+  </div>
+
+  <!-- PLAN SELECTOR -->
+  <div class="plan-selector">
+    <button class="plan-btn active" data-plan="4w" onclick="switchPlan('4w')">
+      4-Week Intensive
+      <span>Full-time prep · 4–5 hrs/day</span>
+    </button>
+    <button class="plan-btn" data-plan="8w" onclick="switchPlan('8w')">
+      8-Week Balanced
+      <span>While working · 2–3 hrs/day</span>
+    </button>
+    <button class="plan-btn" data-plan="12w" onclick="switchPlan('12w')">
+      12-Week Deep Dive
+      <span>Part-time · 1–2 hrs/day</span>
+    </button>
+  </div>
+
+  <!-- ═══ 4-WEEK PLAN ═══ -->
+  <div class="plan-content active" id="plan-4w">
+
+    <!-- Phase bar -->
+    <div class="phase-bar" style="margin-bottom:44px;">
+      <div class="phase-seg" data-label="Week 1: Kotlin + Core" style="background:linear-gradient(90deg,#7c6af7,#a78bfa)"></div>
+      <div class="phase-seg" data-label="Week 2: Android + Compose" style="background:linear-gradient(90deg,#3ecf8e,#06b6d4)"></div>
+      <div class="phase-seg" data-label="Week 3: Architecture + Advanced" style="background:linear-gradient(90deg,#f59e0b,#f87171)"></div>
+      <div class="phase-seg" data-label="Week 4: System Design + Mock" style="background:linear-gradient(90deg,#f87171,#ec4899)"></div>
+    </div>
+
+    <!-- Daily schedule -->
+    <div class="daily-schedule">
+      <div class="ds-title">⏰ Daily Schedule (4–5 hours)</div>
+      <div class="ds-row">
+        <div class="ds-time">7:00–8:30</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">📖 Study + Code</div>
+          <div class="ds-act-desc">Deep read one topic — focus on "How It Works" and "Production Example" sections</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">9:00–10:00</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">🃏 Flash Cards</div>
+          <div class="ds-act-desc">Flip-card review of yesterday's topic + new topic cards</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">10:30–12:00</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">💻 Coding Practice</div>
+          <div class="ds-act-desc">Write code from scratch — ViewModel, coroutines, Room. No copy-paste.</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">14:00–15:00</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">🎯 Interview Framework</div>
+          <div class="ds-act-desc">Practice 30-sec + 2-min answers out loud. Record yourself if possible.</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">15:30–16:30</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">🔄 Review + Quiz</div>
+          <div class="ds-act-desc">Self-test quiz on today's topic. Aim for 75%+ score.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge">Week 1</span>
+        <span class="week-title">Kotlin + Android Core + Framework Internals</span>
+        <span class="week-goal">🎯 Goal: Master the language</span>
+      </div>
+      <div class="week-grid">
+        <div class="rt-card" onclick="go('android_interview_pdfs/1A_Kotlin_Basics_Null_Safety.html')" style="--c:#f87171">
+          <div class="rc-tier" style="color:#f87171;background:rgba(248,113,113,.12)">T1</div>
+          <div class="rc-id">Day 1 · 1A</div>
+          <div class="rc-name">Kotlin Basics & Null Safety</div>
+          <div class="rc-time">⏱ 90 min</div>
+          <div class="rc-why">Foundation of everything. Null safety = most common bug source.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1B_Kotlin_Functions.html')">
+          <div class="rc-tier" style="color:#f87171;background:rgba(248,113,113,.12)">T1</div>
+          <div class="rc-id">Day 1 · 1B</div>
+          <div class="rc-name">Kotlin Functions</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">Extension functions & lambdas appear in every interview.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1C_Scope_Functions.html')">
+          <div class="rc-id">Day 2 · 1C</div>
+          <div class="rc-name">Scope Functions</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">let/apply/run used constantly in production code.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1D_Kotlin_OOP.html')">
+          <div class="rc-id">Day 2 · 1D</div>
+          <div class="rc-name">OOP</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">Classes, inheritance, interfaces — architecture building blocks.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1E_Special_Classes.html')">
+          <div class="rc-id">Day 3 · 1E</div>
+          <div class="rc-name">Special Classes</div>
+          <div class="rc-time">⏱ 75 min</div>
+          <div class="rc-why">Sealed classes = UI state pattern. Data classes everywhere.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1F_Generics_Variance.html')">
+          <div class="rc-id">Day 3 · 1F</div>
+          <div class="rc-name">Generics & Variance</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">in/out confuses many. Senior differentiator.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1G_Delegation_Operators.html')">
+          <div class="rc-id">Day 4 · 1G</div>
+          <div class="rc-name">Delegation & Operators</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">by lazy, by viewModels() — crucial patterns.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1H_Collections.html')">
+          <div class="rc-id">Day 4 · 1H</div>
+          <div class="rc-name">Collections</div>
+          <div class="rc-time">⏱ 75 min</div>
+          <div class="rc-why">Sequences vs collections = performance question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1I_Inline_Recursion.html')">
+          <div class="rc-id">Day 5 · 1I</div>
+          <div class="rc-name">Inline & Recursion</div>
+          <div class="rc-time">⏱ 45 min</div>
+          <div class="rc-why">Reified types asked in senior Kotlin questions.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/1J_Equality_Interop_Errors.html')">
+          <div class="rc-id">Day 5 · 1J</div>
+          <div class="rc-name">Equality, Interop & Errors</div>
+          <div class="rc-time">⏱ 45 min</div>
+          <div class="rc-why">Result type for error handling — modern pattern.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/2A_Components_Overview.html')" style="border-color:rgba(62,207,142,.25)">
+          <div class="rc-tier" style="color:#3ecf8e;background:rgba(62,207,142,.1)">T2</div>
+          <div class="rc-id">Day 6 · 2A</div>
+          <div class="rc-name">Android Components</div>
+          <div class="rc-time">⏱ 75 min</div>
+          <div class="rc-why">First question in every Android interview.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/2B_Activity_Lifecycle_State.html')" style="border-color:rgba(62,207,142,.25)">
+          <div class="rc-id">Day 6 · 2B</div>
+          <div class="rc-name">Activity Lifecycle & State</div>
+          <div class="rc-time">⏱ 90 min</div>
+          <div class="rc-why">Rotation bug = most common real-world Android issue.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/3A_App_Startup.html')">
+          <div class="rc-id">Day 7 · 3A</div>
+          <div class="rc-name">App Startup Internals</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">Zygote question = senior differentiator.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/3B_Main_Thread_Internals.html')">
+          <div class="rc-id">Day 7 · 3B</div>
+          <div class="rc-name">Main Thread (Looper/Handler)</div>
+          <div class="rc-time">⏱ 60 min</div>
+          <div class="rc-why">Why the main thread never blocks — deep understanding needed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#3ecf8e,#06b6d4)">Week 2</span>
+        <span class="week-title">Coroutines + Flow + Jetpack Compose</span>
+        <span class="week-goal">🎯 Goal: Master async & UI</span>
+      </div>
+      <div class="week-grid">
+        <div class="rt-card" onclick="go('android_interview_pdfs/4A_ViewModel.html')">
+          <div class="rc-id">Day 8 · 4A</div><div class="rc-name">ViewModel</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">ViewModelStore survival — most asked Jetpack question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/5A_Coroutines_Fundamentals.html')">
+          <div class="rc-id">Day 8 · 5A</div><div class="rc-name">Coroutines Fundamentals</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Thread vs coroutine — every senior question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/5B_Builders_Dispatchers.html')">
+          <div class="rc-id">Day 9 · 5B</div><div class="rc-name">Builders & Dispatchers</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Which dispatcher for which work — must know.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/5C_Structured_Concurrency.html')">
+          <div class="rc-id">Day 9 · 5C</div><div class="rc-name">Structured Concurrency</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Most important coroutines topic. Spend extra time here.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/5D_Cancellation_Exceptions.html')">
+          <div class="rc-id">Day 10 · 5D</div><div class="rc-name">Cancellation & Exceptions</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">SupervisorJob vs Job bugs are real-world production issues.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/6A_Flow_Core.html')">
+          <div class="rc-id">Day 10 · 6A</div><div class="rc-name">Flow Core</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">StateFlow vs SharedFlow vs LiveData — asked constantly.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/6B_Flow_Operators.html')">
+          <div class="rc-id">Day 11 · 6B</div><div class="rc-name">Flow Operators</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">flatMapLatest for search, combine for dashboard.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/6D_Sharing.html')">
+          <div class="rc-id">Day 11 · 6D</div><div class="rc-name">stateIn / shareIn</div>
+          <div class="rc-time">⏱ 45 min</div><div class="rc-why">WhileSubscribed(5000) pattern — production must-know.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/7A_Compose_Fundamentals.html')">
+          <div class="rc-id">Day 12 · 7A</div><div class="rc-name">Compose Fundamentals</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Recomposition understanding = Compose senior level.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/7B_State_Management.html')">
+          <div class="rc-id">Day 12 · 7B</div><div class="rc-name">State Management</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">State hoisting + UDF = architecture for Compose.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/7C_Side_Effects.html')">
+          <div class="rc-id">Day 13 · 7C</div><div class="rc-name">Side Effects</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">LaunchedEffect key bugs appear in production.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/7D_Compose_Performance.html')">
+          <div class="rc-id">Day 13 · 7D</div><div class="rc-name">Compose Performance</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">@Stable/@Immutable — senior-only territory.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/8A_Architecture_Patterns.html')">
+          <div class="rc-id">Day 14 · 8A</div><div class="rc-name">Architecture Patterns</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">MVVM vs MVI — you WILL be asked this.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/8B_Clean_Architecture.html')">
+          <div class="rc-id">Day 14 · 8B</div><div class="rc-name">Clean Architecture</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">UseCase/Repository/DTO — draw this diagram in interview.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#f59e0b,#f87171)">Week 3</span>
+        <span class="week-title">Architecture + Testing + Performance + Security</span>
+        <span class="week-goal">🎯 Goal: Production expertise</span>
+      </div>
+      <div class="week-grid">
+        <div class="rt-card" onclick="go('android_interview_pdfs/9A_SOLID_Principles.html')">
+          <div class="rc-id">Day 15 · 9A</div><div class="rc-name">SOLID Principles</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Every senior interview has SOLID questions.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/11A_DI_Hilt_Basics.html')">
+          <div class="rc-id">Day 15 · 11A</div><div class="rc-name">DI & Hilt</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Hilt is standard in all modern Android projects.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/12A_REST_HTTP.html')">
+          <div class="rc-id">Day 16 · 12A</div><div class="rc-name">REST & HTTP</div>
+          <div class="rc-time">⏱ 60 min</div><div class="rc-why">Status codes and caching — backend crossover question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/12B_Retrofit_OkHttp.html')">
+          <div class="rc-id">Day 16 · 12B</div><div class="rc-name">Retrofit & OkHttp</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Interceptor chain — write one from memory.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/12C_Advanced_Networking.html')">
+          <div class="rc-id">Day 17 · 12C</div><div class="rc-name">Advanced Networking</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Concurrent token refresh = hardest networking question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/13A_Room.html')">
+          <div class="rc-id">Day 17 · 13A</div><div class="rc-name">Room</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Flow + Room = reactive database pattern.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/20A_Unit_Testing.html')">
+          <div class="rc-id">Day 18 · 20A</div><div class="rc-name">Unit Testing</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Fake vs Mock — tell the difference confidently.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/20B_Coroutines_Flow_Testing.html')">
+          <div class="rc-id">Day 18 · 20B</div><div class="rc-name">Coroutines Testing</div>
+          <div class="rc-time">⏱ 60 min</div><div class="rc-why">runTest + Turbine — must demo this in coding round.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/21A_Performance.html')">
+          <div class="rc-id">Day 19 · 21A</div><div class="rc-name">Performance</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">ANR causes + Baseline Profiles — senior differentiator.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/22A_Memory_Management.html')">
+          <div class="rc-id">Day 19 · 22A</div><div class="rc-name">Memory Management</div>
+          <div class="rc-time">⏱ 60 min</div><div class="rc-why">7 types of leaks — know them all.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/19A_Data_Network_Security.html')">
+          <div class="rc-id">Day 20 · 19A</div><div class="rc-name">Security</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Keystore + cert pinning — banking apps must-know.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/24A_Modularization.html')">
+          <div class="rc-id">Day 20 · 24A</div><div class="rc-name">Modularization</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Every large org asks about multi-module architecture.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/33A_Debugging_Scenarios.html')">
+          <div class="rc-id">Day 21 · 33A</div><div class="rc-name">Debugging Scenarios</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">API called twice — most common real scenario question.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/33B_Data_Concurrency_Scenarios.html')">
+          <div class="rc-id">Day 21 · 33B</div><div class="rc-name">Concurrency Scenarios</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Token refresh Mutex — hardest concurrency scenario.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#f87171,#ec4899)">Week 4</span>
+        <span class="week-title">System Design + Mock Interviews + Coding</span>
+        <span class="week-goal">🎯 Goal: Interview ready</span>
+      </div>
+      <div class="week-grid">
+        <div class="rt-card" onclick="go('android_interview_pdfs/30A_System_Design_Offline_Catalog.html')">
+          <div class="rc-id">Day 22 · 30A</div><div class="rc-name">System Design: Offline Catalog</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Most common system design asked at FAANG.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/30B_System_Design_Login_Auth.html')">
+          <div class="rc-id">Day 22 · 30B</div><div class="rc-name">System Design: Auth</div>
+          <div class="rc-time">⏱ 75 min</div><div class="rc-why">Every banking/fintech app interview asks this.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/30G_System_Design_Large_Scale_App.html')">
+          <div class="rc-id">Day 23 · 30G</div><div class="rc-name">System Design: Large Scale</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Architect for millions — senior Principal level.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/34A_Strings_Coding.html')">
+          <div class="rc-id">Day 24 · 34A–34D</div><div class="rc-name">Coding Practice</div>
+          <div class="rc-time">⏱ 180 min</div><div class="rc-why">Live coding round — practice without hints.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/34E_Android_Coding.html')">
+          <div class="rc-id">Day 25 · 34E</div><div class="rc-name">Android Coding</div>
+          <div class="rc-time">⏱ 120 min</div><div class="rc-why">Parallel coroutines + token refresh — write from scratch.</div>
+        </div>
+        <div class="rt-card" onclick="go('android_interview_pdfs/35A_Behavioral_Senior_Leadership.html')">
+          <div class="rc-id">Day 26 · 35A</div><div class="rc-name">Behavioral + STAR</div>
+          <div class="rc-time">⏱ 90 min</div><div class="rc-why">Prepare 5 STAR stories. Practice out loud.</div>
+        </div>
+        <div class="rt-card" style="border-color:rgba(124,106,247,.4);background:rgba(124,106,247,.05)">
+          <div class="rc-id">Day 27–28</div><div class="rc-name">🔄 Full Mock Interview</div>
+          <div class="rc-time">⏱ 4 hours</div>
+          <div class="rc-why">Simulate real interview: 45min system design + 45min coding + 30min behavioral. Ask a peer or use AI mock.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end 4w -->
+
+  <!-- ═══ 8-WEEK PLAN ═══ -->
+  <div class="plan-content" id="plan-8w">
+    <div class="daily-schedule">
+      <div class="ds-title">⏰ Daily Schedule (While Working · 2–3 hours)</div>
+      <div class="ds-row">
+        <div class="ds-time">6:30–7:30</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">📖 Morning Study</div>
+          <div class="ds-act-desc">Read one topic, focus on Interview Framework section (30-sec + 2-min answers)</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">Lunch</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">🃏 Flash Card Review</div>
+          <div class="ds-act-desc">15–20 minutes of flip cards from today's and yesterday's topics</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">21:00–22:00</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">💻 Code + Quiz</div>
+          <div class="ds-act-desc">Write the production example from scratch. Then self-test quiz (aim 75%+).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge">Weeks 1–2</span>
+        <span class="week-title">Kotlin Fundamentals (all 10 topics)</span>
+        <span class="week-goal">🎯 5 topics/week</span>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Topics: 1A → 1J — take 2 days per topic. Code every example. Never skip the quiz.</p>
+    </div>
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#3ecf8e,#06b6d4)">Weeks 3–4</span>
+        <span class="week-title">Android Core + Coroutines + Flow</span>
+        <span class="week-goal">🎯 Deep focus on async</span>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Topics: 2A–2E, 3A–3D, 4A–4C, 5A–5E, 6A–6D — Spend 2 sessions on 5C (Structured Concurrency). It is the hardest and most asked topic.</p>
+    </div>
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#f59e0b,#f87171)">Weeks 5–6</span>
+        <span class="week-title">Compose + Architecture + DI + Networking + Storage</span>
+        <span class="week-goal">🎯 Modern Android stack</span>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Topics: 7A–7F, 8A–8B, 9A, 10A–10C, 11A–11B, 12A–12C, 13A–13C — Build a mini project combining all of these.</p>
+    </div>
+    <div class="week-block">
+      <div class="week-header">
+        <span class="week-badge" style="background:linear-gradient(135deg,#f87171,#ec4899)">Weeks 7–8</span>
+        <span class="week-title">Testing + System Design + Scenarios + Coding + Behavioral</span>
+        <span class="week-goal">🎯 Interview simulation</span>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Topics: 20A–20C, 30A–30G, 33A–33C, 34A–34E, 35A — Do 3 full mock interviews in week 8. Rate yourself on each competency.</p>
+    </div>
+  </div><!-- end 8w -->
+
+  <!-- ═══ 12-WEEK PLAN ═══ -->
+  <div class="plan-content" id="plan-12w">
+    <div class="daily-schedule">
+      <div class="ds-title">⏰ Daily Schedule (Part-time · 1–2 hours)</div>
+      <div class="ds-row">
+        <div class="ds-time">Any 90 min</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">📖 1 Topic Per Day</div>
+          <div class="ds-act-desc">Read fully. Mark done. 10 min flash card review at the end.</div>
+        </div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-time">Weekend</div>
+        <div class="ds-activity">
+          <div class="ds-act-title">🔄 Week Review</div>
+          <div class="ds-act-desc">Re-read Interview Framework sections for the week. Practice 30-sec answers for all topics.</div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin:16px 0">
+      <strong style="color:var(--text)">12-Week breakdown:</strong><br/>
+      Weeks 1–3: Kotlin (1A–1J) + Android Fundamentals (2A–2E)<br/>
+      Weeks 4–6: Framework Internals + Jetpack + Coroutines + Flow (3A–6D)<br/>
+      Weeks 7–8: Compose + Architecture + SOLID + Patterns (7A–10C)<br/>
+      Weeks 9–10: DI + Networking + Storage + WorkManager + Security + Testing (11A–20C)<br/>
+      Weeks 11–12: Performance + System Design + Scenarios + Coding + Behavioral (21A–35A)
+    </p>
+  </div><!-- end 12w -->
+
+  <!-- STUDY TIPS -->
+  <div class="sh">💡 Study Science Tips</div>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-icon">🔁</div>
+      <div class="tip-title">Spaced Repetition</div>
+      <div class="tip-body">Use the flip cards. Mark "Review" on anything you couldn't recall immediately. Revisit marked cards every 2 days. This is how long-term memory works.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🗣️</div>
+      <div class="tip-title">Teach Out Loud</div>
+      <div class="tip-body">Say the 30-sec answer out loud after reading each topic. If you can't explain it in 30 seconds without looking, you don't know it well enough yet.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">✍️</div>
+      <div class="tip-title">Write Code From Scratch</div>
+      <div class="tip-body">Don't just read code — close the page and write the ViewModel, the Repository, the coroutine scope from memory. Muscle memory matters in coding rounds.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🎯</div>
+      <div class="tip-title">Quality Over Quantity</div>
+      <div class="tip-body">5 topics deeply understood beats 20 topics skimmed. Interviewers drill deeper. Know the "Why" behind every decision — not just the "What".</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">🔗</div>
+      <div class="tip-title">Connect the Dots</div>
+      <div class="tip-body">After each section, ask: "How does this connect to what I already know?" Architecture → ViewModel → StateFlow → Compose → collectAsStateWithLifecycle. The chain matters.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-icon">😴</div>
+      <div class="tip-title">Sleep is Studying</div>
+      <div class="tip-body">Memory consolidation happens during sleep. Don't pull all-nighters before interviews. Study hard, sleep well. 7–8 hours before interview day is non-negotiable.</div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW DAY TIMELINE -->
+  <div class="sh">📅 Interview Day Checklist</div>
+  <div class="daily-schedule">
+    <div class="interview-timeline">
+      <div class="it-item">
+        <div class="it-dot" style="background:#f59e0b"></div>
+        <div class="it-time">Night Before</div>
+        <div class="it-title">Light Review Only</div>
+        <div class="it-body">Go through your flash cards marked "known". Read your 5 STAR stories. No new topics. Sleep by 10pm.</div>
+      </div>
+      <div class="it-item">
+        <div class="it-dot"></div>
+        <div class="it-time">Morning</div>
+        <div class="it-title">Warm Up, Don't Cram</div>
+        <div class="it-body">Read the Quick Revision sheets for 3 most likely topics (Coroutines, Compose, Architecture). Eat well. Exercise 20 min if possible.</div>
+      </div>
+      <div class="it-item">
+        <div class="it-dot" style="background:#3ecf8e"></div>
+        <div class="it-time">During Interview</div>
+        <div class="it-title">Think Out Loud Always</div>
+        <div class="it-body">Never code in silence. Say: "My first thought is X but I'd also consider Y because..." Senior engineers are evaluated on reasoning, not just answers.</div>
+      </div>
+      <div class="it-item">
+        <div class="it-dot" style="background:#7c6af7"></div>
+        <div class="it-time">System Design Round</div>
+        <div class="it-title">Clarify → Diagram → Trade-offs</div>
+        <div class="it-body">Ask clarifying questions first. Draw ASCII diagram. Call out trade-offs explicitly. Mention failure handling. Show you've built this in production.</div>
+      </div>
+      <div class="it-item">
+        <div class="it-dot" style="background:#f87171"></div>
+        <div class="it-time">After Each Round</div>
+        <div class="it-title">Reset Fast</div>
+        <div class="it-body">Don't dwell on mistakes in previous rounds. Each round is independent. Interviewers don't share scores between rounds mid-loop.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>Ready to Start?</h2>
+    <p>Your preparation journey begins with one topic. Go to the dashboard and start with 1A — Kotlin Basics.</p>
+    <a href="../index.html" class="cta-btn">🚀 Go to Dashboard</a>
+  </div>
+
+</div><!-- end page -->
+
+<script>
+function switchPlan(id) {
+  document.querySelectorAll('.plan-btn').forEach(b => b.classList.toggle('active', b.dataset.plan === id));
+  document.querySelectorAll('.plan-content').forEach(c => c.classList.toggle('active', c.id === 'plan-' + id));
+}
+function go(url) { window.location.href = url; }
+</script>
+<script src="android_interview_pdfs/shared.js"></script>
+</body>
+</html>

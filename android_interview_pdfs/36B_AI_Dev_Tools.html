@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>36B — AI Developer Tools for Android | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">36B · AI Developer Tools for Android</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>36B</span> — AI Developer Tools for Android</h1>
+    <p class="hero-desc">Using AI-powered tools (GitHub Copilot, Cursor, Gemini in Android Studio, MCP servers, AI code review) to accelerate Android development.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 36B</span>
+      <span class="badge badge-tier1">&#11088; Tier 1 Differentiator</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>The AI Dev Tools Revolution</h3>
+    <p>AI developer tools have evolved from simple autocomplete into full agents capable of multi-file edits, codebase-aware Q&amp;A, test generation, and automated code review. For Android engineers, this shift reduces time spent on boilerplate and routine patterns — freeing cognitive capacity for architecture and design decisions.</p>
+
+    <h3>Tools in the Android Developer's Toolkit</h3>
+    <ul>
+      <li><strong>GitHub Copilot</strong> — AI pair programmer integrated into VS Code, Android Studio (via plugin), and JetBrains IDEs; inline completions + Copilot Chat</li>
+      <li><strong>Cursor IDE</strong> — VSCode fork with AI-first design; Composer for multi-file edits, codebase indexing, <code>.cursorrules</code> for project-specific instructions</li>
+      <li><strong>Gemini in Android Studio</strong> — Google's first-party integration via Gemini Code Assist; inline suggestions, explain/fix/test generation, commit message generation</li>
+      <li><strong>AI Code Review bots</strong> — CodeRabbit, GitHub Copilot PR reviews; analyze diffs, flag antipatterns, suggest refactors automatically on every PR</li>
+      <li><strong>MCP Servers (Model Context Protocol)</strong> — open protocol for connecting AI models to external tools and data sources; Android Studio supports MCP for agent workflows</li>
+    </ul>
+
+    <h3>Why This Matters for Senior Devs</h3>
+    <ul>
+      <li><strong>Faster prototyping</strong> — scaffold a full feature module in minutes rather than hours</li>
+      <li><strong>Boilerplate elimination</strong> — ViewModels, DAOs, test stubs, Hilt modules generated on demand</li>
+      <li><strong>Smarter debugging</strong> — "Explain this error" and "Fix this bug" reduce context-switching to documentation</li>
+      <li><strong>AI-assisted code review</strong> — catch common Android antipatterns before human review</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      AI tools are a <strong>force multiplier, not a replacement</strong> for engineering judgment. The meta-skill is knowing <em>which output to trust</em> — and writing prompts precise enough to get trustworthy output in the first place.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works</div>
+
+    <h3>GitHub Copilot</h3>
+    <p>Copilot integrates via the LSP (Language Server Protocol). It sends the <strong>context window</strong> — open files, cursor position, and nearby code — to the model and streams completions back inline. Key capabilities:</p>
+    <ul>
+      <li><strong>Inline completions</strong> — ghost text that accepts on Tab; trained on public code</li>
+      <li><strong>Copilot Chat</strong> — Q&amp;A panel; ask about the current file, explain selections, generate tests</li>
+      <li><strong>Copilot in PRs</strong> — auto-generates PR summaries and review comments on diffs</li>
+      <li>Context quality improves when related files are open; it cannot read your entire codebase by default</li>
+    </ul>
+
+    <h3>Cursor IDE</h3>
+    <p>Cursor is a VSCode fork rebuilt for AI-first development. It goes beyond completions:</p>
+    <ul>
+      <li><strong>Composer</strong> — multi-file edit mode; describe a change in natural language and Cursor applies diffs across many files simultaneously</li>
+      <li><strong>Chat with codebase indexing</strong> — Cursor indexes the entire repo so you can ask questions grounded in your actual code</li>
+      <li><strong><code>.cursorrules</code></strong> — a project-level instruction file (checked into git) that customizes AI behavior: stack constraints, code style, architecture rules</li>
+    </ul>
+
+    <h3>Gemini in Android Studio</h3>
+    <p>Enabled via <strong>Settings &gt; Plugins &gt; Gemini Code Assist</strong> (or built-in in newer AS versions). Features:</p>
+    <ul>
+      <li>Inline code suggestions tuned for Android/Kotlin</li>
+      <li>"Explain this code" and "Fix this bug" context actions in the editor</li>
+      <li>Unit test generation — select a class, ask Gemini to write tests</li>
+      <li>Compose preview generation and layout suggestions</li>
+      <li>Commit message generation from staged diffs</li>
+    </ul>
+
+    <h3>MCP Servers (Model Context Protocol)</h3>
+    <p>MCP is an open protocol (introduced by Anthropic, now multi-vendor) that lets AI models connect to external tools and data sources as structured context. Android Studio's AI agent support includes MCP integration:</p>
+    <ul>
+      <li>MCP servers can expose: local filesystem, APIs, databases, CI systems</li>
+      <li>Enables AI agents to <strong>read build files</strong>, <strong>run tests</strong>, <strong>inspect Logcat</strong> — not just generate text</li>
+      <li>Teams can build custom MCP servers for internal documentation, component libraries, or deployment pipelines</li>
+    </ul>
+
+    <h3>AI Code Review</h3>
+    <p>Tools like <strong>CodeRabbit</strong> and <strong>GitHub Copilot PR reviews</strong> automatically comment on pull requests:</p>
+    <ul>
+      <li>Analyze the full diff in context of the codebase</li>
+      <li>Flag Android-specific antipatterns: memory leaks, missing lifecycle handling, incorrect coroutine scope usage</li>
+      <li>Suggest refactors and link to relevant documentation</li>
+    </ul>
+
+    <h3>Architecture Diagram</h3>
+    <div class="ascii-box">  Developer
+      |
+      v
+[Cursor / Android Studio / VS Code + Copilot]
+      |
+      v
+  AI Model (GPT-4o / Gemini / Claude)
+      |
+      v
+Suggestions / Completions / Multi-file Edits
+      |
+      v
+    Code
+
+─────────────────────────────────────────────
+
+MCP Server Layer (optional, agent workflows):
+  [Filesystem | Build Tools | APIs | Logcat]
+      |
+      v
+  AI Context  ──▶  AI Agent  ──▶  Actions</div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. When to Use It</div>
+
+    <h3>Pick the Right Tool for the Job</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Situation</th><th>Best Tool</th></tr>
+      <tr><td>Daily coding, inline autocomplete, boilerplate (ViewModels, DAOs, test stubs)</td><td><strong>GitHub Copilot</strong></td></tr>
+      <tr><td>Large refactors touching many files simultaneously</td><td><strong>Cursor Composer</strong></td></tr>
+      <tr><td>Staying in Android Studio, Compose previews, explaining legacy code</td><td><strong>Gemini in Android Studio</strong></td></tr>
+      <tr><td>Building custom AI agents for team-specific workflows</td><td><strong>MCP Servers</strong></td></tr>
+      <tr><td>Automated antipattern detection on every PR</td><td><strong>AI Code Review (CodeRabbit / Copilot PRs)</strong></td></tr>
+    </table>
+    </div>
+
+    <h3>When NOT to Use AI Tools</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">&#9888; Do NOT Trust AI For</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Security-sensitive code</strong> — API key handling, auth token storage, cryptography logic; AI frequently suggests insecure patterns (hardcoded keys, weak algorithms)</li>
+        <li><strong>Blind acceptance of test coverage</strong> — AI-generated tests cover the happy path; edge cases (empty states, network errors, concurrency) must be written manually</li>
+        <li><strong>Architecture decisions</strong> — AI will generate <em>a</em> solution, not necessarily the <em>right</em> one for your constraints and team conventions</li>
+        <li><strong>Production hotfixes under time pressure</strong> — multi-file AI edits need careful review; don't merge Composer output without reading every diff</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Context Window Tip</div>
+      Copilot's context is limited to open files and the cursor neighbourhood. Keep related files open (e.g., your UseCase <em>and</em> its ViewModel) to get higher-quality completions. Cursor's indexed codebase search is a significant advantage for large projects.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      E-commerce app — generating a complete ProductList feature module using AI tools. Shows <code>.cursorrules</code> setup, prompt engineering for a ViewModel, AI-generated test stub (manually completed), and MCP server config.
+    </div>
+
+    <h3>Step 1: .cursorrules — Project-Level AI Instructions</h3>
+    <p>Commit a <code>.cursorrules</code> file to the repo root. Every AI interaction in Cursor will follow these rules, ensuring generated code matches your team's conventions:</p>
+    <pre><code><span class="cm">// .cursorrules (project root — commit to git)</span>
+You are a Senior Android Engineer.
+Always use:
+- Kotlin (no Java)
+- Hilt for DI
+- StateFlow (not LiveData)
+- Clean Architecture (Presentation / Domain / Data layers)
+- Coroutines with viewModelScope
+- Result&lt;T&gt; for error handling
+
+When generating ViewModels: always inject UseCases, not Repositories directly.
+When generating tests: use MockK, not Mockito.</code></pre>
+
+    <h3>Step 2: Prompt Engineering for a ViewModel</h3>
+    <p>Precise prompts produce precise output. Vague prompts produce vague (often wrong) output:</p>
+    <pre><code><span class="cm">// Bad prompt — too vague:</span>
+"Create a ViewModel for products"
+
+<span class="cm">// Good prompt — specifies stack, patterns, state shape:</span>
+"Create a ProductListViewModel with Hilt injection, StateFlow&lt;ProductListState&gt;,
+pagination via page counter, using GetProductsUseCase(page: Int): Result&lt;List&lt;Product&gt;&gt;.
+Sealed class states: Loading, Success(products), Error(message)."</code></pre>
+
+    <h3>Step 3: AI-Generated ViewModel (Copilot / Cursor output)</h3>
+    <pre><code><span class="cm">// presentation/productlist/ProductListViewModel.kt</span>
+<span class="kw">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ProductListViewModel</span> <span class="kw">@Inject constructor</span>(
+    <span class="kw">private val</span> getProductsUseCase: <span class="cl">GetProductsUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">ProductListState</span>&gt;(<span class="cl">ProductListState</span>.Loading)
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">ProductListState</span>&gt; = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">private var</span> currentPage = <span class="nu">0</span>
+
+    <span class="kw">init</span> { <span class="fn">loadProducts</span>() }
+
+    <span class="kw">fun</span> <span class="fn">loadProducts</span>() {
+        viewModelScope.<span class="fn">launch</span> {
+            _uiState.value = <span class="cl">ProductListState</span>.Loading
+            <span class="fn">getProductsUseCase</span>(page = currentPage)
+                .<span class="fn">onSuccess</span> { products ->
+                    _uiState.value = <span class="cl">ProductListState</span>.<span class="cl">Success</span>(products)
+                    currentPage++
+                }
+                .<span class="fn">onFailure</span> { error ->
+                    _uiState.value = <span class="cl">ProductListState</span>.<span class="cl">Error</span>(error.message <span class="kw">?:</span> <span class="str">"Unknown error"</span>)
+                }
+        }
+    }
+}
+
+<span class="kw">sealed class</span> <span class="cl">ProductListState</span> {
+    <span class="kw">object</span> <span class="cl">Loading</span> : <span class="cl">ProductListState</span>()
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> products: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;) : <span class="cl">ProductListState</span>()
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">ProductListState</span>()
+}</code></pre>
+
+    <h3>Step 4: AI-Generated Test Stub (needs manual edge cases)</h3>
+    <pre><code><span class="cm">// AI generates the happy-path skeleton — you complete the edge cases</span>
+<span class="kw">@OptIn</span>(<span class="cl">ExperimentalCoroutinesApi</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">ProductListViewModelTest</span> {
+
+    <span class="kw">@get:Rule val</span> mainDispatcherRule = <span class="cl">MainDispatcherRule</span>()
+    <span class="kw">private val</span> getProductsUseCase: <span class="cl">GetProductsUseCase</span> = <span class="fn">mockk</span>()
+    <span class="kw">private lateinit var</span> viewModel: <span class="cl">ProductListViewModel</span>
+
+    <span class="kw">@Before fun</span> <span class="fn">setUp</span>() {
+        viewModel = <span class="cl">ProductListViewModel</span>(getProductsUseCase)
+    }
+
+    <span class="cm">// ✅ AI-generated — happy path</span>
+    <span class="kw">@Test fun</span> <span class="str">`when loadProducts succeeds, emits Success state`</span>() = <span class="fn">runTest</span> {
+        <span class="kw">val</span> products = <span class="fn">listOf</span>(<span class="cl">Product</span>(<span class="nu">1</span>, <span class="str">"iPhone"</span>, <span class="nu">999.0</span>))
+        <span class="fn">coEvery</span> { <span class="fn">getProductsUseCase</span>(<span class="fn">any</span>()) } <span class="kw">returns</span> <span class="cl">Result</span>.<span class="fn">success</span>(products)
+        viewModel.<span class="fn">loadProducts</span>()
+        <span class="fn">assertEquals</span>(<span class="cl">ProductListState</span>.<span class="cl">Success</span>(products), viewModel.uiState.value)
+    }
+
+    <span class="cm">// ✅ AI-generated skeleton — you fill this out</span>
+    <span class="kw">@Test fun</span> <span class="str">`when loadProducts fails, emits Error state`</span>() = <span class="fn">runTest</span> {
+        <span class="kw">val</span> exception = <span class="cl">RuntimeException</span>(<span class="str">"Network error"</span>)
+        <span class="fn">coEvery</span> { <span class="fn">getProductsUseCase</span>(<span class="fn">any</span>()) } <span class="kw">returns</span> <span class="cl">Result</span>.<span class="fn">failure</span>(exception)
+        viewModel.<span class="fn">loadProducts</span>()
+        <span class="fn">assertEquals</span>(<span class="cl">ProductListState</span>.<span class="cl">Error</span>(<span class="str">"Network error"</span>), viewModel.uiState.value)
+    }
+
+    <span class="cm">// ⚠️ NOT AI-generated — add manually: empty list, pagination boundary,</span>
+    <span class="cm">//    concurrent loadProducts calls, Loading emitted before Success</span>
+}</code></pre>
+
+    <h3>Step 5: MCP Server Config for Android Studio</h3>
+    <pre><code><span class="cm">// .mcp/android-project.json (MCP server config for Android Studio AI agent)</span>
+{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"android-project"</span>: {
+      <span class="str">"command"</span>: <span class="str">"npx"</span>,
+      <span class="str">"args"</span>: [<span class="str">"-y"</span>, <span class="str">"@modelcontextprotocol/server-filesystem"</span>],
+      <span class="str">"env"</span>: {
+        <span class="str">"ALLOWED_DIRECTORIES"</span>: <span class="str">"/project/app/src,/project/build.gradle.kts"</span>
+      }
+    },
+    <span class="str">"android-build"</span>: {
+      <span class="str">"command"</span>: <span class="str">"node"</span>,
+      <span class="str">"args"</span>: [<span class="str">"./scripts/mcp-build-server.js"</span>],
+      <span class="str">"description"</span>: <span class="str">"Run Gradle tasks and read Logcat from AI agent"</span>
+    }
+  }
+}</code></pre>
+
+    <h3>Key Points About This Example</h3>
+    <ul>
+      <li><code>.cursorrules</code> enforces stack consistency across the entire team — AI always generates Hilt + StateFlow + MockK regardless of who writes the prompt</li>
+      <li>Precise prompts that name the UseCase signature and state shape produce immediately usable code</li>
+      <li>AI test output covers the happy path — <strong>always manually add edge cases</strong>: empty results, pagination boundaries, concurrent calls, Loading→Success transition assertion</li>
+      <li>MCP server config scopes filesystem access — the AI agent can read build files and source but not credentials directories</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Tool</th><th>Strengths</th><th>Weaknesses</th><th>Best For</th></tr>
+      <tr>
+        <td>GitHub Copilot</td>
+        <td>Works inside AS/JetBrains; Copilot Chat; PR review integration; enterprise plan with data privacy</td>
+        <td>Context limited to open files; no multi-file edits; paid (individual or enterprise)</td>
+        <td>Daily inline completions, boilerplate, teams already on GitHub</td>
+      </tr>
+      <tr>
+        <td>Cursor</td>
+        <td>Codebase indexing; Composer (multi-file); <code>.cursorrules</code>; best multi-file refactor UX</td>
+        <td>Separate IDE (not Android Studio); VSCode-based — no AS-specific features (Layout Inspector, Device Manager)</td>
+        <td>Large refactors, greenfield projects, engineers comfortable in VSCode</td>
+      </tr>
+      <tr>
+        <td>Gemini in Android Studio</td>
+        <td>Native AS integration; Android-tuned; Compose support; free tier available; commit message gen</td>
+        <td>Requires AS Hedgehog+; quality behind Copilot/Cursor for complex prompts; Google ecosystem tie-in</td>
+        <td>Teams committed to AS workflow; Compose-heavy projects; quick explain/fix actions</td>
+      </tr>
+      <tr>
+        <td>Tabnine</td>
+        <td>Runs fully on-premise (air-gapped); private model training on your codebase; strong enterprise compliance</td>
+        <td>Lower quality completions vs Copilot/Cursor for general code; limited chat features</td>
+        <td>Regulated industries (finance, healthcare) where cloud AI is prohibited</td>
+      </tr>
+      <tr>
+        <td>Codeium</td>
+        <td>Free; supports most IDEs including AS; reasonable completion quality</td>
+        <td>No team codebase context; no multi-file edits; smaller ecosystem</td>
+        <td>Individual devs on budget, quick productivity boost without cost</td>
+      </tr>
+      <tr>
+        <td>Manual coding only</td>
+        <td>Full control; no privacy risk; no hallucination risk; no subscription cost</td>
+        <td>Slower boilerplate; no AI review assistance; competitive disadvantage at velocity</td>
+        <td>Highly classified projects; environments with strict data handling requirements</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Enterprise Consideration</div>
+      Before enabling any cloud AI tool on a corporate codebase, verify your enterprise agreement. Copilot Enterprise, Cursor Business, and Gemini Code Assist Enterprise all offer <strong>data-not-used-for-training</strong> and <strong>IP indemnification</strong> clauses — required for most corporate use.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Never Put Sensitive Code in AI Context</h3>
+    <pre><code><span class="cm">// ❌ BAD — never prompt AI with real secrets in context</span>
+<span class="cm">// "Here is my API key: sk-proj-abc123 — generate an auth interceptor"</span>
+
+<span class="cm">// ✅ GOOD — use placeholder names, inject real values via BuildConfig/secrets.properties</span>
+<span class="cm">// "Generate an auth interceptor that reads API_KEY from BuildConfig"</span></code></pre>
+    <p>AI chat history may be logged, used for model training (on non-enterprise plans), or exposed via browser history. <strong>Treat your AI context like a public Slack channel.</strong></p>
+
+    <h3>Verify Generated APIs Against Current SDK</h3>
+    <pre><code><span class="cm">// ❌ AI hallucination — this API does not exist in Compose 1.5</span>
+<span class="cm">// LazyColumn(modifier = Modifier.scrollToTop()) // hallucinated modifier</span>
+
+<span class="cm">// ✅ Always check: Compose release notes, Android developer docs, actual import resolution</span>
+<span class="cm">// If Android Studio can't resolve the import — the API doesn't exist</span></code></pre>
+    <p>AI models have a training cutoff. New Compose APIs, updated Hilt versions, and Kotlin 2.x features may be unknown to the model or confused with older API signatures.</p>
+
+    <h3>Use .cursorrules / Custom Instructions Aggressively</h3>
+    <pre><code><span class="cm">// Without .cursorrules — AI may generate LiveData, Mockito, Java, or mix patterns:</span>
+<span class="cm">// val userName: LiveData&lt;String&gt; = MutableLiveData()</span>
+
+<span class="cm">// With .cursorrules specifying StateFlow — consistent output every time:</span>
+<span class="cm">// val userName: StateFlow&lt;String&gt; = _userName.asStateFlow()</span></code></pre>
+
+    <h3>AI Test Coverage Is Shallow — Add Edge Cases Manually</h3>
+    <ul>
+      <li>AI generates happy-path tests: success state, one failure case</li>
+      <li><strong>Always add manually:</strong> empty results, loading state emission, concurrent calls, null inputs, pagination boundaries, coroutine cancellation behaviour</li>
+      <li>Use AI test output as a <em>scaffold</em>, not a complete test suite</li>
+    </ul>
+
+    <h3>Keep Related Files Open (Copilot Context)</h3>
+    <p>Copilot's context window includes open editor tabs. Keep the UseCase, Repository interface, and domain model open when generating a ViewModel — the AI uses these to produce accurate injection signatures and state types.</p>
+
+    <h3>Review Multi-File Refactors Change by Change</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">&#9888; Cursor Composer Warning</div>
+      Multi-file AI edits can silently change behaviour in files you weren't focused on. Always use the <strong>diff review UI</strong> — accept file by file, not "accept all". Pay special attention to: deleted imports, changed function signatures, replaced error handling blocks.
+    </div>
+
+    <h3>Privacy: Corporate Code and Cloud AI</h3>
+    <ul>
+      <li>Check your company's AI usage policy before using Copilot Individual, Cursor Free, or Codeium on corporate repos</li>
+      <li>Enterprise plans (Copilot Enterprise, Cursor Business) guarantee code is not used for training</li>
+      <li>For air-gapped environments: Tabnine Self-Hosted or local LLMs (Ollama + CodeLlama) are the options</li>
+    </ul>
+
+    <h3>Production Best Practices</h3>
+    <ol>
+      <li>Commit a <code>.cursorrules</code> / custom instructions file to every project repo</li>
+      <li>Write precise prompts: name types, interfaces, architecture layers explicitly</li>
+      <li>Always verify generated imports compile and the APIs exist in your current dependency versions</li>
+      <li>Never use AI for cryptography, auth token handling, or secret management code</li>
+      <li>Treat AI test output as a scaffold — complete edge cases manually before merging</li>
+      <li>Review every file in a Composer multi-file edit individually</li>
+      <li>Check enterprise data handling agreements before enabling cloud AI tools on corporate code</li>
+    </ol>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "I use AI tools daily in my Android workflow — GitHub Copilot for inline completions and boilerplate, Cursor for large multi-file refactors, and Gemini in Android Studio for explaining legacy code and generating test stubs. The key is treating AI like a very fast junior dev: excellent at pattern completion, but every output needs senior review — especially for API correctness, edge case coverage, and anything security-related."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "In my day-to-day workflow, I use Copilot for inline completions — it's particularly effective for generating ViewModels, DAOs, and test stubs when I have the relevant interfaces open. I keep a <code>.cursorrules</code> file in every project that enforces our stack constraints: Hilt for DI, StateFlow over LiveData, MockK for tests, Result&lt;T&gt; for error handling. This makes AI output consistent with our codebase conventions without manual correction.<br><br>
+      For large refactors — say migrating a feature from MVI to Clean Architecture — I use Cursor Composer, which can apply changes across multiple files at once. I always review each file's diff individually rather than accepting all at once.<br><br>
+      To avoid pitfalls: I always verify generated APIs compile against our actual dependency versions — AI training cutoffs mean new Compose APIs or updated Hilt APIs can be hallucinated. I never use AI for security-sensitive code: auth logic, token handling, or cryptography. And I complete AI-generated test stubs manually — AI covers the happy path, but edge cases like empty states, concurrent calls, and pagination boundaries need to be written by hand.<br><br>
+      For team-level tooling, I'm interested in MCP servers — the ability to connect an AI agent to our build system and Logcat means we can build custom workflows for things like automated crash triage."
+    </div>
+
+    <h3>Must-Mention Points (Show Deep Knowledge)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div>AI accelerates <strong>boilerplate and pattern completion</strong>, not architecture decisions — you still own the design</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><code>.cursorrules</code> / custom instructions for project consistency — commit to git so the whole team benefits</div></div>
+      <div class="must-item"><div class="must-num">3</div><div>Always verify generated APIs against current SDK docs and actual import resolution in the IDE</div></div>
+      <div class="must-item"><div class="must-num">4</div><div>Never use AI for security-sensitive code paths — auth logic, API key handling, cryptography</div></div>
+      <div class="must-item"><div class="must-num">5</div><div>MCP servers enable AI agents to read build files, run tests, and inspect Logcat — team-specific context injection</div></div>
+      <div class="must-item"><div class="must-num">6</div><div>AI code review (CodeRabbit, Copilot PRs) catches common Android antipatterns on every PR automatically</div></div>
+    </div>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr>
+        <td>How do you handle AI-generated code quality?</td>
+        <td>Verify imports compile, check APIs against current SDK version, complete test edge cases manually, review multi-file diffs change by change</td>
+      </tr>
+      <tr>
+        <td>What is MCP?</td>
+        <td>Model Context Protocol — open standard for connecting AI models to external tools and data sources; lets AI agents read files, run commands, query APIs as structured context</td>
+      </tr>
+      <tr>
+        <td>How do you prevent AI from introducing security issues?</td>
+        <td>Never include security-sensitive code in AI context; use <code>.cursorrules</code> to ban patterns like hardcoded keys; review all auth/crypto code manually; AI code review tools can flag some issues</td>
+      </tr>
+      <tr>
+        <td>Copilot vs Cursor — which do you prefer?</td>
+        <td>Copilot for daily completions inside Android Studio (native IDE experience); Cursor for large refactors needing multi-file Composer and codebase-wide search — different tools for different task sizes</td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I treat AI tools like a very fast junior dev: excellent at boilerplate and pattern completion, but needs senior review for architecture decisions, security code, and edge cases. The meta-skill isn't knowing which AI tool to use — it's <strong>writing precise prompts</strong> and <strong>knowing which output to trust</strong>. A vague prompt produces vague code. A prompt that names your UseCase interface, state sealed class, and DI framework produces immediately usable code. That discipline — treating AI prompts like you treat API contracts — is what separates engineers who genuinely leverage AI from engineers who just have it installed."
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>TOOL COMPARISON</h4>
+        <pre><code>Copilot   → inline, PR review, AS plugin
+Cursor    → multi-file, .cursorrules, index
+Gemini    → native AS, Compose, explain/fix
+Tabnine   → on-premise, regulated envs
+Codeium   → free, no team context</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>.CURSORRULES TEMPLATE</h4>
+        <pre><code>You are a Senior Android Engineer.
+Always use:
+- Kotlin (no Java)
+- Hilt for DI
+- StateFlow (not LiveData)
+- Clean Architecture
+- Result&lt;T&gt; for errors
+- MockK for tests</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>KEY PROMPTS FOR ANDROID</h4>
+        <pre><code>"Create [Class] with Hilt, StateFlow,
+ [UseCase] : Result&lt;T&gt;. Sealed states:
+ Loading, Success(data), Error(msg)"
+
+"Write unit tests with MockK for [VM],
+ include: happy path, error state,
+ [specific edge case]"</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>MCP CONCEPT</h4>
+        <pre><code>Protocol: AI ↔ Tools/Data
+AI Agent can:
+  - Read filesystem / build files
+  - Run Gradle tasks
+  - Inspect Logcat
+  - Query internal APIs
+Config: .mcp/server.json</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>NEVER USE AI FOR</h4>
+        <pre><code>❌ API keys / secrets
+❌ Auth token logic
+❌ Cryptography
+❌ Blind test coverage
+❌ Unreviewed multi-file edits</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>AI CODE REVIEW</h4>
+        <pre><code>CodeRabbit → auto comments on PR
+Copilot PR → summary + review
+Catches:
+  - Memory leaks
+  - Wrong coroutine scope
+  - Missing lifecycle handling
+  - Common antipatterns</code></pre>
+      </div>
+    </div>
+
+    <h3>Quick Reference: Tool Selection</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Task</th><th>Tool</th><th>Why</th></tr>
+      <tr><td>Write a ViewModel from scratch</td><td>Copilot / Cursor</td><td>Inline completion with types in context</td></tr>
+      <tr><td>Refactor 10 files to new pattern</td><td>Cursor Composer</td><td>Multi-file edit with diff review</td></tr>
+      <tr><td>Explain confusing legacy code</td><td>Gemini in AS</td><td>Native IDE, no context switch</td></tr>
+      <tr><td>Generate unit test scaffold</td><td>Copilot / Gemini</td><td>Fast stub; you complete edge cases</td></tr>
+      <tr><td>Catch antipatterns in PR</td><td>CodeRabbit / Copilot PRs</td><td>Automated, every PR, no human time</td></tr>
+      <tr><td>Custom AI agent for team workflow</td><td>MCP Server</td><td>Connect AI to your specific tools/data</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What is GitHub Copilot and how does it integrate with Android Studio?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        GitHub Copilot is an AI pair programmer that provides inline code completions and a chat interface. It integrates with Android Studio via the JetBrains Marketplace plugin. Under the hood, it uses the Language Server Protocol (LSP) to send the current file context (cursor position, open tabs) to the AI model and streams completions back as ghost text. You accept with Tab, reject with Esc. Copilot Chat adds a Q&amp;A panel for explaining code, generating tests, and asking questions grounded in your open files.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What is a <code>.cursorrules</code> file and why should you commit it to git?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <code>.cursorrules</code> is a plain-text instruction file placed at the project root that Cursor reads before every AI interaction. It lets you define project-specific rules: tech stack (Kotlin only, Hilt for DI, StateFlow not LiveData), architecture constraints (inject UseCases not Repositories), and testing conventions (MockK not Mockito). Committing it to git means every developer on the team benefits from the same AI behavior — generated code is consistent with project conventions without manual correction. Think of it as a prompt prefix that runs on every AI call.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — What is Gemini Code Assist in Android Studio? How do you enable it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Gemini Code Assist is Google's first-party AI coding assistant integrated into Android Studio. It provides inline Kotlin/Compose completions, context actions ("Explain this code", "Fix this bug"), unit test generation, and commit message generation from staged diffs. Enable it via <strong>Settings &gt; Plugins &gt; search "Gemini"</strong> (or it may be built-in in AS Ladybug+). Sign in with a Google account. It includes a free tier and is natively aware of Android APIs and Compose semantics.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — What is Model Context Protocol (MCP)? How does it relate to Android development?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        MCP (Model Context Protocol) is an open protocol originally introduced by Anthropic that standardizes how AI models connect to external tools and data sources. Instead of giving an AI model only the text in your editor, MCP lets it interact with: the local filesystem, APIs, databases, build systems, and more — as structured, queryable context.<br><br>
+        In Android development: Android Studio's AI agent feature supports MCP servers. You can configure an MCP server to expose your Gradle build files, run test tasks, read Logcat output, or query an internal component library. This enables AI agents to perform real actions — not just generate text — grounded in your actual project state.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — Why is AI-generated test coverage often insufficient? What do you always add manually?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        AI models generate tests by pattern-matching common test structures from their training data. This means they reliably produce happy-path tests (success state, one basic failure) but consistently miss:<br>
+        • <strong>Empty/null results</strong> — what does the ViewModel do with an empty product list?<br>
+        • <strong>Loading state assertion</strong> — does Loading emit <em>before</em> the success?<br>
+        • <strong>Pagination boundaries</strong> — what happens on page 0 vs. last page?<br>
+        • <strong>Concurrent calls</strong> — what if loadProducts() is called twice rapidly?<br>
+        • <strong>Coroutine cancellation</strong> — is the job cancelled cleanly on ViewModel clear?<br><br>
+        Always treat AI test output as a scaffold — it saves writing the boilerplate, but the edge cases are your responsibility.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — How does Cursor Composer differ from standard Copilot completions?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Standard Copilot completions are <strong>single-location</strong>: they complete code at the cursor position in the current file. They're great for boilerplate but can't reason across multiple files simultaneously.<br><br>
+        Cursor Composer is a <strong>multi-file edit mode</strong>: you describe a change in natural language, and Composer applies diffs across as many files as needed — creating new files, modifying existing ones, and updating imports/references. It also has codebase indexing, so it can find the relevant files itself rather than requiring you to have them open. The trade-off: the output requires careful per-file diff review before accepting, as changes in files you weren't focused on can introduce subtle bugs.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — Write a good <code>.cursorrules</code> file for a Jetpack Compose Android project following Clean Architecture.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="tag-coding">Coding</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+<pre><code>You are a Senior Android Engineer working on a Jetpack Compose app.
+
+Architecture:
+- Clean Architecture: Presentation / Domain / Data layers
+- Presentation: ViewModels, Composables, UiState sealed classes
+- Domain: UseCases, Repository interfaces, domain Models
+- Data: Repository implementations, DTOs, mappers, Room DAOs, Retrofit services
+
+Always use:
+- Kotlin only (never Java)
+- Hilt for dependency injection
+- StateFlow&lt;UiState&gt; in ViewModels (never LiveData)
+- viewModelScope for coroutine launches
+- Result&lt;T&gt; for error propagation
+- Jetpack Compose for all UI (no XML layouts)
+
+Rules:
+- ViewModels inject UseCases, never Repositories directly
+- Repository implementations are in the Data layer only
+- Domain models are separate from DTOs (mappers in Data layer)
+- Tests use MockK, never Mockito
+- UI tests use Compose testing APIs
+
+When generating tests:
+- Happy path + at least one error case
+- Note which edge cases I should add manually</code></pre>
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — An AI-generated Cursor Composer refactor introduced a memory leak in a Fragment. How do you find and fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Common AI-introduced memory leak patterns in Fragments:</strong><br>
+        1. <strong>View binding held beyond onDestroyView</strong> — AI often generates <code>private val binding: FragmentXBinding</code> as a field without nulling it in <code>onDestroyView()</code><br>
+        2. <strong>Listener / callback registered but not removed</strong> — AI adds a click listener or observer in <code>onViewCreated</code> without corresponding removal<br>
+        3. <strong>Wrong coroutine scope</strong> — using <code>viewModelScope</code> or <code>lifecycleScope</code> incorrectly — e.g., launching in a scope that outlives the Fragment view<br><br>
+        <strong>How to find it:</strong><br>
+        • Run the app → navigate away from the Fragment → trigger GC in Android Studio's Memory Profiler<br>
+        • If the Fragment instance is still in the heap after GC, it's leaked<br>
+        • Use LeakCanary — it will report the exact reference chain<br><br>
+        <strong>Fix (binding example):</strong>
+<pre><code><span class="cm">// ✅ Correct pattern — null binding in onDestroyView</span>
+<span class="kw">private var</span> _binding: <span class="cl">FragmentProductBinding</span>? = <span class="kw">null</span>
+<span class="kw">private val</span> binding <span class="kw">get</span>() = _binding<span class="kw">!!</span>
+
+<span class="kw">override fun</span> <span class="fn">onDestroyView</span>() {
+    <span class="kw">super</span>.<span class="fn">onDestroyView</span>()
+    _binding = <span class="kw">null</span>  <span class="cm">// releases reference before Fragment is destroyed</span>
+}</code></pre>
+        <strong>Prevention:</strong> Add to <code>.cursorrules</code>: "When generating Fragments with ViewBinding, always null _binding in onDestroyView."
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — A colleague says "AI wrote all our tests so we have 90% coverage — we're good to ship." What's wrong with this reasoning?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Three problems with this reasoning:</strong><br><br>
+        1. <strong>Coverage ≠ correctness</strong>: 90% line coverage says every line was executed at least once. It says nothing about whether the assertions are meaningful or whether edge cases were tested. AI-generated tests often call methods without asserting meaningful outcomes — covering lines while testing nothing real.<br><br>
+        2. <strong>AI systematically misses edge cases</strong>: Empty results, null inputs, network timeout paths, concurrent mutations, pagination boundaries, configuration changes — these require domain knowledge of what can go wrong. AI models pattern-match on "normal" test shapes and rarely imagine the failure modes that actually occur in production.<br><br>
+        3. <strong>False confidence is worse than no confidence</strong>: Believing you have solid test coverage when you don't means you skip manual QA and exploratory testing — the very processes that would catch what the AI missed.<br><br>
+        <strong>The right position:</strong> AI test output is a scaffold for boilerplate. Senior engineers own the edge case coverage and are accountable for the test quality — not the AI.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S3 — How do you use AI tools safely in a financial services Android app with strict data handling requirements?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="tag-scenario">Scenario</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Framework for safe AI usage in regulated environments:</strong><br><br>
+        1. <strong>Choose enterprise-grade tools with data contracts</strong>: GitHub Copilot Enterprise, Cursor Business, or Gemini Code Assist Enterprise all provide written guarantees that code is not used for model training and include IP indemnification. Verify the contract applies to your jurisdiction and data classification.<br><br>
+        2. <strong>Hard exclusions in <code>.cursorrules</code></strong>: Explicitly instruct the AI to never generate code handling API keys, auth tokens, PII, or cryptographic operations — route those prompts to manual implementation.<br><br>
+        3. <strong>Never include real data in context</strong>: Use placeholder types and anonymised schemas in prompts. No production database schemas, no real endpoint URLs, no sample data with PII.<br><br>
+        4. <strong>For highest-security code paths</strong>: Use Tabnine Self-Hosted or a local LLM (Ollama + CodeLlama) — no code leaves the corporate network. Accept the quality trade-off for the security requirement.<br><br>
+        5. <strong>Mandatory human review of AI output in security-sensitive areas</strong>: Auth flows, encryption wrappers, certificate pinning config — require two senior engineers to review, regardless of AI involvement.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

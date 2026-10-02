@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>41A — Advanced Android Debugging | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #4f9eff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-tier2 { background: rgba(245,200,66,0.12); color: var(--yellow); border: 1px solid rgba(245,200,66,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw { color: #c084fc; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm { color: #6b7280; font-style: italic; }
+  .cl { color: #fbbf24; }
+  .nu { color: #f9a8d4; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .callout-green { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-red { border-color: var(--red); background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow); background: rgba(245,200,66,0.06); }
+  .callout-blue { border-color: var(--accent2); background: rgba(79,158,255,0.06); }
+  .callout-purple { border-color: var(--accent); background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy { background: rgba(62,207,142,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(255,107,107,0.15); color: var(--red); }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW STEP */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR TOP */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #6b5ce7; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+  .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">41A · Advanced Debugging</div>
+  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
+  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
+  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
+  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
+  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
+  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
+  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
+  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
+  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>41A</span> — Advanced Android Debugging</h1>
+    <p class="hero-desc">Production-level debugging using Perfetto, Systrace, Android Studio Profiler, Layout Inspector, LeakCanary, Flipper, and systematic debug methodology.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 41A</span>
+      <span class="badge badge-tier2">&#9733; Tier 2 — Senior Differentiator</span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <div class="section active" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
+
+    <h3>Why This Matters</h3>
+    <p>Senior engineers debug what junior engineers can't find. The difference is <strong>knowing which tool to pick for which symptom</strong> and having a systematic methodology — not just adding print statements and hoping.</p>
+
+    <h3>The Debugging Toolkit</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Tool</th><th>Category</th><th>What It Finds</th></tr>
+      <tr><td>Android Studio Profiler</td><td>CPU / Memory / Network / Energy</td><td>Method traces, heap dumps, request timing, wake locks</td></tr>
+      <tr><td>Perfetto</td><td>System-wide trace</td><td>Jank, startup bottlenecks, binder calls, scheduler</td></tr>
+      <tr><td>Layout Inspector</td><td>UI / Compose</td><td>Composable tree, recomposition counts, live state</td></tr>
+      <tr><td>Database Inspector</td><td>Room / SQLite</td><td>Live table data, query execution</td></tr>
+      <tr><td>Network Inspector</td><td>OkHttp / Network</td><td>HTTP requests, response timing, headers</td></tr>
+      <tr><td>LeakCanary</td><td>Memory</td><td>Activity/Fragment/ViewModel/coroutine leaks</td></tr>
+      <tr><td>StrictMode</td><td>Main-thread violations</td><td>Disk I/O, network on main thread, leaked objects</td></tr>
+      <tr><td>Flipper</td><td>Multi-category</td><td>Network, Layout, Databases, Logs, Preferences — all in one desktop UI</td></tr>
+    </table>
+    </div>
+
+    <h3>Debug Categories</h3>
+    <ul>
+      <li><strong>Performance debugging:</strong> jank, slow startup, ANR, frame drops — use Perfetto, CPU Profiler</li>
+      <li><strong>Memory debugging:</strong> leaks, OOM, excessive allocation — use Memory Profiler, LeakCanary</li>
+      <li><strong>Network debugging:</strong> API failures, slow requests, wrong payloads — use Network Inspector, Flipper</li>
+      <li><strong>UI debugging:</strong> layout issues, recomposition storms — use Layout Inspector</li>
+      <li><strong>Crash debugging:</strong> ANRs, exceptions, native crashes — use Crashlytics, adb logcat, Android Vitals</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      Debugging has three phases: <strong>Instrument</strong> (add visibility before the problem occurs), <strong>Reproduce</strong> (create conditions to trigger the issue reliably), <strong>Isolate</strong> (narrow down to the exact line/component). Most engineers skip Instrument and wonder why they can't reproduce production issues.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: HOW IT WORKS -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How It Works — Tool by Tool</div>
+
+    <h3>Android Studio Profiler</h3>
+
+    <h4>CPU Profiler</h4>
+    <p>Four views for different analysis needs:</p>
+    <ul>
+      <li><strong>Call Chart:</strong> Horizontal timeline showing which methods called which, in order. Good for understanding execution flow.</li>
+      <li><strong>Flame Chart:</strong> Aggregated view — width represents cumulative time. Identifies hot paths at a glance. Widest bars are the performance bottlenecks.</li>
+      <li><strong>Top Down:</strong> Tree showing total time spent in each method and all descendants. Good for finding slow subtrees.</li>
+      <li><strong>Bottom Up:</strong> Shows which callers spent time in a given method. Good for finding where expensive functions are invoked from.</li>
+    </ul>
+    <p><strong>System Trace</strong> uses Perfetto integration directly in Android Studio. Records CPU scheduling, thread states, and custom trace markers. Start it from Profiler &gt; CPU &gt; System Trace.</p>
+
+    <h4>Memory Profiler</h4>
+    <ul>
+      <li><strong>Heap Dump:</strong> Snapshot of all live objects. Look for Activity/Fragment instances that should have been GC'd.</li>
+      <li><strong>Allocation Tracking:</strong> Records every allocation during a window — expensive, use for targeted sessions.</li>
+      <li><strong>GC Events:</strong> Frequent GC means excessive short-lived allocations — profile allocations to find the source.</li>
+    </ul>
+
+    <h4>Network Profiler</h4>
+    <p>Intercepts OkHttp traffic automatically (requires OkHttp 3.3+). Shows request timeline, headers, response body, and timing waterfall. Useful for debugging unexpected API calls or slow responses.</p>
+
+    <h4>Energy Profiler</h4>
+    <p>Shows wake lock acquisitions, jobs, and network events that drain battery. Look for wake locks held across the screen-off boundary.</p>
+
+    <h3>Perfetto</h3>
+    <p>System-wide trace tool that records CPU scheduling, Binder transactions, SurfaceFlinger, and all app threads simultaneously. The successor to Systrace.</p>
+
+    <h4>Recording via adb</h4>
+    <pre><code><span class="cm"># Record a 10-second trace with CPU scheduling and frequency data</span>
+adb shell perfetto \
+  -o /data/misc/perfetto-traces/trace.pftrace \
+  -t <span class="nu">10s</span> \
+  sched freq gfx view
+
+<span class="cm"># Pull the trace to desktop</span>
+adb pull /data/misc/perfetto-traces/trace.pftrace ~/Desktop/
+
+<span class="cm"># Open in web UI</span>
+<span class="cm"># Navigate to: https://ui.perfetto.dev — drag and drop the file</span></code></pre>
+
+    <h4>Key Tracks to Inspect</h4>
+    <ul>
+      <li><strong>Main thread (UI thread):</strong> Should never block for &gt;16ms between frames. Look for long slices.</li>
+      <li><strong>RenderThread:</strong> Runs parallel to main thread — does actual GPU draw calls. Slow here means complex layouts or expensive shaders.</li>
+      <li><strong>Choreographer:</strong> Frame timing. Missing a vsync = dropped frame = jank.</li>
+      <li><strong>Binder:</strong> IPC calls. Excessive Binder on main thread delays frame rendering.</li>
+    </ul>
+
+    <h4>Custom Trace Sections</h4>
+    <pre><code><span class="cm">// Add custom trace markers visible in Perfetto / System Trace</span>
+<span class="kw">import</span> android.os.<span class="cl">Trace</span>
+
+<span class="kw">fun</span> <span class="fn">loadProductList</span>() {
+    <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"ProductRepo.loadProducts"</span>)
+    <span class="kw">try</span> {
+        <span class="cm">// your code</span>
+        <span class="kw">val</span> products = repository.<span class="fn">fetchProducts</span>()
+        <span class="fn">processProducts</span>(products)
+    } <span class="kw">finally</span> {
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>()  <span class="cm">// always end in finally</span>
+    }
+}
+
+<span class="cm">// Compose: add androidx.compose.runtime:runtime-tracing dependency</span>
+<span class="cm">// Composable recompositions appear automatically in traces</span></code></pre>
+
+    <h3>Systrace (Legacy)</h3>
+    <p>Superseded by Perfetto for Android 9+. Still referenced in older documentation. Perfetto produces better traces with richer data. Use Perfetto for all new work.</p>
+
+    <h3>LeakCanary</h3>
+    <pre><code><span class="cm">// build.gradle.kts — debug builds only, NEVER release</span>
+dependencies {
+    debugImplementation(<span class="str">"com.squareup.leakcanary:leakcanary-android:2.14"</span>)
+}
+
+<span class="cm">// No initialization code needed</span>
+<span class="cm">// LeakCanary auto-installs via a ContentProvider (AppInitializer pattern)</span>
+
+<span class="cm">// What it detects automatically:</span>
+<span class="cm">// - Activity leaks (retained after finish())</span>
+<span class="cm">// - Fragment leaks (retained after detach)</span>
+<span class="cm">// - ViewModel leaks (retained after cleared)</span>
+<span class="cm">// - Coroutine scope leaks</span>
+<span class="cm">// - Service leaks</span>
+
+<span class="cm">// Watch custom objects manually:</span>
+<span class="kw">class</span> <span class="cl">MyCustomManager</span> {
+    <span class="kw">fun</span> <span class="fn">release</span>() {
+        <span class="cl">AppWatcher</span>.objectWatcher.<span class="fn">expectWeaklyReachable</span>(
+            <span class="kw">this</span>, <span class="str">"MyCustomManager should be released"</span>
+        )
+    }
+}</code></pre>
+
+    <h3>StrictMode</h3>
+    <pre><code><span class="cm">// Application.onCreate() — debug builds ONLY</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>()
+    <span class="kw">if</span> (<span class="cl">BuildConfig</span>.DEBUG) {
+        <span class="cl">StrictMode</span>.<span class="fn">setThreadPolicy</span>(
+            <span class="cl">StrictMode</span>.<span class="cl">ThreadPolicy</span>.<span class="cl">Builder</span>()
+                .<span class="fn">detectDiskReads</span>()
+                .<span class="fn">detectDiskWrites</span>()
+                .<span class="fn">detectNetwork</span>()         <span class="cm">// network on main thread</span>
+                .<span class="fn">detectCustomSlowCalls</span>()
+                .<span class="fn">penaltyLog</span>()             <span class="cm">// log to logcat</span>
+                .<span class="fn">penaltyDeath</span>()           <span class="cm">// crash — ensures issues are fixed</span>
+                .<span class="fn">build</span>()
+        )
+        <span class="cl">StrictMode</span>.<span class="fn">setVmPolicy</span>(
+            <span class="cl">StrictMode</span>.<span class="cl">VmPolicy</span>.<span class="cl">Builder</span>()
+                .<span class="fn">detectLeakedSqlLiteObjects</span>()
+                .<span class="fn">detectLeakedClosableObjects</span>()   <span class="cm">// unclosed streams, cursors</span>
+                .<span class="fn">detectActivityLeaks</span>()
+                .<span class="fn">detectLeakedRegistrationObjects</span>()
+                .<span class="fn">penaltyLog</span>()
+                .<span class="fn">build</span>()
+        )
+    }
+}</code></pre>
+
+    <h3>Layout Inspector</h3>
+    <p>Connects to a running app and shows the <strong>live composable tree</strong> (for Compose) or view hierarchy. Key features:</p>
+    <ul>
+      <li><strong>Recomposition counts:</strong> Shows how many times each composable has recomposed. High counts = unnecessary recompositions = performance issue.</li>
+      <li><strong>Skip counts:</strong> How many recompositions were skipped (composable was stable and inputs didn't change). High skips = good.</li>
+      <li>Live state inspection — see current values of state variables in composables.</li>
+    </ul>
+
+    <h3>Database Inspector</h3>
+    <p>Connects to a running app's Room/SQLite database in real-time. Allows live SQL queries, table inspection, and seeing data as it changes. No adb pull needed.</p>
+
+    <h3>Network Inspector</h3>
+    <p>Intercepts all OkHttp traffic automatically when using Android Studio Profiler. No code changes required. Shows request/response headers, body, timing, and connection details. Works for all OkHttp-based libraries (Retrofit, etc.).</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
+      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHEN TO USE -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127919;</div> 3. When to Use Each Tool</div>
+
+    <h3>Symptom-to-Tool Map</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Symptom</th><th>Primary Tool</th><th>Secondary Tool</th></tr>
+      <tr><td>App jank / dropped frames</td><td>Perfetto (System Trace)</td><td>CPU Profiler — Flame Chart</td></tr>
+      <tr><td>Slow cold/warm startup</td><td>Perfetto — App Startup track</td><td>CPU Profiler — Method Trace</td></tr>
+      <tr><td>ANR (Application Not Responding)</td><td>CPU Profiler — System Trace</td><td>adb bugreport + ANR traces</td></tr>
+      <tr><td>Memory leak</td><td>LeakCanary (auto-detect)</td><td>Memory Profiler — Heap Dump</td></tr>
+      <tr><td>OutOfMemoryError</td><td>Memory Profiler — Heap Dump</td><td>Perfetto — memory track</td></tr>
+      <tr><td>Excessive GC pauses</td><td>Memory Profiler — Allocation Tracking</td><td>Perfetto — GC events</td></tr>
+      <tr><td>Network request slow/failing</td><td>Network Inspector</td><td>Flipper Network Plugin</td></tr>
+      <tr><td>Disk/network on main thread</td><td>StrictMode — penaltyLog/Death</td><td>CPU Profiler</td></tr>
+      <tr><td>Compose recompositions</td><td>Layout Inspector — recomposition count</td><td>Perfetto — Compose tracing</td></tr>
+      <tr><td>Database query slow</td><td>Database Inspector — query timing</td><td>Room query explain plan</td></tr>
+      <tr><td>Battery drain</td><td>Energy Profiler</td><td>Perfetto — wakelock track</td></tr>
+    </table>
+    </div>
+
+    <h3>When to Use Perfetto vs CPU Profiler</h3>
+    <div class="callout callout-blue">
+      <div class="callout-label">Decision Guide</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>Perfetto:</strong> System-level issues — jank, startup, Binder contention, SurfaceFlinger, scheduler. Cross-process issues. When you need to see what Android itself is doing, not just your app.</li>
+        <li><strong>CPU Profiler:</strong> In-app method-level analysis — which function is slow, where time is spent in your code specifically. Faster to start, narrower scope.</li>
+        <li><strong>Both together:</strong> Use Perfetto to identify <em>when</em> the problem occurs, then CPU Profiler method trace to find <em>which method</em>.</li>
+      </ul>
+    </div>
+
+    <h3>When to Use LeakCanary vs Memory Profiler</h3>
+    <ul>
+      <li><strong>LeakCanary:</strong> Automatic continuous monitoring in debug builds. Zero config. Catches Activity/Fragment/ViewModel leaks with full stack trace and leak path. Should always be in every project.</li>
+      <li><strong>Memory Profiler:</strong> When you need to understand heap composition — what objects exist, which are unexpectedly retained, how much memory each class consumes. Use when OOM or when you suspect leaks LeakCanary doesn't detect.</li>
+    </ul>
+
+    <h3>StrictMode in CI</h3>
+    <p>StrictMode with <code>penaltyDeath()</code> should run in debug builds during CI tests. This makes disk/network-on-main-thread violations fail the build automatically — far better than waiting for performance complaints from users.</p>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
+      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PRODUCTION EXAMPLE -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127981;</div> 4. Production Example — 5-Second Startup Investigation</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Scenario</div>
+      Automotive navigation app reporting 5-second cold start time. Users complain the app is "slow to open." Using Perfetto to systematically investigate and fix.
+    </div>
+
+    <h3>Step 1 — Record Perfetto Trace During Cold Start</h3>
+    <pre><code><span class="cm"># Force-stop app to ensure cold start</span>
+adb shell am force-stop com.example.autoapp
+
+<span class="cm"># Start Perfetto recording</span>
+adb shell perfetto \
+  -o /data/misc/perfetto-traces/startup.pftrace \
+  -t <span class="nu">15s</span> \
+  sched freq gfx view \
+  app \
+  -a com.example.autoapp &amp;
+
+<span class="cm"># Launch the app</span>
+adb shell am start-activity com.example.autoapp/.MainActivity
+
+<span class="cm"># Pull the trace</span>
+adb pull /data/misc/perfetto-traces/startup.pftrace ~/Desktop/</code></pre>
+
+    <h3>Step 2 — Identify Application.onCreate() Blocking Work</h3>
+    <p>In the Perfetto trace (ui.perfetto.dev), search for the app's main thread. The startup track shows:</p>
+    <div class="ascii-box">Cold Start Timeline (Main Thread)
+|-- Application.onCreate() .............. 2800ms  ← PROBLEM
+|   |-- AnalyticsSDK.init() ............. 1200ms
+|   |-- MapSDK.init() ................... 900ms
+|   |-- FirebaseApp.initializeApp() ..... 400ms
+|   |-- SharedPrefs read (disk I/O) ..... 300ms  ← StrictMode violation
+|-- Activity.onCreate() ................. 1100ms
+|   |-- setContent() / inflate .......... 600ms
+|   |-- ViewModel.init() ................ 500ms
+|-- First frame rendered ................ 5100ms total</div>
+
+    <h3>Step 3 — Identify ContentProvider Init Chain</h3>
+    <p>Many SDKs use ContentProviders for auto-initialization (Firebase, LeakCanary, WorkManager). These run before <code>Application.onCreate()</code>. In Perfetto, look for <code>ActivityThread#installContentProviders</code>:</p>
+    <pre><code><span class="cm">// Check merged manifest for all ContentProviders</span>
+<span class="cm">// ./gradlew :app:processDebugManifest</span>
+<span class="cm">// Then open: app/build/intermediates/merged_manifests/debug/AndroidManifest.xml</span>
+<span class="cm">// Count &lt;provider&gt; entries — often 10-20 SDKs add their own</span></code></pre>
+
+    <h3>Step 4 — StrictMode Catches Disk I/O on Main Thread</h3>
+    <p>StrictMode logs in logcat during development confirmed SharedPreferences read on main thread during startup. The fix is DataStore (which is async) or moving prefs read to a background coroutine.</p>
+
+    <h3>Step 5 — Fix: App Startup Library + Coroutines</h3>
+    <pre><code><span class="cm">// build.gradle.kts</span>
+implementation(<span class="str">"androidx.startup:startup-runtime:1.1.1"</span>)
+
+<span class="cm">// Create lazy initializers for SDKs that don't need to be ready immediately</span>
+<span class="kw">class</span> <span class="cl">AnalyticsInitializer</span> : <span class="cl">Initializer</span>&lt;<span class="cl">Analytics</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">create</span>(context: <span class="cl">Context</span>): <span class="cl">Analytics</span> {
+        <span class="kw">return</span> <span class="cl">Analytics</span>.<span class="fn">getInstance</span>(context)
+    }
+    <span class="kw">override fun</span> <span class="fn">dependencies</span>(): <span class="cl">List</span>&lt;<span class="cl">Class</span>&lt;<span class="kw">out</span> <span class="cl">Initializer</span>&lt;*&gt;&gt;&gt; = <span class="fn">emptyList</span>()
+}
+
+<span class="cm">// AndroidManifest.xml — register under InitializationProvider</span>
+&lt;provider
+    android:name=<span class="str">"androidx.startup.InitializationProvider"</span>
+    android:authorities=<span class="str">"${applicationId}.androidx-startup"</span>
+    android:exported=<span class="str">"false"</span>&gt;
+    &lt;meta-data
+        android:name=<span class="str">"com.example.AnalyticsInitializer"</span>
+        android:value=<span class="str">"androidx.startup.Initializer"</span>/&gt;
+&lt;/provider&gt;</code></pre>
+
+    <pre><code><span class="cm">// Application.onCreate() — move heavy init off main thread</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+    <span class="kw">super</span>.<span class="fn">onCreate</span>()
+    <span class="cm">// Only truly critical init here</span>
+
+    <span class="cm">// Move SDKs to background via coroutine</span>
+    <span class="cl">ProcessLifecycleOwner</span>.get().lifecycleScope.<span class="fn">launch</span>(<span class="cl">Dispatchers</span>.IO) {
+        <span class="fn">initMapSDK</span>()
+        <span class="fn">initAnalyticsSDK</span>()
+    }
+}</code></pre>
+
+    <h3>Step 6 — Add Baseline Profiles</h3>
+    <pre><code><span class="cm">// Reduce JIT compilation at startup — pre-compile hot paths</span>
+<span class="cm">// Add to build.gradle.kts</span>
+implementation(<span class="str">"androidx.profileinstaller:profileinstaller:1.3.1"</span>)
+
+<span class="cm">// Add macrobenchmark module for generating baseline profiles:</span>
+<span class="cm">// benchmarks/src/test/.../BaselineProfileGenerator.kt</span>
+<span class="kw">@RunWith</span>(<span class="cl">AndroidJUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">BaselineProfileGenerator</span> {
+    <span class="kw">@get:Rule val</span> rule = <span class="cl">BaselineProfileRule</span>()
+
+    <span class="kw">@Test fun</span> <span class="fn">generate</span>() = rule.<span class="fn">collect</span>(
+        packageName = <span class="str">"com.example.autoapp"</span>
+    ) {
+        <span class="fn">pressHome</span>()
+        <span class="fn">startActivityAndWait</span>()
+        <span class="cm">// navigate critical user journeys</span>
+    }
+}
+<span class="cm">// Generates app/src/main/baseline-prof.txt — commit this file</span></code></pre>
+
+    <h3>Result</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Phase</th><th>Before</th><th>After</th><th>Fix</th></tr>
+      <tr><td>Application.onCreate()</td><td>2800ms</td><td>180ms</td><td>App Startup lib + background coroutines</td></tr>
+      <tr><td>ContentProvider chain</td><td>800ms</td><td>200ms</td><td>Disabled unused auto-init providers</td></tr>
+      <tr><td>First frame</td><td>5100ms</td><td>1100ms</td><td>All of above + Baseline Profile</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
+      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ALTERNATIVES -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#9878;</div> 5. Alternatives &amp; Trade-offs</div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Tool</th><th>Best For</th><th>Limitations</th><th>Verdict</th></tr>
+      <tr>
+        <td>Perfetto</td>
+        <td>System-wide traces, jank, startup, cross-process</td>
+        <td>Large trace files (100MB+); steep learning curve for trace analysis; desktop-only UI</td>
+        <td><strong>Gold standard for performance</strong></td>
+      </tr>
+      <tr>
+        <td>Systrace (legacy)</td>
+        <td>Older codebases referencing it</td>
+        <td>Superseded by Perfetto; deprecated; less data than Perfetto</td>
+        <td><strong>Use Perfetto instead</strong></td>
+      </tr>
+      <tr>
+        <td>CPU Profiler (Android Studio)</td>
+        <td>In-app method traces, quick profiling sessions</td>
+        <td>Profiler overhead affects results; can't see system threads; no cross-process</td>
+        <td><strong>Good for method-level analysis</strong></td>
+      </tr>
+      <tr>
+        <td>Firebase Performance</td>
+        <td>Production metrics, HTTP latency, custom traces in real builds</td>
+        <td>Post-hoc only — not interactive; limited CPU trace depth; requires Firebase</td>
+        <td><strong>Complement to local tools</strong></td>
+      </tr>
+      <tr>
+        <td>StrictMode</td>
+        <td>Catching violations during development and CI</td>
+        <td>Debug-only; no production data; can generate false positives from libraries</td>
+        <td><strong>Must-have in debug builds + CI</strong></td>
+      </tr>
+      <tr>
+        <td>Manual logging (Timber)</td>
+        <td>Business logic tracing, flow debugging</td>
+        <td>No timing, no system context, can't see thread states or allocations</td>
+        <td><strong>Complement — not a replacement</strong></td>
+      </tr>
+    </table>
+    </div>
+
+    <h3>LeakCanary vs Memory Profiler</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">Key Distinction</div>
+      <ul style="margin:0;padding-left:18px;">
+        <li><strong>LeakCanary:</strong> Automatic, zero-config, catches leaks you didn't know about. Shows exact leak path with annotated stack trace. Best for "is there a leak?" detection.</li>
+        <li><strong>Memory Profiler:</strong> Manual, interactive. Shows heap composition, class-level object counts, retained sizes. Best for "why is my app using 400MB?" analysis.</li>
+        <li>Use <strong>both</strong> — they answer different questions.</li>
+      </ul>
+    </div>
+
+    <h3>Flipper vs Android Studio Tools</h3>
+    <div class="callout callout-blue">
+      <div class="callout-label">When to use Flipper</div>
+      Flipper is Meta's open-source desktop debugging platform. It bundles network inspection, layout inspection, database browser, shared preferences viewer, and log viewer in one UI — with a plugin ecosystem. Useful for teams where developers may not have Android Studio (e.g., React Native teams). For pure Android + Kotlin/Compose, Android Studio's built-in tools are equally capable and require no extra setup.
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
+      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PITFALLS -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 6. Pitfalls &amp; Best Practices</div>
+
+    <h3>Pitfall 1 — Trace.beginSection() Without endSection() in finally</h3>
+    <pre><code><span class="cm">// ❌ BAD — if exception thrown, trace section never ends</span>
+<span class="kw">fun</span> <span class="fn">processData</span>(data: <span class="cl">List</span>&lt;<span class="cl">Item</span>&gt;) {
+    <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"processData"</span>)
+    <span class="fn">doHeavyProcessing</span>(data)  <span class="cm">// throws if data is empty</span>
+    <span class="cl">Trace</span>.<span class="fn">endSection</span>()      <span class="cm">// never reached on exception</span>
+}
+
+<span class="cm">// ✅ GOOD — always end in finally</span>
+<span class="kw">fun</span> <span class="fn">processData</span>(data: <span class="cl">List</span>&lt;<span class="cl">Item</span>&gt;) {
+    <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"processData"</span>)
+    <span class="kw">try</span> {
+        <span class="fn">doHeavyProcessing</span>(data)
+    } <span class="kw">finally</span> {
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>()
+    }
+}</code></pre>
+
+    <h3>Pitfall 2 — Memory Profiler Heap Dump Triggers GC</h3>
+    <p>Requesting a heap dump pauses the app briefly and triggers garbage collection. This means the dump shows the state <strong>after</strong> GC, not a live snapshot. Objects that would have been collected appear cleaned up. For true live analysis, use allocation tracking instead, or take multiple dumps.</p>
+
+    <h3>Pitfall 3 — LeakCanary in Release Builds</h3>
+    <pre><code><span class="cm">// ❌ NEVER add LeakCanary to release</span>
+implementation(<span class="str">"com.squareup.leakcanary:leakcanary-android:2.14"</span>)
+
+<span class="cm">// ✅ ALWAYS debug-only</span>
+debugImplementation(<span class="str">"com.squareup.leakcanary:leakcanary-android:2.14"</span>)
+
+<span class="cm">// LeakCanary adds overhead: object watcher, background analysis,</span>
+<span class="cm">// heap dumps — unacceptable in production</span></code></pre>
+
+    <h3>Pitfall 4 — StrictMode penaltyDeath() in Release</h3>
+    <pre><code><span class="cm">// ❌ BAD — crashes production users</span>
+<span class="cl">StrictMode</span>.<span class="fn">setThreadPolicy</span>(<span class="cl">StrictMode</span>.<span class="cl">ThreadPolicy</span>.<span class="cl">Builder</span>()
+    .<span class="fn">penaltyDeath</span>()  <span class="cm">// crashes on violation — debug only!</span>
+    .<span class="fn">build</span>())
+
+<span class="cm">// ✅ GOOD — gate on BuildConfig.DEBUG</span>
+<span class="kw">if</span> (<span class="cl">BuildConfig</span>.DEBUG) {
+    <span class="cl">StrictMode</span>.<span class="fn">setThreadPolicy</span>(
+        <span class="cl">StrictMode</span>.<span class="cl">ThreadPolicy</span>.<span class="cl">Builder</span>()
+            .<span class="fn">detectAll</span>()
+            .<span class="fn">penaltyDeath</span>()
+            .<span class="fn">build</span>()
+    )
+}</code></pre>
+
+    <h3>Pitfall 5 — Layout Inspector Slows Down Device</h3>
+    <p>Layout Inspector uses live reflection to inspect the composable tree — this can significantly slow down the device during inspection, especially on older hardware. Do not use Layout Inspector while measuring performance. Use it only for debugging layout/recomposition issues, not as a general development aid while timing.</p>
+
+    <h3>Pitfall 6 — Perfetto Trace Files Are Very Large</h3>
+    <p>A 10-second Perfetto trace can be 50–200MB depending on trace categories. Analyze on desktop at ui.perfetto.dev — do not try to process them programmatically on device. Use targeted categories (<code>sched gfx view</code>) rather than <code>-a all</code> to keep file sizes manageable.</p>
+
+    <h3>Pitfall 7 — Profiling in Debug Builds</h3>
+    <div class="callout callout-red">
+      <div class="callout-label">Critical</div>
+      Debug builds are 2-3x slower than release builds due to disabled optimizations, debug symbols, and ART interpreter mode. Always profile the <strong>release</strong> build variant (or a profileable build) for accurate numbers. A 500ms operation in debug might be 150ms in release — drawing the wrong conclusions from debug profiling is common.
+    </div>
+
+    <h3>Best Practices</h3>
+    <ol>
+      <li>Add <code>Trace.beginSection()</code> markers around every business-critical path in debug builds.</li>
+      <li>Enable StrictMode with <code>penaltyDeath()</code> in debug + CI from day one.</li>
+      <li>Always include <code>leakcanary-android</code> in <code>debugImplementation</code> — never let it reach release.</li>
+      <li>Profile release builds, not debug builds, for meaningful numbers.</li>
+      <li>Record Perfetto traces early — before optimizing, to have a baseline comparison.</li>
+      <li>Check recomposition counts in Layout Inspector for every new Compose screen before shipping.</li>
+    </ol>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
+      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 7: INTERVIEW FRAMEWORK -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#127908;</div> 7. Interview Answer Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "I approach production performance issues systematically: StrictMode catches main-thread violations in CI, Perfetto reveals jank and startup bottlenecks at the system level, Memory Profiler combined with LeakCanary handles memory issues, and custom <code>Trace.beginSection()</code> markers instrument business-critical paths so I can see them in every trace."
+    </div>
+
+    <h3>2-Minute Structured Answer</h3>
+    <div class="answer-box">
+      "My debugging approach starts at the symptom level — I pick the right tool for the symptom rather than reaching for the first one that comes to mind.<br><br>
+      For performance issues like jank or slow startup, I start with Perfetto. It gives a system-wide view: CPU scheduling, Binder calls, SurfaceFlinger, all app threads simultaneously. I open the trace at ui.perfetto.dev, look for the main thread slices longer than 16ms between frames for jank, or for long Application.onCreate() work during startup. I add custom <code>Trace.beginSection()</code> markers around our business logic so they appear as named slices in the trace.<br><br>
+      For memory leaks, LeakCanary runs automatically in debug builds — it catches Activity, Fragment, and ViewModel leaks with a full annotated path. When I need to understand heap composition, I use the Memory Profiler heap dump, but I'm aware the dump triggers GC, so it's not a live snapshot.<br><br>
+      StrictMode with <code>penaltyDeath()</code> runs in every debug build and CI test — it catches disk reads and network calls on the main thread before they ever reach code review. For Compose performance, Layout Inspector shows recomposition counts per composable, which is the first thing I check when a screen feels slow.<br><br>
+      For startup specifically, the App Startup library + Baseline Profiles are the production-grade solutions once you've identified the bottlenecks via Perfetto."
+    </div>
+
+    <h3>Must-Mention Points (7)</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Perfetto for traces</strong> — system-wide, cross-process, ui.perfetto.dev for analysis; successor to Systrace</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Memory Profiler + heap dump</strong> — heap dump triggers GC; not a live snapshot; use for heap composition analysis</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>LeakCanary auto-detection</strong> — debugImplementation only; zero config; catches Activity/Fragment/ViewModel/coroutine leaks</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>StrictMode in debug + CI</strong> — penaltyDeath() in debug catches main-thread violations before they ship</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Custom Trace.beginSection()</strong> — instrument business paths; always wrap in try/finally; visible in Perfetto and System Trace</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Baseline Profiles</strong> — pre-compile hot bytecode paths; generated by Macrobenchmark; committed as baseline-prof.txt</div></div>
+      <div class="must-item"><div class="must-num">7</div><div><strong>Layout Inspector recomposition count</strong> — high counts = unstable composable parameters; first Compose performance signal</div></div>
+    </div>
+
+    <h3>Senior-Level Insight (Stand Out)</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Say This</div>
+      "I add <code>Trace.beginSection()</code> markers around key business flows in debug builds and run Perfetto traces as part of our Macrobenchmark CI suite — any regression in startup or scroll performance automatically fails the build. We track p95 startup time as a KPI. For Compose recompositions, I review Layout Inspector recomposition counts on every new screen before merging — a screen with 500+ recompositions on a simple scroll is a red flag we catch in code review, not in production."
+    </div>
+
+    <h3>Likely Follow-up Questions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Question</th><th>Short Answer</th></tr>
+      <tr>
+        <td>What is a Baseline Profile?</td>
+        <td>A text file listing hot code paths that the Android runtime pre-compiles (AOT) on app install, reducing JIT compilation overhead at startup. Generated by Macrobenchmark and committed to source control as <code>baseline-prof.txt</code>.</td>
+      </tr>
+      <tr>
+        <td>What is Choreographer in Perfetto?</td>
+        <td>The Android component that drives the frame rendering pipeline, synchronized to the display vsync signal. In Perfetto, the Choreographer track shows if frames are delivered on time. A missed vsync = dropped frame = jank.</td>
+      </tr>
+      <tr>
+        <td>How does LeakCanary detect leaks?</td>
+        <td>It uses a WeakReference to track objects that should be GC'd (Activities after finish, Fragments after detach). If the WeakReference is not cleared after a GC, LeakCanary takes a heap dump and uses heuristic analysis (shark library) to find the reference path keeping the object alive.</td>
+      </tr>
+      <tr>
+        <td>What causes a Compose recomposition storm?</td>
+        <td>Passing unstable (non-stable) types as composable parameters, or reading a State object too high up the tree. When state changes, all composables reading that state recompose. Fix: make parameters stable (data classes, @Stable), hoist state down, use derivedStateOf to limit recompositions.</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
+      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 8: CHEAT SHEET -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 8. Quick Revision Sheet</div>
+
+    <h3>Tool Selection Guide</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Problem</th><th>First Tool</th><th>Key Action</th></tr>
+      <tr><td>Jank / dropped frames</td><td>Perfetto</td><td>Main thread slices &gt;16ms</td></tr>
+      <tr><td>Slow startup</td><td>Perfetto — App Startup</td><td>Application.onCreate() duration</td></tr>
+      <tr><td>ANR</td><td>CPU Profiler — System Trace</td><td>Main thread blocked state</td></tr>
+      <tr><td>Memory leak</td><td>LeakCanary</td><td>Auto-detects with path</td></tr>
+      <tr><td>High memory usage</td><td>Memory Profiler — Heap Dump</td><td>Class histogram, retained size</td></tr>
+      <tr><td>Disk/network on main thread</td><td>StrictMode</td><td>penaltyLog() / penaltyDeath()</td></tr>
+      <tr><td>Compose recompositions</td><td>Layout Inspector</td><td>Recomposition count per composable</td></tr>
+      <tr><td>Slow network requests</td><td>Network Inspector</td><td>Request timeline waterfall</td></tr>
+    </table>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>PERFETTO — ADB COMMANDS</h4>
+        <pre><code># Record trace
+adb shell perfetto \
+  -o /data/.../trace.pftrace \
+  -t 10s sched freq gfx view
+
+# Pull to desktop
+adb pull .../trace.pftrace ~/
+
+# Open: ui.perfetto.dev</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>CUSTOM TRACE MARKERS</h4>
+        <pre><code>Trace.beginSection("myOperation")
+try {
+    // your code
+} finally {
+    Trace.endSection()
+}
+// visible in Perfetto & CPU Profiler</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>STRICTMODE SETUP</h4>
+        <pre><code>if (BuildConfig.DEBUG) {
+  StrictMode.setThreadPolicy(
+    ThreadPolicy.Builder()
+      .detectAll()
+      .penaltyDeath()  // crash on violation
+      .build())
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>LEAKCANARY SETUP</h4>
+        <pre><code>// build.gradle.kts
+debugImplementation(
+  "com.squareup.leakcanary:
+   leakcanary-android:2.14"
+)
+// No init code needed</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>APP STARTUP — LAZY INIT</h4>
+        <pre><code>class MySDKInitializer :
+    Initializer&lt;MySdk&gt; {
+  override fun create(ctx: Context)
+    = MySdk.init(ctx)
+  override fun dependencies()
+    = emptyList()
+}</code></pre>
+      </div>
+      <div class="cheat-card">
+        <h4>HEAP DUMP CAVEAT</h4>
+        <pre><code>// Heap dump triggers GC
+// Not a live snapshot!
+// For live: use Allocation Tracking
+// For leaks: use LeakCanary
+// Check: retained vs shallow size</code></pre>
+      </div>
+    </div>
+
+    <h3>Key Gotchas at a Glance</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Gotcha</th><th>Rule</th></tr>
+      <tr><td>Profile debug builds</td><td>Always profile release variant — debug is 2-3x slower</td></tr>
+      <tr><td>LeakCanary in release</td><td>debugImplementation only — never production</td></tr>
+      <tr><td>StrictMode penaltyDeath in release</td><td>Gate on BuildConfig.DEBUG always</td></tr>
+      <tr><td>Trace.beginSection without finally</td><td>Always end in finally — leaking section corrupts trace</td></tr>
+      <tr><td>Heap dump triggers GC</td><td>Shows post-GC state; use allocation tracking for live view</td></tr>
+      <tr><td>Layout Inspector during timing</td><td>Causes overhead — don't measure while Inspector is attached</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
+      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 9: QUIZ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div> 9. Interview Questions (Self-Check)</div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">How to use</div>
+      Try to answer each question before revealing the answer. Click the arrow to reveal.
+    </div>
+
+    <h3>Basic</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B1 — What is the difference between Perfetto and the CPU Profiler in Android Studio?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Perfetto</strong> is a system-wide tracing tool that records CPU scheduling, Binder IPC, SurfaceFlinger, all app threads, and kernel events simultaneously. It captures what Android as a whole is doing. Traces are viewed in the web UI at ui.perfetto.dev. Ideal for jank, startup, and cross-process issues.<br><br>
+        <strong>CPU Profiler</strong> (Android Studio) is focused on in-app method-level analysis. It shows call charts, flame charts, and method traces within your app's code specifically. Easier to start but narrower — it can't see system threads or other processes.<br><br>
+        <strong>They complement each other</strong>: use Perfetto to identify when and at the system level, then CPU Profiler to identify which method in your code.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B2 — What does StrictMode detect and when should you use it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        StrictMode detects two categories of violations:<br><br>
+        <strong>ThreadPolicy:</strong> Operations that shouldn't happen on the main thread — disk reads, disk writes, network operations, custom slow calls. These cause jank or ANRs if they block the main thread.<br><br>
+        <strong>VmPolicy:</strong> Memory and resource violations — leaked SQLite objects, unclosed Closeable objects, Activity leaks, leaked registration objects.<br><br>
+        Use StrictMode in debug builds only (gate on <code>BuildConfig.DEBUG</code>). Use <code>penaltyLog()</code> to see violations in logcat, or <code>penaltyDeath()</code> to crash immediately — crash mode is preferred in CI because it forces fixes rather than allowing them to accumulate.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">B3 — How does LeakCanary detect memory leaks without any manual initialization code?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        LeakCanary uses the Android <strong>ContentProvider auto-initialization pattern</strong>. The library registers a ContentProvider in its manifest that Android automatically instantiates before <code>Application.onCreate()</code>. Inside that ContentProvider's <code>onCreate()</code>, LeakCanary registers lifecycle callbacks on the Application to watch Activities, Fragments, ViewModels, and Services.<br><br>
+        When a watched object should be garbage collected (e.g., Activity after <code>finish()</code>), LeakCanary creates a <strong>WeakReference</strong> to it and schedules a check. If the WeakReference is not cleared after triggering GC, LeakCanary takes a heap dump and uses its shark library to walk the reference graph and find the shortest path preventing GC. This produces a human-readable leak trace.
+      </div>
+    </div>
+
+    <h3>Intermediate</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I1 — <span class="tag-coding">Coding</span> Add Trace markers to this Repository method so it appears in Perfetto traces with correct begin/end even on exceptions:</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Before:</strong>
+        <pre><code><span class="kw">suspend fun</span> <span class="fn">syncOrders</span>(userId: <span class="cl">String</span>): <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt; {
+    <span class="kw">val</span> remote = api.<span class="fn">getOrders</span>(userId)
+    <span class="kw">val</span> local = dao.<span class="fn">insertAll</span>(remote)
+    <span class="kw">return</span> local
+}</code></pre>
+        <strong>After:</strong>
+        <pre><code><span class="kw">suspend fun</span> <span class="fn">syncOrders</span>(userId: <span class="cl">String</span>): <span class="cl">List</span>&lt;<span class="cl">Order</span>&gt; {
+    <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"OrderRepo.syncOrders"</span>)
+    <span class="kw">return try</span> {
+        <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"OrderRepo.fetchRemote"</span>)
+        <span class="kw">val</span> remote = <span class="kw">try</span> {
+            api.<span class="fn">getOrders</span>(userId)
+        } <span class="kw">finally</span> {
+            <span class="cl">Trace</span>.<span class="fn">endSection</span>()  <span class="cm">// fetchRemote</span>
+        }
+
+        <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"OrderRepo.insertLocal"</span>)
+        <span class="kw">try</span> {
+            dao.<span class="fn">insertAll</span>(remote)
+        } <span class="kw">finally</span> {
+            <span class="cl">Trace</span>.<span class="fn">endSection</span>()  <span class="cm">// insertLocal</span>
+        }
+    } <span class="kw">finally</span> {
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>()  <span class="cm">// syncOrders</span>
+    }
+}</code></pre>
+        Key: every <code>beginSection</code> must have a matching <code>endSection</code> in a <code>finally</code> block to prevent orphaned sections in the trace.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I2 — What does a high recomposition count in Layout Inspector indicate and how do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        A high recomposition count means the composable is being re-executed far more often than needed. Common causes:<br><br>
+        1. <strong>Unstable parameter types:</strong> Non-data-class types, interfaces, or types the Compose compiler can't confirm are stable. Every time the parent recomposes, these composables recompose too.<br>
+        2. <strong>Reading state too high:</strong> A composable reads a <code>State</code> object that changes frequently — the entire subtree recomposes on every change.<br>
+        3. <strong>Lambda references changing:</strong> Lambdas without <code>remember { }</code> are recreated each recomposition, causing child composables to recompose.<br><br>
+        <strong>Fixes:</strong><br>
+        • Use <code>data class</code> for all parameter types (stable by Compose rules)<br>
+        • Annotate with <code>@Stable</code> or <code>@Immutable</code> when appropriate<br>
+        • Use <code>derivedStateOf { }</code> to compute derived state with built-in equality check<br>
+        • Wrap lambdas in <code>rememberUpdatedState</code> or pass stable lambda references<br>
+        • Hoist heavy state closer to where it's read
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I3 — Why should you never profile a debug build for performance measurements?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        Debug builds have several characteristics that make them 2-5x slower than release builds:<br><br>
+        1. <strong>ART interpreter mode:</strong> Debug builds often run in interpreter mode rather than AOT-compiled mode — method calls are far slower<br>
+        2. <strong>No R8/ProGuard:</strong> Code is not shrunk, inlined, or optimized<br>
+        3. <strong>Debug symbols:</strong> Extra metadata is retained in memory<br>
+        4. <strong>AssertionError checks:</strong> Assertions are active<br>
+        5. <strong>Profiler overhead:</strong> Android Studio's profiler itself adds overhead when attached<br><br>
+        Use a <strong>profileable</strong> or <strong>release</strong> build variant for performance measurement. You can enable profiling on a release build by adding <code>&lt;profileable android:shell="true"/&gt;</code> to the manifest in a signed release build — this allows profiling without debug overhead. Baseline Profile measurements must always be on release builds to be meaningful.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">I4 — What is the difference between shallow size and retained size in a heap dump?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Shallow size:</strong> The memory consumed by the object itself — just its fields, not the objects it references. For example, a list object's shallow size is just the size of the list header and array reference, not the items inside.<br><br>
+        <strong>Retained size:</strong> The total memory that would be freed if this object were garbage collected — the object itself plus all objects that are only reachable through it (i.e., would also be GC'd).<br><br>
+        <strong>Why it matters:</strong> When looking for memory hogs in a heap dump, sort by <strong>retained size</strong>. A single ViewModel with small shallow size might have a large retained size if it holds a reference to a large list, a bitmap, or a Context. Retained size tells you the true memory cost of an object, not just its own footprint.
+      </div>
+    </div>
+
+    <h3>Senior / Scenario</h3>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S1 — <span class="tag-scenario">Scenario</span> An ANR is reported in Play Console on a specific device (Xiaomi Redmi Note 11) but you can't reproduce it locally. Walk through your systematic debug approach.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Systematic Approach:</strong><br><br>
+        <strong>1. Analyze Play Console ANR data:</strong><br>
+        • Download the ANR stack trace from Android Vitals. It shows the main thread state at the time of ANR (usually waiting on a lock, doing I/O, or spinning).<br>
+        • Check if it's consistently on the same class/method — this suggests a race condition specific to that device's hardware or MIUI customization.<br><br>
+        <strong>2. Check the main thread stack trace:</strong><br>
+        • Common patterns: Binder transaction waiting (ContentProvider call on main thread), synchronized block held by background thread, SharedPreferences commit() on main thread.<br>
+        • MIUI-specific: Some Xiaomi devices have custom system services that add latency to Binder IPC calls — operations that take 5ms on stock Android take 500ms on MIUI.<br><br>
+        <strong>3. Add StrictMode + custom Trace markers:</strong><br>
+        • If reproducible in a new release: add Trace.beginSection around every main-thread operation in the suspect area. Record Perfetto trace on the actual device or a MIUI emulator image.<br><br>
+        <strong>4. Test on a MIUI emulator / remote device farm:</strong><br>
+        • Use Firebase Test Lab or BrowserStack with a Xiaomi device. Sometimes OEM customizations cause different Binder scheduling behavior.<br><br>
+        <strong>5. Code fix patterns:</strong><br>
+        • If ContentProvider calls: move off main thread<br>
+        • If SharedPreferences: migrate to DataStore<br>
+        • If lock contention: reduce synchronization scope<br>
+        • If database access: enforce Room's main-thread detection<br><br>
+        <strong>Key insight:</strong> ANRs on specific OEM devices are often caused by slower Binder IPC on that OEM's system services. Operations that don't ANR on stock Android 5ms can take 500ms+ on MIUI, pushing your app over the 5-second ANR threshold.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">S2 — After enabling LeakCanary, it reports an Activity leak. The leak path shows: MainActivity → MyViewModel → Repository → callback → MainActivity. How do you fix it?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Problem:</strong> The Repository holds a callback that captures a reference to MainActivity. Since Repository is scoped to ViewModel (which outlives Activities), this creates a leak: even after MainActivity is destroyed and recreated (e.g., on rotation), the old MainActivity instance is retained in memory via the callback reference in Repository.<br><br>
+        <strong>Fix Strategy — never pass Activity/View references into ViewModel or Repository:</strong><br>
+<pre><code><span class="cm">// ❌ BAD — Repository holds reference to Activity</span>
+<span class="kw">class</span> <span class="cl">OrderRepository</span>(
+    <span class="kw">private val</span> onComplete: () -> <span class="cl">Unit</span>  <span class="cm">// lambda capturing Activity</span>
+)</code></pre>
+<pre><code><span class="cm">// ✅ GOOD — Repository emits via Flow, ViewModel collects</span>
+<span class="kw">class</span> <span class="cl">OrderRepository</span> {
+    <span class="kw">private val</span> _events = <span class="cl">MutableSharedFlow</span>&lt;<span class="cl">OrderEvent</span>&gt;()
+    <span class="kw">val</span> events: <span class="cl">SharedFlow</span>&lt;<span class="cl">OrderEvent</span>&gt; = _events.<span class="fn">asSharedFlow</span>()
+}
+
+<span class="cm">// ViewModel collects Flow — survives rotation, no Activity reference</span>
+<span class="kw">class</span> <span class="cl">OrderViewModel</span> : <span class="cl">ViewModel</span>() {
+    <span class="kw">init</span> {
+        viewModelScope.<span class="fn">launch</span> {
+            repository.events.<span class="fn">collect</span> { event -> _uiState.value = event.toUiState() }
+        }
+    }
+}
+
+<span class="cm">// Activity just observes ViewModel — no callback reference needed</span></code></pre>
+        The root rule: <strong>only Activities/Fragments should hold references to Activities/Fragments</strong>. ViewModels and Repositories should communicate via Flow/StateFlow, not callbacks that capture view references.
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
+      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const total = sections.length;
+
+  function showSection(id, num) {
+    sections.forEach(s => {
+      document.getElementById(s).classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach((btn, i) => {
+      btn.classList.toggle('active', i === num - 1);
+    });
+    document.getElementById(id).classList.add('active');
+    const pct = Math.round((num / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleQuiz(el) {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>
