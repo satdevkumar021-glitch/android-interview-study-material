@@ -106,6 +106,7 @@
   <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
   <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
   <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+<button class="nav-item" onclick="show('s10',10)"><span class="nav-num">10</span> Build Diagnostics Lab</button>
 </nav>
 <main class="main">
   <div class="hero">
@@ -545,7 +546,7 @@ types:  debug | release
         <span class="quiz-q-text">8. Your CI build takes 12 minutes. How do you diagnose and fix it?</span>
         <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
       </div>
-      <div class="quiz-a"><div class="answer-box">1) Run ./gradlew assembleDebug --scan to get a build scan — shows per-task timings. 2) Check if build cache is enabled (org.gradle.caching=true) and whether tasks are UP-TO-DATE or FROM-CACHE. 3) Identify KAPT tasks — migrate to KSP for 2× speedup. 4) Enable parallel execution (org.gradle.parallel=true). 5) Set up a remote build cache server so CI agents share cached task outputs. 6) Use configuration cache (Gradle 8+) to skip configuration phase on unchanged builds. Typically this reduces a 12-min build to 3–4 min.</div></div>
+      <div class="quiz-a"><div class="answer-box">1) Run ./gradlew assembleDebug --scan to get a build scan — shows per-task timings. 2) Check if build cache is enabled (org.gradle.caching=true) and whether tasks are UP-TO-DATE or FROM-CACHE. 3) Identify KAPT tasks — evaluate KSP for supported processors and measure the result. 4) Enable parallel execution (org.gradle.parallel=true). 5) Set up a remote build cache server so CI agents share cached task outputs. 6) Use configuration cache when the project’s Gradle version and plugins support it to skip configuration phase on unchanged builds. Measure the impact on your own project; no fixed speedup is guaranteed.</div></div>
     </div>
 
     <div class="quiz-card">
@@ -553,7 +554,7 @@ types:  debug | release
         <span class="quiz-q-text">9. Why does configuration time matter even when you're not building?</span>
         <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
       </div>
-      <div class="quiz-a"><div class="answer-box">Configuration runs on every Gradle invocation — including ./gradlew tasks, IDE sync, and lint. If build scripts do file I/O, network calls, or expensive computation at the top level (outside task actions), they slow every developer interaction. This is why lazy task configuration (tasks.register instead of tasks.create) and configuration cache exist. The configuration cache serializes the task graph and skips re-configuration when inputs are unchanged.</div></div>
+      <div class="quiz-a"><div class="answer-box">Configuration runs on every Gradle invocation — for task graph calculation unless a compatible configuration-cache entry is reused. IDE sync is separate and does not use the configuration cache. If build scripts do file I/O, network calls, or expensive computation at the top level (outside task actions), they slow every developer interaction. This is why lazy task configuration (tasks.register instead of tasks.create) and configuration cache exist. The configuration cache serializes the task graph and skips re-configuration when inputs are unchanged.</div></div>
     </div>
 
     <div class="quiz-card">
@@ -569,6 +570,28 @@ types:  debug | release
     </div>
   </div>
 
+
+<div class="section" id="s10">
+<div class="section-title">10. Practical Lab: Diagnose a Slow Build</div>
+<p><strong>Goal:</strong> explain a build failure or performance change with measurements, not assumed speedups. Use a sample Android project and record its Gradle, AGP, Kotlin and JDK versions before changing anything.</p>
+<h3>1. Reproduce with the project's wrapper</h3>
+<pre><code>./gradlew --version
+./gradlew :app:assembleDebug --profile
+./gradlew :app:assembleDebug --profile
+./gradlew :app:dependencyInsight --dependency kotlinx-coroutines --configuration debugRuntimeClasspath</code></pre>
+<p>Compare first and warm builds in the same environment. Record configuration time, slow tasks, and UP-TO-DATE or FROM-CACHE outcomes. The local profile report is under build/reports/profile. A Build Scan can provide more detail but publishes build information to a service; review what your organization permits before using --scan.</p>
+<h3>2. Compare the caches correctly</h3>
+<table><tr><th>Mechanism</th><th>What it reuses</th><th>What to inspect</th></tr><tr><td>UP-TO-DATE</td><td>Existing task outputs in this workspace</td><td>Did task inputs or outputs change?</td></tr><tr><td>Build cache</td><td>Cacheable task outputs</td><td>Are inputs declared correctly and outputs reusable?</td></tr><tr><td>Configuration cache</td><td>Configured task graph</td><td>Are plugins and build logic compatible? Why was the entry invalidated?</td></tr></table>
+<pre><code>./gradlew :app:assembleDebug --configuration-cache
+./gradlew :app:assembleDebug --configuration-cache</code></pre>
+<p>Read any compatibility report and fix the cause before enabling this permanently. Configuration cache does not accelerate IDE sync. Avoid measuring every run after clean, which removes workspace outputs and changes the comparison.</p>
+<h3>3. Reproducibility and dependency trust</h3>
+<p>Commit the wrapper and reviewed dependency versions. Check the AGP/Gradle/JDK compatibility matrix rather than upgrading each independently. A version catalog centralizes declarations; dependency locking and dependency verification solve different problems. A wrapper distribution checksum protects the downloaded distribution; verification metadata checks dependency artifacts. Review generated checksums against trusted upstream information before committing them.</p>
+<h3>Practice and interview checkpoint</h3>
+<ol><li>Capture two baseline timings and make one change.</li><li>Compare timings and correctness; do not promise a universal percentage improvement.</li><li>Explain why a cache miss happened and how you would detect it in CI.</li><li>Describe how you would investigate a dependency-version conflict with dependencyInsight.</li></ol>
+<p>References: <a href="https://docs.gradle.org/current/userguide/configuration_cache.html">Configuration cache</a>, <a href="https://docs.gradle.org/current/userguide/build_cache.html">Build cache</a>, <a href="https://docs.gradle.org/current/userguide/dependency_verification.html">Dependency verification</a>, <a href="https://docs.gradle.org/current/userguide/gradle_wrapper.html">Gradle Wrapper</a>.</p>
+</div>
+
 </main>
 </div>
 <script>
@@ -577,7 +600,7 @@ types:  debug | release
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    document.getElementById('progressFill').style.width = (num/document.querySelectorAll('.nav-item').length*100)+'%';
     window.scrollTo(0,0);
   }
   function toggleQuiz(el) {
