@@ -12,6 +12,10 @@
 (function () {
   'use strict';
 
+  // Resolve shared assets against this script, not the page's folder.
+  const scriptUrl = document.currentScript.src;
+  const dashboardUrl = new URL('../index.html', scriptUrl).href;
+
   // ── Google Fonts ────────────────────────────────────────────────
   const fontLink = document.createElement('link');
   fontLink.rel = 'stylesheet';
@@ -21,7 +25,7 @@
   // ── Shared CSS ──────────────────────────────────────────────────
   const cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
-  cssLink.href = 'shared.css';
+  cssLink.href = new URL('shared.css', scriptUrl).href;
   document.head.appendChild(cssLink);
 
   // ── Syllabus map (id → {prev, next, name, tier}) ────────────────
@@ -167,7 +171,7 @@
     const tierColor = curTopic ? (tierColors[curTopic.tier] || '#7c6af7') : '#7c6af7';
 
     bar.innerHTML = `
-      <a class="tb-home" href="../index.html">
+      <a class="tb-home" href="${dashboardUrl}">
         <span class="tb-logo">🤖</span>
         <span class="tb-name">Android Prep</span>
       </a>
