@@ -310,10 +310,12 @@ body.aip-injected .sidebar {
   font-weight: 600;
   color: #8b90b8;
 }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .aip-stat-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
 .dot-all { background: #7c6af7; }
 .dot-known { background: #3ecf8e; }
 .dot-review { background: #ff6b6b; }
+.dot-green { background: #3ecf8e; }
 
 /* Flip card grid */
 .aip-flip-grid {
