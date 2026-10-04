@@ -34,7 +34,12 @@ for page in ROOT.rglob('*.html'):
         checked += 1
 # Shared navigation is injected in lesson pages; validate its Home target in that context.
 shared = (ROOT / 'android_interview_pdfs/shared.js').read_text()
-assert 'href="../index.html"' in shared, 'Lesson Home must lead to root dashboard'
+assert "new URL('../index.html', scriptUrl).href" in shared
+assert 'href="${dashboardUrl}"' in shared
+assert "new URL('shared.css', scriptUrl).href" in shared
+for source in (ROOT / 'index.html', ROOT / 'android_interview_pdfs/shared.js'):
+    for filename in re.findall(r"file:\s*['\"]([^'\"]+)['\"]", source.read_text()):
+        assert (source.parent / filename).is_file(), f'{source.name}: missing topic {filename}'
 assert (ROOT / 'index.html').is_file()
 assert not errors, '\n'.join(errors)
 print(f'Passed: {checked} local links and roadmap card targets across all HTML pages.')
