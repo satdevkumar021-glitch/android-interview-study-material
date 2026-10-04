@@ -22,7 +22,7 @@
   // ── Shared CSS ───────────────────────────────────────────────────
   const cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
-  cssLink.href = 'shared.css';
+  cssLink.href = new URL('shared.css', scriptUrl).href;
   document.head.appendChild(cssLink);
 
   // ── Syllabus map ─────────────────────────────────────────────────

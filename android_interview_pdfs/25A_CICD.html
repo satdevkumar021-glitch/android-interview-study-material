@@ -106,6 +106,7 @@
   <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
   <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
   <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+<button class="nav-item" onclick="show('s10',10)"><span class="nav-num">10</span> Pipeline Reliability Lab</button>
 </nav>
 <main class="main">
   <div class="hero">
@@ -169,9 +170,11 @@
   <!-- S3 GitHub Actions -->
   <div class="section" id="s3">
     <div class="section-title"><div class="section-icon">&#9881;</div>3. GitHub Actions Pipeline</div>
-    <h3>Complete Android CI Workflow</h3>
+    <h3>Android Pull Request Verification Example</h3><p>Adapt the JDK, SDK packages and action versions to your project. Tags below are illustrative; pin reviewed production actions to full commit SHAs. Signing and publishing belong in a separate protected release workflow.</p>
     <pre><code><span class="cm"># .github/workflows/android-ci.yml</span>
 name: Android CI
+permissions:
+  contents: read
 on:
   push:
     branches: [ main, develop ]
@@ -211,28 +214,19 @@ jobs:
   build:
     needs: lint-and-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { java-version: '17', distribution: 'temurin' }
       - uses: gradle/actions/setup-gradle@v3
-
-      - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
-
-      - name: Build Release AAB
-        run: ./gradlew bundleRelease
-        env:
-          KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
-          name: release-aab
-          path: app/build/outputs/bundle/release/*.aab</code></pre>
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*.apk</code></pre>
 
     <div class="callout callout-yellow">
       <div class="callout-label">Key Actions</div>
@@ -525,6 +519,25 @@ gradle/actions/setup-gradle@v3</code></pre>
     </div>
   </div>
 
+
+<div class="section" id="s10">
+<div class="section-title">10. Practical Lab: Design a Reliable Android Pipeline</div>
+<p><strong>Goal:</strong> draw the path from a pull request to a releasable artifact, including failures and recovery. Apply the commands to a sample Android repository; this study website itself is not an Android build.</p>
+<h3>Separate verification from release</h3>
+<table><tr><th>Stage</th><th>Checks and outputs</th><th>Trust boundary</th></tr><tr><td>Pull request</td><td>Lint, JVM tests, debug build; preserve reports even after failure</td><td>No signing or publishing credentials; read-only repository permissions</td></tr><tr><td>Integration</td><td>Emulator/device tests for important journeys; defined API levels</td><td>Use synthetic test accounts and controlled services</td></tr><tr><td>Release</td><td>Approved commit, signed AAB, version checks, staged rollout</td><td>Protected environment and reviewed approval policy</td></tr></table>
+<pre><code>./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+# Requires a running emulator or attached test device:
+./gradlew :app:connectedDebugAndroidTest</code></pre>
+<p>Passing a debug build does not prove release behavior: test the release variant's shrinking, manifests and configuration before distribution. Retain lint/test reports, commit identity and artifact provenance. Choose report retention deliberately instead of keeping artifacts indefinitely.</p>
+<h3>Diagnose failures, not just retry them</h3>
+<ul><li><strong>Works locally, fails on CI:</strong> compare the wrapper, JDK, SDK packages, environment variables and task names.</li><li><strong>Fork pull request fails to sign:</strong> signing does not belong in its verification job. Keep release credentials in the trusted release workflow.</li><li><strong>Flaky emulator test:</strong> collect logs and failure evidence; replace fixed sleeps with synchronization. Track flakiness rather than rerunning until green.</li><li><strong>Cache makes an incorrect build pass:</strong> compare against a fresh run, inspect inputs and restrict who can write shared caches.</li><li><strong>Rollout regression:</strong> halt expansion, investigate crash/ANR and functional signals, and prepare a tested replacement. Do not assume users can automatically downgrade an installed version.</li></ul>
+<h3>Pipeline safety and efficiency</h3>
+<p>Use pull_request for untrusted PR checks. Do not execute untrusted PR code in a privileged pull_request_target workflow. Review action sources and pin production actions to reviewed full commit SHAs. Set bounded job timeouts, cancel superseded verification runs, and upload diagnostics with if: always(). Gradle's setup action manages Gradle caching; avoid stacking multiple cache owners for the same directory.</p>
+<h3>Interview exercise</h3>
+<p>A team has a 15-minute pipeline and frequent release incidents. Propose measurable improvements: fail fast on cheap checks, identify the slowest stage, split verification and publishing, define release gates, and track queue time, duration, flake rate and escaped defects. Explain the trade-off before adding parallel jobs or broad caches.</p>
+<p>References: <a href="https://docs.gradle.org/current/userguide/github-actions.html">Gradle on GitHub Actions</a>, <a href="https://docs.github.com/en/actions/reference/security/secure-use">GitHub Actions security</a>.</p>
+</div>
+
 </main>
 </div>
 <script>
@@ -533,7 +546,7 @@ gradle/actions/setup-gradle@v3</code></pre>
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-    document.getElementById('progressFill').style.width = (num/9*100)+'%';
+    document.getElementById('progressFill').style.width = (num/document.querySelectorAll('.nav-item').length*100)+'%';
     window.scrollTo(0,0);
   }
   function toggleQuiz(el) {
