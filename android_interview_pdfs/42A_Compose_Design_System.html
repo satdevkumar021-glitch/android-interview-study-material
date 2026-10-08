@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>42A — Compose Design System &amp; Multi-Brand Theming | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">42A · Design System</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> CompositionLocal API</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Brand Token Architecture</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> MaterialTheme Deep Dive</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Multi-Brand in Practice</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Design System Modules</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Pitfalls &amp; Best Practices</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Interview Framework</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
+</nav>
+
+<main class="main" id="mainScroll">
+  <!-- HERO -->
+  <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>42A</span> — Compose Design System &amp; Multi-Brand Theming</h1>
+    <p class="hero-desc">CompositionLocal, design tokens, MaterialTheme customisation, and how to support multiple brands from a single Compose codebase — the architecture behind scalable UI systems.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 42A</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+      <span class="badge badge-hot">&#128293; Hot</span>
+    </div>
+  </div>
+
+  <!-- S1: Overview -->
+  <div class="section" id="s1">
+    <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+
+    <h3>What Is a Design System?</h3>
+    <p>A <strong>design system</strong> is a shared language between designers and engineers consisting of three interlocking layers:</p>
+    <ul>
+      <li><strong>Design Tokens</strong> — the raw primitives: colors, typography scales, spacing values, corner radii. These are pure data, not UI code.</li>
+      <li><strong>Component Library</strong> — reusable Composables that consume tokens. A <code>PrimaryButton</code> reads <code>buttonBackground</code> from the token set; it never hardcodes <code>Color(0xFF6200EE)</code>.</li>
+      <li><strong>Screen Compositions</strong> — product screens assembled from components. They contain layout and business logic, not visual decisions.</li>
+    </ul>
+
+    <h3>Why Multi-Brand Matters</h3>
+    <p>Enterprise products increasingly deliver <strong>one codebase, multiple visual identities</strong>. Examples from production:</p>
+    <ul>
+      <li><strong>Acme Corp</strong> — two product lines have different brand colours, logo assets, and typographic tone but share all checkout, account, and loyalty screens.</li>
+      <li><strong>Automotive super-app</strong> — 14 vehicle brands (each with distinct primary colour, logo, typography, and tone) running from a single Compose codebase. Each brand supplies its own token set as a data object injected at startup — zero UI code duplication.</li>
+      <li><strong>Banking super-apps</strong> — white-label banking apps where each bank provides its colour palette and font; the underlying transaction, card, and KYC flows are identical.</li>
+    </ul>
+
+    <h3>The Three-Layer Architecture</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Contents</th><th>Brand-specific?</th></tr></thead>
+        <tbody>
+          <tr><td>Design Tokens</td><td>ColorTokens, TypographyTokens, SpacingTokens data classes</td><td>✅ Yes — each brand has its own instance</td></tr>
+          <tr><td>Component Library</td><td>PrimaryButton, Card, AppBar, TextField composables</td><td>❌ No — reads tokens via CompositionLocal</td></tr>
+          <tr><td>Screen Compositions</td><td>HomeScreen, CheckoutScreen, ProfileScreen</td><td>❌ No — assembles components</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      The key insight is that <strong>brand identity is data, not code</strong>. Your composables never know which brand they're rendering for — they just consume tokens from CompositionLocal. Swapping brands is swapping the data, not rewriting components. A component that reads <code>LocalBrandColors.current.primary</code> works for all 14 brands without a single <code>if (brand == BRAND_X)</code> branch.
+    </div>
+
+    <h3>Real-World Scale</h3>
+    <p>In a real-world multi-brand automotive app, a single <code>:design-system</code> module maintains ~80 composable components. Each of the 14 brand modules contributes a <strong>400-line Kotlin file</strong> that is entirely data: colours, fonts, spacing, icon drawables. No UI code is duplicated across brands. A new brand launch is a new data file + Gradle flavour — the entire app is production-ready in days, not months.</p>
+  </div>
+
+  <!-- S2: CompositionLocal API -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128101;</div>2. CompositionLocal API</div>
+
+    <h3>What Is CompositionLocal?</h3>
+    <p><strong>CompositionLocal</strong> is Compose's mechanism for <em>implicit parameter passing</em>. Instead of threading a value through every function signature, you provide it once at a high level and any descendant composable can read it. Think of it as a typed, scoped global that is safe to use in the composition tree.</p>
+    <p>Compose's own <code>MaterialTheme</code>, <code>LocalContext</code>, <code>LocalDensity</code>, and <code>LocalFocusManager</code> are all built on this exact mechanism.</p>
+
+    <h3>Two Factory Functions</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Factory</th><th>Recomposition Scope</th><th>When to Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>compositionLocalOf { }</code></td><td>Only composables that <em>read</em> the value recompose on change</td><td>Values that change during a session (e.g. dark/light mode toggle, locale)</td></tr>
+          <tr><td><code>staticCompositionLocalOf { }</code></td><td>Entire subtree below the provider recomposes on change</td><td>Stable values set once at startup (e.g. entire brand config object)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Performance Note</div>
+      <code>staticCompositionLocalOf</code> causes the entire subtree to recompose when the value changes. For brand config (set once at startup and never changed), this is perfectly fine — the cost is paid once. For frequently changing values (e.g. scroll offset), always use <code>compositionLocalOf</code> instead.
+    </div>
+
+    <h3>Reading and Providing Values</h3>
+    <ul>
+      <li><strong>Reading:</strong> <code>LocalSomething.current</code> — reads the nearest provided value in the composition tree.</li>
+      <li><strong>Providing:</strong> <code>CompositionLocalProvider(LocalSomething provides value) { content() }</code> — scopes the value to all descendants in the <code>content</code> lambda.</li>
+    </ul>
+
+    <h3>Full Example: Brand Color CompositionLocal</h3>
+    <pre><code><span class="cm">// 1. Define the token data class</span>
+<span class="kw">data class</span> <span class="cl">BrandColors</span>(
+    <span class="kw">val</span> primary: <span class="cl">Color</span>,
+    <span class="kw">val</span> secondary: <span class="cl">Color</span>,
+    <span class="kw">val</span> surface: <span class="cl">Color</span>,
+    <span class="kw">val</span> onPrimary: <span class="cl">Color</span>,
+    <span class="kw">val</span> onSurface: <span class="cl">Color</span>,
+    <span class="kw">val</span> error: <span class="cl">Color</span>,
+    <span class="kw">val</span> logo: <span class="cl">Int</span> <span class="cm">// drawable resource ID</span>
+)
+
+<span class="cm">// 2. Create the CompositionLocal with a sensible default (fallback / preview)</span>
+<span class="kw">val</span> <span class="fn">LocalBrandColors</span> = <span class="fn">staticCompositionLocalOf</span> {
+    <span class="cl">BrandColors</span>(
+        primary    = <span class="cl">Color</span>(<span class="nu">0xFF1C1C1E</span>),
+        secondary  = <span class="cl">Color</span>(<span class="nu">0xFF56CFB2</span>),
+        surface    = <span class="cl">Color</span>(<span class="nu">0xFF0F1117</span>),
+        onPrimary  = <span class="cl">Color</span>.<span class="fn">White</span>,
+        onSurface  = <span class="cl">Color</span>(<span class="nu">0xFFE2E4F0</span>),
+        error      = <span class="cl">Color</span>(<span class="nu">0xFFFF6B6B</span>),
+        logo       = R.drawable.<span class="fn">logo_default</span>
+    )
+}
+
+<span class="cm">// 3. Read the token anywhere in the composition tree</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">PrimaryButton</span>(text: <span class="cl">String</span>, onClick: () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> colors = <span class="fn">LocalBrandColors</span>.current  <span class="cm">// no parameter needed</span>
+    <span class="cl">Button</span>(
+        onClick = onClick,
+        colors = <span class="cl">ButtonDefaults</span>.<span class="fn">buttonColors</span>(
+            containerColor = colors.primary,
+            contentColor   = colors.onPrimary
+        )
+    ) { <span class="cl">Text</span>(text) }
+}
+
+<span class="cm">// 4. Provide a brand-specific value at the root</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">BrandARoot</span>(content: <span class="an">@Composable</span> () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> brandAColors = <span class="cl">BrandColors</span>(
+        primary   = <span class="cl">Color</span>(<span class="nu">0xFFE63946</span>), <span class="cm">// Brand A primary</span>
+        secondary = <span class="cl">Color</span>(<span class="nu">0xFF457B9D</span>), <span class="cm">// Brand A secondary</span>
+        surface   = <span class="cl">Color</span>(<span class="nu">0xFFFFFFFF</span>),
+        onPrimary = <span class="cl">Color</span>.<span class="fn">White</span>,
+        onSurface = <span class="cl">Color</span>(<span class="nu">0xFF1C1C1E</span>),
+        error     = <span class="cl">Color</span>(<span class="nu">0xFFD32F2F</span>),
+        logo      = R.drawable.<span class="fn">logo_brand_a</span>
+    )
+    <span class="cl">CompositionLocalProvider</span>(<span class="fn">LocalBrandColors</span> <span class="kw">provides</span> brandAColors) {
+        content()
+    }
+}</code></pre>
+
+    <h3>Overriding in Subtrees (Nested Providers)</h3>
+    <p>CompositionLocal scoping is hierarchical. You can narrow a scope within a larger tree — for example, a dark-mode preview card inside a light-mode screen can wrap its content in a new provider:</p>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">DarkPreviewCard</span>(content: <span class="an">@Composable</span> () -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> current = <span class="fn">LocalBrandColors</span>.current
+    <span class="cm">// Override only surface/onSurface for the dark preview</span>
+    <span class="cl">CompositionLocalProvider</span>(
+        <span class="fn">LocalBrandColors</span> <span class="kw">provides</span> current.<span class="fn">copy</span>(
+            surface   = <span class="cl">Color</span>(<span class="nu">0xFF1C1C1E</span>),
+            onSurface = <span class="cl">Color</span>.<span class="fn">White</span>
+        )
+    ) { content() }
+}</code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Interview Tip</div>
+      Interviewers love to ask: "How does a deeply nested composable get a value without prop-drilling?" The answer is CompositionLocal. Know the API, know when to use <code>static</code> vs dynamic, and give a concrete example like brand theming.
+    </div>
+  </div>
+
+  <!-- S3: Brand Token Architecture -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#127912;</div>3. Brand Token Architecture</div>
+
+    <h3>Three-Level Token Hierarchy</h3>
+    <p>The industry-standard approach (from the W3C Design Token Community Group, adopted by Figma, Salesforce Lightning, and Material Design 3) uses three levels:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Level</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Global tokens</td><td>Raw palette values — all possible colors in the system</td><td><code>Color(0xFFC8102E)</code>, <code>Color(0xFFFFFFFF)</code></td></tr>
+          <tr><td>Alias tokens</td><td>Semantic meaning mapped to globals</td><td><code>primary = brandRed</code>, <code>surface = white</code></td></tr>
+          <tr><td>Component tokens</td><td>Component-specific slots mapped to alias tokens</td><td><code>buttonBackground = primary</code>, <code>cardBorderColor = border</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">Why This Hierarchy Matters</div>
+      When the design team changes "primary = #C8102E" to "#B50024" in one place, every button, header, and active state that uses the <code>primary</code> alias automatically updates across all 80 components — no search-and-replace, no missed spots.
+    </div>
+
+    <h3>Complete BrandTheme Data Structure</h3>
+    <pre><code><span class="cm">// ── Token data classes ── (pure Kotlin, no Android deps)</span>
+
+<span class="kw">data class</span> <span class="cl">ColorTokens</span>(
+    <span class="kw">val</span> primary:         <span class="cl">Color</span>,
+    <span class="kw">val</span> primaryVariant:  <span class="cl">Color</span>,
+    <span class="kw">val</span> secondary:       <span class="cl">Color</span>,
+    <span class="kw">val</span> background:      <span class="cl">Color</span>,
+    <span class="kw">val</span> surface:         <span class="cl">Color</span>,
+    <span class="kw">val</span> surfaceVariant:  <span class="cl">Color</span>,
+    <span class="kw">val</span> onPrimary:       <span class="cl">Color</span>,
+    <span class="kw">val</span> onSecondary:     <span class="cl">Color</span>,
+    <span class="kw">val</span> onBackground:    <span class="cl">Color</span>,
+    <span class="kw">val</span> onSurface:       <span class="cl">Color</span>,
+    <span class="kw">val</span> error:           <span class="cl">Color</span>,
+    <span class="kw">val</span> onError:         <span class="cl">Color</span>,
+    <span class="kw">val</span> outline:         <span class="cl">Color</span>,
+    <span class="kw">val</span> logo:            <span class="cl">Int</span>   <span class="cm">// @DrawableRes</span>
+)
+
+<span class="kw">data class</span> <span class="cl">TypographyTokens</span>(
+    <span class="kw">val</span> displayLarge:   <span class="cl">TextStyle</span>,
+    <span class="kw">val</span> headlineMedium: <span class="cl">TextStyle</span>,
+    <span class="kw">val</span> titleLarge:     <span class="cl">TextStyle</span>,
+    <span class="kw">val</span> bodyMedium:     <span class="cl">TextStyle</span>,
+    <span class="kw">val</span> labelSmall:     <span class="cl">TextStyle</span>
+)
+
+<span class="kw">data class</span> <span class="cl">SpacingTokens</span>(
+    <span class="kw">val</span> xs:  <span class="cl">Dp</span> = <span class="nu">4</span>.dp,
+    <span class="kw">val</span> sm:  <span class="cl">Dp</span> = <span class="nu">8</span>.dp,
+    <span class="kw">val</span> md:  <span class="cl">Dp</span> = <span class="nu">16</span>.dp,
+    <span class="kw">val</span> lg:  <span class="cl">Dp</span> = <span class="nu">24</span>.dp,
+    <span class="kw">val</span> xl:  <span class="cl">Dp</span> = <span class="nu">32</span>.dp,
+    <span class="kw">val</span> xxl: <span class="cl">Dp</span> = <span class="nu">48</span>.dp
+)
+
+<span class="kw">data class</span> <span class="cl">ShapeTokens</span>(
+    <span class="kw">val</span> small:  <span class="cl">Shape</span> = <span class="cl">RoundedCornerShape</span>(<span class="nu">4</span>.dp),
+    <span class="kw">val</span> medium: <span class="cl">Shape</span> = <span class="cl">RoundedCornerShape</span>(<span class="nu">8</span>.dp),
+    <span class="kw">val</span> large:  <span class="cl">Shape</span> = <span class="cl">RoundedCornerShape</span>(<span class="nu">16</span>.dp),
+    <span class="kw">val</span> full:   <span class="cl">Shape</span> = <span class="cl">CircleShape</span>
+)
+
+<span class="cm">// ── Top-level BrandTheme ──</span>
+<span class="kw">data class</span> <span class="cl">BrandTheme</span>(
+    <span class="kw">val</span> colors:     <span class="cl">ColorTokens</span>,
+    <span class="kw">val</span> typography: <span class="cl">TypographyTokens</span>,
+    <span class="kw">val</span> spacing:    <span class="cl">SpacingTokens</span>   = <span class="cl">SpacingTokens</span>(),
+    <span class="kw">val</span> shapes:     <span class="cl">ShapeTokens</span>     = <span class="cl">ShapeTokens</span>()
+)</code></pre>
+
+    <h3>Brand Registry</h3>
+    <pre><code><span class="kw">enum class</span> <span class="cl">Brand</span> {
+    BRAND_A, BRAND_B,
+    BRAND_C, BRAND_D, BRAND_E, BRAND_F, BRAND_G, BRAND_H
+}
+
+<span class="kw">object</span> <span class="cl">BrandRegistry</span> {
+    <span class="kw">private val</span> registry: <span class="cl">Map</span>&lt;<span class="cl">Brand</span>, <span class="cl">BrandTheme</span>&gt; = <span class="fn">mapOf</span>(
+        <span class="cl">Brand</span>.<span class="fn">BRAND_A</span> <span class="kw">to</span> <span class="fn">brandATheme</span>(),
+        <span class="cl">Brand</span>.<span class="fn">BRAND_B</span>    <span class="kw">to</span> <span class="fn">brandBTheme</span>(),
+        <span class="cl">Brand</span>.<span class="fn">BRAND_C</span>             <span class="kw">to</span> <span class="fn">brandBTheme</span>(),
+        <span class="cl">Brand</span>.<span class="fn">BRAND_D</span>              <span class="kw">to</span> <span class="fn">brandDTheme</span>()
+        <span class="cm">// ... more brands</span>
+    )
+
+    <span class="kw">fun</span> <span class="fn">get</span>(brand: <span class="cl">Brand</span>): <span class="cl">BrandTheme</span> =
+        registry[brand] ?: <span class="kw">throw</span> <span class="cl">IllegalArgumentException</span>(<span class="str">"Unknown brand: $brand"</span>)
+}
+
+<span class="cm">// Each brand is a pure data factory function — no UI, no Android deps</span>
+<span class="kw">fun</span> <span class="fn">brandATheme</span>() = <span class="cl">BrandTheme</span>(
+    colors = <span class="cl">ColorTokens</span>(
+        primary        = <span class="cl">Color</span>(<span class="nu">0xFFE63946</span>), <span class="cm">// Brand A primary</span>
+        primaryVariant = <span class="cl">Color</span>(<span class="nu">0xFFB50024</span>),
+        secondary      = <span class="cl">Color</span>(<span class="nu">0xFF457B9D</span>), <span class="cm">// Brand A secondary</span>
+        background     = <span class="cl">Color</span>(<span class="nu">0xFFFFFFFF</span>),
+        surface        = <span class="cl">Color</span>(<span class="nu">0xFFF5F5F5</span>),
+        surfaceVariant = <span class="cl">Color</span>(<span class="nu">0xFFEEEEEE</span>),
+        onPrimary      = <span class="cl">Color</span>.<span class="fn">White</span>,
+        onSecondary    = <span class="cl">Color</span>.<span class="fn">Black</span>,
+        onBackground   = <span class="cl">Color</span>(<span class="nu">0xFF1C1C1E</span>),
+        onSurface      = <span class="cl">Color</span>(<span class="nu">0xFF1C1C1E</span>),
+        error          = <span class="cl">Color</span>(<span class="nu">0xFFD32F2F</span>),
+        onError        = <span class="cl">Color</span>.<span class="fn">White</span>,
+        outline        = <span class="cl">Color</span>(<span class="nu">0xFFCCCCCC</span>),
+        logo           = R.drawable.<span class="fn">logo_brand_a</span>
+    ),
+    typography = <span class="cl">TypographyTokens</span>(
+        displayLarge   = <span class="cl">TextStyle</span>(fontFamily = <span class="fn">BrandFontFamily</span>, fontSize = <span class="nu">57</span>.sp, fontWeight = <span class="cl">FontWeight</span>.<span class="fn">Light</span>),
+        headlineMedium = <span class="cl">TextStyle</span>(fontFamily = <span class="fn">BrandFontFamily</span>, fontSize = <span class="nu">28</span>.sp),
+        titleLarge     = <span class="cl">TextStyle</span>(fontFamily = <span class="fn">BrandFontFamily</span>, fontSize = <span class="nu">22</span>.sp, fontWeight = <span class="cl">FontWeight</span>.<span class="fn">Medium</span>),
+        bodyMedium     = <span class="cl">TextStyle</span>(fontFamily = <span class="fn">BrandFontFamily</span>, fontSize = <span class="nu">14</span>.sp),
+        labelSmall     = <span class="cl">TextStyle</span>(fontFamily = <span class="fn">BrandFontFamily</span>, fontSize = <span class="nu">11</span>.sp, letterSpacing = <span class="nu">0.5</span>.sp)
+    )
+)
+
+<span class="kw">fun</span> <span class="fn">brandBTheme</span>() = <span class="cl">BrandTheme</span>(
+    colors = <span class="cl">ColorTokens</span>(
+        primary        = <span class="cl">Color</span>(<span class="nu">0xFF002855</span>), <span class="cm">// Brand B deep navy</span>
+        primaryVariant = <span class="cl">Color</span>(<span class="nu">0xFF001A3A</span>),
+        secondary      = <span class="cl">Color</span>(<span class="nu">0xFFB2A96A</span>), <span class="cm">// Brand B gold</span>
+        background     = <span class="cl">Color</span>(<span class="nu">0xFF0F0F0F</span>),
+        surface        = <span class="cl">Color</span>(<span class="nu">0xFF1A1A1A</span>),
+        surfaceVariant = <span class="cl">Color</span>(<span class="nu">0xFF252525</span>),
+        onPrimary      = <span class="cl">Color</span>.<span class="fn">White</span>,
+        onSecondary    = <span class="cl">Color</span>.<span class="fn">Black</span>,
+        onBackground   = <span class="cl">Color</span>.<span class="fn">White</span>,
+        onSurface      = <span class="cl">Color</span>.<span class="fn">White</span>,
+        error          = <span class="cl">Color</span>(<span class="nu">0xFFCF6679</span>),
+        onError        = <span class="cl">Color</span>.<span class="fn">Black</span>,
+        outline        = <span class="cl">Color</span>(<span class="nu">0xFF3A3A3A</span>),
+        logo           = R.drawable.<span class="fn">logo_brand_b</span>
+    ),
+    typography = <span class="cl">TypographyTokens</span>( <span class="cm">/* BrandBFontFamily ... */</span> )
+)</code></pre>
+  </div>
+
+  <!-- S4: MaterialTheme Deep Dive -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#127744;</div>4. MaterialTheme Deep Dive</div>
+
+    <h3>MaterialTheme Is Just CompositionLocal</h3>
+    <p>Internally, <code>MaterialTheme</code> is nothing magical — it's a composable that provides several CompositionLocals:</p>
+    <pre><code><span class="cm">// Simplified internals of MaterialTheme (actual Compose source)</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">MaterialTheme</span>(
+    colorScheme: <span class="cl">ColorScheme</span> = <span class="cl">MaterialTheme</span>.colorScheme,
+    typography:  <span class="cl">Typography</span>  = <span class="cl">MaterialTheme</span>.typography,
+    shapes:      <span class="cl">Shapes</span>      = <span class="cl">MaterialTheme</span>.shapes,
+    content:     <span class="an">@Composable</span> () -> <span class="cl">Unit</span>
+) {
+    <span class="cl">CompositionLocalProvider</span>(
+        <span class="fn">LocalColorScheme</span>  <span class="kw">provides</span> colorScheme, <span class="cm">// → MaterialTheme.colorScheme</span>
+        <span class="fn">LocalTypography</span>   <span class="kw">provides</span> typography,  <span class="cm">// → MaterialTheme.typography</span>
+        <span class="fn">LocalShapes</span>       <span class="kw">provides</span> shapes,       <span class="cm">// → MaterialTheme.shapes</span>
+        content = content
+    )
+}</code></pre>
+    <p>This means you can <strong>feed your BrandTheme tokens directly into MaterialTheme</strong> and every Material component (Button, Card, TextField, TopAppBar) automatically respects your brand colours.</p>
+
+    <h3>Mapping BrandTheme → Material ColorScheme</h3>
+    <pre><code><span class="kw">fun</span> <span class="cl">BrandTheme</span>.<span class="fn">toColorScheme</span>(): <span class="cl">ColorScheme</span> = <span class="fn">darkColorScheme</span>(
+    primary          = colors.primary,
+    onPrimary        = colors.onPrimary,
+    primaryContainer = colors.primaryVariant,
+    secondary        = colors.secondary,
+    onSecondary      = colors.onSecondary,
+    background       = colors.background,
+    onBackground     = colors.onBackground,
+    surface          = colors.surface,
+    onSurface        = colors.onSurface,
+    surfaceVariant   = colors.surfaceVariant,
+    error            = colors.error,
+    onError          = colors.onError,
+    outline          = colors.outline
+)
+
+<span class="kw">fun</span> <span class="cl">BrandTheme</span>.<span class="fn">toMaterialTypography</span>(): <span class="cl">Typography</span> = <span class="cl">Typography</span>(
+    displayLarge   = typography.displayLarge,
+    headlineMedium = typography.headlineMedium,
+    titleLarge     = typography.titleLarge,
+    bodyMedium     = typography.bodyMedium,
+    labelSmall     = typography.labelSmall
+)
+
+<span class="kw">fun</span> <span class="cl">BrandTheme</span>.<span class="fn">toMaterialShapes</span>(): <span class="cl">Shapes</span> = <span class="cl">Shapes</span>(
+    small  = shapes.small,
+    medium = shapes.medium,
+    large  = shapes.large
+)</code></pre>
+
+    <h3>The Full Root Composable</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">MultiApp</span>(brand: <span class="cl">Brand</span> = <span class="cl">Brand</span>.<span class="fn">BRAND_A</span>) {
+    <span class="kw">val</span> brandTheme = <span class="fn">remember</span>(brand) { <span class="cl">BrandRegistry</span>.<span class="fn">get</span>(brand) }
+
+    <span class="cl">CompositionLocalProvider</span>(
+        <span class="fn">LocalBrandColors</span>     <span class="kw">provides</span> brandTheme.colors,
+        <span class="fn">LocalBrandTypography</span> <span class="kw">provides</span> brandTheme.typography,
+        <span class="fn">LocalBrandSpacing</span>    <span class="kw">provides</span> brandTheme.spacing
+    ) {
+        <span class="cl">MaterialTheme</span>(
+            colorScheme = brandTheme.<span class="fn">toColorScheme</span>(),
+            typography  = brandTheme.<span class="fn">toMaterialTypography</span>(),
+            shapes      = brandTheme.<span class="fn">toMaterialShapes</span>()
+        ) {
+            <span class="fn">AppNavHost</span>()
+        }
+    }
+}</code></pre>
+
+    <h3>Dynamic Color (Android 12+ Monet) vs Fixed Brand Tokens</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Approach</th><th>Use Case</th><th>Trade-off</th></tr></thead>
+        <tbody>
+          <tr><td>Monet dynamic color (<code>dynamicDarkColorScheme</code>)</td><td>Consumer apps that should feel personal and native (Google apps, system apps)</td><td>Loses brand identity. <code>primary</code> changes per user wallpaper.</td></tr>
+          <tr><td>Fixed brand tokens</td><td>Enterprise, luxury, automotive, banking — brand recognition is paramount</td><td>Consistent, predictable. Cannot adapt to user's wallpaper.</td></tr>
+          <tr><td>Hybrid</td><td>Consumer apps with optional brand override</td><td>Complex: check <code>Build.VERSION.SDK_INT &gt;= 31</code> and user preference flag</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Interview Point</div>
+      If the interviewer asks about dynamic color: "We explicitly opted out of Monet for brand-critical surfaces. Dynamic color makes sense for a personal productivity app, but for a brand app the primary colour must always match brand guidelines — those are contractual."
+    </div>
+
+    <h3>Custom Token Access Pattern</h3>
+    <p>Always provide a <strong>type-safe accessor object</strong> so callsites are ergonomic:</p>
+    <pre><code><span class="cm">// Accessor object — mirrors MaterialTheme's API style</span>
+<span class="kw">object</span> <span class="cl">BrandTheme</span> {
+    <span class="kw">val</span> colors: <span class="cl">ColorTokens</span>
+        <span class="an">@Composable</span>
+        <span class="an">@ReadOnlyComposable</span>
+        <span class="kw">get</span>() = <span class="fn">LocalBrandColors</span>.current
+
+    <span class="kw">val</span> typography: <span class="cl">TypographyTokens</span>
+        <span class="an">@Composable</span>
+        <span class="an">@ReadOnlyComposable</span>
+        <span class="kw">get</span>() = <span class="fn">LocalBrandTypography</span>.current
+
+    <span class="kw">val</span> spacing: <span class="cl">SpacingTokens</span>
+        <span class="an">@Composable</span>
+        <span class="an">@ReadOnlyComposable</span>
+        <span class="kw">get</span>() = <span class="fn">LocalBrandSpacing</span>.current
+}
+
+<span class="cm">// Usage inside any composable — clean and discoverable:</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductCard</span>(name: <span class="cl">String</span>, price: <span class="cl">String</span>) {
+    <span class="cl">Card</span>(
+        colors = <span class="cl">CardDefaults</span>.<span class="fn">cardColors</span>(containerColor = <span class="cl">BrandTheme</span>.colors.surface),
+        modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(<span class="cl">BrandTheme</span>.spacing.md)
+    ) {
+        <span class="cl">Text</span>(name,  style = <span class="cl">BrandTheme</span>.typography.titleLarge)
+        <span class="cl">Text</span>(price, style = <span class="cl">BrandTheme</span>.typography.bodyMedium)
+    }
+}</code></pre>
+  </div>
+
+  <!-- S5: Multi-Brand in Practice -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127381;</div>5. Multi-Brand in Practice</div>
+
+    <h3>Runtime Brand Switching</h3>
+    <p>Some apps allow the user to switch brand context mid-session (e.g., a dealer app that shows inventory for multiple vehicle brands). The pattern is:</p>
+    <ol>
+      <li>Hold the active <code>Brand</code> in a <code>StateFlow</code> inside a <code>ViewModel</code></li>
+      <li>Collect it in the root composable with <code>collectAsStateWithLifecycle()</code></li>
+      <li>Pass it to the root theme wrapper — Compose re-runs the provider with the new token set</li>
+    </ol>
+
+    <pre><code><span class="cm">// BrandViewModel.kt</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">BrandViewModel</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> brandPrefs: <span class="cl">BrandPreferences</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _activeBrand = <span class="fn">MutableStateFlow</span>(brandPrefs.<span class="fn">getSavedBrand</span>())
+    <span class="kw">val</span> activeBrand: <span class="cl">StateFlow</span>&lt;<span class="cl">Brand</span>&gt; = _activeBrand.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">switchBrand</span>(brand: <span class="cl">Brand</span>) {
+        _activeBrand.<span class="fn">value</span> = brand
+        brandPrefs.<span class="fn">saveBrand</span>(brand)
+    }
+}
+
+<span class="cm">// MainActivity.kt</span>
+<span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">private val</span> brandVm: <span class="cl">BrandViewModel</span> <span class="kw">by</span> <span class="fn">viewModels</span>()
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="kw">val</span> brand <span class="kw">by</span> brandVm.activeBrand.<span class="fn">collectAsStateWithLifecycle</span>()
+            <span class="fn">MultiApp</span>(brand = brand)
+        }
+    }
+}</code></pre>
+
+    <h3>Build Flavour Approach (Static Brand Selection)</h3>
+    <p>When each AAB is always for a single brand (e.g. "BrandA App" on Play Store vs "BrandB App"), use product flavours:</p>
+    <pre><code><span class="cm">// build.gradle.kts (app module)</span>
+<span class="fn">android</span> {
+    <span class="fn">flavorDimensions</span>(<span class="str">"brand"</span>)
+    <span class="fn">productFlavors</span> {
+        <span class="fn">create</span>(<span class="str">"brand-b"</span>) {
+            <span class="fn">dimension</span>(<span class="str">"brand"</span>)
+            applicationId = <span class="str">"com.example.branda"</span>
+            <span class="fn">buildConfigField</span>(<span class="str">"String"</span>, <span class="str">"BRAND_ID"</span>, <span class="str">"\"BRAND_C\""</span>)
+        }
+        <span class="fn">create</span>(<span class="str">"brand-d"</span>) {
+            <span class="fn">dimension</span>(<span class="str">"brand"</span>)
+            applicationId = <span class="str">"com.example.brandb"</span>
+            <span class="fn">buildConfigField</span>(<span class="str">"String"</span>, <span class="str">"BRAND_ID"</span>, <span class="str">"\"BRAND_D\""</span>)
+        }
+    }
+}
+
+<span class="cm">// In MainActivity — brand is statically determined at build time</span>
+<span class="kw">val</span> brand = <span class="cl">Brand</span>.<span class="fn">valueOf</span>(<span class="cl">BuildConfig</span>.<span class="fn">BRAND_ID</span>)
+<span class="fn">setContent</span> { <span class="fn">BrandApp</span>(brand = brand) }</code></pre>
+
+    <h3>Hilt Dependency Injection Approach</h3>
+    <p>For maximum flexibility, inject the <code>BrandTheme</code> directly via Hilt. The brand module provides its own Hilt module:</p>
+    <pre><code><span class="cm">// In :brand-b module</span>
+<span class="an">@Module</span>
+<span class="an">@InstallIn</span>(<span class="cl">SingletonComponent</span>::<span class="kw">class</span>)
+<span class="kw">object</span> <span class="cl">BrandBThemeModule</span> {
+    <span class="an">@Provides</span>
+    <span class="an">@Singleton</span>
+    <span class="kw">fun</span> <span class="fn">provideBrandTheme</span>(): <span class="cl">BrandTheme</span> = <span class="fn">brandBTheme</span>()
+}
+
+<span class="cm">// Root composable reads the injected theme</span>
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">ThemeViewModel</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">val</span> brandTheme: <span class="cl">BrandTheme</span>
+) : <span class="cl">ViewModel</span>()
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">AppRoot</span>(themeVm: <span class="cl">ThemeViewModel</span> = <span class="fn">hiltViewModel</span>()) {
+    <span class="kw">val</span> theme = themeVm.brandTheme
+    <span class="cl">CompositionLocalProvider</span>(
+        <span class="fn">LocalBrandColors</span>     <span class="kw">provides</span> theme.colors,
+        <span class="fn">LocalBrandTypography</span> <span class="kw">provides</span> theme.typography,
+        <span class="fn">LocalBrandSpacing</span>    <span class="kw">provides</span> theme.spacing
+    ) {
+        <span class="cl">MaterialTheme</span>(
+            colorScheme = theme.<span class="fn">toColorScheme</span>(),
+            typography  = theme.<span class="fn">toMaterialTypography</span>()
+        ) { <span class="fn">AppNavHost</span>() }
+    }
+}</code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Real-World Answer</div>
+      "In a multi-brand app I worked on, the base app module had no brand knowledge whatsoever. Each brand module (e.g. <code>:brand-premium</code>, <code>:brand-economy</code>) injected its token set via Hilt at app startup. The NavHost wrapped everything in CompositionLocalProvider with that brand's tokens. We could build brand-specific AABs from the same source tree with just a Gradle flavour switch. CI produced all brand APKs from one pipeline run."
+    </div>
+  </div>
+
+  <!-- S6: Design System Modules -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128194;</div>6. Design System Modules</div>
+
+    <h3>Recommended Module Graph</h3>
+    <pre><code><span class="cm">// Dependency direction: → means "depends on"</span>
+:design-system-tokens        <span class="cm">// Pure Kotlin — ColorTokens, TypographyTokens, SpacingTokens</span>
+        ↑
+:design-system-components    <span class="cm">// Compose composables — PrimaryButton, AppCard, BrandLogo</span>
+        ↑
+:brand-a-theme    <span class="cm">// brandATheme() data function</span>
+:brand-b-theme      <span class="cm">// brandBTheme() data function</span>
+:brand-b               <span class="cm">// brandBTheme() + Hilt module</span>
+        ↑
+:feature-home                <span class="cm">// HomeScreen uses BrandTheme, imports :design-system-components</span>
+:feature-checkout
+:feature-account
+        ↑
+:app                         <span class="cm">// Ties everything together — depends on flavour's brand module + features</span></code></pre>
+
+    <h3>Module Contents</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Module</th><th>Contents</th><th>Dependencies</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td><code>:design-system-tokens</code></td><td>ColorTokens, TypographyTokens, SpacingTokens, ShapeTokens data classes</td><td>Pure Kotlin only — no android deps, no Compose</td><td>Design System team</td></tr>
+          <tr><td><code>:design-system-components</code></td><td>~80 composables: PrimaryButton, AppCard, BrandLogo, TokenText, BrandScaffold…</td><td><code>:tokens</code>, Compose, Material3</td><td>Design System team</td></tr>
+          <tr><td><code>:brand-X</code></td><td>One <code>BrandTheme</code> data factory + Hilt module (optional)</td><td><code>:tokens</code> only</td><td>Each brand team</td></tr>
+          <tr><td><code>:feature-*</code></td><td>Screen composables using components</td><td><code>:components</code>, domain layer</td><td>Feature teams</td></tr>
+          <tr><td><code>:catalog</code></td><td>Standalone app rendering every component in every brand</td><td>All brand modules + components</td><td>Design System team</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why Separate :design-system-tokens from :design-system-components?</h3>
+    <ul>
+      <li><strong>Compile isolation</strong>: Brand token modules have zero Compose transitive dependencies. Pure Kotlin JVM modules compile in milliseconds and can be unit-tested without Robolectric.</li>
+      <li><strong>Designer handoff</strong>: Designers export Figma tokens as JSON, a script generates <code>ColorTokens</code> data classes, and the change lands in <code>:tokens</code> only — no component code is touched.</li>
+      <li><strong>Testability</strong>: Token correctness is testable as pure Kotlin assertions: <code>assertEquals(Color(0xFFC8102E), brandATheme().colors.primary)</code>.</li>
+    </ul>
+
+    <h3>The Catalog App (Storybook for Android)</h3>
+    <p>A <strong>:catalog</strong> module is a standalone debug APK that renders every component in every brand theme side by side. Benefits:</p>
+    <ul>
+      <li>QA and designers can review all brand permutations without running the full app</li>
+      <li>Catches token mismatches at design-review time, not production</li>
+      <li>Can be used for automated screenshot tests: render every component × every brand, compare to golden images</li>
+    </ul>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CatalogScreen</span>() {
+    <span class="cl">LazyColumn</span> {
+        <span class="cl">Brand</span>.entries.<span class="fn">forEach</span> { brand ->
+            <span class="kw">val</span> theme = <span class="cl">BrandRegistry</span>.<span class="fn">get</span>(brand)
+            <span class="fn">item</span> {
+                <span class="cl">Text</span>(brand.name, style = <span class="cl">MaterialTheme</span>.typography.titleLarge,
+                     modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(<span class="nu">16</span>.dp))
+            }
+            <span class="fn">item</span> {
+                <span class="cl">CompositionLocalProvider</span>(
+                    <span class="fn">LocalBrandColors</span>     <span class="kw">provides</span> theme.colors,
+                    <span class="fn">LocalBrandTypography</span> <span class="kw">provides</span> theme.typography,
+                    <span class="fn">LocalBrandSpacing</span>    <span class="kw">provides</span> theme.spacing
+                ) {
+                    <span class="cl">MaterialTheme</span>(colorScheme = theme.<span class="fn">toColorScheme</span>()) {
+                        <span class="fn">ComponentShowcase</span>() <span class="cm">// renders buttons, cards, inputs</span>
+                    }
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Component Contract</h3>
+    <p>Every component in <code>:design-system-components</code> must satisfy this contract:</p>
+    <ul>
+      <li>❌ No hardcoded <code>Color</code> values in the component body</li>
+      <li>❌ No direct reference to <code>MaterialTheme.colorScheme.primary</code> for brand-differentiated visuals</li>
+      <li>✅ All visual values read from <code>LocalBrandColors.current</code>, <code>LocalBrandTypography.current</code>, <code>LocalBrandSpacing.current</code></li>
+      <li>✅ Component is @Preview-able with an explicit brand provider (no ambient magic needed for previews)</li>
+    </ul>
+  </div>
+
+  <!-- S7: Pitfalls & Best Practices -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#9888;&#65039;</div>7. Pitfalls &amp; Best Practices</div>
+
+    <h3>Common Mistakes</h3>
+
+    <div class="callout callout-red">
+      <div class="callout-label">❌ Pitfall 1 — Hardcoded Colors in Components</div>
+      <p style="margin-bottom:6px;">Writing <code>Color.Red</code> or <code>Color(0xFFFF0000)</code> directly inside a component body silently breaks brand theming. The component will ignore whatever the brand token says for <code>error</code>.</p>
+      <pre style="margin:6px 0 0;font-size:12.5px;"><code><span class="cm">// ❌ WRONG — hardcoded, brand-unaware</span>
+<span class="kw">fun</span> <span class="fn">ErrorText</span>(msg: <span class="cl">String</span>) = <span class="cl">Text</span>(msg, color = <span class="cl">Color</span>.<span class="fn">Red</span>)
+
+<span class="cm">// ✅ CORRECT — brand-aware</span>
+<span class="kw">fun</span> <span class="fn">ErrorText</span>(msg: <span class="cl">String</span>) = <span class="cl">Text</span>(msg, color = <span class="fn">LocalBrandColors</span>.current.error)</code></pre>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">❌ Pitfall 2 — Reading MaterialTheme.colorScheme.primary When You Need Brand Primary</div>
+      <p>If you use <code>MaterialTheme.colorScheme.primary</code> in a custom component and the brand adds a custom <code>brandPrimary</code> that diverges from M3's primary (e.g. for a gradient button), the component silently shows the wrong colour. Always read from your own <code>LocalBrandColors.current.primary</code> in custom components.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">❌ Pitfall 3 — staticCompositionLocalOf for Frequently Changing Values</div>
+      <p>Using <code>staticCompositionLocalOf</code> for a value that changes frequently (e.g. a scroll position, a counter, a dark/light toggle that users can flip 10 times per minute) will cause the <em>entire subtree below the provider</em> to recompose every time. For volatile values, use <code>compositionLocalOf</code> — only the composables that actually read the value recompose.</p>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">❌ Pitfall 4 — Forgetting to Test Each Brand Theme</div>
+      <p>Token mismatches only appear at runtime — a brand might accidentally set <code>onPrimary = Color.Black</code> when the button background is also dark, making text invisible. Without brand-specific screenshot tests, this ships to production. Write a parameterised screenshot test that covers all brands for every component.</p>
+    </div>
+
+    <h3>Best Practices</h3>
+
+    <div class="callout callout-green">
+      <div class="callout-label">✅ Always Read From Your CompositionLocal</div>
+      Every component reads <code>LocalBrandColors.current</code> (or your <code>BrandTheme.colors</code> accessor). Never cache it outside the composable scope — let Compose handle recomposition correctly.
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">✅ Static for Brand Identity, Dynamic for Session Values</div>
+      <code>staticCompositionLocalOf</code> for the full brand config object (changes once: at app startup or brand switch). <code>compositionLocalOf</code> for dark mode, locale, or any value that changes during a user session.
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">✅ Brand-Agnostic Screenshot Tests</div>
+      Write one screenshot test per component that iterates over all brand themes:
+      <pre style="margin:8px 0 0;font-size:12.5px;"><code><span class="an">@RunWith</span>(<span class="cl">Parameterized</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">PrimaryButtonScreenshotTest</span>(<span class="kw">private val</span> brand: <span class="cl">Brand</span>) {
+    <span class="kw">companion object</span> {
+        <span class="an">@JvmStatic</span> <span class="an">@Parameterized.Parameters</span>
+        <span class="kw">fun</span> <span class="fn">brands</span>() = <span class="cl">Brand</span>.<span class="fn">entries</span>.<span class="fn">toList</span>()
+    }
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">screenshotMatchesGolden</span>() {
+        <span class="kw">val</span> theme = <span class="cl">BrandRegistry</span>.<span class="fn">get</span>(brand)
+        composeTestRule.<span class="fn">setContent</span> {
+            <span class="cl">CompositionLocalProvider</span>(<span class="fn">LocalBrandColors</span> <span class="kw">provides</span> theme.colors) {
+                <span class="fn">PrimaryButton</span>(text = <span class="str">"Order Now"</span>) {}
+            }
+        }
+        composeTestRule.<span class="fn">onRoot</span>().<span class="fn">captureRoboImage</span>(<span class="str">"golden/button_${brand.name}.png"</span>)
+    }
+}</code></pre>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">✅ Keep Token Data Classes in Pure Kotlin Module</div>
+      Token data classes must have <strong>zero Android framework dependencies</strong>. <code>ColorTokens</code> should use Compose's <code>androidx.compose.ui.graphics.Color</code> (which is multiplatform-ready), but no <code>Context</code>, no <code>Resources</code>, no <code>@DrawableRes</code> integers if you want maximum portability. Test them as fast JVM unit tests.
+    </div>
+
+    <h3>Quick Reference Decision Table</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th>Use</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Entire brand config loaded at startup</td><td><code>staticCompositionLocalOf</code></td><td>Stable; full tree recompose on change is acceptable once</td></tr>
+          <tr><td>Dark/light mode toggle</td><td><code>compositionLocalOf</code></td><td>Changes per session; only reading composables should recompose</td></tr>
+          <tr><td>Current screen locale</td><td><code>compositionLocalOf</code></td><td>Can change mid-session in some apps</td></tr>
+          <tr><td>Font scale / accessibility settings</td><td>Compose's built-in <code>LocalDensity</code></td><td>Already handled by the framework</td></tr>
+          <tr><td>Brand-specific A/B test flag</td><td><code>compositionLocalOf</code></td><td>May be updated by remote config mid-session</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- S8: Interview Framework -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#127919;</div>8. Interview Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "A design system in Compose is built on CompositionLocal. You define design tokens — colors, typography, spacing — as plain Kotlin data classes. Each brand provides its own token set. <code>CompositionLocalProvider</code> injects the correct tokens at the root of the composition tree. Every component reads <code>LocalBrandColors.current</code> — it has zero knowledge of which brand it's running under. Swapping brands means swapping one data object, not touching any component code."
+    </div>
+
+    <h3>2-Minute Answer (Expanded)</h3>
+    <p>Build from the 30-second base and layer in:</p>
+    <ol>
+      <li><strong>Token hierarchy:</strong> "We use three levels — global palette → semantic alias tokens → component tokens. This means a single change to <code>primary</code> propagates to every consumer automatically."</li>
+      <li><strong>staticCompositionLocalOf vs compositionLocalOf:</strong> "Brand config uses static because it's set once. Dark mode toggle uses dynamic because only the reading composables should recompose, not the whole tree."</li>
+      <li><strong>MaterialTheme integration:</strong> "We map our <code>BrandTheme</code> tokens into <code>MaterialTheme</code>'s <code>ColorScheme</code> and <code>Typography</code>, so all Material components like Button and TextField automatically use brand colours without any extra wiring."</li>
+      <li><strong>Module structure:</strong> "<code>:design-system-tokens</code> is pure Kotlin — no Android deps. <code>:design-system-components</code> holds the composables. Each brand lives in its own <code>:brand-X</code> module that's just a data file + optional Hilt module."</li>
+      <li><strong>Build approach:</strong> "We use Gradle product flavours for static brand selection — each AAB is for one brand. For apps that support runtime switching, a ViewModel holds the active brand in a StateFlow and the root composable collects it with <code>collectAsStateWithLifecycle</code>."</li>
+      <li><strong>Testing:</strong> "We have a parameterised screenshot test for every component that iterates over all brand themes. Token mismatches show up as golden file diffs in CI, not in production."</li>
+    </ol>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>CompositionLocal / staticCompositionLocalOf</strong> for stable brand config — know why <em>static</em> is appropriate and when to use the dynamic variant instead.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Token hierarchy: global → alias → component</strong> — single source of truth; one change propagates everywhere.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>MaterialTheme wrapping</strong> — map your brand tokens into ColorScheme so Material components remain compatible without special casing.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Module separation: <code>:design-system-tokens</code>, <code>:design-system-components</code>, <code>:brand-X</code></strong> — compile isolation and fast iteration.</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>DI / build flavours for brand injection at app startup</strong> — no hardcoded brand checks in shared code, clean separation of concerns.</div></div>
+      <div class="must-item"><div class="must-num">6</div><div><strong>Catalog app for component isolation testing</strong> — every component × every brand, automated screenshot diffing in CI.</div></div>
+    </div>
+
+    <h3>Signal Words That Impress</h3>
+    <ul>
+      <li>"Brand identity is <strong>data</strong>, not code" — shows architecture maturity</li>
+      <li>"staticCompositionLocalOf is appropriate because it's a <strong>stable</strong> value" — shows performance awareness</li>
+      <li>"We map our tokens into <strong>MaterialTheme.colorScheme</strong> so Material components stay compatible" — shows ecosystem knowledge</li>
+      <li>"Our :tokens module has <strong>zero Android dependencies</strong>" — shows modularisation expertise</li>
+      <li>"Parameterised screenshot tests over all brand themes in <strong>CI</strong>" — shows production quality thinking</li>
+    </ul>
+  </div>
+
+  <!-- S9: Interview Questions -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <!-- Q1 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q1. What is CompositionLocal and why is it used for theming in Compose?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>What to say:</strong> CompositionLocal is Compose's mechanism for passing values implicitly down the composition tree without threading them through every function parameter. It's like a scoped, typed ambient value.</p>
+        <p>For theming, it's ideal because the theme affects hundreds of composables across many layers of the tree. Without it, you'd need to pass <code>colors: ColorTokens</code> as a parameter to every single composable — including ones that just pass it through without using it (prop drilling). <code>CompositionLocalProvider</code> injects the value once at the root; any descendant reads it with <code>LocalSomething.current</code>.</p>
+        <div class="answer-box">"CompositionLocal provides implicit parameters to the composition tree. For theming, this avoids prop-drilling brand colors through every composable. The theme is provided once at the root, and any component anywhere in the tree reads it via LocalBrandColors.current. It's how MaterialTheme itself works under the hood."</div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q2. What is the difference between compositionLocalOf and staticCompositionLocalOf?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Key difference: recomposition scope.</strong></p>
+        <ul>
+          <li><code>compositionLocalOf { }</code> — When the value changes, only the composables that <em>read</em> the local recompose. More granular and efficient for values that change during a session.</li>
+          <li><code>staticCompositionLocalOf { }</code> — When the value changes, <em>the entire subtree below the provider</em> recomposes. The word "static" means Compose doesn't track individual read points — it assumes the value is stable.</li>
+        </ul>
+        <p><strong>When to use each:</strong> Use <code>static</code> for brand config (set once at startup, stable for the app lifetime). Use dynamic for dark/light mode, locale, or anything a user can toggle mid-session.</p>
+        <div class="answer-box">"staticCompositionLocalOf recomposes the whole subtree on change — acceptable for brand config that's set once. compositionLocalOf only recomposes the composables that actually read the value, so it's better for volatile data like dark mode state."</div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q3. How would you support two brands with different primary colours from a single Compose codebase?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Step-by-step answer:</strong></p>
+        <ol>
+          <li>Define a <code>ColorTokens</code> data class with a <code>primary: Color</code> field (and all other tokens).</li>
+          <li>Create a <code>staticCompositionLocalOf&lt;ColorTokens&gt;</code> with a default value.</li>
+          <li>Create one instance of <code>ColorTokens</code> per brand with brand-specific values.</li>
+          <li>At the root of the composition, wrap in <code>CompositionLocalProvider(LocalColorTokens provides brandColors)</code>.</li>
+          <li>In every component, read <code>LocalColorTokens.current.primary</code> — never hardcode colours.</li>
+        </ol>
+        <p>For build-time selection use Gradle flavours; for runtime switching use a ViewModel StateFlow feeding the root provider.</p>
+        <div class="answer-box">"Define a ColorTokens data class, create staticCompositionLocalOf for it, instantiate one per brand, and provide the correct instance at the composition root. Components read LocalColorTokens.current.primary. Swapping brands is swapping the data object, no component code changes."</div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q4. Where in the composition tree would you place CompositionLocalProvider for a multi-brand app?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>As high as possible</strong> — ideally wrapping the <code>NavHost</code> or the outermost content composable inside <code>setContent { }</code>.</p>
+        <p>It must be <em>above</em> any component that reads the local. If you place it inside a feature screen, only that screen's composables get the brand colours; the rest of the app falls back to the default value. In a multi-module app, the provider sits in the <code>:app</code> module's root composable, above the navigation graph.</p>
+        <p>Typically: <code>Activity.setContent → BrandTheme wrapper → MaterialTheme → NavHost → screens</code></p>
+        <div class="answer-box">"At the very root — in setContent in MainActivity, wrapping MaterialTheme and NavHost. This ensures every screen and every component in the navigation graph inherits the brand tokens without any composable needing to know where the tokens came from."</div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q5. A component deep in the tree needs a brand-specific logo drawable. How does it get it without passing a parameter through 10 composables?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p>This is exactly the problem CompositionLocal solves. Include the logo drawable resource ID inside your <code>BrandColors</code> (or a dedicated <code>BrandAssets</code>) data class:</p>
+        <pre style="font-size:12px;margin:8px 0;"><code><span class="kw">data class</span> <span class="cl">BrandColors</span>(..., <span class="kw">val</span> logo: <span class="cl">Int</span> <span class="cm">/* @DrawableRes */</span>)
+
+<span class="cm">// Deep component — no parameter needed</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">BrandLogo</span>() {
+    <span class="kw">val</span> logoRes = <span class="fn">LocalBrandColors</span>.current.logo
+    <span class="cl">Image</span>(<span class="fn">painterResource</span>(logoRes), contentDescription = <span class="kw">null</span>)
+}</code></pre>
+        <p>The token set provided at the root includes the drawable resource. The deep component reads it without a single caller needing to thread the parameter. For more complex asset sets, create a separate <code>BrandAssets</code> data class provided via its own <code>LocalBrandAssets</code>.</p>
+        <div class="answer-box">"Include the logo drawable ID in the BrandColors token set. LocalBrandColors is already provided at the root, so any composable at any depth reads LocalBrandColors.current.logo — zero prop drilling, zero parameter threading."</div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q6. Your design team adds a new token (errorSecondary). What's the safest way to roll it out without breaking existing brand implementations?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Add the field with a default value</strong> in the data class. Because it's a <code>data class</code> with a Kotlin default, existing brand instantiations that don't yet specify <code>errorSecondary</code> will compile without changes:</p>
+        <pre style="font-size:12px;margin:8px 0;"><code><span class="kw">data class</span> <span class="cl">ColorTokens</span>(
+    <span class="kw">val</span> error: <span class="cl">Color</span>,
+    <span class="cm">// New token — defaults to a safe fallback derived from existing token</span>
+    <span class="kw">val</span> errorSecondary: <span class="cl">Color</span> = error.<span class="fn">copy</span>(alpha = <span class="nu">0.6f</span>)
+)</code></pre>
+        <p><strong>Rollout plan:</strong></p>
+        <ol>
+          <li>Add <code>errorSecondary</code> with a default to <code>ColorTokens</code> in <code>:design-system-tokens</code>.</li>
+          <li>Use it in the new component in <code>:design-system-components</code>. All existing brands compile — they get the default.</li>
+          <li>Each brand team progressively overrides the default with their correct brand value in their own <code>:brand-X</code> module.</li>
+          <li>When all brands have explicitly set it, the default can optionally be removed (breaking change — communicate in advance).</li>
+        </ol>
+        <div class="answer-box">"Add the token with a sensible default value derived from existing tokens — e.g., error.copy(alpha=0.6f). All existing brand implementations compile immediately. Each brand team can then explicitly set the correct value in their own module at their own pace, without a big-bang migration."</div>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q7. How does MaterialTheme relate to your custom brand token system? Should they coexist or replace each other?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>They should coexist, with your brand tokens feeding into MaterialTheme.</strong></p>
+        <p>MaterialTheme provides <code>LocalColorScheme</code>, <code>LocalTypography</code>, <code>LocalShapes</code> — the same CompositionLocal mechanism. Material components (Button, Card, TextField, TopAppBar) read from <code>MaterialTheme.colorScheme</code>. If you completely bypass MaterialTheme, every Material component needs manual colour overrides — that's hundreds of lines of boilerplate.</p>
+        <p>The correct architecture:</p>
+        <ul>
+          <li>Your custom <code>LocalBrandColors</code> is the source of truth for brand tokens.</li>
+          <li>You map brand tokens → <code>ColorScheme</code> via an extension function and pass them to <code>MaterialTheme</code>.</li>
+          <li>Material components automatically pick up brand colours via <code>MaterialTheme.colorScheme</code>.</li>
+          <li>Custom components read from <code>LocalBrandColors.current</code> directly, so they can use brand-specific tokens that M3 has no equivalent for (e.g. <code>logo</code>, <code>errorSecondary</code>).</li>
+        </ul>
+        <div class="answer-box">"They coexist. Our brand tokens are the source of truth — they feed into MaterialTheme via a toColorScheme() mapping. Material components use MaterialTheme automatically. Our custom components read from LocalBrandColors.current directly for brand-specific tokens that M3 doesn't have a concept for."</div>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Q8. How would you test that each brand theme renders correctly without writing 14 copies of every UI test?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Parameterised screenshot tests</strong> using Roborazzi (or Paparazzi for pure JVM):</p>
+        <pre style="font-size:12px;margin:8px 0;"><code><span class="an">@RunWith</span>(<span class="cl">ParameterizedRobolectricTestRunner</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">PrimaryButtonTest</span>(<span class="kw">private val</span> brand: <span class="cl">Brand</span>) {
+
+    <span class="an">@get:Rule</span> <span class="kw">val</span> composeRule = <span class="fn">createComposeRule</span>()
+
+    <span class="kw">companion object</span> {
+        <span class="an">@JvmStatic</span>
+        <span class="an">@ParameterizedRobolectricTestRunner.Parameters</span>(name = <span class="str">"{0}"</span>)
+        <span class="kw">fun</span> <span class="fn">brands</span>() = <span class="cl">Brand</span>.<span class="fn">entries</span>.<span class="fn">toList</span>()
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">primaryButton_matchesGolden</span>() {
+        <span class="kw">val</span> theme = <span class="cl">BrandRegistry</span>.<span class="fn">get</span>(brand)
+        composeRule.<span class="fn">setContent</span> {
+            <span class="cl">CompositionLocalProvider</span>(<span class="fn">LocalBrandColors</span> <span class="kw">provides</span> theme.colors) {
+                <span class="cl">MaterialTheme</span>(colorScheme = theme.<span class="fn">toColorScheme</span>()) {
+                    <span class="fn">PrimaryButton</span>(<span class="str">"Order Now"</span>) {}
+                }
+            }
+        }
+        composeRule.<span class="fn">onRoot</span>().<span class="fn">captureRoboImage</span>(<span class="str">"golden/PrimaryButton_${brand.name}.png"</span>)
+    }
+}</code></pre>
+        <p>One test class covers all 14 brands via the <code>@Parameters</code> list. Golden images are stored in the repo. Any token mismatch surfaces as a visual diff in CI. New brands automatically get coverage by being added to the <code>Brand</code> enum — no new test code needed.</p>
+        <div class="answer-box">"Parameterised screenshot tests with Roborazzi. One test class iterates over all Brand enum values, wraps each component in the correct CompositionLocalProvider, and compares against golden images. New brands are covered automatically by being added to the Brand enum — zero additional test code."</div>
+      </div>
+    </div>
+
+  </div><!-- end s9 -->
+</main>
+</div><!-- end layout -->
+
+<script>
+(function () {
+  var sections   = Array.from(document.querySelectorAll('.section[id]'));
+  var navItems   = Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var progressFill = document.getElementById('progressFill');
+
+  function getActiveSection () {
+    var offset = 120;
+    var active = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= offset) active = sections[i];
+    }
+    return active;
+  }
+
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      item.classList.toggle('active',         isActive);
+      item.classList.toggle('aip-nav-active', isActive);
+    });
+    if (progressFill) {
+      var docH = document.documentElement.scrollHeight - window.innerHeight;
+      var pct  = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+    var activeItem = navItems.find(function (it) { return it.dataset.section === active.id; });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') || activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  var mainEl = document.getElementById('mainScroll') || document.querySelector('.main') || document.querySelector('main');
+  if (mainEl && mainEl !== document.body) mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  setTimeout(updateSidebar, 100);
+
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+}());
+
+function toggleQuiz(el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>20D — Compose UI Testing</title>
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+.sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+.nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;flex-shrink:0;}
+.nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+.main{flex:1;overflow-y:auto;}
+.hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+.hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+.hero h1 span{color:var(--accent);}
+.hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+.hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+.badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+.badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+.badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+.section{padding:40px 48px;max-width:920px;border-bottom:1px solid var(--border);}
+.section:last-child{border-bottom:none;}
+.section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+p strong{color:var(--text);}
+li{color:var(--muted);margin-bottom:6px;}
+li strong{color:var(--text);}
+ul,ol{padding-left:20px;margin-bottom:14px;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+.kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+.table-wrap{overflow-x:auto;margin:14px 0 20px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td:first-child{color:var(--text);font-weight:600;}
+td strong{color:var(--text);}
+.callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+.callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+.callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+.callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+.callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+.callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+.callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.callout-green .callout-label{color:var(--green);}
+.callout-red .callout-label{color:var(--red);}
+.callout-yellow .callout-label{color:var(--yellow);}
+.callout-blue .callout-label{color:var(--accent2);}
+.callout-purple .callout-label{color:var(--accent);}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+.quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+.quiz-q:hover{background:rgba(255,255,255,.02);}
+.quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+.quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+.diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+.diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+.toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+.quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+.quiz-a.open{display:block;}
+.toggle-icon.open{transform:rotate(180deg);}
+.answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+.must-mention{display:grid;gap:10px;margin:14px 0;}
+.must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+.must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .1s linear;}
+@media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.section{display:block!important;opacity:1!important;animation:none!important;padding:40px 48px;max-width:920px;border-bottom:1px solid var(--border);}
+.section:last-of-type{border-bottom:none;}
+.nav-buttons{display:none!important;}
+.nav-item.active,.nav-item.aip-nav-active{background:rgba(124,106,247,.15)!important;color:var(--accent)!important;}
+.nav-item.active .nav-num,.nav-item.aip-nav-active .nav-num{background:rgba(124,106,247,.25)!important;color:var(--accent)!important;}
+@media(max-width:768px){.section{padding:24px 16px!important;}.sidebar{display:none!important;}}
+.sidebar-back{display:flex;align-items:center;gap:8px;padding:8px 12px 12px;margin-bottom:8px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--muted);font-size:12px;font-weight:600;transition:color .15s;}
+.sidebar-back:hover{color:var(--accent);}
+.sidebar-back svg{width:14px;height:14px;flex-shrink:0;fill:currentColor;}
+.hero-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:14px;transition:color .15s;font-weight:500;}
+.hero-back:hover{color:var(--accent);}
+.hero-back svg{width:12px;height:12px;fill:currentColor;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-back">
+      <svg viewBox="0 0 16 16"><path d="M10.5 3L5.5 8l5 5"/></svg>
+      All Topics
+    </a>
+    <div class="sidebar-header">20D — Compose Testing</div>
+    <a class="nav-item active" data-section="s1" href="#s1"><span class="nav-num">1</span>Overview</a>
+    <a class="nav-item" data-section="s2" href="#s2"><span class="nav-num">2</span>Test Setup &amp; Dependencies</a>
+    <a class="nav-item" data-section="s3" href="#s3"><span class="nav-num">3</span>ComposeTestRule &amp; Finders</a>
+    <a class="nav-item" data-section="s4" href="#s4"><span class="nav-num">4</span>Interactions &amp; Assertions</a>
+    <a class="nav-item" data-section="s5" href="#s5"><span class="nav-num">5</span>Semantics &amp; Accessibility</a>
+    <a class="nav-item" data-section="s6" href="#s6"><span class="nav-num">6</span>Testing Patterns</a>
+    <a class="nav-item" data-section="s7" href="#s7"><span class="nav-num">7</span>Pitfalls &amp; Best Practices</a>
+    <a class="nav-item" data-section="s8" href="#s8"><span class="nav-num">8</span>Interview Framework</a>
+    <a class="nav-item" data-section="s9" href="#s9"><span class="nav-num">9</span>Interview Questions</a>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main" id="mainScroll">
+    <!-- HERO -->
+    <div class="hero">
+      <a href="index.html" class="hero-back">
+        <svg viewBox="0 0 16 16"><path d="M10.5 3L5.5 8l5 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        Back to Index
+      </a>
+      <div class="hero-tag">🧪 Jetpack Compose</div>
+      <h1>20D — <span>Compose UI Testing</span></h1>
+      <p class="hero-desc">ComposeTestRule, semantic finders, performClick/performTextInput, assertIsDisplayed, screenshot testing, accessibility semantics, and testing stateful composables with full Kotlin examples.</p>
+      <div class="hero-meta">
+        <span class="badge badge-id">ID: 20D</span>
+        <span class="badge badge-tier1">⭐ Tier 1</span>
+        <span class="badge badge-hot">🔥 Hot</span>
+      </div>
+    </div>
+
+    <!-- S1: OVERVIEW -->
+    <section class="section" id="s1">
+      <div class="section-title"><div class="section-icon">🗺</div>Overview</div>
+
+      <h3>Why Compose Testing Is Different from Espresso</h3>
+      <p>Traditional Espresso tests navigate a <strong>View hierarchy</strong> — finding widgets by their resource ID (<code>R.id.submit_button</code>), casting to typed subclasses, and asserting on View properties. Jetpack Compose has no View hierarchy at all. There are no <code>View</code> objects, no XML layout IDs, no <code>ViewGroup</code> trees to traverse.</p>
+      <p>Instead Compose builds a <strong>semantics tree</strong> — a separate, lightweight tree that runs in parallel with the composition tree. Every composable that participates in accessibility or testing emits a <em>semantics node</em>. That node holds properties: text content, content description, role, enabled state, click action, and so on. Both the Android accessibility framework (TalkBack) and Compose's test framework consume this same semantics tree. Your test never touches a composable directly; it finds a semantics node and interacts with it.</p>
+
+      <h3>Three Layers of Compose Testing</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>What it tests</th><th>Speed</th><th>Tool</th></tr></thead>
+          <tbody>
+            <tr><td>Unit</td><td>Pure logic — ViewModel state, UseCases, mappers</td><td>Very fast (&lt;1 ms)</td><td>JUnit + MockK / Turbine</td></tr>
+            <tr><td>Integration</td><td>Composable + ViewModel with fake repository</td><td>Medium (emulator/device)</td><td>createComposeRule()</td></tr>
+            <tr><td>End-to-End</td><td>Full NavHost flow, real Activity</td><td>Slow (full app launch)</td><td>createAndroidComposeRule&lt;MainActivity&gt;()</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The Testing Pyramid in Compose</h3>
+      <p>The classic pyramid still applies, but the layers map differently than in View-based apps:</p>
+      <ul>
+        <li><strong>70% Unit tests</strong> — ViewModel logic, UseCase rules, state machines, mappers. Zero UI. Fastest feedback loop.</li>
+        <li><strong>20% Integration tests</strong> — Composable renders correctly, responds to state changes, emits correct events. Uses <code>createComposeRule()</code> with fake dependencies.</li>
+        <li><strong>10% E2E tests</strong> — Full navigation flows with real Activity. Validates happy paths and critical error paths from the user's perspective.</li>
+      </ul>
+
+      <h3>Key Dependency</h3>
+      <p>The <strong>entire Compose test API</strong> lives in one artifact: <code>androidx.compose.ui:ui-test-junit4</code>. It provides:</p>
+      <ul>
+        <li><code>createComposeRule()</code> and <code>createAndroidComposeRule()</code></li>
+        <li>All finder functions (<code>onNodeWithText</code>, <code>onNodeWithTag</code>, etc.)</li>
+        <li>All interaction functions (<code>performClick</code>, <code>performTextInput</code>, etc.)</li>
+        <li>All assertion functions (<code>assertIsDisplayed</code>, <code>assertTextEquals</code>, etc.)</li>
+        <li><code>waitUntil{}</code> for async assertions</li>
+      </ul>
+
+      <h3>Two Rules: createComposeRule vs createAndroidComposeRule</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rule</th><th>Activity needed?</th><th>Best for</th><th>Startup cost</th></tr></thead>
+          <tbody>
+            <tr><td><code>createComposeRule()</code></td><td>No (uses a test stub Activity from ui-test-manifest)</td><td>Isolated composable, ViewModel integration</td><td>Low</td></tr>
+            <tr><td><code>createAndroidComposeRule&lt;A&gt;()</code></td><td>Yes — launches your actual Activity</td><td>Navigation, system back, theme from Activity, deep links</td><td>High</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Compose Testing vs Espresso — Comparison</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Aspect</th><th>Espresso</th><th>Compose Testing</th></tr></thead>
+          <tbody>
+            <tr><td>Node discovery</td><td>View ID (<code>R.id.x</code>), text, class</td><td>Semantics node — tag, text, role, custom props</td></tr>
+            <tr><td>Hierarchy traversed</td><td>View hierarchy</td><td>Semantics tree</td></tr>
+            <tr><td>Async waiting</td><td>IdlingResource</td><td><code>waitUntil{}</code>, <code>mainClock</code></td></tr>
+            <tr><td>Animation control</td><td>Espresso animation disabling in settings</td><td><code>mainClock.autoAdvance</code>, <code>advanceTimeBy()</code></td></tr>
+            <tr><td>Screenshot testing</td><td>3rd-party (Shot, etc.)</td><td>Paparazzi (offline JVM) or AndroidX screenshot</td></tr>
+            <tr><td>Stability across UI refactor</td><td>Breaks if ID changes</td><td>Stable if semantics preserved</td></tr>
+            <tr><td>Interoperability</td><td>Can test Compose via AccessibilityNodeInfo</td><td>Native Compose — preferred</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-purple">
+        <div class="callout-label">Senior Mental Model</div>
+        <p style="margin:0;color:var(--muted);">"In Compose tests you're testing the <strong style="color:var(--text);">semantics tree</strong>, not the View tree. A <code>Text</code> composable emits a semantics node with a <em>text</em> property. Your test finds it via <code>onNodeWithText()</code>. This means your UI can be completely restructured — move composables around, extract components, rename internal functions — and your tests still pass as long as <strong style="color:var(--text);">semantics are preserved</strong>. The test is coupled to behaviour, not implementation."</p>
+      </div>
+    </section>
+
+    <!-- S2: SETUP -->
+    <section class="section" id="s2">
+      <div class="section-title"><div class="section-icon">⚙️</div>Test Setup &amp; Dependencies</div>
+
+      <h3>Gradle Dependencies</h3>
+      <pre><code><span class="cm">// build.gradle.kts (app module)</span>
+<span class="fn">dependencies</span> {
+    <span class="cm">// Core Compose test library — provides ComposeTestRule, finders, interactions</span>
+    <span class="fn">androidTestImplementation</span>(<span class="str">"androidx.compose.ui:ui-test-junit4:$compose_version"</span>)
+
+    <span class="cm">// Required: provides a stub Activity for createComposeRule() in debug builds</span>
+    <span class="fn">debugImplementation</span>(<span class="str">"androidx.compose.ui:ui-test-manifest:$compose_version"</span>)
+
+    <span class="cm">// Recommended: mock dependencies in integration tests</span>
+    <span class="fn">androidTestImplementation</span>(<span class="str">"io.mockk:mockk-android:1.13.5"</span>)
+
+    <span class="cm">// Recommended: test coroutines (StateFlow, suspend fns, TestCoroutineDispatcher)</span>
+    <span class="fn">androidTestImplementation</span>(<span class="str">"org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"</span>)
+
+    <span class="cm">// Optional: Hilt testing support</span>
+    <span class="fn">androidTestImplementation</span>(<span class="str">"com.google.dagger:hilt-android-testing:$hilt_version"</span>)
+    <span class="fn">kaptAndroidTest</span>(<span class="str">"com.google.dagger:hilt-android-compiler:$hilt_version"</span>)
+}</code></pre>
+
+      <h4>Why ui-test-manifest?</h4>
+      <p><code>createComposeRule()</code> needs a real Activity to host the Compose content, but it shouldn't need <em>your</em> Activity. The <code>ui-test-manifest</code> artifact ships a minimal <code>ComponentActivity</code> in your debug APK. Without it you get: <strong>"No activities found"</strong> or <strong>"No compose hierarchies found"</strong> at runtime.</p>
+
+      <h3>Basic Test Class Structure</h3>
+      <pre><code><span class="an">@RunWith</span>(<span class="cl">AndroidJUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">LoginScreenTest</span> {
+
+    <span class="an">@get:Rule</span>
+    <span class="kw">val</span> composeTestRule = <span class="fn">createComposeRule</span>()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">loginScreen_displaysEmailAndPasswordFields</span>() {
+        composeTestRule.<span class="fn">setContent</span> {
+            <span class="fn">AppTheme</span> {
+                <span class="fn">LoginScreen</span>(onLoginSuccess = {})
+            }
+        }
+        composeTestRule
+            .<span class="fn">onNodeWithText</span>(<span class="str">"Email"</span>)
+            .<span class="fn">assertIsDisplayed</span>()
+        composeTestRule
+            .<span class="fn">onNodeWithText</span>(<span class="str">"Password"</span>)
+            .<span class="fn">assertIsDisplayed</span>()
+    }
+}</code></pre>
+
+      <h3>Using createAndroidComposeRule for Navigation Tests</h3>
+      <pre><code><span class="an">@RunWith</span>(<span class="cl">AndroidJUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">NavigationTest</span> {
+
+    <span class="cm">// Launches the REAL MainActivity — use only for nav/back/deep link testing</span>
+    <span class="an">@get:Rule</span>
+    <span class="kw">val</span> composeTestRule = <span class="fn">createAndroidComposeRule</span>&lt;<span class="cl">MainActivity</span>&gt;()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">homeToDetail_navigation_works</span>() {
+        composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_0"</span>).<span class="fn">performClick</span>()
+        composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_detail_screen"</span>).<span class="fn">assertIsDisplayed</span>()
+    }
+}</code></pre>
+
+      <h3>Injecting Fake ViewModels (No Hilt Required)</h3>
+      <p>For isolated composable tests, the cleanest approach is to <strong>pass dependencies directly</strong> to the composable rather than using the DI framework. Compose composables that accept a ViewModel as a parameter (rather than creating one internally) are trivially testable:</p>
+      <pre><code><span class="cm">// Production composable — ViewModel as default parameter</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductListScreen</span>(
+    viewModel: <span class="cl">ProductListViewModel</span> = <span class="fn">viewModel</span>()
+) { <span class="cm">/* ... */</span> }
+
+<span class="cm">// In test — inject fake directly:</span>
+<span class="kw">val</span> fakeRepo = <span class="cl">FakeProductRepository</span>()
+<span class="kw">val</span> fakeViewModel = <span class="cl">ProductListViewModel</span>(<span class="cl">GetProductsUseCase</span>(fakeRepo))
+composeTestRule.<span class="fn">setContent</span> {
+    <span class="fn">ProductListScreen</span>(viewModel = fakeViewModel)
+}</code></pre>
+
+      <div class="callout callout-blue">
+        <div class="callout-label">Best Practice</div>
+        <p style="margin:0;color:var(--muted);">Always use <code>createComposeRule()</code> — no Activity — for isolated composable tests. Only upgrade to <code>createAndroidComposeRule&lt;MainActivity&gt;()</code> when you genuinely need the full Activity: testing Jetpack Navigation, system back button behaviour, or Activity-level theming. The Activity-backed rule is slower and harder to isolate.</p>
+      </div>
+    </section>
+
+    <!-- S3: FINDERS -->
+    <section class="section" id="s3">
+      <div class="section-title"><div class="section-icon">🔍</div>ComposeTestRule &amp; Finders</div>
+
+      <h3>The Full Finder API</h3>
+      <pre><code><span class="cm">// ── By text ────────────────────────────────────────────────────────────</span>
+<span class="fn">onNodeWithText</span>(<span class="str">"Submit"</span>)
+<span class="fn">onNodeWithText</span>(<span class="str">"Submit"</span>, ignoreCase = <span class="kw">true</span>)
+<span class="fn">onNodeWithText</span>(<span class="str">"ubmi"</span>, substring = <span class="kw">true</span>)  <span class="cm">// partial match</span>
+
+<span class="cm">// ── By content description ─────────────────────────────────────────────</span>
+<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Close dialog"</span>)
+<span class="fn">onNodeWithContentDescription</span>(<span class="str">"close"</span>, ignoreCase = <span class="kw">true</span>, substring = <span class="kw">true</span>)
+
+<span class="cm">// ── By test tag (most stable) ──────────────────────────────────────────</span>
+<span class="fn">onNodeWithTag</span>(<span class="str">"login_button"</span>)
+<span class="fn">onNodeWithTag</span>(<span class="str">"email_field"</span>, useUnmergedTree = <span class="kw">true</span>)
+
+<span class="cm">// ── By semantics matcher ───────────────────────────────────────────────</span>
+<span class="fn">onNode</span>(<span class="fn">hasRole</span>(<span class="cl">Role</span>.Button))
+<span class="fn">onNode</span>(<span class="fn">hasSetTextAction</span>())       <span class="cm">// any text input field</span>
+<span class="fn">onNode</span>(<span class="fn">hasClickAction</span>())         <span class="cm">// any clickable node</span>
+<span class="fn">onNode</span>(<span class="fn">hasScrollAction</span>())        <span class="cm">// scrollable container</span>
+<span class="fn">onNode</span>(<span class="fn">isDialog</span>())               <span class="cm">// dialog popups</span>
+<span class="fn">onNode</span>(<span class="fn">isPopup</span>())                <span class="cm">// dropdowns / menus</span>
+<span class="fn">onNode</span>(<span class="fn">isFocused</span>())              <span class="cm">// currently focused field</span>
+<span class="fn">onNode</span>(<span class="fn">isEnabled</span>())
+<span class="fn">onNode</span>(<span class="fn">isNotEnabled</span>())
+
+<span class="cm">// ── Combining matchers (and / or) ─────────────────────────────────────</span>
+<span class="fn">onNode</span>(<span class="fn">hasText</span>(<span class="str">"Email"</span>) <span class="kw">and</span> <span class="fn">hasSetTextAction</span>())
+<span class="fn">onNode</span>(<span class="fn">hasTag</span>(<span class="str">"btn"</span>) <span class="kw">or</span> <span class="fn">hasText</span>(<span class="str">"Submit"</span>))
+
+<span class="cm">// ── Multiple nodes ─────────────────────────────────────────────────────</span>
+<span class="fn">onAllNodesWithText</span>(<span class="str">"Delete"</span>)           <span class="cm">// SemanticsNodeInteractionCollection</span>
+<span class="fn">onAllNodesWithTag</span>(<span class="str">"list_item"</span>)[<span class="nu">2</span>]      <span class="cm">// index into collection</span>
+<span class="fn">onAllNodesWithContentDescription</span>(<span class="str">"Star"</span>)</code></pre>
+
+      <h3>Adding testTag to Composables</h3>
+      <pre><code><span class="cm">// In your composable:</span>
+<span class="cl">Button</span>(
+    onClick = onSubmit,
+    modifier = <span class="cl">Modifier</span>.<span class="fn">testTag</span>(<span class="str">"submit_button"</span>)
+) { <span class="cl">Text</span>(<span class="str">"Submit"</span>) }
+
+<span class="cl">TextField</span>(
+    value = email,
+    onValueChange = onEmailChange,
+    modifier = <span class="cl">Modifier</span>.<span class="fn">testTag</span>(<span class="str">"email_field"</span>)
+)
+
+<span class="cm">// In your test:</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"submit_button"</span>).<span class="fn">performClick</span>()
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"email_field"</span>).<span class="fn">performTextInput</span>(<span class="str">"user@example.com"</span>)</code></pre>
+
+      <h3>waitUntil for Async Content</h3>
+      <p>When a composable loads data asynchronously (e.g., via a <code>LaunchedEffect</code> or <code>collectAsState()</code>), the node may not exist in the semantics tree immediately. Use <code>waitUntil</code> to poll:</p>
+      <pre><code><span class="cm">// Wait until at least one product_item node appears</span>
+composeTestRule.<span class="fn">waitUntil</span>(timeoutMillis = <span class="nu">5_000</span>) {
+    composeTestRule
+        .<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+        .<span class="fn">fetchSemanticsNodes</span>()
+        .isNotEmpty()
+}
+<span class="cm">// Now safe to assert on individual items</span>
+composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)[<span class="nu">0</span>].<span class="fn">assertIsDisplayed</span>()</code></pre>
+
+      <h3>Finder Function Reference</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Function</th><th>Finds by</th><th>Best use case</th><th>Locale-safe?</th></tr></thead>
+          <tbody>
+            <tr><td><code>onNodeWithTag()</code></td><td>Developer-set testTag</td><td>Any testable UI element</td><td>✅ Yes</td></tr>
+            <tr><td><code>onNodeWithText()</code></td><td>Visible text content</td><td>Static strings in tests</td><td>❌ No</td></tr>
+            <tr><td><code>onNodeWithContentDescription()</code></td><td>Accessibility label</td><td>Icons and images</td><td>❌ No</td></tr>
+            <tr><td><code>onNode(matcher)</code></td><td>Any SemanticsMatcher</td><td>Role, state, combined conditions</td><td>Depends</td></tr>
+            <tr><td><code>onAllNodesWithTag()</code></td><td>Shared testTag</td><td>LazyColumn items, repeated elements</td><td>✅ Yes</td></tr>
+            <tr><td><code>onAllNodes(matcher)</code></td><td>Any SemanticsMatcher</td><td>Checking count, bulk assertions</td><td>Depends</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-green">
+        <div class="callout-label">Best Practice</div>
+        <p style="margin:0;color:var(--muted);"><code>testTag</code> is the most robust finder. Text and <code>contentDescription</code> can change with localisation or copy changes. <code>testTag</code> is a developer-controlled stable identifier. In production apps, wrap tag constants in a <code>TestTags</code> object so tests and composables share the same source of truth: <code>object TestTags { const val LOGIN_BUTTON = "login_button" }</code>.</p>
+      </div>
+    </section>
+
+    <!-- S4: INTERACTIONS & ASSERTIONS -->
+    <section class="section" id="s4">
+      <div class="section-title"><div class="section-icon">🎮</div>Interactions &amp; Assertions</div>
+
+      <h3>Full Interaction API</h3>
+      <pre><code><span class="cm">// ── Click actions ──────────────────────────────────────────────────────</span>
+.<span class="fn">performClick</span>()
+.<span class="fn">performLongClick</span>()
+.<span class="fn">performDoubleClick</span>()
+
+<span class="cm">// ── Text input ─────────────────────────────────────────────────────────</span>
+.<span class="fn">performTextInput</span>(<span class="str">"user@example.com"</span>)   <span class="cm">// appends to current text</span>
+.<span class="fn">performTextClearance</span>()                  <span class="cm">// clears the field</span>
+.<span class="fn">performTextReplacement</span>(<span class="str">"new text"</span>)      <span class="cm">// clear + type</span>
+.<span class="fn">performImeAction</span>()                      <span class="cm">// keyboard Done/Next/Search</span>
+
+<span class="cm">// ── Scroll ─────────────────────────────────────────────────────────────</span>
+.<span class="fn">performScrollTo</span>()                       <span class="cm">// scroll node into view</span>
+.<span class="fn">performScrollToIndex</span>(<span class="nu">5</span>)                <span class="cm">// LazyColumn: scroll to index</span>
+.<span class="fn">performScrollToKey</span>(<span class="str">"id_5"</span>)             <span class="cm">// LazyColumn: scroll to key</span>
+.<span class="fn">performScrollToNode</span>(<span class="fn">hasText</span>(<span class="str">"Item 12"</span>)) <span class="cm">// scroll until child matches</span>
+
+<span class="cm">// ── Touch gestures ─────────────────────────────────────────────────────</span>
+.<span class="fn">performTouchInput</span> {
+    <span class="fn">swipeUp</span>()
+    <span class="fn">swipeLeft</span>()
+    <span class="fn">swipeRight</span>()
+    <span class="fn">swipeDown</span>()
+    <span class="fn">click</span>(<span class="cl">Offset</span>(<span class="nu">100f</span>, <span class="nu">200f</span>))
+    <span class="fn">longClick</span>(<span class="cl">Offset</span>(<span class="nu">100f</span>, <span class="nu">200f</span>))
+    <span class="fn">pinch</span>(...)
+}</code></pre>
+
+      <h3>Full Assertion API</h3>
+      <pre><code><span class="cm">// ── Visibility ─────────────────────────────────────────────────────────</span>
+.<span class="fn">assertIsDisplayed</span>()           <span class="cm">// visible AND on screen</span>
+.<span class="fn">assertIsNotDisplayed</span>()        <span class="cm">// exists in tree but not visible</span>
+.<span class="fn">assertExists</span>()                <span class="cm">// in semantics tree (may be off-screen)</span>
+.<span class="fn">assertDoesNotExist</span>()          <span class="cm">// NOT in tree at all</span>
+
+<span class="cm">// ── State ──────────────────────────────────────────────────────────────</span>
+.<span class="fn">assertIsEnabled</span>()
+.<span class="fn">assertIsDisabled</span>()
+.<span class="fn">assertIsSelected</span>()
+.<span class="fn">assertIsNotSelected</span>()
+.<span class="fn">assertIsFocused</span>()
+.<span class="fn">assertIsNotFocused</span>()
+.<span class="fn">assertIsOn</span>()                  <span class="cm">// Toggle, Checkbox</span>
+.<span class="fn">assertIsOff</span>()
+
+<span class="cm">// ── Content ────────────────────────────────────────────────────────────</span>
+.<span class="fn">assertTextEquals</span>(<span class="str">"Expected text"</span>)
+.<span class="fn">assertTextContains</span>(<span class="str">"partial"</span>)
+.<span class="fn">assertContentDescriptionEquals</span>(<span class="str">"Close"</span>)
+.<span class="fn">assertContentDescriptionContains</span>(<span class="str">"close"</span>)
+
+<span class="cm">// ── Actions ────────────────────────────────────────────────────────────</span>
+.<span class="fn">assertHasClickAction</span>()
+.<span class="fn">assertHasNoClickAction</span>()
+
+<span class="cm">// ── Collection ─────────────────────────────────────────────────────────</span>
+.<span class="fn">assertCountEquals</span>(<span class="nu">3</span>)          <span class="cm">// on SemanticsNodeInteractionCollection</span></code></pre>
+
+      <h3>Testing a Complete Login Flow</h3>
+      <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">loginFlow_validCredentials_navigatesToHome</span>() {
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">AppTheme</span> { <span class="fn">AppNavHost</span>() }
+    }
+
+    <span class="cm">// Fill email field</span>
+    composeTestRule
+        .<span class="fn">onNodeWithTag</span>(<span class="str">"email_field"</span>)
+        .<span class="fn">performTextInput</span>(<span class="str">"user@example.com"</span>)
+
+    <span class="cm">// Fill password field</span>
+    composeTestRule
+        .<span class="fn">onNodeWithTag</span>(<span class="str">"password_field"</span>)
+        .<span class="fn">performTextInput</span>(<span class="str">"password123"</span>)
+
+    <span class="cm">// Submit</span>
+    composeTestRule
+        .<span class="fn">onNodeWithTag</span>(<span class="str">"login_button"</span>)
+        .<span class="fn">performClick</span>()
+
+    <span class="cm">// Verify navigation occurred</span>
+    composeTestRule
+        .<span class="fn">onNodeWithTag</span>(<span class="str">"home_screen"</span>)
+        .<span class="fn">assertIsDisplayed</span>()
+}
+
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">loginFlow_invalidEmail_showsError</span>() {
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">AppTheme</span> { <span class="fn">LoginScreen</span>(onLoginSuccess = {}) }
+    }
+
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"email_field"</span>).<span class="fn">performTextInput</span>(<span class="str">"notanemail"</span>)
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"login_button"</span>).<span class="fn">performClick</span>()
+
+    <span class="cm">// Error message should appear</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"email_error"</span>).<span class="fn">assertIsDisplayed</span>()
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"email_error"</span>).<span class="fn">assertTextContains</span>(<span class="str">"invalid"</span>, ignoreCase = <span class="kw">true</span>)
+}</code></pre>
+
+      <div class="callout callout-yellow">
+        <div class="callout-label">Important Distinction</div>
+        <p style="margin:0;color:var(--muted);"><strong style="color:var(--text);">assertIsDisplayed()</strong> fails if the node exists in the tree but is not visible — scrolled off screen, <code>alpha = 0</code>, or hidden behind another layout. Use <strong style="color:var(--text);">assertExists()</strong> if you only want to verify the node is in the tree regardless of visibility. Use <strong style="color:var(--text);">assertDoesNotExist()</strong> when you need to confirm an element was removed from the tree entirely (e.g., a dialog was dismissed).</p>
+      </div>
+    </section>
+
+    <!-- S5: SEMANTICS -->
+    <section class="section" id="s5">
+      <div class="section-title"><div class="section-icon">♿</div>Semantics &amp; Accessibility</div>
+
+      <h3>What Is the Semantics Tree?</h3>
+      <p>When Compose lays out your UI, it builds two trees simultaneously: the <strong>composition tree</strong> (which composables produce which layout nodes) and the <strong>semantics tree</strong> (which nodes have accessibility meaning). The semantics tree is a filtered, simplified view of your UI that exposes only the information needed by accessibility services and tests.</p>
+      <p>Every composable that calls <code>Modifier.semantics{}</code> — directly or implicitly through Material components — contributes a node. <code>Text</code> contributes its text. <code>Button</code> contributes a click action and role. <code>TextField</code> contributes text, set-text action, and editing state. You test the semantics tree, not the composition tree.</p>
+
+      <h3>mergeDescendants — Compound Components</h3>
+      <pre><code><span class="cm">// WITHOUT mergeDescendants: two separate semantics nodes</span>
+<span class="cm">// → screen reader reads icon and text separately</span>
+<span class="cm">// → test must find each node independently</span>
+<span class="cl">Row</span> {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Star, contentDescription = <span class="kw">null</span>)
+    <span class="cl">Text</span>(<span class="str">"4.5 stars"</span>)
+}
+
+<span class="cm">// WITH mergeDescendants: one unified semantics node</span>
+<span class="cm">// → screen reader reads "4.5 stars" as a single unit</span>
+<span class="cm">// → test: onNodeWithText("4.5 stars") finds the merged node</span>
+<span class="cl">Row</span>(
+    modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span>(mergeDescendants = <span class="kw">true</span>) {}
+) {
+    <span class="cl">Icon</span>(<span class="cl">Icons</span>.Default.Star, contentDescription = <span class="kw">null</span>)
+    <span class="cl">Text</span>(<span class="str">"4.5 stars"</span>)
+}
+
+<span class="cm">// Accessing unmerged tree in tests when needed:</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"rating"</span>, useUnmergedTree = <span class="kw">true</span>)</code></pre>
+
+      <h3>Custom Semantic Properties</h3>
+      <pre><code><span class="cm">// Define a custom semantics property</span>
+<span class="kw">val</span> <span class="cl">SelectedKey</span> = <span class="fn">SemanticsPropertyKey</span>&lt;<span class="cl">Boolean</span>&gt;(<span class="str">"Selected"</span>)
+<span class="kw">var</span> <span class="cl">SemanticsPropertyReceiver</span>.selected <span class="kw">by</span> <span class="cl">SelectedKey</span>
+
+<span class="cm">// Apply in composable</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SelectableListItem</span>(text: <span class="cl">String</span>, isSelected: <span class="cl">Boolean</span>, ...) {
+    <span class="cl">Row</span>(
+        modifier = <span class="cl">Modifier</span>
+            .<span class="fn">testTag</span>(<span class="str">"list_item"</span>)
+            .<span class="fn">semantics</span> { selected = isSelected }
+            .<span class="fn">clickable</span>(onClick = onClick)
+    ) { <span class="cl">Text</span>(text) }
+}
+
+<span class="cm">// Test it:</span>
+composeTestRule
+    .<span class="fn">onNode</span>(<span class="cl">SemanticsMatcher</span>.<span class="fn">expectValue</span>(<span class="cl">SelectedKey</span>, <span class="kw">true</span>))
+    .<span class="fn">assertIsDisplayed</span>()</code></pre>
+
+      <h3>contentDescription Best Practices</h3>
+      <pre><code><span class="cm">// ✅ Dynamic description reflecting actual state</span>
+<span class="cl">Icon</span>(
+    imageVector = <span class="cl">Icons</span>.Default.Favorite,
+    contentDescription = <span class="kw">if</span> (isFavorite) <span class="str">"Remove from favourites"</span> <span class="kw">else</span> <span class="str">"Add to favourites"</span>
+)
+
+<span class="cm">// ✅ Null contentDescription for purely decorative icons</span>
+<span class="cl">Icon</span>(
+    imageVector = <span class="cl">Icons</span>.Default.ChevronRight,
+    contentDescription = <span class="kw">null</span>   <span class="cm">// decorative — screen reader skips</span>
+)
+
+<span class="cm">// In test — assert correct description based on state</span>
+composeTestRule
+    .<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Add to favourites"</span>)
+    .<span class="fn">assertHasClickAction</span>()
+
+composeTestRule
+    .<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Add to favourites"</span>)
+    .<span class="fn">performClick</span>()
+
+composeTestRule
+    .<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Remove from favourites"</span>)
+    .<span class="fn">assertIsDisplayed</span>()   <span class="cm">// state changed correctly</span></code></pre>
+
+      <h3>Testing Invisible Content (Screen Reader Only)</h3>
+      <pre><code><span class="cm">// Assert loading indicator has correct content description</span>
+composeTestRule
+    .<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Loading products"</span>)
+    .<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// Assert icon has accessible label and is clickable</span>
+composeTestRule
+    .<span class="fn">onNode</span>(<span class="fn">hasContentDescription</span>(<span class="str">"Delete item"</span>))
+    .<span class="fn">assertHasClickAction</span>()
+
+<span class="cm">// Verify error is readable by screen reader even if hidden visually</span>
+composeTestRule
+    .<span class="fn">onNodeWithTag</span>(<span class="str">"error_message"</span>)
+    .<span class="fn">assertExists</span>()   <span class="cm">// in tree (screen reader can read)</span></code></pre>
+
+      <div class="callout callout-blue">
+        <div class="callout-label">Key Concept</div>
+        <p style="margin:0;color:var(--muted);"><code>mergeDescendants = true</code> is critical for compound components like rating bars, checkboxes with labels, and list items. Without it, screen readers and tests see multiple disconnected nodes. With it, they see one meaningful unit. If your test fails with "multiple nodes found", check whether a parent container has <code>mergeDescendants = true</code> causing nodes to collapse — use <code>useUnmergedTree = true</code> in the finder to bypass merging.</p>
+      </div>
+    </section>
+
+    <!-- S6: TESTING PATTERNS -->
+    <section class="section" id="s6">
+      <div class="section-title"><div class="section-icon">🏗</div>Testing Patterns (State, Navigation, Screenshot)</div>
+
+      <h3>Pattern 1 — Testing State Changes</h3>
+      <p>Drive state via <code>mutableStateOf</code> held in the test, then assert that the composable reflects changes:</p>
+      <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">counter_incrementButton_updatesDisplayedCount</span>() {
+    <span class="kw">var</span> count <span class="kw">by</span> <span class="fn">mutableStateOf</span>(<span class="nu">0</span>)
+
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">CounterScreen</span>(
+            count = count,
+            onIncrement = { count++ },
+            onDecrement = { count-- }
+        )
+    }
+
+    <span class="cm">// Initial state</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"count_text"</span>).<span class="fn">assertTextEquals</span>(<span class="str">"0"</span>)
+
+    <span class="cm">// Increment once</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"increment_button"</span>).<span class="fn">performClick</span>()
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"count_text"</span>).<span class="fn">assertTextEquals</span>(<span class="str">"1"</span>)
+
+    <span class="cm">// Increment again</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"increment_button"</span>).<span class="fn">performClick</span>()
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"count_text"</span>).<span class="fn">assertTextEquals</span>(<span class="str">"2"</span>)
+
+    <span class="cm">// Decrement</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"decrement_button"</span>).<span class="fn">performClick</span>()
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"count_text"</span>).<span class="fn">assertTextEquals</span>(<span class="str">"1"</span>)
+}</code></pre>
+
+      <h3>Pattern 2 — Integration Test with Real ViewModel + Fake Repo</h3>
+      <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">productList_loadsAndDisplaysItems</span>() {
+    <span class="kw">val</span> fakeProducts = <span class="fn">listOf</span>(
+        <span class="cl">Product</span>(<span class="str">"1"</span>, <span class="str">"Espresso Machine"</span>, <span class="str">"$299"</span>),
+        <span class="cl">Product</span>(<span class="str">"2"</span>, <span class="str">"Milk Frother"</span>, <span class="str">"$49"</span>)
+    )
+    <span class="kw">val</span> fakeRepo = <span class="cl">FakeProductRepository</span>(fakeProducts)
+    <span class="kw">val</span> viewModel = <span class="cl">ProductListViewModel</span>(<span class="cl">GetProductsUseCase</span>(fakeRepo))
+
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">AppTheme</span> { <span class="fn">ProductListScreen</span>(viewModel = viewModel) }
+    }
+
+    <span class="cm">// Wait for coroutine to emit products</span>
+    composeTestRule.<span class="fn">waitUntil</span>(timeoutMillis = <span class="nu">3_000</span>) {
+        composeTestRule
+            .<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+            .<span class="fn">fetchSemanticsNodes</span>()
+            .size == <span class="nu">2</span>
+    }
+
+    composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Espresso Machine"</span>).<span class="fn">assertIsDisplayed</span>()
+    composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Milk Frother"</span>).<span class="fn">assertIsDisplayed</span>()
+    composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"$299"</span>).<span class="fn">assertIsDisplayed</span>()
+}
+
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">productList_emptyState_showsEmptyMessage</span>() {
+    <span class="kw">val</span> fakeRepo = <span class="cl">FakeProductRepository</span>(<span class="fn">emptyList</span>())
+    <span class="kw">val</span> viewModel = <span class="cl">ProductListViewModel</span>(<span class="cl">GetProductsUseCase</span>(fakeRepo))
+
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">AppTheme</span> { <span class="fn">ProductListScreen</span>(viewModel = viewModel) }
+    }
+
+    composeTestRule.<span class="fn">waitUntil</span>(<span class="nu">3_000</span>) {
+        composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"loading_indicator"</span>)
+            .<span class="fn">fetchSemanticsNodes</span>().isEmpty()
+    }
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"empty_state_message"</span>).<span class="fn">assertIsDisplayed</span>()
+}</code></pre>
+
+      <h3>Pattern 3 — Screenshot Testing with Paparazzi</h3>
+      <p>Paparazzi renders composables on the JVM — no emulator or device needed. It snapshots the rendered bitmap and compares it against a golden image on each test run. Perfect for component library regression testing.</p>
+      <pre><code><span class="cm">// build.gradle.kts</span>
+<span class="fn">plugins</span> {
+    <span class="fn">id</span>(<span class="str">"app.cash.paparazzi"</span>) <span class="fn">version</span> <span class="str">"1.3.4"</span>
+}
+<span class="fn">dependencies</span> {
+    <span class="fn">testImplementation</span>(<span class="str">"app.cash.paparazzi:paparazzi:1.3.4"</span>)
+}
+
+<span class="cm">// Screenshot test:</span>
+<span class="an">@RunWith</span>(<span class="cl">JUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">ProductCardScreenshotTest</span> {
+
+    <span class="an">@get:Rule</span>
+    <span class="kw">val</span> paparazzi = <span class="cl">Paparazzi</span>(deviceConfig = <span class="cl">DeviceConfig</span>.PIXEL_5)
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">productCard_defaultState</span>() {
+        paparazzi.<span class="fn">snapshot</span> {
+            <span class="fn">AppTheme</span> {
+                <span class="fn">ProductCard</span>(
+                    product = <span class="cl">Product</span>(<span class="str">"1"</span>, <span class="str">"Espresso Machine"</span>, <span class="str">"$299"</span>),
+                    onAddToCart = {}
+                )
+            }
+        }
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">productCard_darkTheme</span>() {
+        paparazzi.<span class="fn">snapshot</span> {
+            <span class="fn">AppTheme</span>(darkTheme = <span class="kw">true</span>) {
+                <span class="fn">ProductCard</span>(
+                    product = <span class="cl">Product</span>(<span class="str">"1"</span>, <span class="str">"Espresso Machine"</span>, <span class="str">"$299"</span>),
+                    onAddToCart = {}
+                )
+            }
+        }
+    }
+}
+
+<span class="cm">// Run to record goldens: ./gradlew recordPaparazziDebug</span>
+<span class="cm">// Run to verify:        ./gradlew verifyPaparazziDebug</span></code></pre>
+
+      <h3>Pattern 4 — Testing Navigation</h3>
+      <pre><code><span class="an">@RunWith</span>(<span class="cl">AndroidJUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">NavigationTest</span> {
+
+    <span class="an">@get:Rule</span>
+    <span class="kw">val</span> composeTestRule = <span class="fn">createAndroidComposeRule</span>&lt;<span class="cl">MainActivity</span>&gt;()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">homeScreen_clickProduct_navigatesToDetailAndBack</span>() {
+        <span class="cm">// Tap first product</span>
+        composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_0"</span>).<span class="fn">performClick</span>()
+
+        <span class="cm">// Verify detail screen appeared</span>
+        composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_detail_screen"</span>).<span class="fn">assertIsDisplayed</span>()
+
+        <span class="cm">// Navigate back via toolbar back button</span>
+        composeTestRule
+            .<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Navigate back"</span>)
+            .<span class="fn">performClick</span>()
+
+        <span class="cm">// Verify home screen restored</span>
+        composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"home_screen"</span>).<span class="fn">assertIsDisplayed</span>()
+    }
+}</code></pre>
+
+      <h3>Pattern 5 — Testing with TestNavController (No Activity)</h3>
+      <pre><code><span class="cm">// Test navigation without a real Activity using TestNavHostController</span>
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">appNavigation_startDestination_isHome</span>() {
+    <span class="kw">lateinit var</span> navController: <span class="cl">NavHostController</span>
+
+    composeTestRule.<span class="fn">setContent</span> {
+        navController = <span class="fn">rememberNavController</span>()
+        <span class="fn">AppNavHost</span>(navController = navController)
+    }
+
+    composeTestRule.<span class="fn">runOnUiThread</span> {
+        <span class="fn">assertEquals</span>(<span class="str">"home"</span>, navController.currentDestination?.route)
+    }
+}</code></pre>
+    </section>
+
+    <!-- S7: PITFALLS -->
+    <section class="section" id="s7">
+      <div class="section-title"><div class="section-icon">⚠️</div>Pitfalls &amp; Best Practices</div>
+
+      <h3>Common Pitfalls</h3>
+
+      <h4>❌ Using onNodeWithText() for Localised Strings</h4>
+      <p>Hard-coding translated strings in tests breaks when the device language changes or copy is updated.</p>
+      <pre><code><span class="cm">// ❌ Breaks with language changes</span>
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Submit"</span>).<span class="fn">performClick</span>()
+
+<span class="cm">// ✅ Use testTag — stable across all locales</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"submit_button"</span>).<span class="fn">performClick</span>()</code></pre>
+
+      <h4>❌ Not Waiting for Async State</h4>
+      <pre><code><span class="cm">// ❌ Asserts before LaunchedEffect completes — flaky!</span>
+composeTestRule.<span class="fn">setContent</span> { <span class="fn">ProductListScreen</span>(viewModel) }
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Espresso Machine"</span>).<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// ✅ Wait for state to settle first</span>
+composeTestRule.<span class="fn">waitUntil</span>(<span class="nu">3_000</span>) {
+    composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+        .<span class="fn">fetchSemanticsNodes</span>().isNotEmpty()
+}
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Espresso Machine"</span>).<span class="fn">assertIsDisplayed</span>()</code></pre>
+
+      <h4>❌ Thread.sleep() for Async Waits</h4>
+      <pre><code><span class="cm">// ❌ Never do this — slow, unreliable, causes CI timeouts</span>
+<span class="cl">Thread</span>.<span class="fn">sleep</span>(<span class="nu">2000</span>)
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"result"</span>).<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// ✅ Use waitUntil — polls with timeout</span>
+composeTestRule.<span class="fn">waitUntil</span>(timeoutMillis = <span class="nu">3_000</span>) {
+    composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"result"</span>)
+        .<span class="fn">fetchSemanticsNodes</span>().isNotEmpty()
+}</code></pre>
+
+      <h4>❌ Forgetting ui-test-manifest</h4>
+      <pre><code><span class="cm">// ❌ Missing dependency → "No activities found" crash</span>
+
+<span class="cm">// ✅ Add to build.gradle.kts:</span>
+<span class="fn">debugImplementation</span>(<span class="str">"androidx.compose.ui:ui-test-manifest:$compose_version"</span>)</code></pre>
+
+      <h4>❌ assertIsDisplayed() on Off-Screen LazyColumn Items</h4>
+      <pre><code><span class="cm">// ❌ Item exists in tree but is not on screen — fails</span>
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Item 50"</span>).<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// ✅ Scroll to it first</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_list"</span>)
+    .<span class="fn">performScrollToIndex</span>(<span class="nu">49</span>)
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Item 50"</span>).<span class="fn">assertIsDisplayed</span>()</code></pre>
+
+      <h3>Best Practices</h3>
+
+      <h4>✅ Control Animations with mainClock</h4>
+      <pre><code><span class="cm">// Pause automatic clock advancement</span>
+composeTestRule.mainClock.autoAdvance = <span class="kw">false</span>
+
+<span class="cm">// Trigger animation</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"expand_button"</span>).<span class="fn">performClick</span>()
+
+<span class="cm">// Advance exactly 300ms (half of a 600ms animation)</span>
+composeTestRule.mainClock.<span class="fn">advanceTimeBy</span>(<span class="nu">300</span>)
+
+<span class="cm">// Assert mid-animation state</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"panel"</span>).<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// Complete the animation</span>
+composeTestRule.mainClock.<span class="fn">advanceTimeBy</span>(<span class="nu">300</span>)</code></pre>
+
+      <h4>✅ Debug the Semantics Tree with printToLog</h4>
+      <pre><code><span class="cm">// When a finder fails — print the full semantics tree to Logcat</span>
+composeTestRule.<span class="fn">onRoot</span>().<span class="fn">printToLog</span>(<span class="str">"SemanticTree"</span>)
+
+<span class="cm">// Also works on sub-trees</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_list"</span>).<span class="fn">printToLog</span>(<span class="str">"ListTree"</span>)</code></pre>
+
+      <h4>✅ Async Test with MainCoroutineRule + waitUntil</h4>
+      <pre><code><span class="an">@RunWith</span>(<span class="cl">AndroidJUnit4</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">ProductListScreenTest</span> {
+
+    <span class="an">@get:Rule</span>(<span class="fn">order</span> = <span class="nu">0</span>)
+    <span class="kw">val</span> mainCoroutineRule = <span class="cl">MainCoroutineRule</span>()  <span class="cm">// sets Dispatchers.Main</span>
+
+    <span class="an">@get:Rule</span>(<span class="fn">order</span> = <span class="nu">1</span>)
+    <span class="kw">val</span> composeTestRule = <span class="fn">createComposeRule</span>()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">products_loadSuccessfully</span>() = mainCoroutineRule.runTest {
+        <span class="kw">val</span> fakeRepo = <span class="cl">FakeProductRepository</span>(<span class="fn">listOf</span>(<span class="cl">Product</span>(<span class="str">"1"</span>, <span class="str">"Espresso Machine"</span>)))
+        <span class="kw">val</span> viewModel = <span class="cl">ProductListViewModel</span>(<span class="cl">GetProductsUseCase</span>(fakeRepo))
+
+        composeTestRule.<span class="fn">setContent</span> {
+            <span class="fn">AppTheme</span> { <span class="fn">ProductListScreen</span>(viewModel = viewModel) }
+        }
+
+        composeTestRule.<span class="fn">waitUntil</span>(<span class="nu">3_000</span>) {
+            composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+                .<span class="fn">fetchSemanticsNodes</span>().isNotEmpty()
+        }
+
+        composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Espresso Machine"</span>).<span class="fn">assertIsDisplayed</span>()
+    }
+}</code></pre>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pitfall</th><th>Symptom</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Missing ui-test-manifest</td><td>"No activities found" crash</td><td><code>debugImplementation ui-test-manifest</code></td></tr>
+            <tr><td>onNodeWithText() with localized text</td><td>Test breaks on language change</td><td>Use <code>testTag</code></td></tr>
+            <tr><td>No async wait</td><td>Intermittent "No matching node"</td><td>Use <code>waitUntil{}</code></td></tr>
+            <tr><td>Thread.sleep()</td><td>Slow tests, CI timeouts</td><td>Use <code>waitUntil{}</code> or <code>mainClock</code></td></tr>
+            <tr><td>assertIsDisplayed on off-screen item</td><td>AssertionError even though item exists</td><td><code>performScrollToIndex()</code> first</td></tr>
+            <tr><td>Testing merged semantics node</td><td>"Multiple nodes found"</td><td><code>useUnmergedTree = true</code></td></tr>
+            <tr><td>createAndroidComposeRule for simple tests</td><td>Tests are slow, flaky</td><td>Use <code>createComposeRule()</code> instead</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- S8: INTERVIEW FRAMEWORK -->
+    <section class="section" id="s8">
+      <div class="section-title"><div class="section-icon">🎯</div>Interview Framework</div>
+
+      <h3>30-Second Answer</h3>
+      <div class="answer-box">
+        "Compose UI testing uses the <strong>semantics tree</strong>, not the View hierarchy. You write tests using <strong>ComposeTestRule</strong> — set content with <code>setContent{}</code>, find nodes with <code>onNodeWithTag()</code> or <code>onNodeWithText()</code>, interact with <code>performClick()</code> and <code>performTextInput()</code>, and assert with <code>assertIsDisplayed()</code> and <code>assertTextEquals()</code>. For async content I use <code>waitUntil{}</code>. I prefer <code>testTag</code> over text finders for stability across locales and copy changes."
+      </div>
+
+      <h3>2-Minute Answer — Expand With</h3>
+      <ul>
+        <li><strong>Two test rules:</strong> <code>createComposeRule()</code> for isolated composable tests (fast, no Activity), <code>createAndroidComposeRule&lt;MainActivity&gt;()</code> only for navigation/back/deep link tests that require the real Activity.</li>
+        <li><strong>Semantics tree:</strong> Compose tests interact with a semantics tree — a lightweight parallel tree containing accessibility metadata. This is why tests survive UI refactors as long as semantics are preserved.</li>
+        <li><strong>Screenshot testing:</strong> Use Paparazzi for offline JVM snapshot regression — renders on the JVM with no emulator, compares golden bitmaps. Fast CI feedback for component library changes.</li>
+        <li><strong>Integration pattern:</strong> Use a real ViewModel with a fake repository. Don't mock the ViewModel — test the real one. This gives confidence that the ViewModel + composable integration actually works.</li>
+        <li><strong>Navigation testing:</strong> For NavHost flows, use <code>createAndroidComposeRule&lt;MainActivity&gt;()</code>. For unit-testing navigation graph routes, use <code>TestNavHostController</code> with <code>createComposeRule()</code>.</li>
+        <li><strong>Async:</strong> <code>waitUntil{}</code> polls the semantics tree until a condition is met or the timeout expires. For coroutine-driven tests, combine with <code>MainCoroutineRule</code> and <code>runTest{}</code>.</li>
+      </ul>
+
+      <h3>Must-Mention Checklist</h3>
+      <div class="must-mention">
+        <div class="must-item">
+          <div class="must-num">1</div>
+          <div><strong>ComposeTestRule</strong> — <code>createComposeRule()</code> for isolated tests vs <code>createAndroidComposeRule&lt;Activity&gt;()</code> for navigation/Activity-level tests.</div>
+        </div>
+        <div class="must-item">
+          <div class="must-num">2</div>
+          <div><strong>Semantic finders</strong> — <code>onNodeWithTag()</code> preferred over <code>onNodeWithText()</code> for locale stability. Tags are developer-controlled, text/descriptions change with copy.</div>
+        </div>
+        <div class="must-item">
+          <div class="must-num">3</div>
+          <div><strong>Interactions</strong> — <code>performClick()</code>, <code>performTextInput()</code>, <code>performScrollTo()</code>, <code>performScrollToIndex()</code>, <code>performTouchInput{}</code>.</div>
+        </div>
+        <div class="must-item">
+          <div class="must-num">4</div>
+          <div><strong>Assertions</strong> — <code>assertIsDisplayed()</code>, <code>assertTextEquals()</code>, <code>assertDoesNotExist()</code>, <code>assertIsEnabled()</code>, <code>assertCountEquals()</code>.</div>
+        </div>
+        <div class="must-item">
+          <div class="must-num">5</div>
+          <div><strong>Async handling</strong> — <code>waitUntil{}</code> with a timeout condition. Never <code>Thread.sleep()</code>. For animations, use <code>mainClock.autoAdvance = false</code> + <code>advanceTimeBy()</code>.</div>
+        </div>
+        <div class="must-item">
+          <div class="must-num">6</div>
+          <div><strong>ui-test-manifest</strong> — <code>debugImplementation("androidx.compose.ui:ui-test-manifest")</code> is required. Without it, <code>createComposeRule()</code> crashes with "No activities found".</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S9: INTERVIEW QUESTIONS -->
+    <section class="section" id="s9">
+      <div class="section-title"><div class="section-icon">💬</div>Interview Questions</div>
+
+      <!-- Q1 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q1 — What is the difference between <code>createComposeRule()</code> and <code>createAndroidComposeRule()</code>?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><strong>createComposeRule()</strong> creates a <code>ComposeContentTestRule</code> that uses a minimal stub <code>ComponentActivity</code> provided by the <code>ui-test-manifest</code> dependency. No real Activity from your app is launched. It's fast, isolated, and ideal for testing individual composables or ViewModel integration.</p>
+          <p><strong>createAndroidComposeRule&lt;MainActivity&gt;()</strong> actually launches your <code>MainActivity</code>. The full Activity lifecycle runs. Use this only when the test genuinely requires the Activity — navigation with <code>NavHost</code>, system back handling, or themes/resources that come from the Activity context.</p>
+          <pre><code><span class="cm">// Isolated — no Activity needed</span>
+<span class="an">@get:Rule</span>
+<span class="kw">val</span> composeTestRule = <span class="fn">createComposeRule</span>()
+
+<span class="cm">// Full Activity — for navigation tests</span>
+<span class="an">@get:Rule</span>
+<span class="kw">val</span> composeTestRule = <span class="fn">createAndroidComposeRule</span>&lt;<span class="cl">MainActivity</span>&gt;()</code></pre>
+          <p>Rule of thumb: start with <code>createComposeRule()</code>. Only escalate to <code>createAndroidComposeRule</code> when your test fails specifically because it needs the Activity.</p>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q2 — How do you find a composable node in a Compose test?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>You use <strong>semantic finder functions</strong> on the <code>ComposeTestRule</code>. The primary finders are:</p>
+          <pre><code><span class="cm">// By testTag — most stable, locale-independent</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"login_button"</span>)
+
+<span class="cm">// By visible text</span>
+composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Submit"</span>)
+
+<span class="cm">// By accessibility content description</span>
+composeTestRule.<span class="fn">onNodeWithContentDescription</span>(<span class="str">"Close"</span>)
+
+<span class="cm">// By semantics matcher (role, state, actions)</span>
+composeTestRule.<span class="fn">onNode</span>(<span class="fn">hasRole</span>(<span class="cl">Role</span>.Button) <span class="kw">and</span> <span class="fn">hasText</span>(<span class="str">"Submit"</span>))</code></pre>
+          <p>Prefer <code>testTag</code>. Add it via <code>Modifier.testTag("my_tag")</code> on your composable. This is the most stable identifier — it never changes with copy updates or locale changes.</p>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q3 — Your test fails with "No matching node found" — how do you debug it?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Step-by-step debugging process:</p>
+          <p><strong>1. Print the semantics tree</strong> to Logcat and read what nodes actually exist:</p>
+          <pre><code>composeTestRule.<span class="fn">onRoot</span>().<span class="fn">printToLog</span>(<span class="str">"DEBUG"</span>)</code></pre>
+          <p><strong>2. Check for async issues</strong> — is your content loaded yet? If the screen shows a loading spinner when the test runs, the product nodes don't exist. Fix: add <code>waitUntil{}</code> before the assertion.</p>
+          <p><strong>3. Check for merged semantics</strong> — if a parent uses <code>mergeDescendants = true</code>, child nodes are absorbed. Your finder may need <code>useUnmergedTree = true</code>:</p>
+          <pre><code>composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"4.5 stars"</span>, useUnmergedTree = <span class="kw">true</span>)</code></pre>
+          <p><strong>4. Check for off-screen nodes</strong> — in a <code>LazyColumn</code>, items outside the visible window are not in the semantics tree. Use <code>performScrollToIndex()</code> first.</p>
+          <p><strong>5. Verify testTag is set</strong> — check that the composable actually has the tag in the code path being exercised. A conditional can mean the tag is not applied in certain states.</p>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q4 — How do you test a LazyColumn that loads data asynchronously from a ViewModel?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Use a fake repository, inject it into a real ViewModel, and use <code>waitUntil{}</code> to poll until the data appears:</p>
+          <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">productList_async_loadsAndDisplaysItems</span>() {
+    <span class="kw">val</span> fakeRepo = <span class="cl">FakeProductRepository</span>(
+        <span class="fn">listOf</span>(<span class="cl">Product</span>(<span class="str">"1"</span>, <span class="str">"Espresso Machine"</span>))
+    )
+    <span class="kw">val</span> viewModel = <span class="cl">ProductListViewModel</span>(<span class="cl">GetProductsUseCase</span>(fakeRepo))
+
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">AppTheme</span> { <span class="fn">ProductListScreen</span>(viewModel = viewModel) }
+    }
+
+    <span class="cm">// Poll until the product item tag appears</span>
+    composeTestRule.<span class="fn">waitUntil</span>(timeoutMillis = <span class="nu">5_000</span>) {
+        composeTestRule
+            .<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+            .<span class="fn">fetchSemanticsNodes</span>()
+            .isNotEmpty()
+    }
+
+    composeTestRule.<span class="fn">onNodeWithText</span>(<span class="str">"Espresso Machine"</span>).<span class="fn">assertIsDisplayed</span>()
+}</code></pre>
+          <p>For tests that need coroutine dispatch control, combine with <code>@get:Rule val mainCoroutineRule = MainCoroutineRule()</code> and use <code>runTest{}</code>. The fake repository can be a simple in-memory implementation returning the provided data via a <code>Flow</code>.</p>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q5 — What is the semantics tree and why does Compose testing use it instead of the View hierarchy?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>The <strong>semantics tree</strong> is a parallel tree built by Compose alongside the layout/composition tree. Each composable that calls <code>Modifier.semantics{}</code> — directly or through Material components — contributes a <strong>semantics node</strong>. That node holds structured metadata: text content, content description, role (Button, Image, etc.), state (enabled, checked, focused), and available actions (click, set-text, scroll).</p>
+          <p><strong>Why not the View hierarchy?</strong> In Compose there is no View hierarchy. Composables are functions that emit layout instructions — there are no <code>View</code> objects, no <code>ViewGroup</code> trees, no <code>R.id</code> identifiers. There is nothing for a View-level testing framework to inspect.</p>
+          <p><strong>The key advantage:</strong> The semantics tree is decoupled from implementation structure. You can restructure your composables completely — extract components, rearrange layouts, rename composable functions — and your tests still pass as long as the semantic meaning (text, tags, actions) is preserved. Tests are coupled to <em>behaviour</em>, not implementation:</p>
+          <pre><code><span class="cm">// This test passes regardless of whether "Submit" is a Button,</span>
+<span class="cm">// a TextButton, a custom composable, or wrapped in 10 Box containers</span>
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"submit_button"</span>)
+    .<span class="fn">assertIsEnabled</span>()
+    .<span class="fn">performClick</span>()</code></pre>
+          <p>The semantics tree is also what accessibility services (TalkBack, Switch Access) read — so tests that pass are also a strong signal that the UI is accessible.</p>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q6 — How do you test a composable that uses LaunchedEffect to trigger a side effect?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><code>LaunchedEffect</code> launches a coroutine tied to the composition lifecycle. In tests, the Compose test framework controls the clock. The coroutine runs on the test's coroutine dispatcher.</p>
+          <p><strong>Pattern 1 — Simply waitUntil for the observable outcome:</strong></p>
+          <pre><code><span class="cm">// Composable uses LaunchedEffect to load and show a snackbar after 2s</span>
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">screen_launchedEffect_showsSnackbar</span>() {
+    composeTestRule.<span class="fn">setContent</span> {
+        <span class="fn">MyScreen</span>(viewModel = fakeViewModel)
+    }
+    composeTestRule.<span class="fn">waitUntil</span>(timeoutMillis = <span class="nu">5_000</span>) {
+        composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"snackbar"</span>)
+            .<span class="fn">fetchSemanticsNodes</span>().isNotEmpty()
+    }
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"snackbar"</span>).<span class="fn">assertIsDisplayed</span>()
+}</code></pre>
+          <p><strong>Pattern 2 — Advance the clock for time-based effects:</strong></p>
+          <pre><code>composeTestRule.mainClock.autoAdvance = <span class="kw">false</span>
+composeTestRule.<span class="fn">setContent</span> { <span class="fn">MyScreen</span>() }
+
+<span class="cm">// Advance past the LaunchedEffect delay</span>
+composeTestRule.mainClock.<span class="fn">advanceTimeBy</span>(<span class="nu">3_000</span>)
+
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"result"</span>).<span class="fn">assertIsDisplayed</span>()</code></pre>
+          <p><strong>Pattern 3 — Use TestCoroutineDispatcher via MainCoroutineRule for full coroutine control:</strong></p>
+          <pre><code><span class="an">@get:Rule</span>(<span class="fn">order</span> = <span class="nu">0</span>) <span class="kw">val</span> coroutineRule = <span class="cl">MainCoroutineRule</span>()
+<span class="an">@get:Rule</span>(<span class="fn">order</span> = <span class="nu">1</span>) <span class="kw">val</span> composeTestRule = <span class="fn">createComposeRule</span>()
+
+<span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">test</span>() = coroutineRule.<span class="fn">runTest</span> {
+    composeTestRule.<span class="fn">setContent</span> { <span class="fn">MyScreen</span>() }
+    <span class="fn">advanceUntilIdle</span>()  <span class="cm">// drains all pending coroutines</span>
+    composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"result"</span>).<span class="fn">assertIsDisplayed</span>()
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q7 — Describe how you would implement screenshot regression testing for a component library.</span>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Screenshot regression testing catches unintended visual changes. The standard approach for Compose component libraries is <strong>Paparazzi</strong> (offline JVM rendering).</p>
+          <p><strong>Setup:</strong></p>
+          <pre><code><span class="cm">// build.gradle.kts</span>
+<span class="fn">plugins</span> { <span class="fn">id</span>(<span class="str">"app.cash.paparazzi"</span>) <span class="fn">version</span> <span class="str">"1.3.4"</span> }
+<span class="fn">dependencies</span> { <span class="fn">testImplementation</span>(<span class="str">"app.cash.paparazzi:paparazzi:1.3.4"</span>) }</code></pre>
+          <p><strong>Write tests for each visual state:</strong></p>
+          <pre><code><span class="kw">class</span> <span class="cl">ButtonScreenshotTest</span> {
+    <span class="an">@get:Rule</span>
+    <span class="kw">val</span> paparazzi = <span class="cl">Paparazzi</span>(
+        deviceConfig = <span class="cl">DeviceConfig</span>.PIXEL_5,
+        theme = <span class="str">"android:Theme.Material.Light.NoActionBar"</span>
+    )
+
+    <span class="an">@Test</span> <span class="kw">fun</span> <span class="fn">button_enabled</span>() {
+        paparazzi.<span class="fn">snapshot</span> { <span class="fn">AppTheme</span> { <span class="fn">PrimaryButton</span>(<span class="str">"Submit"</span>, enabled = <span class="kw">true</span>, onClick = {}) } }
+    }
+    <span class="an">@Test</span> <span class="kw">fun</span> <span class="fn">button_disabled</span>() {
+        paparazzi.<span class="fn">snapshot</span> { <span class="fn">AppTheme</span> { <span class="fn">PrimaryButton</span>(<span class="str">"Submit"</span>, enabled = <span class="kw">false</span>, onClick = {}) } }
+    }
+    <span class="an">@Test</span> <span class="kw">fun</span> <span class="fn">button_dark_theme</span>() {
+        paparazzi.<span class="fn">snapshot</span> { <span class="fn">AppTheme</span>(darkTheme = <span class="kw">true</span>) { <span class="fn">PrimaryButton</span>(<span class="str">"Submit"</span>, onClick = {}) } }
+    }
+}</code></pre>
+          <p><strong>Workflow:</strong></p>
+          <ul>
+            <li><strong>Record goldens:</strong> <code>./gradlew recordPaparazziDebug</code> — generates PNG golden files committed to source control</li>
+            <li><strong>Verify in CI:</strong> <code>./gradlew verifyPaparazziDebug</code> — compares rendered output to goldens; fails if pixel diff exceeds threshold</li>
+            <li><strong>Update after intentional changes:</strong> re-run record, review diffs in PR, commit updated goldens</li>
+          </ul>
+          <p><strong>Coverage strategy:</strong> test every component in every documented state — default, disabled, loading, error, hover, dark theme, different screen densities. Use <code>@TestParameter</code> for parameterised snapshot tests if you have many variants.</p>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <span class="quiz-q-text">Q8 — Your Compose test is flaky — it sometimes passes and sometimes fails on the same code. What are the likely causes and how do you fix them?</span>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Flaky Compose tests almost always have one of these root causes:</p>
+          <p><strong>1. Race condition — asserting before async state settles</strong></p>
+          <pre><code><span class="cm">// ❌ Flaky: sometimes the coroutine hasn't emitted yet</span>
+composeTestRule.<span class="fn">setContent</span> { <span class="fn">ProductListScreen</span>(viewModel) }
+composeTestRule.<span class="fn">onNodeWithTag</span>(<span class="str">"product_item"</span>).<span class="fn">assertIsDisplayed</span>()
+
+<span class="cm">// ✅ Fix: wait until the node exists</span>
+composeTestRule.<span class="fn">waitUntil</span>(<span class="nu">5_000</span>) {
+    composeTestRule.<span class="fn">onAllNodesWithTag</span>(<span class="str">"product_item"</span>)
+        .<span class="fn">fetchSemanticsNodes</span>().isNotEmpty()
+}</code></pre>
+          <p><strong>2. Animation not complete — asserting during transition</strong></p>
+          <pre><code><span class="cm">// ✅ Fix: disable auto-advance and control the clock</span>
+composeTestRule.mainClock.autoAdvance = <span class="kw">false</span>
+<span class="cm">// ... trigger action ...</span>
+composeTestRule.mainClock.<span class="fn">advanceTimeBy</span>(<span class="nu">1_000</span>)  <span class="cm">// skip past animation</span></code></pre>
+          <p><strong>3. Shared mutable state between tests</strong> — a static field or singleton retains state from a previous test run. Fix: reset state in <code>@Before</code> / <code>@After</code>, or use a fresh instance per test.</p>
+          <p><strong>4. Test-order dependency</strong> — test A leaves the app in a state that test B depends on. Fix: each test must be fully self-contained — set its own content in <code>setContent{}</code>.</p>
+          <p><strong>5. Timing sensitivity on slow CI machines</strong> — <code>waitUntil</code> timeout is too short. Fix: increase the timeout or replace polling with a deterministic condition that doesn't depend on wall-clock time.</p>
+          <p><strong>6. LazyColumn item not in semantics tree</strong> — an item was scrolled off-screen between one test run and the next due to different initial scroll positions. Fix: always <code>performScrollToIndex()</code> before asserting off-screen items.</p>
+          <p><strong>Diagnostic approach:</strong> run the test 20 times in a row (<code>adb shell am instrument -e numRuns 20</code>), capture Logcat, look for "No matching node" or assertion errors. Print the semantics tree on failure with <code>printToLog()</code>.</p>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var secs=Array.from(document.querySelectorAll('.section[id]'));
+  var navs=Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var pf=document.getElementById('progressFill');
+  function getActive(){var off=120,act=secs[0];for(var i=0;i<secs.length;i++){var r=secs[i].getBoundingClientRect();if(r.top<=off)act=secs[i];}return act;}
+  function update(){var a=getActive();if(!a)return;navs.forEach(function(n){var ok=n.dataset.section===a.id;n.classList.toggle('active',ok);n.classList.toggle('aip-nav-active',ok);});if(pf){var d=document.documentElement.scrollHeight-window.innerHeight;pf.style.width=(d>0?Math.min(window.scrollY/d*100,100):0)+'%';}var ai=navs.find(function(n){return n.dataset.section===a.id;});if(ai){var sb=ai.closest('.sidebar')||ai.closest('nav:not(#aip-topbar)');if(sb){var it=ai.offsetTop,sh=sb.clientHeight,ss=sb.scrollTop;if(it<ss+44||it>ss+sh-64)sb.scrollTop=Math.max(0,it-sh/2+24);}}}
+  window.addEventListener('scroll',update,{passive:true});
+  var me=document.getElementById('mainScroll')||document.querySelector('.main');
+  if(me&&me!==document.body)me.addEventListener('scroll',update,{passive:true});
+  setTimeout(update,100);
+  navs.forEach(function(n){n.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(n.dataset.section);if(!t)return;var tb=document.getElementById('aip-topbar');var off=(tb?tb.offsetHeight:0)+12;window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});});});
+}());
+function toggleQuiz(el){var a=el.nextElementSibling,i=el.querySelector('.toggle-icon');if(a)a.classList.toggle('open');if(i)i.classList.toggle('open');}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

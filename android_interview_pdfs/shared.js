@@ -22,7 +22,17 @@
   // ── Shared CSS ───────────────────────────────────────────────────
   const cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
-  cssLink.href = new URL('shared.css', scriptUrl).href;
+  // Resolve shared.css relative to this script's own URL (document.currentScript
+  // is available synchronously; fallback scans all script tags for shared.js)
+  const _sharedScriptSrc = (document.currentScript && document.currentScript.src) ||
+    (function () {
+      const ss = document.getElementsByTagName('script');
+      for (let i = ss.length - 1; i >= 0; i--) {
+        if (ss[i].src && ss[i].src.indexOf('shared.js') !== -1) return ss[i].src;
+      }
+      return '';
+    }());
+  cssLink.href = _sharedScriptSrc ? new URL('shared.css', _sharedScriptSrc).href : 'shared.css';
   document.head.appendChild(cssLink);
 
   // ── Syllabus map ─────────────────────────────────────────────────
@@ -124,6 +134,14 @@
     {id:'39A',name:'Android Accessibility',file:'39A_Accessibility.html',tier:2},
     {id:'40A',name:'Android New APIs (12–16)',file:'40A_Android_New_APIs.html',tier:1},
     {id:'41A',name:'Advanced Android Debugging',file:'41A_Advanced_Debugging.html',tier:2},
+    {id:'42A',name:'Compose Design System & Multi-Brand Theming',file:'42A_Compose_Design_System.html',tier:1},
+    {id:'42B',name:'Trustworthy AI: Principles & Responsible Development',file:'42B_Trustworthy_AI.html',tier:1},
+    {id:'42C',name:'Advanced App Security: FLAG_SECURE & Hardening',file:'42C_Security_Hardening.html',tier:1},
+    {id:'13D',name:'DataStore: Preferences & Proto',file:'13D_DataStore.html',tier:1},
+    {id:'19C',name:'Secrets & API Key Security',file:'19C_Secrets_API_Key_Security.html',tier:1},
+    {id:'20D',name:'Compose UI Testing',file:'20D_Compose_Testing.html',tier:1},
+    {id:'21B',name:'Baseline Profiles & Macrobenchmark',file:'21B_Baseline_Profiles.html',tier:1},
+    {id:'21C',name:'App Startup Performance',file:'21C_App_Startup_Performance.html',tier:1},
   ];
 
   // ── Progress helpers ─────────────────────────────────────────────
@@ -450,7 +468,7 @@
       main.appendChild(banner);
 
       document.getElementById('nb-home-btn').addEventListener('click', function() {
-        window.location.href = '../index.html';
+        window.location.href = 'index.html';
       });
       document.getElementById('nb-done-btn').addEventListener('click', function() {
         markDone();
@@ -522,7 +540,7 @@
     const tierColor = curTopic ? (tierColors[curTopic.tier] || '#7c6af7') : '#7c6af7';
 
     bar.innerHTML =
-      '<a class="tb-home" href="../index.html">' +
+      '<a class="tb-home" href="index.html">' +
         '<span class="tb-logo">\uD83E\uDD16</span>' +
         '<span class="tb-name">Android Prep</span>' +
       '</a>' +

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>7F – Compose Navigation</title>
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b8fa8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;}
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3148;--accent:#7c6af7;--accent2:#56cfb2;--text:#e2e4f0;--muted:#8b90b8;--warn:#f0a04b;--danger:#f06b6b;--good:#56cfb2;--code-bg:#13151f;--radius:10px;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;display:flex;min-height:100vh;}
   nav{width:240px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
@@ -45,23 +45,90 @@
   .q-mid{background:rgba(240,160,75,.2);color:var(--warn);}
   .q-senior{background:rgba(240,107,107,.2);color:var(--danger);}
   @media(max-width:700px){body{flex-direction:column;}nav{width:100%;height:auto;position:static;}main{padding:24px 16px;}}
+
+  @media(max-width:768px){ section[id] { padding: 24px 16px !important; } .sidebar { display: none; } }
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<nav>
-  <h2>7F · Nav Compose</h2>
-  <a href="#overview">1 · Overview</a>
-  <a href="#how">2 · How It Works</a>
-  <a href="#when">3 · When to Use</a>
-  <a href="#prod">4 · Production Example</a>
-  <a href="#alt">5 · Alternatives</a>
-  <a href="#pitfalls">6 · Pitfalls</a>
-  <a href="#interview">7 · Interview Framework</a>
-  <a href="#revision">8 · Revision Sheet</a>
-  <a href="#quiz">9 · Quiz</a>
+<div class="layout"><nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">7F · Compose Navigation</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#overview" data-section="overview"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#how" data-section="how"><span class="nav-num">2</span> How It Works</a>
+  <a class="nav-item" href="#when" data-section="when"><span class="nav-num">3</span> When to Use</a>
+  <a class="nav-item" href="#prod" data-section="prod"><span class="nav-num">4</span> Production Example</a>
+  <a class="nav-item" href="#alt" data-section="alt"><span class="nav-num">5</span> Alternatives</a>
+  <a class="nav-item" href="#pitfalls" data-section="pitfalls"><span class="nav-num">6</span> Pitfalls</a>
+  <a class="nav-item" href="#interview" data-section="interview"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#revision" data-section="revision"><span class="nav-num">8</span> Revision Sheet</a>
+  <a class="nav-item" href="#quiz" data-section="quiz"><span class="nav-num">9</span> Quiz</a>
 </nav>
-<main>
+<main id="mainScroll">
 <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
   <h1>7F — Compose Navigation</h1>
   <div class="meta">
     <span class="badge t1">Tier 1</span>
@@ -459,14 +526,131 @@ fun AppNavHost() {
   </details>
 </section>
 </main>
-<script>
-  const links=document.querySelectorAll('nav a');
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('nav a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
-  },{threshold:0.3});
-  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
-</script>
 
+
+
+
+
+
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
 <script src="shared.js"></script>
 </body>
 </html>

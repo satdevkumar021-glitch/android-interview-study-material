@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main{flex:1;overflow-y:auto;}
+  .main {flex:1;overflow-y:auto;}
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -92,25 +92,91 @@
   .tag-scenario{background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
   @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
   ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="layout">
 <nav class="sidebar">
   <div class="sidebar-header">20B · Coroutines &amp; Flow Testing</div>
-  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
-  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> How It Works</button>
-  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> When to Use</button>
-  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Production Example</button>
-  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</button>
-  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
-  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
-  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> How It Works</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> When to Use</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Production Example</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Alternatives &amp; Trade-offs</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision Sheet</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
 </nav>
-<main class="main">
+<main class="main" id="mainScroll">
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; Android Interview Prep</div>
     <h1><span>20B</span> — Coroutines &amp; Flow Testing</h1>
     <p class="hero-desc">Modern kotlinx-coroutines-test: runTest {}, StandardTestDispatcher vs UnconfinedTestDispatcher, advanceUntilIdle(), advanceTimeBy(), and Turbine for testing StateFlow, SharedFlow, and cold Flows.</p>
@@ -121,7 +187,7 @@
   </div>
 
   <!-- S1 -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128640;</div>1. Overview &amp; Test Coroutines Architecture</div>
     <p>Testing asynchronous coroutines requires replacing real-time multi-threaded schedulers with <strong>virtual time dispatchers</strong>. The modern <code>kotlinx.coroutines.test</code> API provides <code>runTest {}</code>, which automatically manages virtual time and fails fast on uncaught exceptions.</p>
 
@@ -131,10 +197,6 @@
         <li><code>runBlockingTest</code> &amp; <code>TestCoroutineDispatcher</code>: <strong>Deprecated</strong> due to complex leak issues and inconsistent virtual time propagation across child jobs.</li>
         <li><code>runTest {}</code> + <code>StandardTestDispatcher</code>: <strong>Modern standard</strong> (since Coroutines 1.6+). Provides deterministic coroutine queuing and explicit virtual time control.</li>
       </ul>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-primary" onclick="show('s2',2)">Next: How It Works &amp; Dispatchers →</button>
     </div>
   </div>
 
@@ -169,11 +231,6 @@
       <li><code>advanceTimeBy(delayMillis)</code>: Advances virtual time by the exact number of milliseconds, triggering scheduled <code>delay()</code> calls without blocking the real JVM thread.</li>
       <li><code>runCurrent()</code>: Executes pending tasks currently scheduled at the current virtual timestamp.</li>
     </ul>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
-      <button class="btn btn-primary" onclick="show('s3',3)">Next: Flow Testing with Turbine →</button>
-    </div>
   </div>
 
   <!-- S3 -->
@@ -198,11 +255,6 @@ coldFlow.<span class="fn">test</span> {
         <li><code>awaitError()</code>: Asserts that the Flow threw an exception and returns it.</li>
         <li><code>cancelAndIgnoreRemainingEvents()</code> / <code>cancelAndConsumeRemainingEvents()</code>: Cancels collection of infinite hot flows (e.g. StateFlow).</li>
       </ul>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s2',2)">← How It Works</button>
-      <button class="btn btn-primary" onclick="show('s4',4)">Next: Production Example →</button>
     </div>
   </div>
 
@@ -257,11 +309,6 @@ coldFlow.<span class="fn">test</span> {
         }
     }
 }</code></pre>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s3',3)">← Flow with Turbine</button>
-      <button class="btn btn-primary" onclick="show('s5',5)">Next: Alternatives &amp; Trade-offs →</button>
-    </div>
   </div>
 
   <!-- S5 -->
@@ -295,11 +342,6 @@ coldFlow.<span class="fn">test</span> {
         </tbody>
       </table>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s4',4)">← Production Example</button>
-      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls &amp; Best Practices →</button>
-    </div>
   </div>
 
   <!-- S6 -->
@@ -319,11 +361,6 @@ coldFlow.<span class="fn">test</span> {
     <div class="callout callout-yellow">
       <div class="callout-label">Pitfall 3: Missing cancelAndIgnoreRemainingEvents() in Turbine</div>
       <p>When collecting an infinite hot Flow with Turbine, omitting <code>cancelAndIgnoreRemainingEvents()</code> will cause Turbine to wait for a completion event at the end of the block, throwing an <code>AssertionError: Expected complete, but was uncompleted</code>.</p>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s5',5)">← Alternatives</button>
-      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
     </div>
   </div>
 
@@ -348,11 +385,6 @@ coldFlow.<span class="fn">test</span> {
       <div class="must-item"><div class="must-num">2</div><div><strong>Standard vs Unconfined:</strong> Queued vs eager immediate execution.</div></div>
       <div class="must-item"><div class="must-num">3</div><div><strong>Turbine DSL:</strong> <code>awaitItem()</code>, <code>awaitComplete()</code>, <code>cancelAndIgnoreRemainingEvents()</code>.</div></div>
       <div class="must-item"><div class="must-num">4</div><div><strong>Virtual Time Control:</strong> <code>advanceUntilIdle()</code> and <code>advanceTimeBy()</code>.</div></div>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
-      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
     </div>
   </div>
 
@@ -390,11 +422,6 @@ Dispatchers.resetMain()</code></pre>
         <pre><code>StateFlow / SharedFlow -> Never call .toList()!
 Use Turbine or backgroundScope.launch</code></pre>
       </div>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
-      <button class="btn btn-primary" onclick="show('s9',9)">Next: Interview Questions →</button>
     </div>
   </div>
 
@@ -516,17 +543,12 @@ Use Turbine or backgroundScope.launch</code></pre>
 <span class="kw">val</span> mainDispatcherRule = <span class="cl">MainDispatcherRule</span>()</code></pre>
       </div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
-      <button class="btn btn-primary" onclick="show('s1',1)">↑ Back to Top</button>
-    </div>
   </div>
 </main>
 </div>
 <script>
   const S=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
-  function show(id,num){
+  
     S.forEach(s=>document.getElementById(s).classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===num-1));
     document.getElementById(id).classList.add('active');
@@ -539,6 +561,129 @@ Use Turbine or backgroundScope.launch</code></pre>
   }
 </script>
 
+
+
+
+
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
 <script src="shared.js"></script>
 </body>
 </html>

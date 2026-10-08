@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>21C — App Startup Performance</title>
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+.sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+.nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;flex-shrink:0;}
+.nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+.main{flex:1;}
+.hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+.hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+.hero h1 span{color:var(--accent);}
+.hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+.hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+.badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+.badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+.badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+.section{display:block!important;padding:40px 48px;max-width:920px;border-bottom:1px solid var(--border);}
+.section:last-of-type{border-bottom:none;}
+.section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+p{color:var(--muted);margin-bottom:14px;}p strong{color:var(--text);}
+li{color:var(--muted);margin-bottom:6px;}li strong{color:var(--text);}
+ul,ol{padding-left:20px;margin-bottom:14px;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+.kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+.table-wrap{overflow-x:auto;margin:14px 0 20px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td:first-child{color:var(--text);font-weight:600;}td strong{color:var(--text);}
+.callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+.callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+.callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+.callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+.callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+.callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+.callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.callout-green .callout-label{color:var(--green);}.callout-red .callout-label{color:var(--red);}.callout-yellow .callout-label{color:var(--yellow);}.callout-blue .callout-label{color:var(--accent2);}.callout-purple .callout-label{color:var(--accent);}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+.quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+.quiz-q:hover{background:rgba(255,255,255,.02);}
+.quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+.quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+.diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+.diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+.toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+.quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+.quiz-a.open{display:block;}
+.toggle-icon.open{transform:rotate(180deg);}
+.answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+.must-mention{display:grid;gap:10px;margin:14px 0;}
+.must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+.must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .1s linear;}
+.nav-buttons{display:none!important;}
+.nav-item.active,.nav-item.aip-nav-active{background:rgba(124,106,247,.15)!important;color:var(--accent)!important;}
+.nav-item.active .nav-num,.nav-item.aip-nav-active .nav-num{background:rgba(124,106,247,.25)!important;color:var(--accent)!important;}
+@media(max-width:768px){.sidebar{display:none!important;}.section{padding:24px 16px!important;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sidebar-back{display:flex;align-items:center;gap:8px;padding:8px 12px 12px;margin-bottom:8px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--muted);font-size:12px;font-weight:600;transition:color .15s;}
+.sidebar-back:hover{color:var(--accent);}
+.sidebar-back svg{width:14px;height:14px;flex-shrink:0;fill:currentColor;}
+.hero-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:14px;transition:color .15s;font-weight:500;}
+.hero-back:hover{color:var(--accent);}
+.hero-back svg{width:12px;height:12px;fill:currentColor;}
+.timeline{margin:14px 0 20px;display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:0;align-items:stretch;}
+.tl-num{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:36px;}
+.tl-circle{width:28px;height:28px;border-radius:50%;background:rgba(124,106,247,.2);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--accent);flex-shrink:0;}
+.tl-line{width:2px;background:var(--border);flex:1;margin:0 auto;}
+.tl-item:last-child .tl-line{display:none;}
+.tl-body{padding:2px 0 20px 16px;flex:1;}
+.tl-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.tl-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+.tl-item.bottleneck .tl-circle{background:rgba(255,107,107,.2);border-color:var(--red);color:var(--red);}
+.tl-item.optimisable .tl-circle{background:rgba(62,207,142,.2);border-color:var(--green);color:var(--green);}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-back">
+      <svg viewBox="0 0 16 16"><path d="M10.5 3.5L6 8l4.5 4.5"/></svg>
+      Back to Index
+    </a>
+    <div class="sidebar-header">21C — App Startup</div>
+    <a class="nav-item active" data-section="s1" href="#s1"><span class="nav-num">1</span>Overview — Startup Types</a>
+    <a class="nav-item" data-section="s2" href="#s2"><span class="nav-num">2</span>The Startup Timeline</a>
+    <a class="nav-item" data-section="s3" href="#s3"><span class="nav-num">3</span>App Startup Library</a>
+    <a class="nav-item" data-section="s4" href="#s4"><span class="nav-num">4</span>Cold Start Optimisation</a>
+    <a class="nav-item" data-section="s5" href="#s5"><span class="nav-num">5</span>Lazy Initialisation Patterns</a>
+    <a class="nav-item" data-section="s6" href="#s6"><span class="nav-num">6</span>Tracing &amp; Profiling Startup</a>
+    <a class="nav-item" data-section="s7" href="#s7"><span class="nav-num">7</span>Pitfalls &amp; Common Mistakes</a>
+    <a class="nav-item" data-section="s8" href="#s8"><span class="nav-num">8</span>Interview Framework</a>
+    <a class="nav-item" data-section="s9" href="#s9"><span class="nav-num">9</span>Interview Questions</a>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main" id="mainScroll">
+
+    <!-- HERO -->
+    <div class="hero">
+      <a href="index.html" class="hero-back">
+        <svg viewBox="0 0 16 16"><path d="M10.5 3.5L6 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        Android Interview Prep
+      </a>
+      <div class="hero-tag">🚀 Performance</div>
+      <h1><span>21C</span> — App Startup Performance</h1>
+      <p class="hero-desc">Cold, warm, and hot start mechanics. The full startup timeline from zygote fork to first frame. App Startup library for initialiser ordering. Lazy loading, tracing with Perfetto, and measuring TTID/TTFD.</p>
+      <div class="hero-meta">
+        <span class="badge badge-id">ID: 21C</span>
+        <span class="badge badge-tier1">⭐ Tier 1</span>
+        <span class="badge badge-hot">🔥 Hot Topic</span>
+      </div>
+    </div>
+
+    <!-- S1: OVERVIEW -->
+    <div class="section" id="s1">
+      <div class="section-title"><div class="section-icon">📋</div>Overview — Startup Types</div>
+
+      <h3>Three Startup Types</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Process State</th><th>Activity State</th><th>Timeline Steps</th><th>Typical Duration</th><th>Optimisation Levers</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Cold Start</strong></td>
+              <td>Does not exist</td>
+              <td>Does not exist</td>
+              <td>Zygote fork → JVM init → Application.onCreate() → ContentProviders → Activity.onCreate() → layout inflate → first frame</td>
+              <td>300ms–3000ms</td>
+              <td>Baseline Profile, lazy init, App Startup library, reduce ContentProviders</td>
+            </tr>
+            <tr>
+              <td><strong>Warm Start</strong></td>
+              <td>Exists (still in memory)</td>
+              <td>Destroyed (back-pressed / memory pressure)</td>
+              <td>Activity.onCreate() → layout inflate → first frame</td>
+              <td>50ms–250ms</td>
+              <td>Lightweight Activity onCreate, saved state restoration speed</td>
+            </tr>
+            <tr>
+              <td><strong>Hot Start</strong></td>
+              <td>Exists</td>
+              <td>Exists (paused/stopped)</td>
+              <td>Activity.onRestart/onStart/onResume → redraw</td>
+              <td>0ms–100ms</td>
+              <td>Minimal onResume work, avoid synchronous I/O on resume</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Why Startup Matters</h3>
+      <ul>
+        <li><strong>Play Store ranking:</strong> Google Play considers startup performance in app quality signals and ranking algorithms.</li>
+        <li><strong>Retention impact:</strong> Users who experience &gt;5 second cold starts have a <strong>29% higher uninstall rate</strong> within 30 days.</li>
+        <li><strong>Revenue:</strong> E-commerce studies show each additional 100ms of startup latency correlates with ~1% drop in conversion.</li>
+      </ul>
+
+      <h3>Time Targets</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cold Start TTID</th><th>Rating</th><th>User Perception</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 500ms</td><td style="color:var(--green);font-weight:700;">Excellent</td><td>Feels instant</td></tr>
+            <tr><td>500ms – 1000ms</td><td style="color:var(--accent2);font-weight:700;">Good</td><td>Slightly perceptible but acceptable</td></tr>
+            <tr><td>1000ms – 2000ms</td><td style="color:var(--yellow);font-weight:700;">Acceptable</td><td>Noticeable — users may tolerate</td></tr>
+            <tr><td>&gt; 2000ms</td><td style="color:var(--red);font-weight:700;">Poor</td><td>Frustrating — abandon / uninstall risk</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>TTID vs TTFD</h3>
+      <p><strong>TTID (Time to Initial Display):</strong> Time from launch intent to first frame rendered on screen. Measured automatically by the system. Check with <code>adb shell am start -W</code> → <code>ThisTime</code>.</p>
+      <p><strong>TTFD (Time to Full Display):</strong> Time until your content is fully loaded and useful. You control this by calling <code>reportFullyDrawn()</code>. Without this call, Macrobenchmark cannot measure TTFD accurately.</p>
+
+      <div class="callout callout-yellow">
+        <div class="callout-label">Key Distinction</div>
+        TTID can look great (fast skeleton/splash) while TTFD is terrible (data loads slowly). Users see TTFD. Always optimise and measure both — and always call <code>reportFullyDrawn()</code> when your real content is visible.
+      </div>
+    </div>
+
+    <!-- S2: STARTUP TIMELINE -->
+    <div class="section" id="s2">
+      <div class="section-title"><div class="section-icon">⏱️</div>The Startup Timeline</div>
+
+      <p>Full annotated cold start sequence from process creation to first rendered frame:</p>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-num"><div class="tl-circle">1</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">System forks from Zygote</div><div class="tl-desc">Android's Zygote process pre-warms a JVM and pre-loads common classes. Your app process is forked from this. <strong>Not optimisable by the app developer.</strong></div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-num"><div class="tl-circle">2</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">JVM initialised, DEX classes loaded</div><div class="tl-desc">Class loading begins. With a Baseline Profile, startup-path classes are already AOT-compiled. <strong>Partially optimisable via Baseline Profiles.</strong></div></div>
+        </div>
+        <div class="tl-item bottleneck">
+          <div class="tl-num"><div class="tl-circle">3</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">ContentProviders initialised ⚠️ HIDDEN BOTTLENECK</div><div class="tl-desc">Every registered ContentProvider is initialised <em>before</em> Application.onCreate() runs. Many SDKs use the ContentProvider trick for auto-init: Firebase, WorkManager, Lifecycle, CameraX. Each CP holds the Application Context lock. With 5–8 SDKs, this can consume 50–150ms.</div></div>
+        </div>
+        <div class="tl-item optimisable">
+          <div class="tl-num"><div class="tl-circle">4</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Application.attachBaseContext() → Application.onCreate()</div><div class="tl-desc">DI graph, logging, analytics, crash reporting initialised here. <strong>Major optimisation opportunity.</strong> Move non-critical SDK init off main thread. Use lazy init and App Startup library.</div></div>
+        </div>
+        <div class="tl-item optimisable">
+          <div class="tl-num"><div class="tl-circle">5</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Activity created — setContentView() / Compose setContent()</div><div class="tl-desc">Layout inflation (XML) or initial composition (Compose). Complex layouts with deep hierarchies or custom views inflate slowly. <strong>Optimise with ViewStub, Compose, constraint-flat hierarchies.</strong></div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-num"><div class="tl-circle">6</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Layout measured, laid out, drawn → TTID</div><div class="tl-desc">First frame rendered to screen. This is <strong>TTID</strong> — what <code>adb shell am start -W</code> reports as <code>ThisTime</code>. The system records this automatically.</div></div>
+        </div>
+        <div class="tl-item optimisable">
+          <div class="tl-num"><div class="tl-circle">7</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Async data loads complete → UI updates → reportFullyDrawn() → TTFD</div><div class="tl-desc">Network calls, database queries, image loading finish. UI transitions from skeleton/loading state to full content. Call <code>reportFullyDrawn()</code> here. This is <strong>TTFD</strong>.</div></div>
+        </div>
+      </div>
+
+      <h3>Measuring from ADB</h3>
+      <pre><code><span class="cm"># Cold start measurement — kills app first, then starts and waits</span>
+adb shell am force-stop com.example.myapp
+adb shell am start -W -n com.example.myapp/.MainActivity
+
+<span class="cm"># Output:</span>
+<span class="cm"># Status: ok</span>
+<span class="cm"># LaunchState: COLD</span>
+<span class="cm"># Activity: com.example.myapp/.MainActivity</span>
+<span class="cm"># ThisTime: 423      ← TTID in ms (Activity launch time)</span>
+<span class="cm"># TotalTime: 423     ← Time including all Activities in the chain</span>
+<span class="cm"># WaitTime: 445      ← Includes system overhead</span></code></pre>
+
+      <h3>ContentProvider as Hidden Startup Cost</h3>
+      <pre><code><span class="cm">// Firebase, WorkManager, Lifecycle etc. register CPs like this in their manifests:</span>
+<span class="cm">// &lt;provider android:name="com.google.firebase.provider.FirebaseInitProvider"</span>
+<span class="cm">//           android:initOrder="100" /&gt;</span>
+<span class="cm">// Each CP's onCreate() is called on the main thread BEFORE your Application.onCreate()</span>
+
+<span class="cm">// To see all CPs being initialised at startup, run:</span>
+adb shell am start -W com.example.myapp/.MainActivity
+<span class="cm"># Then open Perfetto/System Trace and look for "bindApplication" → "ContentProvider" sections</span></code></pre>
+    </div>
+
+    <!-- S3: APP STARTUP LIBRARY -->
+    <div class="section" id="s3">
+      <div class="section-title"><div class="section-icon">📦</div>App Startup Library</div>
+
+      <p><strong>Problem:</strong> N SDKs registering N ContentProviders for auto-init creates N separate ContentProvider instantiations, each holding the Application Context lock on the main thread during startup.</p>
+      <p><strong>Solution:</strong> The App Startup library provides a <strong>single ContentProvider</strong> (<code>InitializationProvider</code>) that orchestrates all registered Initializers in dependency order.</p>
+
+      <div class="callout callout-green">
+        <div class="callout-label">✅ Impact</div>
+        App Startup replaces N ContentProviders with 1. For an app with 5 auto-init SDKs, this eliminates <strong>4 unnecessary ContentProvider creations</strong> — each of which holds an Application Context lock during initialisation. Typical saving: 20–60ms of cold start time.
+      </div>
+
+      <h3>Dependency</h3>
+      <pre><code><span class="cm">// build.gradle.kts</span>
+implementation(<span class="str">"androidx.startup:startup-runtime:1.1.1"</span>)</code></pre>
+
+      <h3>Writing Initializers</h3>
+      <pre><code><span class="cm">// WorkManager initializer</span>
+<span class="kw">class</span> <span class="cl">WorkManagerInitializer</span> : <span class="cl">Initializer</span>&lt;<span class="cl">WorkManager</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">create</span>(context: <span class="cl">Context</span>): <span class="cl">WorkManager</span> {
+        <span class="cl">WorkManager</span>.<span class="fn">initialize</span>(context, <span class="cl">Configuration</span>.<span class="cl">Builder</span>().<span class="fn">build</span>())
+        <span class="kw">return</span> <span class="cl">WorkManager</span>.<span class="fn">getInstance</span>(context)
+    }
+    <span class="kw">override fun</span> <span class="fn">dependencies</span>(): <span class="cl">List</span>&lt;<span class="cl">Class</span>&lt;<span class="kw">out</span> <span class="cl">Initializer</span>&lt;*&gt;&gt;&gt; = <span class="fn">emptyList</span>()
+}
+
+<span class="cm">// Timber initializer (no dependencies)</span>
+<span class="kw">class</span> <span class="cl">TimberInitializer</span> : <span class="cl">Initializer</span>&lt;<span class="cl">Unit</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">create</span>(context: <span class="cl">Context</span>) {
+        <span class="kw">if</span> (<span class="cl">BuildConfig</span>.DEBUG) <span class="cl">Timber</span>.<span class="fn">plant</span>(<span class="cl">Timber</span>.<span class="cl">DebugTree</span>())
+    }
+    <span class="kw">override fun</span> <span class="fn">dependencies</span>(): <span class="cl">List</span>&lt;<span class="cl">Class</span>&lt;<span class="kw">out</span> <span class="cl">Initializer</span>&lt;*&gt;&gt;&gt; = <span class="fn">emptyList</span>()
+}
+
+<span class="cm">// Crashlytics initializer — depends on Timber being ready first</span>
+<span class="kw">class</span> <span class="cl">CrashlyticsInitializer</span> : <span class="cl">Initializer</span>&lt;<span class="cl">Unit</span>&gt; {
+    <span class="kw">override fun</span> <span class="fn">create</span>(context: <span class="cl">Context</span>) {
+        <span class="cl">FirebaseCrashlytics</span>.<span class="fn">getInstance</span>().<span class="fn">setCrashlyticsCollectionEnabled</span>(!<span class="cl">BuildConfig</span>.DEBUG)
+    }
+    <span class="kw">override fun</span> <span class="fn">dependencies</span>() = <span class="fn">listOf</span>(<span class="cl">TimberInitializer</span>::<span class="kw">class</span>.java)
+}</code></pre>
+
+      <h3>Manifest Registration</h3>
+      <pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;<span class="fn">provider</span>
+    android:name=<span class="str">"androidx.startup.InitializationProvider"</span>
+    android:authorities=<span class="str">"${applicationId}.androidx-startup"</span>
+    android:exported=<span class="str">"false"</span>
+    tools:node=<span class="str">"merge"</span>&gt;
+    &lt;<span class="fn">meta-data</span>
+        android:name=<span class="str">"com.example.WorkManagerInitializer"</span>
+        android:value=<span class="str">"androidx.startup"</span> /&gt;
+    &lt;<span class="fn">meta-data</span>
+        android:name=<span class="str">"com.example.TimberInitializer"</span>
+        android:value=<span class="str">"androidx.startup"</span> /&gt;
+    &lt;<span class="fn">meta-data</span>
+        android:name=<span class="str">"com.example.CrashlyticsInitializer"</span>
+        android:value=<span class="str">"androidx.startup"</span> /&gt;
+&lt;/<span class="fn">provider</span>&gt;</code></pre>
+
+      <h3>Lazy / Manual Initialisation</h3>
+      <pre><code><span class="cm">// Disable automatic init in manifest (use tools:node="remove"):</span>
+&lt;<span class="fn">meta-data</span>
+    android:name=<span class="str">"com.example.HeavyAnalyticsInitializer"</span>
+    android:value=<span class="str">"androidx.startup"</span>
+    tools:node=<span class="str">"remove"</span> /&gt;
+
+<span class="cm">// Then init manually when needed (e.g., after first screen is shown):</span>
+<span class="cl">AppInitializer</span>.<span class="fn">getInstance</span>(context)
+    .<span class="fn">initializeComponent</span>(<span class="cl">HeavyAnalyticsInitializer</span>::<span class="kw">class</span>.java)</code></pre>
+    </div>
+
+    <!-- S4: COLD START OPTIMISATION -->
+    <div class="section" id="s4">
+      <div class="section-title"><div class="section-icon">⚡</div>Cold Start Optimisation</div>
+
+      <h3>Optimisation Checklist — Ranked by Impact</h3>
+
+      <h4>1. Move Heavy Init Out of Application.onCreate()</h4>
+      <pre><code><span class="cm">// ❌ BEFORE: blocking main thread at startup</span>
+<span class="kw">class</span> <span class="cl">MyApplication</span> : <span class="cl">Application</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+        <span class="cl">HeavyAnalyticsSdk</span>.<span class="fn">initialize</span>(<span class="kw">this</span>)        <span class="cm">// 80ms on main thread</span>
+        <span class="cl">ImageLoader</span>.<span class="fn">setup</span>(<span class="kw">this</span>, diskCacheSize = <span class="nu">500_000_000</span>) <span class="cm">// 40ms</span>
+    }
+}
+
+<span class="cm">// ✅ AFTER: defer to background thread</span>
+<span class="kw">class</span> <span class="cl">MyApplication</span> : <span class="cl">Application</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+        <span class="cm">// Only critical-path init on main thread</span>
+        <span class="cl">Timber</span>.<span class="fn">plant</span>(<span class="cl">Timber</span>.<span class="cl">DebugTree</span>())
+        <span class="cm">// Defer heavy init</span>
+        <span class="cl">AppScope</span>.launch(<span class="cl">Dispatchers</span>.IO) {
+            <span class="cl">HeavyAnalyticsSdk</span>.<span class="fn">initialize</span>(<span class="kw">this</span>@<span class="cl">MyApplication</span>)
+        }
+    }
+}</code></pre>
+
+      <h4>2. SplashScreen API — Instant Perceived Start</h4>
+      <pre><code><span class="cm">// themes.xml</span>
+&lt;<span class="fn">style</span> name=<span class="str">"Theme.App.Starting"</span> parent=<span class="str">"Theme.SplashScreen"</span>&gt;
+    &lt;<span class="fn">item</span> name=<span class="str">"windowSplashScreenBackground"</span>&gt;@color/brand_bg&lt;/<span class="fn">item</span>&gt;
+    &lt;<span class="fn">item</span> name=<span class="str">"windowSplashScreenAnimatedIcon"</span>&gt;@drawable/ic_logo&lt;/<span class="fn">item</span>&gt;
+    &lt;<span class="fn">item</span> name=<span class="str">"postSplashScreenTheme"</span>&gt;@style/Theme.App&lt;/<span class="fn">item</span>&gt;
+&lt;/<span class="fn">style</span>&gt;
+
+<span class="cm">// MainActivity.kt</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+    <span class="kw">val</span> splashScreen = <span class="fn">installSplashScreen</span>()
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="cm">// Keep splash visible until data is ready</span>
+    splashScreen.<span class="fn">setKeepOnScreenCondition</span> { !viewModel.isReady }
+    <span class="fn">setContentView</span>(<span class="cl">R</span>.layout.activity_main)
+}</code></pre>
+
+      <h4>3. Reduce ContentProviders — Use App Startup Library</h4>
+      <p>See Section 3 for full implementation. Replace N SDK ContentProviders with a single <code>InitializationProvider</code>.</p>
+
+      <h4>4. Lazy-load Non-Critical Dependencies</h4>
+      <pre><code><span class="cm">// Hilt lazy injection — AnalyticsManager not created until first access</span>
+<span class="an">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">AppCompatActivity</span>() {
+    <span class="an">@Inject</span> <span class="kw">lateinit var</span> analyticsManager: <span class="cl">Lazy</span>&lt;<span class="cl">AnalyticsManager</span>&gt;
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="cm">// analyticsManager.get() called here — not at startup</span>
+    }
+
+    <span class="kw">fun</span> <span class="fn">onUserAction</span>() {
+        analyticsManager.<span class="fn">get</span>().<span class="fn">track</span>(<span class="str">"user_action"</span>) <span class="cm">// Created on first use</span>
+    }
+}</code></pre>
+
+      <h4>5. Enable R8 / Code Shrinking</h4>
+      <p>Smaller DEX files mean faster class loading. Enable R8 in release builds and write effective ProGuard rules. Unused classes removed = faster startup.</p>
+
+      <h4>6. Add Baseline Profile</h4>
+      <p>See module 21B. AOT-compiles startup-critical code. Typically the highest single-step improvement at 20–40%.</p>
+    </div>
+
+    <!-- S5: LAZY INITIALISATION PATTERNS -->
+    <div class="section" id="s5">
+      <div class="section-title"><div class="section-icon">💤</div>Lazy Initialisation Patterns</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pattern</th><th>When to Use</th><th>Thread-Safety</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Kotlin <code>by lazy</code></td><td>Expensive property, single-threaded or safe context</td><td><code>LazyThreadSafetyMode.SYNCHRONIZED</code> by default</td><td>Simplest — use for ViewModels, repositories</td></tr>
+            <tr><td>Hilt <code>Lazy&lt;T&gt;</code></td><td>DI-provided object not needed at startup</td><td>Thread-safe via Hilt's Scope locks</td><td>Best for injected dependencies in Activities/Fragments</td></tr>
+            <tr><td>Deferred coroutine init</td><td>Background initialisation with async result</td><td>Coroutine-safe with <code>Mutex</code> or <code>StateFlow</code></td><td>Use when init involves I/O or network</td></tr>
+            <tr><td><code>AtomicReference</code></td><td>Background init, any thread can read</td><td>Fully thread-safe</td><td>Use for static/singleton background init</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kotlin by lazy</h3>
+      <pre><code><span class="kw">class</span> <span class="cl">ProductRepository</span> {
+    <span class="cm">// Only created when first accessed — not at class instantiation</span>
+    <span class="kw">private val</span> heavyParser: <span class="cl">XmlParser</span> <span class="kw">by lazy</span> {
+        <span class="cl">XmlParser</span>(<span class="fn">loadConfig</span>()) <span class="cm">// 30ms — deferred until needed</span>
+    }
+}</code></pre>
+
+      <h3>Hilt Lazy Injection</h3>
+      <pre><code><span class="an">@AndroidEntryPoint</span>
+<span class="kw">class</span> <span class="cl">HomeFragment</span> : <span class="cl">Fragment</span>() {
+    <span class="cm">// dagger.Lazy — AnalyticsManager created only on first .get() call</span>
+    <span class="an">@Inject</span> <span class="kw">lateinit var</span> analytics: <span class="cl">Lazy</span>&lt;<span class="cl">AnalyticsManager</span>&gt;
+
+    <span class="kw">override fun</span> <span class="fn">onResume</span>() {
+        <span class="kw">super</span>.<span class="fn">onResume</span>()
+        <span class="cm">// Analytics not created until actual first use</span>
+        analytics.<span class="fn">get</span>().<span class="fn">trackScreen</span>(<span class="str">"home"</span>)
+    }
+}</code></pre>
+
+      <h3>Deferred Coroutine Initialisation</h3>
+      <pre><code><span class="kw">class</span> <span class="cl">HomeViewModel</span> <span class="an">@Inject</span> <span class="kw">constructor</span>(
+    <span class="kw">private val</span> repo: <span class="cl">ProductRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">init</span> {
+        <span class="cm">// Launch after first frame — don't block startup</span>
+        viewModelScope.<span class="fn">launch</span> {
+            <span class="cm">// Suspend until layout is done</span>
+            <span class="fn">withFrameNanos</span> {}
+            repo.<span class="fn">prefetchPopularProducts</span>()
+        }
+    }
+}</code></pre>
+
+      <h3>AtomicReference Background Singleton Init</h3>
+      <pre><code><span class="kw">object</span> <span class="cl">HeavySingleton</span> {
+    <span class="kw">private val</span> instance = <span class="cl">AtomicReference</span>&lt;<span class="cl">HeavyService</span>?&gt;(<span class="kw">null</span>)
+
+    <span class="kw">fun</span> <span class="fn">initInBackground</span>(context: <span class="cl">Context</span>) {
+        <span class="cl">Thread</span> {
+            instance.<span class="fn">set</span>(<span class="cl">HeavyService</span>(context)) <span class="cm">// background thread</span>
+        }.<span class="fn">start</span>()
+    }
+
+    <span class="kw">fun</span> <span class="fn">get</span>(): <span class="cl">HeavyService</span>? = instance.<span class="fn">get</span>() <span class="cm">// null until ready</span>
+}</code></pre>
+
+      <h3>reportFullyDrawn()</h3>
+      <pre><code><span class="cm">// Call when ALL your content is actually displayed and useful</span>
+<span class="kw">class</span> <span class="cl">HomeActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="cl">ProductListScreen</span>(
+                onContentReady = {
+                    <span class="cm">// Called when the first items are visible in the list</span>
+                    <span class="fn">reportFullyDrawn</span>()
+                }
+            )
+        }
+    }
+}</code></pre>
+    </div>
+
+    <!-- S6: TRACING & PROFILING -->
+    <div class="section" id="s6">
+      <div class="section-title"><div class="section-icon">🔍</div>Tracing &amp; Profiling Startup</div>
+
+      <h3>Perfetto / System Trace (Preferred)</h3>
+      <p>Perfetto is the production-quality profiling tool for Android startup. Captures all threads, ContentProvider init, class loading, and custom trace sections with minimal overhead.</p>
+      <pre><code><span class="cm"># Capture a system trace during app startup (10 seconds)</span>
+adb shell perfetto \
+  -c - --txt \
+  -o /data/misc/perfetto-traces/startup.perfetto-trace &lt;&lt;EOF
+buffers: { size_kb: 63488 fill_policy: DISCARD }
+data_sources: { config { name: "android.log" } }
+data_sources: { config { name: "linux.process_stats" } }
+data_sources: { config { name: "android.frametimeline" } }
+duration_ms: 10000
+EOF
+
+<span class="cm"># Pull the trace</span>
+adb pull /data/misc/perfetto-traces/startup.perfetto-trace ~/Desktop/startup.perfetto-trace
+<span class="cm"># Open in https://ui.perfetto.dev</span></code></pre>
+
+      <h3>Custom Trace Sections</h3>
+      <p>Add named sections to your code — they appear as labelled spans in Perfetto's timeline:</p>
+      <pre><code><span class="kw">class</span> <span class="cl">MyApplication</span> : <span class="cl">Application</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>() {
+        <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"App.onCreate"</span>)
+        <span class="kw">super</span>.<span class="fn">onCreate</span>()
+
+        <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"App.initTimber"</span>)
+        <span class="cl">Timber</span>.<span class="fn">plant</span>(<span class="cl">Timber</span>.<span class="cl">DebugTree</span>())
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>()
+
+        <span class="cl">Trace</span>.<span class="fn">beginSection</span>(<span class="str">"App.initDatabase"</span>)
+        <span class="cl">Room</span>.<span class="fn">databaseBuilder</span>(<span class="kw">this</span>, <span class="cl">AppDatabase</span>::<span class="kw">class</span>.java, <span class="str">"app.db"</span>)
+            .<span class="fn">build</span>()
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>()
+
+        <span class="cl">Trace</span>.<span class="fn">endSection</span>() <span class="cm">// App.onCreate</span>
+    }
+}</code></pre>
+
+      <h3>What to Look for in a Startup Trace</h3>
+      <ul>
+        <li><strong>Main thread blocking work:</strong> Any long spans on the main thread before first frame. Should be &lt;16ms each.</li>
+        <li><strong>ContentProvider init time:</strong> Look for <code>bindApplication</code> → <code>ContentProvider: [name]</code> sections. Identify which SDKs are slowest.</li>
+        <li><strong>Large class loads:</strong> Look for <code>ClassLoad</code> events — indicates classes not in Baseline Profile being JIT-compiled for first time.</li>
+        <li><strong>Synchronous I/O:</strong> Look for disk read/write on main thread. Even small SharedPreferences reads can block 5–20ms.</li>
+        <li><strong>Blocking coroutines:</strong> <code>runBlocking</code> on main thread appears as a blocked main thread span.</li>
+      </ul>
+
+      <h3>Android Studio Profiler — Startup Template</h3>
+      <p>Android Studio (Flamingo+) includes an automated <strong>App Startup</strong> profiling template. Run via <em>Profiler → App Startup</em> to get an automated flame graph showing the full startup call tree, class loading, and thread activity — without manual ADB commands.</p>
+
+      <h3>Method Tracing (Legacy — High Overhead)</h3>
+      <pre><code><span class="cm">// Use only for identifying which methods take the most time (not for real timing)</span>
+<span class="cl">Debug</span>.<span class="fn">startMethodTracing</span>(<span class="str">"startup_trace"</span>)
+<span class="cm">// ... code to profile ...</span>
+<span class="cl">Debug</span>.<span class="fn">stopMethodTracing</span>()
+<span class="cm">// Pull: adb pull /sdcard/startup_trace.trace</span>
+<span class="cm">// ⚠️ Method tracing adds 10–100× overhead — never use for measuring actual times</span></code></pre>
+    </div>
+
+    <!-- S7: PITFALLS -->
+    <div class="section" id="s7">
+      <div class="section-title"><div class="section-icon">⚠️</div>Pitfalls &amp; Common Mistakes</div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ SharedPreferences in Application.onCreate()</div>
+        <code>SharedPreferences.getString()</code> triggers a synchronous disk read on the main thread. On a cold device with fragmented storage, this can take 10–50ms.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Migrate to DataStore and read asynchronously. If you must use SharedPreferences, move the read to a background thread and use a LiveData/StateFlow to observe the result.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Too Many ContentProviders for Auto-Init</div>
+        Each SDK registering its own ContentProvider adds ~5–15ms of main-thread overhead per ContentProvider at startup.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Use the App Startup library to consolidate all SDK init into a single ContentProvider with ordered, dependency-aware Initializers.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Initialising Analytics/Crash/Push on Main Thread</div>
+        Firebase Analytics, Crashlytics, and push notification SDKs often do file I/O and network calls during init. Calling these on the main thread adds 50–150ms.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Check SDK docs for thread safety — most modern SDKs support background-thread init. Use <code>AppScope.launch(Dispatchers.IO)</code>.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Large Static Initialiser Blocks</div>
+        Kotlin <code>companion object</code> and <code>object</code> declarations with heavy static initialisation run when the class is first loaded — which can be during startup.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Profile with Perfetto to identify expensive class load events. Convert static-init work to lazy properties.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Not Calling reportFullyDrawn()</div>
+        Without <code>reportFullyDrawn()</code>, Macrobenchmark cannot measure TTFD accurately — it falls back to a heuristic that may not match real user-perceived loading time.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Call <code>reportFullyDrawn()</code> (or the Compose <code>ReportDrawn</code>/<code>ReportDrawnWhen</code> modifiers) precisely when your first screen's meaningful content is fully visible.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Measuring Startup on a Device with a Cold JIT Cache</div>
+        First launch on a freshly installed build is always slow (JIT not yet warmed). Measuring only the first launch gives a misleadingly bad number.
+        <br><strong style="color:var(--green)">✅ Fix:</strong> Use Macrobenchmark's <code>StartupMode.COLD</code> which kills and restarts the app process for each iteration, giving statistically valid cold-start numbers with correct ART state.
+      </div>
+    </div>
+
+    <!-- S8: INTERVIEW FRAMEWORK -->
+    <div class="section" id="s8">
+      <div class="section-title"><div class="section-icon">🎯</div>Interview Framework</div>
+
+      <h3>30-Second Answer</h3>
+      <div class="answer-box">
+        "Cold start is the full path: Zygote fork → ContentProviders init → Application onCreate → Activity created → first frame drawn. The two main optimisation levers are: (1) <strong>Baseline Profiles</strong> for AOT compilation — 20–40% faster without code changes. (2) Moving heavy work out of Application.onCreate() — use the <strong>App Startup library</strong> to merge ContentProviders and enable lazy initialisation of non-critical SDKs. I measure with <code>adb am start -W</code> and Macrobenchmark's StartupTimingMetric, and I always call <code>reportFullyDrawn()</code> for accurate TTFD."
+      </div>
+
+      <h3>2-Minute Deep Dive Structure</h3>
+      <ol>
+        <li><strong>Define startup types:</strong> Cold (full process creation) / Warm (Activity recreated) / Hot (resume) — different optimisation levers for each</li>
+        <li><strong>Identify the timeline:</strong> ContentProviders are the hidden early bottleneck — initialised before Application.onCreate()</li>
+        <li><strong>ContentProvider problem:</strong> N SDKs = N ContentProviders = N main-thread locks → App Startup library consolidates to 1</li>
+        <li><strong>Application.onCreate():</strong> Move non-critical SDK init to background thread; use Hilt Lazy for deferred DI</li>
+        <li><strong>Measurement:</strong> <code>adb am start -W</code> for quick checks; Macrobenchmark for CI-grade measurement; Perfetto for detailed profiling</li>
+        <li><strong>Baseline Profiles:</strong> AOT-compile the startup path — the highest-impact single optimisation</li>
+      </ol>
+
+      <h3>Must-Mention Points</h3>
+      <div class="must-mention">
+        <div class="must-item"><div class="must-num">1</div><div><strong>Cold / Warm / Hot start definitions</strong> — demonstrates depth: not just "app launch" but understanding of process state and what work is repeated</div></div>
+        <div class="must-item"><div class="must-num">2</div><div><strong>TTID vs TTFD</strong> — shows you understand the difference between technical first frame and user-perceived loading complete; <code>reportFullyDrawn()</code> requirement</div></div>
+        <div class="must-item"><div class="must-num">3</div><div><strong>ContentProvider as hidden startup cost</strong> — non-obvious insight; shows you've actually profiled startup rather than just knowing the theory</div></div>
+        <div class="must-item"><div class="must-num">4</div><div><strong>App Startup library</strong> — solution to the ContentProvider problem: single CP, ordered Initializers, lazy init support</div></div>
+        <div class="must-item"><div class="must-num">5</div><div><strong>Baseline Profiles</strong> — AOT compilation of startup-critical methods; shipped in AAB; 20–40% cold start improvement</div></div>
+        <div class="must-item"><div class="must-num">6</div><div><strong>reportFullyDrawn()</strong> — marks TTFD; required for accurate Macrobenchmark measurement; Compose variants: <code>ReportDrawn</code>/<code>ReportDrawnWhen</code></div></div>
+      </div>
+    </div>
+
+    <!-- S9: INTERVIEW QUESTIONS -->
+    <div class="section" id="s9">
+      <div class="section-title"><div class="section-icon">❓</div>Interview Questions</div>
+
+      <!-- Q1 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What is the difference between cold start, warm start, and hot start?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ul>
+            <li><strong>Cold start:</strong> The app process does not exist. Android forks from Zygote, creates the Application, initialises ContentProviders, runs Application.onCreate(), creates the Activity, inflates/composes the layout, and draws the first frame. Slowest — full initialization path runs.</li>
+            <li><strong>Warm start:</strong> The app process still exists in memory, but the Activity was destroyed (user pressed back, or system killed the Activity under memory pressure). The system recreates only the Activity — Application.onCreate() does NOT run again. Faster than cold, but layout still inflated.</li>
+            <li><strong>Hot start:</strong> Both process and Activity still exist. The Activity was merely paused (user switched apps, received a call). It's just brought back to the foreground. Fastest — nearly instant.</li>
+          </ul>
+          <p><strong>Why it matters for interviews:</strong> Most startup optimisation questions are about cold start. Warm start is optimised differently (fast Activity recreation, saved state efficiency). Hot start rarely needs optimisation.</p>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What is the difference between TTID and TTFD? How do you measure each?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><strong>TTID (Time to Initial Display):</strong> The time from launch intent to the <em>first frame</em> rendered on screen. Measured automatically by the system — even a blank/skeleton frame counts. Reported by <code>adb shell am start -W</code> as <code>ThisTime</code>. Also measured by Macrobenchmark's <code>StartupTimingMetric</code> automatically.</p>
+          <p><strong>TTFD (Time to Full Display):</strong> The time until your app's content is <em>actually useful</em> — data loaded, images showing, interactive. You must signal this by calling <code>reportFullyDrawn()</code> (or the Compose equivalents <code>ReportDrawn</code>/<code>ReportDrawnWhen</code>). Without this call, Macrobenchmark cannot measure TTFD accurately.</p>
+          <p><strong>Why the distinction matters:</strong> An app can show a fast skeleton screen (good TTID) while the actual data loads slowly (bad TTFD). Users experience TTFD — the screen isn't useful until data appears. You should optimise and monitor both metrics.</p>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">Why are ContentProviders a startup bottleneck, and how does the App Startup library solve this?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><strong>The Problem:</strong> Android initialises all registered ContentProviders on the main thread <em>before</em> Application.onCreate() runs. Many popular SDKs (Firebase, WorkManager, Lifecycle, CameraX, etc.) use the ContentProvider trick for auto-initialisation: they register a ContentProvider in their manifest, and its <code>onCreate()</code> triggers their SDK init. With 5–8 SDKs, you can have 5–8 ContentProviders each blocking the main thread for 5–20ms each = 50–150ms hidden startup cost.</p>
+          <p><strong>App Startup Solution:</strong></p>
+          <ol>
+            <li>Replaces all SDK ContentProviders with a <strong>single</strong> <code>InitializationProvider</code></li>
+            <li>Each SDK implements the <code>Initializer&lt;T&gt;</code> interface instead of a ContentProvider</li>
+            <li>Initializers declare their dependencies — App Startup topologically sorts and runs them in order</li>
+            <li>Supports <strong>lazy initialisation</strong>: mark an initializer to not run at startup, call manually when needed</li>
+          </ol>
+          <p><strong>Net result:</strong> 1 ContentProvider creation instead of N. The remaining init code still runs, but the ContentProvider overhead is eliminated 4+ times.</p>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">How do you measure cold start time on Android? Name at least two methods.</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ol>
+            <li><strong><code>adb shell am start -W</code>:</strong> Quick command-line measurement. Force-stop the app first (<code>am force-stop</code>), then run. Returns <code>ThisTime</code> (Activity launch time = TTID) and <code>TotalTime</code>. Good for quick checks but not statistically rigorous — single measurement, not averaged.</li>
+            <li><strong>Macrobenchmark with <code>StartupTimingMetric</code>:</strong> Production-quality measurement. Runs multiple iterations, kills the process between each (for COLD mode), reports P50/P90/P99 percentiles of <code>timeToInitialDisplay</code> and <code>timeToFullDisplay</code>. Requires physical device or Firebase Test Lab.</li>
+            <li><strong>Perfetto / System Trace:</strong> Not a timing tool per se, but gives the full startup flame graph — lets you see <em>why</em> startup is slow: which ContentProviders, which method calls, which class loads. Essential for diagnosis after you've identified there's a problem.</li>
+            <li><strong>Android Studio Profiler — App Startup template:</strong> GUI-based automated startup trace. Provides flame graph of the full startup call stack directly in AS.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What is the relationship between Baseline Profiles and cold start performance?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Without Baseline Profiles, ART starts in interpreted mode on cold start — every method in the startup path runs as bytecode first, then JIT-compiles "hot" methods after ~30–60 executions. This means the very first cold start (and subsequent ones until the JIT warms up, which happens over days) is 20–40% slower than it could be.</p>
+          <p>Baseline Profiles pre-populate the ART profile cache at install time. ProfileInstaller reads <code>baseline-prof.txt</code> from the AAB, converts it to binary ART format, and ART's background compiler AOT-compiles all listed methods. On next cold start, those methods execute at native speed — no interpretation overhead, no JIT delay.</p>
+          <p><strong>Typical measured impact:</strong></p>
+          <ul>
+            <li>Cold start TTID: 30–80ms reduction (15–40%)</li>
+            <li>First scroll jank: significantly reduced for the first few seconds</li>
+            <li>First navigation: faster as Fragments/composables are pre-compiled</li>
+          </ul>
+          <p><strong>Key point for interviews:</strong> Baseline Profiles are purely additive and risk-free. They improve performance with zero code changes — just a text file shipped in your AAB.</p>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What lazy initialisation patterns do you use in Android, and when should you use each?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ul>
+            <li><strong>Kotlin <code>by lazy</code>:</strong> For class properties that are expensive to construct but not always needed. Thread-safe by default (SYNCHRONIZED mode). Best for repositories, parsers, validators that may not be used in every code path.</li>
+            <li><strong>Hilt <code>Lazy&lt;T&gt;</code> (dagger.Lazy):</strong> For injected dependencies in Activities/Fragments that aren't needed until after first user interaction. The DI graph constructs the object on first <code>.get()</code> call rather than at injection time.</li>
+            <li><strong>Deferred coroutine init:</strong> For initialisation that involves I/O or network. Launch a coroutine in <code>viewModelScope</code> or <code>lifecycleScope</code> using <code>Dispatchers.IO</code>. Expose a <code>StateFlow</code> that the UI observes — shows loading state until ready.</li>
+            <li><strong>Background thread with AtomicReference:</strong> For low-level singleton services that must be thread-safe and initialised exactly once on a background thread. Set the reference when done; callers check for null before use.</li>
+            <li><strong>App Startup library lazy mode:</strong> Mark SDK initializers as lazy in the manifest; call <code>AppInitializer.getInstance(context).initializeComponent()</code> at the appropriate time (e.g., after first frame, or when user first triggers a feature).</li>
+          </ul>
+          <p><strong>General rule:</strong> Anything taking &gt;5ms that isn't needed before the first frame should be deferred. Profile with Perfetto first — don't guess what's slow.</p>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">A Perfetto trace of your app's cold start shows 400ms of main thread blocking before the first frame. How do you diagnose and fix this?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><strong>Step 1 — Identify the blocking sections in the trace:</strong></p>
+          <ul>
+            <li>Expand the main thread lane in Perfetto. Look for the <code>bindApplication</code> event and zoom into it.</li>
+            <li>Identify <strong>ContentProvider initialisation</strong> spans — these appear before your code. Sum their durations.</li>
+            <li>Find <strong>Application.onCreate()</strong> span. Expand to see child spans (if you added <code>Trace.beginSection()</code> calls).</li>
+            <li>Look for any <strong>disk I/O</strong> events on the main thread (typically SharedPreferences, database opens).</li>
+            <li>Look for <strong>long class-load events</strong> — large DEX sections being JIT-compiled on first use.</li>
+          </ul>
+          <p><strong>Step 2 — Fix by category:</strong></p>
+          <ul>
+            <li><strong>ContentProvider bottleneck (100ms+):</strong> Migrate all SDK auto-inits to App Startup library. Identify which SDK's ContentProvider is slowest by checking individual CP spans.</li>
+            <li><strong>Application.onCreate() work (100ms+):</strong> Move all non-critical SDK init to background thread via <code>AppScope.launch(Dispatchers.IO)</code>.</li>
+            <li><strong>Disk I/O on main thread:</strong> Replace SharedPreferences with DataStore. Open databases on background thread.</li>
+            <li><strong>Class loading overhead:</strong> Add Baseline Profile — lists the startup-path classes for AOT compilation, eliminating first-launch JIT.</li>
+          </ul>
+          <p><strong>Step 3 — Verify:</strong> Add <code>Trace.beginSection()</code> calls around each fixed section, re-capture Perfetto, confirm each section is now &lt;16ms or moved off main thread. Validate final TTID improvement with Macrobenchmark.</p>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">You must design startup for a new app that must show first frame in under 300ms on a mid-range device. What is your strategy?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>300ms cold start on mid-range hardware is aggressive (equivalent to flagship targets on budget devices). Requires a systematic approach from day one:</p>
+          <p><strong>Architecture decisions:</strong></p>
+          <ul>
+            <li><strong>No synchronous work in Application.onCreate():</strong> Only fire-and-forget coroutines for non-critical SDKs. Logging library only.</li>
+            <li><strong>App Startup library from day 1:</strong> Zero extra ContentProviders — all SDK inits go through a single Initializer dependency graph.</li>
+            <li><strong>SplashScreen API:</strong> System shows splash immediately (before your code runs) — perceived start is faster than TTID.</li>
+          </ul>
+          <p><strong>First screen design:</strong></p>
+          <ul>
+            <li>First screen must be renderable from static/cached data — no blocking network call before first frame.</li>
+            <li>Use a skeleton/shimmer layout that displays instantly. Call <code>reportFullyDrawn()</code> only when real content loads.</li>
+            <li>Prefer <strong>Compose</strong> for the first screen — Compose's lazy composition model is generally faster to first frame than deep XML hierarchies.</li>
+          </ul>
+          <p><strong>Compilation strategy:</strong></p>
+          <ul>
+            <li><strong>Baseline Profile from day 1:</strong> Generate covering the full startup path. Regenerate on every release. This alone typically saves 60–100ms on cold start.</li>
+            <li><strong>R8 full mode:</strong> Maximum code shrinking = smallest DEX = fastest class loading.</li>
+          </ul>
+          <p><strong>Measurement strategy:</strong></p>
+          <ul>
+            <li>Set up Macrobenchmark in CI from day 1. Fail the build if cold start TTID exceeds 280ms (10ms buffer).</li>
+            <li>Test on target hardware (mid-range device, not flagship).</li>
+            <li>Measure with Perfetto at each milestone to catch regressions early — it's far harder to fix a 600ms startup than to maintain a 250ms one.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- end s9 -->
+  </div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+(function(){
+  var secs=Array.from(document.querySelectorAll('.section[id]'));
+  var navs=Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var pf=document.getElementById('progressFill');
+  function getActive(){var off=120,act=secs[0];for(var i=0;i<secs.length;i++){var r=secs[i].getBoundingClientRect();if(r.top<=off)act=secs[i];}return act;}
+  function update(){var a=getActive();if(!a)return;navs.forEach(function(n){var ok=n.dataset.section===a.id;n.classList.toggle('active',ok);n.classList.toggle('aip-nav-active',ok);});if(pf){var d=document.documentElement.scrollHeight-window.innerHeight;pf.style.width=(d>0?Math.min(window.scrollY/d*100,100):0)+'%';}var ai=navs.find(function(n){return n.dataset.section===a.id;});if(ai){var sb=ai.closest('.sidebar')||ai.closest('nav:not(#aip-topbar)');if(sb){var it=ai.offsetTop,sh=sb.clientHeight,ss=sb.scrollTop;if(it<ss+44||it>ss+sh-64)sb.scrollTop=Math.max(0,it-sh/2+24);}}}
+  window.addEventListener('scroll',update,{passive:true});
+  var me=document.getElementById('mainScroll')||document.querySelector('.main');
+  if(me&&me!==document.body)me.addEventListener('scroll',update,{passive:true});
+  setTimeout(update,100);
+  navs.forEach(function(n){n.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(n.dataset.section);if(!t)return;var tb=document.getElementById('aip-topbar');var off=(tb?tb.offsetHeight:0)+12;window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});});});
+}());
+function toggleQuiz(el){var a=el.nextElementSibling,i=el.querySelector('.toggle-icon');if(a)a.classList.toggle('open');if(i)i.classList.toggle('open');}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

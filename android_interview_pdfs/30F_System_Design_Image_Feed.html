@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main{flex:1;overflow-y:auto;}
+  .main {flex:1;overflow-y:auto;}
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a2535 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(86,207,178,.12);border:1px solid rgba(86,207,178,.3);color:var(--accent2);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -86,25 +86,91 @@
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
   @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
   ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="layout">
 <nav class="sidebar">
   <div class="sidebar-header">30F · Image-heavy Feed</div>
-  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Problem</button>
-  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Architecture</button>
-  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Data Flow</button>
-  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Key Decisions</button>
-  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Trade-offs</button>
-  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Scalability &amp; Failure</button>
-  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
-  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Quiz</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Problem</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Architecture</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Data Flow</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Key Decisions</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Trade-offs</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Scalability &amp; Failure</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Quiz</a>
 </nav>
-<main class="main">
+<main class="main" id="mainScroll">
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; System Design</div>
     <h1><span>30F</span> — System Design: Image-heavy Feed</h1>
     <p class="hero-desc">Design an infinite-scroll image feed for Android — Paging 3, Coil, three-level cache, offline support, 60fps smoothness. Senior differentiator unit.</p>
@@ -115,7 +181,7 @@
   </div>
 
   <!-- S1: Problem -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128269;</div>1. Problem Statement</div>
     <h3>Scenario</h3>
     <p>Design an Android client for an <strong>image-heavy social feed</strong> (think Instagram-style) that scrolls infinitely, loads images fast, works offline, and maintains 60fps throughout.</p>
@@ -138,7 +204,6 @@
       <div class="callout-label">Clarifying Questions to Ask</div>
       (1) Is the feed real-time or pull-to-refresh? (2) What image sizes — fixed aspect ratio or variable? (3) Is there a CDN? (4) Do we need Stories/Reels or just feed? (5) What's the p50/p99 feed latency from backend?
     </div>
-    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Architecture →</button></div>
   </div>
 
   <!-- S2: Architecture -->
@@ -201,10 +266,6 @@ AsyncImage → MemoryCache (LRU) → DiskCache → Network (CDN)
         pagingSourceFactory = { repository.<span class="fn">pagingSource</span>() }
     ).<span class="fn">flow</span>().<span class="fn">cachedIn</span>(viewModelScope)   <span class="cm">// survive rotation</span>
 }</code></pre>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s3',3)">Next: Data Flow →</button>
-    </div>
   </div>
 
   <!-- S3: Data Flow -->
@@ -271,10 +332,6 @@ PagingSource exhausted (no more local data)
 )</code></pre>
     <h3>Cursor-based Pagination</h3>
     <p>Real-time feeds should use <strong>cursor-based pagination</strong> (not offset-based). Reason: if 3 new items are inserted at top while user is on page 2, offset-based pagination skips or duplicates items. Cursor points to a specific item ID/timestamp — always consistent.</p>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s4',4)">Next: Key Decisions →</button>
-    </div>
   </div>
 
   <!-- S4: Key Decisions -->
@@ -318,10 +375,6 @@ PagingSource exhausted (no more local data)
         imageLoader.<span class="fn">enqueue</span>(<span class="cl">ImageRequest</span>.<span class="cl">Builder</span>(context).<span class="fn">data</span>(item.imageUrl).<span class="fn">build</span>())
     }
 }</code></pre>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s5',5)">Next: Trade-offs →</button>
-    </div>
   </div>
 
   <!-- S5: Trade-offs -->
@@ -341,10 +394,6 @@ PagingSource exhausted (no more local data)
     <div class="callout callout-red">
       <div class="callout-label">Common Mistake</div>
       Loading full-resolution images (2000×2000px) into feed thumbnails. Coil's <code>.size()</code> modifier or <code>ImageRequest.size()</code> should be set to the display size. Decoding a 4K image into a 400px thumbnail wastes 10× memory and CPU.
-    </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s6',6)">Next: Scalability →</button>
     </div>
   </div>
 
@@ -369,10 +418,6 @@ PagingSource exhausted (no more local data)
       <li>Pre-fetch distance = 5 items — network request starts before user reaches end</li>
       <li>Avoid <code>notifyDataSetChanged()</code> equiv — Paging uses diffing internally</li>
     </ul>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
-    </div>
   </div>
 
   <!-- S7: Interview Framework -->
@@ -393,10 +438,6 @@ PagingSource exhausted (no more local data)
       <li>Canceling image loads when composable leaves composition (Coil handles automatically)</li>
       <li>Bandwidth strategy: thumbnails in feed, full-res on detail</li>
     </ul>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
-    </div>
   </div>
 
   <!-- S8: Quick Revision -->
@@ -413,10 +454,6 @@ PagingSource exhausted (no more local data)
       <tr><td>prefetchDistance = 5</td><td>Triggers network load 5 items before list end — smooth infinite scroll</td></tr>
       <tr><td>Thumbnail URL strategy</td><td>Feed gets CDN-resized 400px; full-res only on detail or WiFi pre-fetch</td></tr>
     </table></div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
-    </div>
   </div>
 
   <!-- S9: Quiz -->
@@ -502,29 +539,134 @@ PagingSource exhausted (no more local data)
       </div>
       <div class="quiz-a"><div class="answer-box">prefetchDistance is how many items before the end of the loaded list Paging 3 starts loading the next page. A value of 5 means "start loading the next page when the user is 5 items from the bottom." Too small causes visible load indicators; too large wastes bandwidth. 3–10 is typical; tune based on network latency and scroll speed.</div></div>
     </div>
-
-    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
   </div>
 </main>
 </div>
+
+
+
+
+
+
+
+
+
 <script>
-function show(id,n){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
-  const pct=Math.round((n/9)*100);
-  document.getElementById('progressFill').style.width=pct+'%';
-  window.scrollTo(0,0);
-}
-function toggleQuiz(el){
-  const a=el.nextElementSibling;
-  const icon=el.querySelector('.toggle-icon');
-  a.classList.toggle('open');
-  icon.classList.toggle('open');
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
 }
 </script>
-
 <script src="shared.js"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main{flex:1;overflow-y:auto;}
+  .main {flex:1;overflow-y:auto;}
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#211a35 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -92,25 +92,91 @@
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
   @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
   ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="layout">
 <nav class="sidebar">
   <div class="sidebar-header">35A · Behavioral</div>
-  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> STAR Framework</button>
-  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Technical Stories</button>
-  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> People Stories</button>
-  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Delivery Stories</button>
-  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Architecture &amp; Design</button>
-  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Cross-team &amp; Mentoring</button>
-  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision</button>
-  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Practice Questions</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> STAR Framework</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Technical Stories</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> People Stories</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Delivery Stories</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Architecture &amp; Design</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Cross-team &amp; Mentoring</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Practice Questions</a>
 </nav>
-<main class="main">
+<main class="main" id="mainScroll">
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; Senior Differentiator</div>
     <h1><span>35A</span> — Behavioral &amp; Senior Leadership</h1>
     <p class="hero-desc">11 STAR story templates for senior Android engineers: production incidents, architecture decisions, disagreements, mentoring, missed deadlines, and cross-team collaboration — with complete metrics and WHY framing.</p>
@@ -121,7 +187,7 @@
   </div>
 
   <!-- S1: STAR Framework -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#11088;</div>1. STAR Framework</div>
     <h3>The STAR Structure</h3>
     <div class="table-wrap"><table>
@@ -145,7 +211,6 @@
       <li><strong>Learning:</strong> What did you learn? What would you do differently?</li>
       <li><strong>Judgment:</strong> Did you make good technical decisions? Can you defend them?</li>
     </ul>
-    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Technical Stories →</button></div>
   </div>
 
   <!-- S2: Technical Stories -->
@@ -171,11 +236,6 @@
         <div class="star-row"><span class="star-label">Result</span><span class="star-content">Cold start dropped from 6.2s to 1.8s — 71% improvement. Met OEM deadline. Added Macrobenchmark CI gate: build fails if cold start exceeds 2.5s. No regressions over next 6 months.</span></div>
       </div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s3',3)">Next: People Stories →</button>
-    </div>
   </div>
 
   <!-- S3: People Stories -->
@@ -200,11 +260,6 @@
         <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY structured approach: (1) Assessment first — watched them code for 30 minutes, identified the gaps precisely (callbacks vs coroutines). (2) WHY not just give code examples: adults learn better by doing. I gave them small, progressively harder tasks with the correct pattern, not the solution. (3) Daily 15-minute async code reviews with explanations of WHY — not just "do it this way." (4) Pair programming 2 hours per day for the first week — they drove, I guided. (5) Defined "graduation criteria": when they could code, test, and explain a coroutine + ViewModel + Flow pattern independently.</span></div>
         <div class="star-row"><span class="star-label">Result</span><span class="star-content">Feature shipped on time. Junior was contributing independently within 5 weeks. 6 months later, they mentored the next junior who joined. I replicated the graduation criteria approach across the whole team — it became our standard onboarding framework.</span></div>
       </div>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s4',4)">Next: Delivery Stories →</button>
     </div>
   </div>
 
@@ -241,11 +296,6 @@
         <div class="star-row"><span class="star-label">Result</span><span class="star-content">Fix shipped in 4 hours. Affected users recovered within 24 hours (cache re-synced). Zero further migration bugs across 18 subsequent releases. The MigrationTestHelper CI requirement became a team standard.</span></div>
       </div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s5',5)">Next: Architecture →</button>
-    </div>
   </div>
 
   <!-- S5: Architecture & Design -->
@@ -271,11 +321,6 @@
         <div class="star-row"><span class="star-label">Result</span><span class="star-content">Delivered in 4 days as estimated. PM was satisfied. Battery usage was well within acceptable bounds. Built a template of clarifying questions I now use for all new feature estimates.</span></div>
       </div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s6',6)">Next: Cross-team →</button>
-    </div>
   </div>
 
   <!-- S6: Cross-team & More -->
@@ -300,11 +345,6 @@
         <div class="star-row"><span class="star-label">Action</span><span class="star-content">WHY I targeted ViewModels specifically: the root cause was lifecycle-incorrect code. WHY not RxJava: the team was already learning Kotlin Coroutines — adding RxJava would split attention. WHY incremental approach: (1) Created a shared ViewModel base class that all new screens MUST use. (2) Introduced a PR checklist item: "no network calls in Activity/Fragment lifecycle". (3) Migrated the 5 highest-crash screens first — targeted the 80% of crashes (Pareto). (4) Added a lint rule that flags direct network calls in lifecycle methods. (5) Ran weekly "tech health" reviews showing crash-rate progress to maintain team focus.</span></div>
         <div class="star-row"><span class="star-label">Result</span><span class="star-content">Crash rate reduced 68% in 3 months (target was 50%). All new screens used ViewModel pattern by month 2. The lint rule caught 12 violations before they reached production. Presented the approach at an internal tech talk — adopted by 2 other teams in the org.</span></div>
       </div>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
     </div>
   </div>
 
@@ -337,10 +377,6 @@
     </table></div>
     <h3>Bridging Technical Depth with Leadership</h3>
     <p>Senior engineers are expected to make technical decisions that have organizational impact. Frame your technical decisions in terms of team velocity, quality, and future maintainability — not just "this was architecturally correct."</p>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
-    </div>
   </div>
 
   <!-- S8: Quick Revision -->
@@ -360,10 +396,6 @@
       <tr><td>Cross-team collaboration</td><td>1:1 before group, prototype to de-risk, alternative with same feel</td><td>Shipped on time, 3% higher conversion</td></tr>
       <tr><td>Architecture improvement</td><td>Pareto (top 5 crash screens), lint rule, PR checklist</td><td>68% crash reduction in 3 months</td></tr>
     </table></div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s9',9)">Next: Practice Questions →</button>
-    </div>
   </div>
 
   <!-- S9: Practice Questions -->
@@ -449,29 +481,134 @@
       </div>
       <div class="quiz-a"><div class="answer-box">Mid-level: describes what happened and what they did. Senior: explains WHY — why they chose this approach over alternatives, what the organizational/team impact was, what they changed to prevent recurrence, what leverage they created (lint rule, team standard, runbook, mentoring chain). Mid-level: "I fixed the crash." Senior: "I fixed the crash, added a CI check that catches this class of bug, wrote a runbook for on-call, and presented it as a tech talk so 3 other teams benefited." The recurring theme: how did your action scale beyond the immediate task?</div></div>
     </div>
-
-    <div class="nav-buttons"><button class="btn btn-secondary" onclick="show('s8',8)">← Back</button></div>
   </div>
 </main>
 </div>
+
+
+
+
+
+
+
+
+
 <script>
-function show(id,n){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav-item')[n-1].classList.add('active');
-  const pct=Math.round((n/9)*100);
-  document.getElementById('progressFill').style.width=pct+'%';
-  window.scrollTo(0,0);
-}
-function toggleQuiz(el){
-  const a=el.nextElementSibling;
-  const icon=el.querySelector('.toggle-icon');
-  a.classList.toggle('open');
-  icon.classList.toggle('open');
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
 }
 </script>
-
 <script src="shared.js"></script>
 </body>
 </html>

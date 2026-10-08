@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main{flex:1;overflow-y:auto;}
+  .main {flex:1;overflow-y:auto;}
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -90,26 +90,92 @@
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
   @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
   ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="layout">
 <nav class="sidebar">
   <div class="sidebar-header">23A · Gradle / Build System</div>
-  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
-  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Gradle Lifecycle</button>
-  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> AGP &amp; Build Files</button>
-  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> Build Variants &amp; Signing</button>
-  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> KAPT vs KSP &amp; Caching</button>
-  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</button>
-  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
-  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
-<button class="nav-item" onclick="show('s10',10)"><span class="nav-num">10</span> Build Diagnostics Lab</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Gradle Lifecycle</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> AGP &amp; Build Files</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Build Variants &amp; Signing</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> KAPT vs KSP &amp; Caching</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision Sheet</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
+<a class="nav-item" href="#s10" data-section="s10"><span class="nav-num">10</span> Build Diagnostics Lab</a>
 </nav>
-<main class="main">
+<main class="main" id="mainScroll">
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; Android Interview Prep</div>
     <h1><span>23A</span> — Gradle / Build System</h1>
     <p class="hero-desc">Gradle lifecycle, Android Gradle Plugin, build types, product flavors, version catalogs, KAPT vs KSP, and build performance — everything a senior Android engineer must know about the build system.</p>
@@ -120,7 +186,7 @@
   </div>
 
   <!-- S1 Overview -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
     <h3>What this unit covers</h3>
     <ul>
@@ -135,7 +201,6 @@
       <div class="callout-label">Senior Mental Model</div>
       Gradle is a <strong>programmatic build system</strong>, not declarative like Make. Every <code>build.gradle.kts</code> is Kotlin code executed at configuration time. Understanding the three phases (init → config → exec) is essential for writing correct, fast build scripts and debugging mysterious build failures.
     </div>
-    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Gradle Lifecycle →</button></div>
   </div>
 
   <!-- S2 Gradle Lifecycle -->
@@ -179,11 +244,6 @@ rootProject.name = <span class="str">"MyApp"</span>
 <span class="cm">// connected[Variant]    — instrumented tests</span>
 <span class="cm">// lint[Variant]         — runs lint</span>
 <span class="cm">// clean                 — deletes build/ directories</span></code></pre>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s1',1)">← Overview</button>
-      <button class="btn btn-primary" onclick="show('s3',3)">Next: AGP &amp; Build Files →</button>
-    </div>
   </div>
 
   <!-- S3 AGP & Build Files -->
@@ -240,11 +300,6 @@ ksp                  = { id = <span class="str">"com.google.devtools.ksp"</span>
       <tr><td>Google recommendation</td><td>✅ Preferred</td><td>Legacy</td></tr>
       <tr><td>Refactoring</td><td>Safe refactoring via IDE</td><td>Text-based only</td></tr>
     </table></div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s2',2)">← Gradle Lifecycle</button>
-      <button class="btn btn-primary" onclick="show('s4',4)">Next: Build Variants →</button>
-    </div>
   </div>
 
   <!-- S4 Build Variants & Signing -->
@@ -298,11 +353,6 @@ productFlavors {
       <div class="callout-label">Security Warning</div>
       Never commit your <code>.jks</code> keystore or plaintext passwords to version control. Use environment variables (for CI) or <code>local.properties</code> (gitignored) for local development.
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s3',3)">← AGP &amp; Build Files</button>
-      <button class="btn btn-primary" onclick="show('s5',5)">Next: KAPT vs KSP →</button>
-    </div>
   </div>
 
   <!-- S5 KAPT vs KSP & Caching -->
@@ -353,11 +403,6 @@ buildCache {
       <div class="callout-label">Performance Tips</div>
       Use <code>./gradlew assembleDebug --scan</code> to get a build scan URL showing which tasks are slow. Common culprits: KAPT on large projects, full recompilation due to ABI changes, and disabled build cache.
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s4',4)">← Build Variants</button>
-      <button class="btn btn-primary" onclick="show('s6',6)">Next: Pitfalls →</button>
-    </div>
   </div>
 
   <!-- S6 Pitfalls -->
@@ -382,10 +427,6 @@ buildCache {
       <tr><td>Put signing creds in env vars</td><td>Security — never commit credentials</td></tr>
       <tr><td>Profile with <code>--scan</code></td><td>Identify slow tasks before optimizing</td></tr>
     </table></div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s5',5)">← KAPT vs KSP</button>
-      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
-    </div>
   </div>
 
   <!-- S7 Interview Framework -->
@@ -426,11 +467,6 @@ buildCache {
     <div class="callout callout-purple">
       <div class="callout-label">Senior Differentiator</div>
       Know that configuration-time performance matters: a slow build script slows every IDE sync and every CI pipeline check. Migrate KAPT → KSP, enable remote build cache, and use <code>--configuration-cache</code> (Gradle 8+) to serialize the task graph. This is the difference between a 2-minute CI build and an 8-minute one.
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s6',6)">← Pitfalls</button>
-      <button class="btn btn-primary" onclick="show('s8',8)">Next: Quick Revision →</button>
     </div>
   </div>
 
@@ -475,10 +511,6 @@ types:  debug | release
       <tr><td>Build cache</td><td>Reuse task outputs across builds/machines</td></tr>
       <tr><td>Build variant</td><td>flavor × buildType combination (e.g. prodRelease)</td></tr>
     </table></div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s7',7)">← Interview Framework</button>
-      <button class="btn btn-primary" onclick="show('s9',9)">Next: Quiz →</button>
-    </div>
   </div>
 
   <!-- S9 Quiz -->
@@ -564,10 +596,6 @@ types:  debug | release
       </div>
       <div class="quiz-a"><div class="answer-box">UP-TO-DATE: task skipped because its inputs/outputs haven't changed on the same machine since last run — it checks the local output directory. Build cache: task outputs stored by a hash of the inputs — can be reused across machines (remote cache) or after a clean. After ./gradlew clean, UP-TO-DATE won't help, but the build cache will still restore outputs FROM-CACHE. Remote build cache is essential for CI where workspaces are fresh each run.</div></div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s8',8)">← Quick Revision</button>
-    </div>
   </div>
 
 
@@ -594,23 +622,131 @@ types:  debug | release
 
 </main>
 </div>
-<script>
-  function show(id, num) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-    document.getElementById('progressFill').style.width = (num/document.querySelectorAll('.nav-item').length*100)+'%';
-    window.scrollTo(0,0);
-  }
-  function toggleQuiz(el) {
-    const ans = el.nextElementSibling;
-    const icon = el.querySelector('.toggle-icon');
-    ans.classList.toggle('open');
-    icon.classList.toggle('open');
-  }
-</script>
 
+
+
+
+
+
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
 <script src="shared.js"></script>
 </body>
 </html>

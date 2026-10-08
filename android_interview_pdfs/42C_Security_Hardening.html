@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>42C — Advanced App Security: FLAG_SECURE &amp; App Hardening | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main{flex:1;overflow-y:auto;}
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-hot{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
+  .checklist-table td:nth-child(3) { font-size: 12.5px; }
+  .step-list { counter-reset: step; list-style: none; padding-left: 0; }
+  .step-list li { counter-increment: step; display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .step-list li::before { content: counter(step); background: rgba(124,106,247,.2); color: var(--accent); font-size: 11px; font-weight: 800; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">42C · Advanced App Security</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> FLAG_SECURE Deep Dive</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Task &amp; Recents Hardening</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Screen Capture Prevention</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Activity &amp; Component Security</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Runtime Self-Protection</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Security Checklist</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Interview Framework</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
+</nav>
+
+<main class="main" id="mainScroll">
+  <!-- HERO -->
+  <div class="hero">
+    <a class="hero-back" href="index.html">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      &#8592; Back to Dashboard
+    </a>
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>42C</span> — Advanced App Security: FLAG_SECURE &amp; App Hardening</h1>
+    <p class="hero-desc">FLAG_SECURE, excludeFromRecents, task hijacking prevention, screen capture defense, exported components, and runtime self-protection — the full security hardening layer for production Android apps.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 42C</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+      <span class="badge badge-hot">&#128293; Hot</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S1 — OVERVIEW
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-title"><div class="section-icon">&#128274;</div>1. Overview &amp; Attack Surface</div>
+
+    <p>A production Android app — especially one handling payments, subscriptions, and user accounts — presents a large attack surface. Security is not a single feature but a <strong>property you maintain</strong> across every API surface, every component, and every runtime environment your app runs in.</p>
+
+    <h3>The Attack Surface of a Production App</h3>
+    <ul>
+      <li><strong>Screenshots &amp; screen recording</strong> — system APIs and accessibility services can capture screen content</li>
+      <li><strong>Task switcher thumbnails</strong> — Android captures live screenshots when user presses the recents button</li>
+      <li><strong>Exported components</strong> — Activities, Services, Receivers, and ContentProviders accessible to other apps</li>
+      <li><strong>Deep links &amp; URI handling</strong> — crafted URIs can bypass auth flows or inject data</li>
+      <li><strong>WebViews</strong> — JavaScript bridges, file access, and redirect interception</li>
+      <li><strong>IPC (Binder)</strong> — unprotected inter-process communication exposes sensitive operations</li>
+      <li><strong>Runtime environment</strong> — rooted devices, emulators, Frida/Xposed hooks, debugger attachment</li>
+    </ul>
+
+    <h3>Two Security Postures</h3>
+    <p><strong>Passive hardening</strong> prevents information leakage — FLAG_SECURE, input masking, excludeFromRecents. The goal is that even if an attacker observes the device, they learn nothing useful.</p>
+    <p><strong>Active hardening (RASP)</strong> detects and responds to attacks at runtime — root detection, integrity verification, anti-debugging. The goal is to make the app hostile to attackers who have partial control of the device.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Attack Vector</th><th>Risk</th><th>Defense</th></tr></thead>
+        <tbody>
+          <tr><td>Screenshots</td><td>Credential / payment data leakage</td><td><code>FLAG_SECURE</code></td></tr>
+          <tr><td>Task switcher thumbnails</td><td>Screen content visible in recents</td><td><code>FLAG_SECURE</code> + <code>excludeFromRecents</code></td></tr>
+          <tr><td>Task hijacking (StrandHogg)</td><td>Overlay phishing — malicious Activity on top of yours</td><td><code>taskAffinity=""</code> + <code>allowTaskReparenting=false</code></td></tr>
+          <tr><td>Exported components</td><td>Unauthorized access to sensitive operations</td><td><code>android:exported=false</code> + permission checks</td></tr>
+          <tr><td>Root / emulator</td><td>Reverse engineering, hook injection</td><td>Play Integrity API + multi-signal root detection</td></tr>
+          <tr><td>Reverse engineering</td><td>IP theft, credential extraction</td><td>R8 obfuscation + code splitting + certificate pinning</td></tr>
+          <tr><td>Deep link injection</td><td>Auth bypass, data injection</td><td>Host/path whitelist + server-side token validation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">&#127775; Senior Mental Model</div>
+      <p style="margin:0;">"Security is not a feature you add — it's a property you maintain. Every API surface your app exposes is a potential attack vector. Your job is to minimize the surface and harden what remains. For a banking or payment app, the question is never <em>if</em> someone will attempt an attack — it's <em>when</em>. Design for the adversarial case from day one."</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S2 — FLAG_SECURE DEEP DIVE
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128247;</div>2. FLAG_SECURE Deep Dive</div>
+
+    <h3>What FLAG_SECURE Does</h3>
+    <p><code>WindowManager.LayoutParams.FLAG_SECURE</code> is a window-level flag that tells the system this window contains sensitive content. It activates several protections simultaneously:</p>
+    <ul>
+      <li>Prevents programmatic screenshots via <code>adb shell screencap</code></li>
+      <li>Prevents capture via <code>MediaProjection</code> / screen recording APIs</li>
+      <li>Causes the window to appear as a <strong>black rectangle</strong> in the task switcher instead of a live thumbnail</li>
+      <li>Blocks <code>SurfaceView</code> capture for camera/video preview windows</li>
+    </ul>
+
+    <h3>What FLAG_SECURE Does NOT Do</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; Important Limitations</div>
+      <ul style="margin:0;">
+        <li>Does <strong>not</strong> prevent a user pointing a physical camera at the screen</li>
+        <li>Does <strong>not</strong> protect content in other windows (e.g. a notification shade showing a PIN)</li>
+        <li>Does <strong>not</strong> prevent Accessibility services from reading view content (use <code>setImportantForAccessibility</code> or content masking for that)</li>
+      </ul>
+    </div>
+
+    <h3>How to Set It — The Correct Way</h3>
+    <p>FLAG_SECURE must be set <strong>before</strong> <code>setContentView()</code>. It is a Window-level property, not a View-level one. Setting it after <code>setContentView()</code> is a common mistake that may not apply reliably.</p>
+
+    <pre><code><span class="kw">class</span> <span class="cl">PaymentActivity</span> : <span class="cl">AppCompatActivity</span>() {
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="cm">// ✅ Must be set BEFORE setContentView — this is the first line</span>
+        window.<span class="fn">addFlags</span>(<span class="cl">WindowManager</span>.<span class="cl">LayoutParams</span>.FLAG_SECURE)
+
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContentView</span>(R.layout.activity_payment)
+    }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">&#128683; Common Mistake</div>
+      <p style="margin:0;">Calling <code>window.addFlags(FLAG_SECURE)</code> <em>after</em> <code>setContentView()</code>. At that point the window is already created and the flag may not take effect consistently. <strong>Always set it before setContentView, ideally as the very first line in onCreate.</strong> Also do not call <code>super.onCreate()</code> before setting the flag — the super call may trigger window creation on some base classes.</p>
+    </div>
+
+    <h3>Compose Applications</h3>
+    <p>In a Jetpack Compose app, FLAG_SECURE is set in the <strong>Activity</strong>, not in a Composable. It is a window-level property and has no Composable equivalent. The pattern is identical:</p>
+
+    <pre><code><span class="kw">class</span> <span class="cl">PaymentActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        window.<span class="fn">addFlags</span>(<span class="cl">WindowManager</span>.<span class="cl">LayoutParams</span>.FLAG_SECURE)
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="cl">PaymentScreen</span>()
+        }
+    }
+}</code></pre>
+
+    <h3>Selective Application</h3>
+    <p>Apply FLAG_SECURE <strong>only to screens with sensitive content</strong>: payment flows, account credential screens, PIN entry, medical records. Do not apply it to the entire application — this breaks legitimate screenshot use cases (customer support, sharing receipts) and creates a poor user experience.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Screen Type</th><th>Apply FLAG_SECURE?</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Payment / checkout</td><td style="color:var(--green);">✅ Yes</td><td>Card numbers, CVV, billing address</td></tr>
+          <tr><td>Login / PIN entry</td><td style="color:var(--green);">✅ Yes</td><td>Credentials</td></tr>
+          <tr><td>Account details</td><td style="color:var(--green);">✅ Yes</td><td>Personal data, account numbers</td></tr>
+          <tr><td>Order confirmation</td><td style="color:var(--yellow);">⚠️ Consider</td><td>Contains order details + personal info</td></tr>
+          <tr><td>Product catalogue</td><td style="color:var(--red);">❌ No</td><td>Public info — users share product pages</td></tr>
+          <tr><td>Home / Dashboard</td><td style="color:var(--red);">❌ No</td><td>Breaks normal sharing + support screenshots</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Testing FLAG_SECURE</h3>
+    <pre><code><span class="cm"># Should produce a solid black image for secured windows</span>
+adb shell screencap -p /sdcard/test.png
+adb pull /sdcard/test.png
+
+<span class="cm"># Or check via adb if recording is blocked</span>
+adb shell screenrecord /sdcard/test.mp4</code></pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S3 — TASK & RECENTS HARDENING
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128260;</div>3. Task &amp; Recents Hardening</div>
+
+    <h3>The Task Switcher Attack</h3>
+    <p>When a user presses the recents/overview button, Android <strong>captures a screenshot thumbnail</strong> of every running app. This thumbnail persists in memory and on-disk cache. For a banking or payment app, this can expose PINs, account numbers, and full transaction details to anyone who picks up the device later.</p>
+    <p>This is not theoretical — researchers have extracted task switcher thumbnails from devices without unlocking them on older Android versions.</p>
+
+    <h3>Strategy 1: FLAG_SECURE (Already Covered)</h3>
+    <p>FLAG_SECURE also applies to the task switcher thumbnail — the window appears as a black rectangle in recents. This is the strongest protection but shows an opaque black card rather than a preview, which may confuse users for main screens.</p>
+
+    <h3>Strategy 2: android:excludeFromRecents</h3>
+    <p>The activity does not appear in the task switcher at all. The entire task is removed from the recents list.</p>
+
+    <p><strong>Best for:</strong> one-time payment confirmation screens, sensitive deep link handlers, auth challenge screens.</p>
+    <p><strong>Downside:</strong> bad UX for the app's main activity — users can't return to the app from recents.</p>
+
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;<span class="kw">activity</span>
+    <span class="an">android:name</span>=<span class="str">".PaymentActivity"</span>
+    <span class="an">android:excludeFromRecents</span>=<span class="str">"true"</span>
+    <span class="an">android:taskAffinity</span>=<span class="str">""</span>
+    <span class="an">android:noHistory</span>=<span class="str">"true"</span>
+    <span class="an">android:allowTaskReparenting</span>=<span class="str">"false"</span> /&gt;</code></pre>
+
+    <h3>Strategy 3: Dynamic Thumbnail Masking in onStop()</h3>
+    <p>The most user-friendly approach: in <code>onStop()</code>, replace sensitive content with a safe placeholder (logo, loading screen). When the user returns, restore the content in <code>onResume()</code>. The recents thumbnail shows the safe placeholder.</p>
+
+    <pre><code><span class="kw">class</span> <span class="cl">AccountActivity</span> : <span class="cl">AppCompatActivity</span>() {
+
+    <span class="kw">override fun</span> <span class="fn">onStop</span>() {
+        <span class="kw">super</span>.<span class="fn">onStop</span>()
+        <span class="cm">// Hide sensitive content — task switcher captures AFTER onStop</span>
+        binding.accountNumberText.<span class="fn">visibility</span> = <span class="cl">View</span>.INVISIBLE
+        binding.balanceText.<span class="fn">visibility</span> = <span class="cl">View</span>.INVISIBLE
+        binding.securityOverlay.<span class="fn">visibility</span> = <span class="cl">View</span>.VISIBLE <span class="cm">// show logo</span>
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onResume</span>() {
+        <span class="kw">super</span>.<span class="fn">onResume</span>()
+        <span class="cm">// Restore content when user comes back</span>
+        binding.accountNumberText.<span class="fn">visibility</span> = <span class="cl">View</span>.VISIBLE
+        binding.balanceText.<span class="fn">visibility</span> = <span class="cl">View</span>.VISIBLE
+        binding.securityOverlay.<span class="fn">visibility</span> = <span class="cl">View</span>.GONE
+    }
+}</code></pre>
+
+    <h3>android:noHistory — Back Stack Security</h3>
+    <p><code>android:noHistory="true"</code> removes the activity from the back stack when the user navigates away. This prevents back-navigation to sensitive screens after logout or session expiry. Critical for: login screens, payment screens, OTP screens.</p>
+
+    <h3>android:taskAffinity="" — StrandHogg Prevention</h3>
+    <p>The <strong>StrandHogg vulnerability</strong> (CVE-2020-0096) exploits Android's task management: a malicious app declares <code>taskAffinity</code> matching your app's package name. When the user launches your app, the malicious Activity is injected on top and presented as a login screen — a classic overlay phishing attack.</p>
+
+    <div class="callout callout-red">
+      <div class="callout-label">&#9888; StrandHogg — High Severity</div>
+      <p style="margin:0;margin-bottom:8px;">StrandHogg 1.0 (2019) affected all Android versions. StrandHogg 2.0 (CVE-2020-0096) could attack any app without requiring <code>singleTask</code>. Patched in Android 10+, but devices on older Android remain vulnerable.</p>
+      <p style="margin:0;"><strong>Defense:</strong> set <code>android:taskAffinity=""</code> on all sensitive activities (empty string isolates the activity into its own task). Additionally set <code>android:allowTaskReparenting="false"</code>.</p>
+    </div>
+
+    <pre><code><span class="cm">&lt;!-- Complete manifest hardening for a payment activity --&gt;</span>
+&lt;<span class="kw">activity</span>
+    <span class="an">android:name</span>=<span class="str">".PaymentFlowActivity"</span>
+    <span class="an">android:exported</span>=<span class="str">"false"</span>
+    <span class="an">android:excludeFromRecents</span>=<span class="str">"true"</span>
+    <span class="an">android:taskAffinity</span>=<span class="str">""</span>
+    <span class="an">android:noHistory</span>=<span class="str">"true"</span>
+    <span class="an">android:allowTaskReparenting</span>=<span class="str">"false"</span>
+    <span class="an">android:screenOrientation</span>=<span class="str">"portrait"</span> /&gt;</code></pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Attribute</th><th>Effect</th><th>Use When</th></tr></thead>
+        <tbody>
+          <tr><td><code>FLAG_SECURE</code></td><td>Black thumbnail in recents + block screenshot</td><td>All sensitive windows</td></tr>
+          <tr><td><code>excludeFromRecents</code></td><td>Task removed from recents entirely</td><td>One-time sensitive flows</td></tr>
+          <tr><td><code>noHistory</code></td><td>Removed from back stack on navigate away</td><td>Auth screens, OTP, payment confirm</td></tr>
+          <tr><td><code>taskAffinity=""</code></td><td>Isolates activity into its own task — prevents StrandHogg</td><td>All exported or deep-link activities</td></tr>
+          <tr><td><code>allowTaskReparenting=false</code></td><td>Prevents task injection by malicious apps</td><td>All activities handling PII</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S4 — SCREEN CAPTURE PREVENTION
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128249;</div>4. Screen Capture Prevention</div>
+
+    <h3>Layered Approach to Capture Prevention</h3>
+    <p>No single mechanism prevents all forms of screen capture. A production security posture combines multiple layers:</p>
+
+    <h4>1. FLAG_SECURE — System-Level Block</h4>
+    <p>Prevents <code>MediaProjection</code>-based screen recording, <code>adb screencap</code>, and task switcher thumbnails. The most effective programmatic protection. Apply to all windows containing sensitive data.</p>
+
+    <h4>2. Secure Input Fields</h4>
+    <p>Use <code>inputType="textPassword"</code> on PIN/password fields. This masks content at the View level independently of FLAG_SECURE. Even if FLAG_SECURE is accidentally missing from a screen, the PIN field appears as dots.</p>
+    <pre><code><span class="cm">&lt;!-- XML layout --&gt;</span>
+&lt;<span class="kw">com.google.android.material.textfield.TextInputEditText</span>
+    <span class="an">android:id</span>=<span class="str">"@+id/pinInput"</span>
+    <span class="an">android:inputType</span>=<span class="str">"numberPassword"</span>
+    <span class="an">android:importantForAutofill</span>=<span class="str">"no"</span> /&gt;</code></pre>
+
+    <h4>3. Jetpack Compose Secure Text Fields</h4>
+    <pre><code><span class="cm">// Compose — password field with visual masking</span>
+<span class="kw">var</span> pin <span class="kw">by</span> <span class="fn">remember</span> { <span class="fn">mutableStateOf</span>(<span class="str">""</span>) }
+
+<span class="cl">OutlinedTextField</span>(
+    value = pin,
+    onValueChange = { pin = it },
+    visualTransformation = <span class="cl">PasswordVisualTransformation</span>(),
+    keyboardOptions = <span class="cl">KeyboardOptions</span>(keyboardType = <span class="cl">KeyboardType</span>.NumberPassword),
+    <span class="cm">// Screen readers won't announce the value</span>
+    modifier = <span class="cl">Modifier</span>.<span class="fn">semantics</span> { contentDescription = <span class="str">"PIN entry"</span> }
+)</code></pre>
+
+    <h4>4. WebView Hardening</h4>
+    <p>WebViews require specific hardening to prevent capture of displayed content and to prevent malicious redirects:</p>
+    <pre><code><span class="kw">fun</span> <span class="fn">setupSecureWebView</span>(webView: <span class="cl">WebView</span>) {
+    webView.settings.<span class="fn">apply</span> {
+        <span class="cm">// Disable file access — prevents file:// URI attacks</span>
+        allowFileAccess = <span class="kw">false</span>
+        allowContentAccess = <span class="kw">false</span>
+        allowFileAccessFromFileURLs = <span class="kw">false</span>
+        allowUniversalAccessFromFileURLs = <span class="kw">false</span>
+
+        <span class="cm">// Disable JS by default — enable only if absolutely required</span>
+        javaScriptEnabled = <span class="kw">false</span>
+
+        <span class="cm">// Prevent mixed content in payment pages</span>
+        mixedContentMode = <span class="cl">WebSettings</span>.MIXED_CONTENT_NEVER_ALLOW
+
+        <span class="cm">// Enable Safe Browsing</span>
+        safeBrowsingEnabled = <span class="kw">true</span>
+    }
+
+    webView.webViewClient = <span class="kw">object</span> : <span class="cl">WebViewClient</span>() {
+        <span class="kw">override fun</span> <span class="fn">shouldOverrideUrlLoading</span>(
+            view: <span class="cl">WebView</span>, request: <span class="cl">WebResourceRequest</span>
+        ): <span class="cl">Boolean</span> {
+            <span class="cm">// Whitelist only expected domains</span>
+            <span class="kw">val</span> host = request.url.host ?: <span class="kw">return true</span>
+            <span class="kw">val</span> allowed = <span class="fn">listOf</span>(<span class="str">"myapp.com"</span>, <span class="str">"www.myapp.com"</span>)
+            <span class="kw">return</span> host !<span class="kw">in</span> allowed <span class="cm">// true = block the navigation</span>
+        }
+    }
+}</code></pre>
+
+    <h4>5. Screen Recording Detection — The Hard Truth</h4>
+    <p>There is <strong>no reliable way to detect screen recording on Android by design</strong>. The system intentionally does not expose this information to apps (to protect user privacy when recording tutorial videos). Mitigate by:</p>
+    <ul>
+      <li>FLAG_SECURE — blocks the <code>MediaProjection</code> API capture path</li>
+      <li>Time-limited access tokens — sensitive data expires and is no longer on-screen</li>
+      <li>Session-aware auto-lock — return to lock screen after inactivity</li>
+      <li>UI masking — progressively hide sensitive data after display time expires</li>
+    </ul>
+
+    <h4>6. DRM-Protected Content</h4>
+    <p>For video/audio content (e-books, subscription content): use ExoPlayer with Widevine DRM. DRM-protected content automatically receives FLAG_SECURE-like protection via the <code>MediaDrm</code> API — the system marks the output as protected and prevents capture at the hardware composition layer.</p>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">&#128161; Physical Camera Limitation</div>
+      <p style="margin:0;">FLAG_SECURE does not prevent a user pointing a physical camera at the screen. For truly sensitive content (legal documents, medical records, one-time codes), combine FLAG_SECURE with <strong>time-limited access tokens</strong> (display for 30 seconds, then re-auth), <strong>session-aware access controls</strong>, and UI masking of partial data (show only last 4 digits of account number by default).</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S5 — ACTIVITY & COMPONENT SECURITY
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128101;</div>5. Activity &amp; Component Security</div>
+
+    <h3>The Exported Component Problem</h3>
+    <p>Any component with <code>android:exported="true"</code> or with an implicit intent filter (pre-Android 12) is accessible to <strong>all other apps on the device</strong>. A malicious app can start your exported Activity with crafted intent extras, trigger exported Services, or query exported ContentProviders.</p>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; Android 12 Breaking Change (API 31+)</div>
+      <p style="margin:0;">Apps targeting API 31+ <strong>must</strong> explicitly declare <code>android:exported</code> for every Activity, Service, and BroadcastReceiver that has an intent filter. Failing to do so causes an install-time crash: <code>android.content.pm.PackageManager$NameNotFoundException</code>. There is no default — you must be explicit.</p>
+    </div>
+
+    <h3>Component Security Best Practices</h3>
+
+    <ol class="step-list">
+      <li><strong>Default all components to <code>android:exported="false"</code></strong> — only export what is intentionally public (share targets, deep link handlers, launcher activity).</li>
+      <li><strong>Add permission checks to exported components</strong> — use <code>android:permission</code> to require a signature-level permission that only your app (and apps signed with your key) can hold.</li>
+      <li><strong>Validate all deep link inputs</strong> — never trust URI parameters from deep links without validation. Deep links can be sent by any app.</li>
+      <li><strong>Use App Links for deep links</strong> — verified <code>https://</code> links (via assetlinks.json) cannot be spoofed by other apps, unlike custom URI schemes (<code>myapp://</code>).</li>
+    </ol>
+
+    <h3>Deep Link Security</h3>
+    <pre><code><span class="kw">class</span> <span class="cl">DeepLinkActivity</span> : <span class="cl">AppCompatActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+
+        <span class="kw">val</span> uri = intent.data ?: <span class="kw">run</span> { <span class="fn">finish</span>(); <span class="kw">return</span> }
+
+        <span class="cm">// 1. Validate host — reject anything not from your domain</span>
+        <span class="kw">if</span> (uri.host != <span class="str">"app.myapp.com"</span>) {
+            <span class="fn">finish</span>()
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// 2. Validate path prefix</span>
+        <span class="kw">if</span> (uri.path?.startsWith(<span class="str">"/order/"</span>) != <span class="kw">true</span>) {
+            <span class="fn">finish</span>()
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// 3. Validate parameter format with whitelist regex</span>
+        <span class="kw">val</span> orderId = uri.<span class="fn">getQueryParameter</span>(<span class="str">"orderId"</span>)
+        <span class="kw">if</span> (orderId.<span class="fn">isNullOrBlank</span>() || !orderId.<span class="fn">matches</span>(<span class="cl">Regex</span>(<span class="str">"[A-Z0-9]{8,16}"</span>))) {
+            <span class="fn">finish</span>()
+            <span class="kw">return</span>
+        }
+
+        <span class="cm">// 4. Never use orderId directly in SQL — use parameterized queries</span>
+        viewModel.<span class="fn">loadOrder</span>(orderId) <span class="cm">// ViewModel validates server-side</span>
+    }
+}</code></pre>
+
+    <h3>ContentProvider Security</h3>
+    <p>ContentProviders are a frequent source of data leakage in Android apps. Default to <code>android:exported="false"</code> unless cross-app sharing is required. When sharing is required:</p>
+    <ul>
+      <li>Use <code>android:readPermission</code> and <code>android:writePermission</code> separately — grant minimum necessary access</li>
+      <li>Use <code>android:grantUriPermissions="true"</code> with explicit URI grants instead of blanket export</li>
+      <li>Use <code>FileProvider</code> (from Jetpack) for file sharing — it provides scoped URI access without exposing file paths</li>
+      <li>Validate all query parameters and selection arguments against SQL injection — never concatenate user input into queries</li>
+    </ul>
+
+    <pre><code><span class="cm">&lt;!-- Secure FileProvider declaration --&gt;</span>
+&lt;<span class="kw">provider</span>
+    <span class="an">android:name</span>=<span class="str">"androidx.core.content.FileProvider"</span>
+    <span class="an">android:authorities</span>=<span class="str">"${applicationId}.fileprovider"</span>
+    <span class="an">android:exported</span>=<span class="str">"false"</span>
+    <span class="an">android:grantUriPermissions</span>=<span class="str">"true"</span>&gt;
+    &lt;<span class="kw">meta-data</span>
+        <span class="an">android:name</span>=<span class="str">"android.support.FILE_PROVIDER_PATHS"</span>
+        <span class="an">android:resource</span>=<span class="str">"@xml/file_paths"</span> /&gt;
+&lt;/<span class="kw">provider</span>&gt;</code></pre>
+
+    <h3>BroadcastReceiver Security</h3>
+    <p>For internal broadcasts (within your app), use <code>LocalBroadcastManager</code> — broadcasts stay within your process and cannot be intercepted by other apps. For system broadcasts that require an exported receiver, verify sender identity using the <code>permission</code> parameter on <code>sendBroadcast()</code> and <code>android:permission</code> on the receiver.</p>
+
+    <pre><code><span class="cm">// Internal broadcast — never visible to other apps</span>
+<span class="cl">LocalBroadcastManager</span>.<span class="fn">getInstance</span>(context)
+    .<span class="fn">sendBroadcast</span>(<span class="cl">Intent</span>(<span class="str">"com.example.PAYMENT_COMPLETE"</span>))
+
+<span class="cm">// For exported receiver — require signature permission</span>
+<span class="kw">val</span> intent = <span class="cl">Intent</span>(<span class="str">"com.example.PAYMENT_COMPLETE"</span>)
+<span class="fn">sendBroadcast</span>(intent, <span class="str">"com.example.permission.PAYMENT_EVENTS"</span>)</code></pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S6 — RUNTIME APPLICATION SELF-PROTECTION
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128737;</div>6. Runtime Application Self-Protection (RASP)</div>
+
+    <h3>What RASP Is</h3>
+    <p>Runtime Application Self-Protection is the practice of the app <strong>detecting and responding to attacks at runtime</strong>. Rather than relying solely on static hardening, RASP adds active checks: root detection, emulator detection, debugger detection, hook detection, and tampering detection.</p>
+
+    <h3>Play Integrity API (Replaces SafetyNet — Mandatory since 2024)</h3>
+    <p>The Play Integrity API provides a server-verified verdict about the app and device state. It supersedes the deprecated SafetyNet Attestation API.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Verdict Level</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code>MEETS_BASIC_INTEGRITY</code></td><td>Device passed basic integrity — not obviously tampered</td><td>Allow normal operations</td></tr>
+          <tr><td><code>MEETS_DEVICE_INTEGRITY</code></td><td>Certified Android device (GMS certified), no known exploits</td><td>Required for payment operations</td></tr>
+          <tr><td><code>MEETS_STRONG_INTEGRITY</code></td><td>Passes all checks including bootloader lock state</td><td>Required for highest-risk operations</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <pre><code><span class="kw">class</span> <span class="cl">IntegrityVerifier</span>(
+    <span class="kw">private val</span> context: <span class="cl">Context</span>,
+    <span class="kw">private val</span> apiBackend: <span class="cl">BackendApi</span>
+) {
+    <span class="kw">private val</span> integrityManager = <span class="cl">IntegrityManagerFactory</span>.<span class="fn">create</span>(context)
+
+    <span class="cm">/**
+     * Request integrity verdict. Must be called off the main thread.
+     * The nonce is server-generated and single-use to prevent replay attacks.
+     */</span>
+    <span class="kw">suspend fun</span> <span class="fn">verifyForPayment</span>(paymentId: <span class="cl">String</span>): <span class="cl">IntegrityResult</span> {
+        <span class="cm">// 1. Get a fresh server-side nonce — single use, tied to this operation</span>
+        <span class="kw">val</span> nonce = apiBackend.<span class="fn">getIntegrityNonce</span>(paymentId)
+
+        <span class="cm">// 2. Request token from Play Integrity API</span>
+        <span class="kw">val</span> tokenRequest = <span class="cl">IntegrityTokenRequest</span>.<span class="fn">builder</span>()
+            .<span class="fn">setNonce</span>(nonce)
+            .<span class="fn">setCloudProjectNumber</span>(CLOUD_PROJECT_NUMBER)
+            .<span class="fn">build</span>()
+
+        <span class="kw">val</span> tokenResponse = integrityManager
+            .<span class="fn">requestIntegrityToken</span>(tokenRequest)
+            .<span class="fn">await</span>() <span class="cm">// Coroutine-friendly extension</span>
+
+        <span class="cm">// 3. Send token to YOUR server for verification — never trust client-side verdict</span>
+        <span class="kw">return</span> apiBackend.<span class="fn">verifyIntegrityToken</span>(
+            token = tokenResponse.token(),
+            paymentId = paymentId
+        )
+        <span class="cm">// Server decrypts and verifies verdict, then proceeds or blocks</span>
+    }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">&#9888; Play Integrity API — Critical Usage Rules</div>
+      <ul style="margin:0;">
+        <li><strong>Never call on the main thread</strong> — it makes a network request to Google's servers</li>
+        <li><strong>Has a quota</strong> — do not call on every screen. Call only for specific sensitive operations: payment initiation, account changes, login</li>
+        <li><strong>Nonce must be server-generated</strong> — a client-generated nonce can be replayed. The nonce ties the verdict to a specific operation</li>
+        <li><strong>Verdict must be verified server-side</strong> — never make security decisions based on client-side decryption of the token</li>
+      </ul>
+    </div>
+
+    <h3>Root Detection — Multi-Signal Approach</h3>
+    <p>No single root check is reliable. Combine multiple signals — a single check is trivially bypassed by Magisk modules that hook individual system calls:</p>
+
+    <pre><code><span class="kw">object</span> <span class="cl">RaspChecker</span> {
+
+    <span class="kw">fun</span> <span class="fn">isDeviceCompromised</span>(): <span class="cl">Boolean</span> {
+        <span class="kw">var</span> score = <span class="nu">0</span>
+
+        <span class="cm">// Signal 1: su binary presence in common locations</span>
+        <span class="kw">val</span> suPaths = <span class="fn">arrayOf</span>(
+            <span class="str">"/system/bin/su"</span>, <span class="str">"/system/xbin/su"</span>, <span class="str">"/sbin/su"</span>,
+            <span class="str">"/data/local/su"</span>, <span class="str">"/data/local/bin/su"</span>
+        )
+        <span class="kw">if</span> (suPaths.<span class="fn">any</span> { <span class="cl">File</span>(it).<span class="fn">exists</span>() }) score += <span class="nu">3</span>
+
+        <span class="cm">// Signal 2: Magisk manager package</span>
+        <span class="kw">val</span> rootPackages = <span class="fn">listOf</span>(
+            <span class="str">"com.topjohnwu.magisk"</span>, <span class="str">"eu.chainfire.supersu"</span>,
+            <span class="str">"com.noshufou.android.su"</span>
+        )
+        <span class="kw">if</span> (rootPackages.<span class="fn">any</span> { <span class="fn">isPackageInstalled</span>(it) }) score += <span class="nu">3</span>
+
+        <span class="cm">// Signal 3: test-keys build (non-official ROM)</span>
+        <span class="kw">val</span> buildTags = <span class="cl">Build</span>.TAGS ?: <span class="str">""</span>
+        <span class="kw">if</span> (buildTags.<span class="fn">contains</span>(<span class="str">"test-keys"</span>)) score += <span class="nu">2</span>
+
+        <span class="cm">// Signal 4: writable system partition</span>
+        <span class="kw">try</span> {
+            <span class="kw">val</span> file = <span class="cl">File</span>(<span class="str">"/system/test_rasp_check"</span>)
+            file.<span class="fn">createNewFile</span>()
+            file.<span class="fn">delete</span>()
+            score += <span class="nu">4</span> <span class="cm">// Writable /system is a strong indicator</span>
+        } <span class="kw">catch</span> (_: <span class="cl">Exception</span>) { <span class="cm">/* expected — /system should be read-only */</span> }
+
+        <span class="cm">// Signal 5: dangerous system properties</span>
+        <span class="kw">if</span> (<span class="fn">getSystemProperty</span>(<span class="str">"ro.debuggable"</span>) == <span class="str">"1"</span>) score += <span class="nu">2</span>
+        <span class="kw">if</span> (<span class="fn">getSystemProperty</span>(<span class="str">"ro.secure"</span>) == <span class="str">"0"</span>) score += <span class="nu">2</span>
+
+        <span class="kw">return</span> score >= <span class="nu">4</span> <span class="cm">// Threshold — tune based on false positive rate</span>
+    }
+
+    <span class="kw">fun</span> <span class="fn">isEmulator</span>(): <span class="cl">Boolean</span> {
+        <span class="kw">return</span> (<span class="cl">Build</span>.FINGERPRINT.<span class="fn">startsWith</span>(<span class="str">"generic"</span>) ||
+                <span class="cl">Build</span>.FINGERPRINT.<span class="fn">startsWith</span>(<span class="str">"unknown"</span>) ||
+                <span class="cl">Build</span>.MODEL.<span class="fn">contains</span>(<span class="str">"google_sdk"</span>) ||
+                <span class="cl">Build</span>.MODEL.<span class="fn">contains</span>(<span class="str">"Emulator"</span>) ||
+                <span class="cl">Build</span>.MODEL.<span class="fn">contains</span>(<span class="str">"Android SDK built for x86"</span>) ||
+                <span class="cl">Build</span>.HARDWARE.<span class="fn">contains</span>(<span class="str">"goldfish"</span>) ||
+                <span class="cl">Build</span>.HARDWARE.<span class="fn">contains</span>(<span class="str">"ranchu"</span>) ||
+                <span class="cl">Build</span>.PRODUCT.<span class="fn">startsWith</span>(<span class="str">"sdk"</span>))
+    }
+
+    <span class="kw">fun</span> <span class="fn">isDebuggerAttached</span>(): <span class="cl">Boolean</span> {
+        <span class="kw">return</span> <span class="cl">Debug</span>.<span class="fn">isDebuggerConnected</span>() || <span class="cl">Debug</span>.<span class="fn">waitingForDebugger</span>()
+    }
+}</code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; RASP — Defense in Depth, Not a Silver Bullet</div>
+      <p style="margin:0;margin-bottom:8px;">RASP is defense in depth, not a guarantee. Determined attackers with Magisk + Frida can bypass individual checks. The goal is to <strong>raise the cost of attack</strong> high enough that most attackers give up. Each bypassed check requires attacker effort.</p>
+      <p style="margin:0;"><strong>Never trust client-side security alone.</strong> Always combine RASP with server-side validation: server-verified Play Integrity tokens, server-side fraud detection, rate limiting, and anomaly detection. If a client claims to be on a clean device but shows suspicious transaction patterns, the server should still intervene.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S7 — SECURITY CHECKLIST
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#9989;</div>7. Production Security Checklist</div>
+
+    <p>A 20-item pre-release security checklist for production Android apps handling payments or PII.</p>
+
+    <div class="table-wrap">
+      <table class="checklist-table">
+        <thead><tr><th>Category</th><th>Control</th><th>Implementation</th><th>Risk if Missing</th></tr></thead>
+        <tbody>
+          <tr><td>Screen Protection</td><td>FLAG_SECURE on payment/auth windows</td><td><code>window.addFlags(FLAG_SECURE)</code> before <code>setContentView()</code></td><td>Card numbers captured by screencap / screen recorder</td></tr>
+          <tr><td>Screen Protection</td><td>Password masking on PIN/card fields</td><td><code>inputType="numberPassword"</code> or <code>PasswordVisualTransformation</code></td><td>Credentials visible in screenshot even without FLAG_SECURE</td></tr>
+          <tr><td>Screen Protection</td><td>Auto-lock on inactivity</td><td>ViewModel timer → navigate to lock screen on timeout</td><td>Unattended device exposes sensitive data</td></tr>
+          <tr><td>Task Security</td><td>excludeFromRecents on sensitive activities</td><td><code>android:excludeFromRecents="true"</code> in manifest</td><td>Task switcher thumbnail leaks sensitive screen content</td></tr>
+          <tr><td>Task Security</td><td>noHistory on auth/payment screens</td><td><code>android:noHistory="true"</code> in manifest</td><td>Back-navigation to sensitive screen after logout</td></tr>
+          <tr><td>Task Security</td><td>taskAffinity="" on all sensitive activities</td><td><code>android:taskAffinity=""</code> in manifest</td><td>StrandHogg task hijacking / overlay phishing</td></tr>
+          <tr><td>Task Security</td><td>allowTaskReparenting=false</td><td><code>android:allowTaskReparenting="false"</code></td><td>Malicious app injects activity into your task</td></tr>
+          <tr><td>Component Security</td><td>All components exported=false by default</td><td>Explicit <code>android:exported="false"</code> on all components</td><td>Other apps can start/query sensitive components</td></tr>
+          <tr><td>Component Security</td><td>Signature permissions on exported components</td><td><code>android:permission="<wbr>com.app.permission.SENSITIVE"</code> with <code>protectionLevel="signature"</code></td><td>Third-party apps can access sensitive operations</td></tr>
+          <tr><td>Component Security</td><td>Deep link input validation</td><td>Host whitelist + path check + parameter regex validation</td><td>Malicious deep links bypass auth or inject data</td></tr>
+          <tr><td>Component Security</td><td>App Links instead of custom URI schemes</td><td>HTTPS verified links via assetlinks.json</td><td>Custom schemes spoofable by any installed app</td></tr>
+          <tr><td>Data Security</td><td>Encrypted SharedPreferences</td><td><code>EncryptedSharedPreferences</code> (Jetpack Security)</td><td>Tokens/keys readable from adb on unencrypted devices</td></tr>
+          <tr><td>Data Security</td><td>No sensitive data in logs</td><td>ProGuard/R8 removes log calls; log level checks</td><td>LogCat exposes credentials, tokens, PII</td></tr>
+          <tr><td>Data Security</td><td>No secrets in APK resources</td><td>Runtime injection via encrypted config / remote config</td><td>API keys extracted from APK via apktool</td></tr>
+          <tr><td>Network Security</td><td>Certificate pinning (see 19A)</td><td>OkHttp <code>CertificatePinner</code> or Network Security Config</td><td>MITM intercepts payment data</td></tr>
+          <tr><td>Network Security</td><td>cleartext traffic disabled</td><td><code>android:usesCleartextTraffic="false"</code> in manifest</td><td>HTTP traffic exposed on network</td></tr>
+          <tr><td>Runtime Protection</td><td>Play Integrity API for sensitive ops</td><td>Server-verified nonce-based verdict before payment initiation</td><td>Payments processed on rooted/tampered devices</td></tr>
+          <tr><td>Runtime Protection</td><td>Multi-signal root detection</td><td><code>RaspChecker</code> with 5+ signals, threshold scoring</td><td>Frida hooks bypass single-check detection</td></tr>
+          <tr><td>Runtime Protection</td><td>Anti-debug in production builds</td><td><code>Debug.isDebuggerConnected()</code> check in sensitive paths</td><td>Debugger-assisted reverse engineering of payment logic</td></tr>
+          <tr><td>Runtime Protection</td><td>R8 full mode obfuscation</td><td><code>minifyEnabled=true</code> + <code>proguardFiles</code> in release build</td><td>Business logic, API endpoints readable in decompiled APK</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">&#128270; Cross-References</div>
+      <p style="margin:0;">Network security (certificate pinning, TLS config, Network Security Config) is covered in depth in <strong>19A — Data &amp; Network Security</strong>. R8 obfuscation and ProGuard rules are covered in <strong>19B — App Hardening</strong>. This page focuses on the window/task/component/runtime layer.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S8 — INTERVIEW FRAMEWORK
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#127919;</div>8. Interview Framework</div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "For a banking or payment app, I apply security in layers. At the window level, I set FLAG_SECURE — before setContentView — to prevent screenshots and mask the task switcher thumbnail. For sensitive activities like payment and auth screens, I set excludeFromRecents and noHistory to prevent them appearing in task history and the back stack. I set taskAffinity to an empty string to isolate the task and prevent StrandHogg task hijacking. All components are android:exported=false unless explicitly public, and deep links are validated against whitelist patterns for host, path, and parameter format. At runtime, I use the Play Integrity API — server-verified, nonce-based — to confirm device integrity before allowing sensitive operations like payment initiation."
+    </div>
+
+    <h3>2-Minute Extended Answer</h3>
+    <div class="answer-box">
+      "Beyond the basics, I'd add detail on the StrandHogg vulnerability — malicious apps exploit taskAffinity to inject overlay activities, and the defense is taskAffinity='', allowTaskReparenting=false on all sensitive activities. For WebViews in payment flows, I disable file access, set MIXED_CONTENT_NEVER_ALLOW, and whitelist navigation to specific domains with a custom WebViewClient.<br><br>
+      For component security, I use signature-level permissions on any exported component so only apps signed with my signing key can access them. Deep links use App Links (https:// verified via assetlinks.json) rather than custom schemes that can be spoofed.<br><br>
+      For runtime protection, I combine Play Integrity with multi-signal root detection — su binary presence, Magisk manager package, test-keys build tag, writable /system partition, and dangerous system properties. No single check is reliable; the threshold scoring approach raises the cost of evasion. All of this is defense in depth — I never trust client-only security, and the server independently validates integrity tokens before authorizing any payment operation."
+    </div>
+
+    <h3>Must-Mention Checklist</h3>
+    <div class="must-mention">
+      <div class="must-item">
+        <div class="must-num">1</div>
+        <div><strong>FLAG_SECURE before setContentView</strong> — not after. Window must not be created yet when the flag is set.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">2</div>
+        <div><strong>excludeFromRecents + noHistory</strong> for payment/auth screens — prevents task switcher leakage and back-navigation post-logout.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">3</div>
+        <div><strong>taskAffinity="" to prevent task hijacking (StrandHogg)</strong> — isolates sensitive activities into their own task.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">4</div>
+        <div><strong>android:exported="false" as default</strong> for all components — explicit, not relying on defaults.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">5</div>
+        <div><strong>Deep link input validation</strong> — host + path + parameter whitelist. App Links preferred over custom URI schemes.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">6</div>
+        <div><strong>Play Integrity API for sensitive operations</strong> — server-verified, nonce-based, not called on every screen.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">7</div>
+        <div><strong>Defense in depth — server-side validation, not client-only</strong> — client RASP raises the cost of attack; server makes the final security decision.</div>
+      </div>
+    </div>
+
+    <h3>Comparison: FLAG_SECURE vs excludeFromRecents</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>FLAG_SECURE</th><th>excludeFromRecents</th></tr></thead>
+        <tbody>
+          <tr><td>Task switcher</td><td>Shows black rectangle</td><td>Removes task entirely</td></tr>
+          <tr><td>Screenshot via adb</td><td>✅ Blocked</td><td>❌ Not blocked (different concern)</td></tr>
+          <tr><td>Screen recording</td><td>✅ Blocked</td><td>❌ Not blocked</td></tr>
+          <tr><td>User experience</td><td>App still in recents (black card)</td><td>App invisible from recents</td></tr>
+          <tr><td>Best for</td><td>All sensitive windows — strongest capture protection</td><td>One-time flows, deep links, auth screens</td></tr>
+          <tr><td>Combine with</td><td>Selective per-screen application</td><td><code>noHistory</code> + <code>taskAffinity=""</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S9 — INTERVIEW QUESTIONS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127942;</div>9. Interview Questions</div>
+
+    <!-- Q1 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q1. What is FLAG_SECURE and when do you use it?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><code>FLAG_SECURE</code> is a <code>WindowManager.LayoutParams</code> flag that marks a window as containing sensitive content. When set, it prevents programmatic screenshots (via adb, MediaProjection API), blocks screen recording of that window, and causes the window to appear as a black rectangle in the task switcher recents view.</p>
+        <p><strong>When to use:</strong> Payment screens, login/PIN entry, account details pages, any screen displaying PII or credentials. Apply selectively — not to the entire app — to avoid breaking legitimate screenshot use cases.</p>
+        <p><strong>Critical implementation detail:</strong> It must be set before <code>setContentView()</code>:</p>
+        <pre><code><span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+    window.<span class="fn">addFlags</span>(<span class="cl">WindowManager</span>.<span class="cl">LayoutParams</span>.FLAG_SECURE) <span class="cm">// FIRST</span>
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="fn">setContentView</span>(R.layout.activity_payment)
+}</code></pre>
+        <p>What it does NOT prevent: a physical camera pointed at the screen, Accessibility services reading view content, or captures of other windows.</p>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q2. How do you prevent your app from appearing in the Android task switcher?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>Three approaches, each with different trade-offs:</p>
+        <ol>
+          <li><strong><code>android:excludeFromRecents="true"</code></strong> — removes the task from the recents screen entirely. Best for one-time flows (payment confirmation, auth screens). Downside: bad UX if applied to the main activity.</li>
+          <li><strong>FLAG_SECURE</strong> — the task stays in recents but shows a black rectangle instead of the live thumbnail. Useful when you want the app accessible from recents but don't want sensitive content visible.</li>
+          <li><strong>Dynamic masking in <code>onStop()</code></strong> — replace sensitive views with a safe placeholder, restore in <code>onResume()</code>. Keeps the app in recents with a safe thumbnail. Best UX but requires more code.</li>
+        </ol>
+        <p>For a payment Activity, the recommended combination: <code>excludeFromRecents="true"</code> + <code>noHistory="true"</code> + <code>taskAffinity=""</code>. This removes it from recents, prevents back-navigation post-completion, and isolates the task.</p>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q3. What is the StrandHogg vulnerability and how do you prevent it?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>StrandHogg</strong> is a class of task hijacking vulnerabilities exploiting Android's task management.</p>
+        <p><strong>How it works:</strong> A malicious app declares <code>android:taskAffinity</code> equal to your app's package name and sets <code>android:allowTaskReparenting="true"</code>. When the user launches your app, Android's task manager routes the malicious Activity to your task stack. The malicious Activity sits on top, appearing as your app's login screen — a phishing overlay. It can capture credentials before passing control back.</p>
+        <p><strong>StrandHogg 2.0 (CVE-2020-0096)</strong> was more severe — it did not require <code>singleTask</code> launch mode and could attack any app without any interaction from the malicious app developer.</p>
+        <p><strong>Defenses:</strong></p>
+        <ul>
+          <li><code>android:taskAffinity=""</code> — empty string isolates the Activity into its own anonymous task. A malicious app cannot match an empty affinity.</li>
+          <li><code>android:allowTaskReparenting="false"</code> — prevents the activity from being moved between tasks</li>
+          <li>Keep targetSdkVersion up to date — Android 10+ includes OS-level mitigations</li>
+          <li>For deep-link activities, validate the calling package using <code>callingPackage</code> or signed intent extras</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q4. Your banking app shows account numbers. Walk through all the screen capture attack vectors and your defenses.</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Attack vectors and mitigations:</strong></p>
+        <ol>
+          <li><strong>adb screencap / MediaProjection API</strong> → FLAG_SECURE blocks both. The system marks the window's surface as protected, and the composition layer refuses capture requests.</li>
+          <li><strong>Task switcher thumbnail</strong> → FLAG_SECURE renders a black rectangle. Alternatively, use dynamic masking in onStop() to show a placeholder.</li>
+          <li><strong>Malicious Accessibility Service</strong> → Cannot be fully blocked (Accessibility is a user-granted privilege). Mitigate with <code>android:importantForAccessibility="no"</code> on sensitive views, and mask data by default (show last 4 digits only, require explicit user action to reveal).</li>
+          <li><strong>Physical camera pointed at screen</strong> → FLAG_SECURE does not help here. Mitigate with time-limited display (auto-mask after 30s), partial masking (show ••••1234), and physical display brightness/contrast warnings.</li>
+          <li><strong>Screen reader / TalkBack announcing values</strong> → Use <code>setContentDescription()</code> with masked values for sensitive views.</li>
+          <li><strong>Frida hook on the screenshot API</strong> → Harder to prevent. Combine RASP (hook detection, Frida port scan) with Play Integrity API before displaying sensitive data. If integrity fails, show only masked data.</li>
+        </ol>
+        <p><strong>Defence-in-depth summary:</strong> FLAG_SECURE + partial masking by default + time-limited reveal + Play Integrity check before showing full account number.</p>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q5. A security audit finds your app's ContentProvider is exported without permissions. What are the risks and how do you fix it?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Risks of an exported ContentProvider without permissions:</strong></p>
+        <ul>
+          <li><strong>Data exfiltration:</strong> Any app can query your ContentProvider and read all data it exposes — user profiles, order history, payment methods, auth tokens stored in the database.</li>
+          <li><strong>SQL injection:</strong> If the provider passes selection arguments to SQLite without parameterization, a malicious app can inject SQL to read or delete arbitrary data.</li>
+          <li><strong>Data manipulation:</strong> If the provider supports insert/update/delete, a malicious app can corrupt or poison your app's data.</li>
+          <li><strong>URI traversal:</strong> If the provider uses file-based URIs, path traversal attacks may expose files outside the intended directory.</li>
+        </ul>
+        <p><strong>Fix — in order of priority:</strong></p>
+        <ol>
+          <li>Set <code>android:exported="false"</code> if the provider is only used internally. This is the complete fix for internal providers.</li>
+          <li>If cross-app access is required, add <code>android:readPermission</code> and <code>android:writePermission</code> with <code>protectionLevel="signature"</code> so only apps from your signing key can access it.</li>
+          <li>For file sharing with arbitrary apps, replace the ContentProvider with <code>FileProvider</code> (Jetpack) using scoped URI grants — <code>FLAG_GRANT_READ_URI_PERMISSION</code> on a per-share basis.</li>
+          <li>Audit all query() implementations for SQL injection — use parameterized queries, never concatenate selection strings from caller input.</li>
+          <li>Add query parameter validation — reject unknown projection columns, limit selection to whitelisted columns.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q6. You need to prevent your payment activity from appearing in the user's recent apps list, but only when the user has NOT completed the payment. How do you implement this dynamically?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>The manifest attribute <code>android:excludeFromRecents</code> is static. For dynamic control, use <code>ActivityManager.AppTask</code>:</p>
+        <pre><code><span class="kw">class</span> <span class="cl">PaymentActivity</span> : <span class="cl">AppCompatActivity</span>() {
+    <span class="kw">private var</span> paymentCompleted = <span class="kw">false</span>
+
+    <span class="kw">override fun</span> <span class="fn">onStop</span>() {
+        <span class="kw">super</span>.<span class="fn">onStop</span>()
+        <span class="kw">if</span> (!paymentCompleted) {
+            <span class="cm">// Payment not complete — remove from recents dynamically</span>
+            <span class="fn">excludeFromRecentsDynamically</span>()
+        }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onResume</span>() {
+        <span class="kw">super</span>.<span class="fn">onResume</span>()
+        <span class="cm">// If user returns, hide sensitive content until re-auth</span>
+        <span class="kw">if</span> (!paymentCompleted) {
+            viewModel.<span class="fn">requireReAuthentication</span>()
+        }
+    }
+
+    <span class="kw">private fun</span> <span class="fn">excludeFromRecentsDynamically</span>() {
+        <span class="kw">val</span> am = <span class="fn">getSystemService</span>(<span class="cl">ActivityManager</span>::<span class="kw">class</span>.java) ?: <span class="kw">return</span>
+        <span class="cm">// Find our task in the recent tasks list and exclude it</span>
+        am.<span class="fn">appTasks</span>.<span class="fn">firstOrNull</span> {
+            it.taskInfo.baseActivity?.packageName == packageName
+        }?.<span class="fn">setExcludeFromRecents</span>(<span class="kw">true</span>)
+    }
+
+    <span class="kw">fun</span> <span class="fn">onPaymentSuccess</span>() {
+        paymentCompleted = <span class="kw">true</span>
+        <span class="cm">// Allow task to appear in recents once complete (or finish it)</span>
+        <span class="fn">getSystemService</span>(<span class="cl">ActivityManager</span>::<span class="kw">class</span>.java)
+            ?.<span class="fn">appTasks</span>
+            ?.<span class="fn">firstOrNull</span> { it.taskInfo.baseActivity?.packageName == packageName }
+            ?.<span class="fn">setExcludeFromRecents</span>(<span class="kw">false</span>)
+        <span class="cm">// Or: finish the activity — noHistory removes it from back stack</span>
+        <span class="fn">finish</span>()
+    }
+}</code></pre>
+        <p>The key is <code>ActivityManager.AppTask.setExcludeFromRecents(boolean)</code>, available since API 21. Combine with FLAG_SECURE for the intermediate "payment in progress" state.</p>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q7. Describe how you would implement Play Integrity API verification for a payment flow, including the nonce strategy.</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>The key principle:</strong> the nonce must be server-generated, single-use, and tied to a specific operation. Client-generated nonces can be replayed.</p>
+        <p><strong>Flow:</strong></p>
+        <ol>
+          <li>User initiates payment → app calls <code>POST /api/payment/start</code> on your server</li>
+          <li>Server generates a cryptographically random nonce (e.g. UUID + HMAC of operation details), stores it with a 60-second TTL, returns it to the client</li>
+          <li>Client calls <code>IntegrityManager.requestIntegrityToken(nonce)</code> — on a coroutine, never main thread</li>
+          <li>Client sends the integrity token + nonce to server as part of the payment request</li>
+          <li>Server calls Google's <code>playintegrity.v1.decodeIntegrityToken</code> API to decrypt and verify the verdict</li>
+          <li>Server checks: verdict level ≥ MEETS_DEVICE_INTEGRITY, package name matches, nonce matches the stored value, token freshness within acceptable window</li>
+          <li>Server marks nonce as consumed (prevents replay), then proceeds with or rejects the payment</li>
+        </ol>
+        <p><strong>What the server checks in the verdict:</strong></p>
+        <ul>
+          <li><code>appIntegrity.appRecognitionVerdict</code> — must be PLAY_RECOGNIZED (unmodified APK from Play Store)</li>
+          <li><code>deviceIntegrity.deviceRecognitionVerdict</code> — must include MEETS_DEVICE_INTEGRITY</li>
+          <li><code>accountDetails.appLicensingVerdict</code> — must be LICENSED (user has legitimate copy)</li>
+          <li><code>requestDetails.nonce</code> — must match server-stored nonce for this payment</li>
+          <li><code>requestDetails.timestampMillis</code> — must be within the last 60 seconds</li>
+        </ul>
+        <p>Never make the security decision client-side — the verdict JSON is encrypted for your server key, but a compromised client could substitute a pre-obtained passing verdict. The server is the source of truth.</p>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q8. An attacker has rooted a device and is using Frida to hook your SSL pinning code. What additional layers of protection do you have?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>This is a defense-in-depth question. When SSL pinning is bypassed, your remaining protections are:</p>
+        <p><strong>Layer 1 — Frida/Hook Detection (RASP)</strong></p>
+        <ul>
+          <li>Scan for Frida's default port (27042) being open: <code>Socket("127.0.0.1", 27042)</code> connecting successfully is a strong indicator</li>
+          <li>Inspect <code>/proc/self/maps</code> for Frida-related shared library names (<code>frida-agent</code>, <code>gadget</code>)</li>
+          <li>Check for Frida's pipe files in <code>/tmp/frida-*</code></li>
+          <li>Detect method hooking via reflection — compare a known method's implementation address before and after a suspicious window</li>
+        </ul>
+        <p><strong>Layer 2 — Play Integrity API</strong></p>
+        <p>Frida hooking SSL pinning does not spoof the Play Integrity verdict — that requires a separate attack chain. If the device has Frida and is rooted, it likely fails MEETS_DEVICE_INTEGRITY. The server refuses payment initiation entirely, regardless of what the client claims.</p>
+        <p><strong>Layer 3 — Server-Side Request Validation</strong></p>
+        <p>Even if the attacker can see decrypted traffic (SSL pinning bypassed), they cannot replay or forge requests that include valid HMAC signatures derived from user session tokens that expire in seconds, or one-time payment tokens. The attacker can observe but not generate valid payment requests without the user's active session.</p>
+        <p><strong>Layer 4 — Server-Side Anomaly Detection</strong></p>
+        <p>Even if all client-side protections are bypassed, server-side ML-based fraud detection flags unusual patterns: transaction amount outliers, unusual device fingerprint, rapid successive payments, geographic impossibility.</p>
+        <p><strong>The senior answer:</strong> "We assume client-side protections will eventually be bypassed by a sufficiently skilled attacker. Our architecture is designed so that bypassing any single layer does not grant the ability to complete a fraudulent transaction. The server makes the final authorization decision based on multiple independent signals."</p>
+      </div>
+    </div>
+
+  </div><!-- end s9 -->
+
+</main>
+</div><!-- end layout -->
+
+<script>
+(function () {
+  var sections   = Array.from(document.querySelectorAll('.section[id]'));
+  var navItems   = Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var progressFill = document.getElementById('progressFill');
+  function getActiveSection () {
+    var offset = 120; var active = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= offset) active = sections[i];
+    }
+    return active;
+  }
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      item.classList.toggle('active', isActive);
+      item.classList.toggle('aip-nav-active', isActive);
+    });
+    if (progressFill) {
+      var docH = document.documentElement.scrollHeight - window.innerHeight;
+      var pct  = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+    var activeItem = navItems.find(function (it) { return it.dataset.section === active.id; });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') || activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop; var sbH = sb.clientHeight; var sbS = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+      }
+    }
+  }
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  var mainEl = document.getElementById('mainScroll') || document.querySelector('.main') || document.querySelector('main');
+  if (mainEl && mainEl !== document.body) mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  setTimeout(updateSidebar, 100);
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+}());
+function toggleQuiz(el) {
+  var ans = el.nextElementSibling; var icon = el.querySelector('.toggle-icon');
+  if (ans) ans.classList.toggle('open'); if (icon) icon.classList.toggle('open');
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

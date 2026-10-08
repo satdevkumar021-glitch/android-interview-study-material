@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>13D — DataStore: Preferences &amp; Proto | Android Interview Prep</title>
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+.sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+.nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;flex-shrink:0;}
+.nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+.main{flex:1;}
+.hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+.hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+.hero h1 span{color:var(--accent);}
+.hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+.hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+.badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+.badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+.badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+.section{display:block!important;padding:40px 48px;max-width:920px;border-bottom:1px solid var(--border);}
+.section:last-of-type{border-bottom:none;}
+.section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+p{color:var(--muted);margin-bottom:14px;}p strong{color:var(--text);}
+li{color:var(--muted);margin-bottom:6px;}li strong{color:var(--text);}
+ul,ol{padding-left:20px;margin-bottom:14px;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+.kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+.table-wrap{overflow-x:auto;margin:14px 0 20px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td:first-child{color:var(--text);font-weight:600;}td strong{color:var(--text);}
+.callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+.callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+.callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+.callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+.callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+.callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+.callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.callout-green .callout-label{color:var(--green);}.callout-red .callout-label{color:var(--red);}.callout-yellow .callout-label{color:var(--yellow);}.callout-blue .callout-label{color:var(--accent2);}.callout-purple .callout-label{color:var(--accent);}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+.quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+.quiz-q:hover{background:rgba(255,255,255,.02);}
+.quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+.quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+.diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+.diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+.toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+.quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+.quiz-a.open{display:block;}
+.toggle-icon.open{transform:rotate(180deg);}
+.answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+.must-mention{display:grid;gap:10px;margin:14px 0;}
+.must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+.must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .1s linear;}
+.nav-buttons{display:none!important;}
+.nav-item.active,.nav-item.aip-nav-active{background:rgba(124,106,247,.15)!important;color:var(--accent)!important;}
+.nav-item.active .nav-num,.nav-item.aip-nav-active .nav-num{background:rgba(124,106,247,.25)!important;color:var(--accent)!important;}
+@media(max-width:768px){.sidebar{display:none!important;}.section{padding:24px 16px!important;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sidebar-back{display:flex;align-items:center;gap:8px;padding:8px 12px 12px;margin-bottom:8px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--muted);font-size:12px;font-weight:600;transition:color .15s;}
+.sidebar-back:hover{color:var(--accent);}
+.sidebar-back svg{width:14px;height:14px;flex-shrink:0;fill:currentColor;}
+.hero-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:14px;transition:color .15s;font-weight:500;}
+.hero-back:hover{color:var(--accent);}
+.hero-back svg{width:12px;height:12px;fill:currentColor;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">13D · DataStore</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Preferences DataStore</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Proto DataStore</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Migration Strategy</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> DataStore + ViewModel</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Testing DataStore</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Pitfalls &amp; Gotchas</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Interview Framework</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
+</nav>
+
+<main class="main" id="mainScroll">
+  <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>13D</span> — DataStore: Preferences &amp; Proto</h1>
+    <p class="hero-desc">Jetpack DataStore replaces SharedPreferences with a coroutine-based, type-safe, non-blocking storage API. Covers Preferences DataStore, Proto DataStore, migration strategy, ViewModel integration, and testing.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 13D</span>
+      <span class="badge badge-tier1">&#11088; Tier 1</span>
+      <span class="badge badge-hot">&#128293; Hot</span>
+    </div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section" id="s1">
+    <div class="section-title"><div class="section-icon">&#128202;</div>1. Overview</div>
+    <p><strong>Jetpack DataStore</strong> is Google's modern data storage solution designed to overcome the structural, concurrency, and performance flaws inherent in the legacy <code>SharedPreferences</code> API. Built from the ground up using <strong>Kotlin Coroutines</strong> and <strong>Flow</strong>, DataStore provides an asynchronous, consistent, and transactional data storage engine for lightweight application state and user preferences.</p>
+
+    <h3>Why SharedPreferences Is Problematic</h3>
+    <ul>
+      <li><strong>Synchronous I/O on UI Thread:</strong> Initial loading of SharedPreferences XML parses disk files synchronously. Calling <code>getSharedPreferences()</code> or reading values before the file finishes loading forces the main thread to block, directly causing UI jank and ANRs (Application Not Responding).</li>
+      <li><strong>apply() Hidden ANR Traps:</strong> While <code>apply()</code> queues disk writes asynchronously off the calling thread, the Android framework's <code>ActivityThread.handleStopActivity()</code> waits on a queued <code>CountDownLatch</code> for all pending <code>apply()</code> disk writes to complete during <code>onStop()</code> / <code>onPause()</code> lifecycle events, frequently triggering ANRs in production apps.</li>
+      <li><strong>commit() Main Thread Blocking:</strong> <code>commit()</code> synchronously writes to disk and returns a boolean, blocking whatever thread executes it.</li>
+      <li><strong>Lack of Error Signaling:</strong> SharedPreferences swallows disk write and read I/O exceptions silently without giving the developer a chance to recover from corrupted storage or out-of-disk-space errors.</li>
+      <li><strong>No Type Safety:</strong> Keys and values are weakly typed. Storing a String and reading an Int triggers a runtime <code>ClassCastException</code>.</li>
+      <li><strong>No Reactive Stream Support:</strong> <code>OnSharedPreferenceChangeListener</code> holds weak references that get garbage collected unpredictably, misses initial values, and lacks flow-control mechanisms like backpressure.</li>
+      <li><strong>No Transactional Guarantees:</strong> Concurrent modifications across multiple editors lead to lost updates or partial writes if a process crashes mid-write.</li>
+    </ul>
+
+    <h3>Two DataStore Implementations</h3>
+    <ol>
+      <li><strong>Preferences DataStore:</strong> Stores and accesses data using key-value pairs (similar to SharedPreferences), but with type-safe key definitions and full coroutine/Flow support. No pre-defined schema is required.</li>
+      <li><strong>Proto DataStore:</strong> Stores data as custom typed objects defined via Protocol Buffers (protobuf). It guarantees compile-time type safety, schema validation, and structured object serialization.</li>
+    </ol>
+
+    <h3>Storage Solution Comparison</h3>
+    <div class="table-wrap"><table>
+      <tr>
+        <th>Feature</th>
+        <th>SharedPreferences</th>
+        <th>Preferences DataStore</th>
+        <th>Proto DataStore</th>
+        <th>Room (SQLite)</th>
+      </tr>
+      <tr>
+        <td><strong>Primary Use Case</strong></td>
+        <td>Simple key-value flags (Legacy)</td>
+        <td>Simple settings &amp; UI flags</td>
+        <td>Complex typed configurations</td>
+        <td>Relational, queried data sets</td>
+      </tr>
+      <tr>
+        <td><strong>Threading Model</strong></td>
+        <td>Blocks main thread on init/commit/onStop</td>
+        <td>Fully non-blocking (Dispatchers.IO)</td>
+        <td>Fully non-blocking (Dispatchers.IO)</td>
+        <td>Non-blocking coroutine / Flow queries</td>
+      </tr>
+      <tr>
+        <td><strong>Type Safety</strong></td>
+        <td>❌ None (Runtime ClassCastException)</td>
+        <td>⚠️ Key-level type safety only</td>
+        <td>✅ Full compile-time schema safety</td>
+        <td>✅ Full compile-time query &amp; schema safety</td>
+      </tr>
+      <tr>
+        <td><strong>Reactive API</strong></td>
+        <td>Weak-ref listener (flaky)</td>
+        <td><code>Flow&lt;Preferences&gt;</code></td>
+        <td><code>Flow&lt;T&gt;</code></td>
+        <td><code>Flow&lt;List&lt;Entity&gt;&gt;</code></td>
+      </tr>
+      <tr>
+        <td><strong>Write Transactions</strong></td>
+        <td>❌ Non-atomic (file write race)</td>
+        <td>✅ Atomic (single-writer actor)</td>
+        <td>✅ Atomic (single-writer actor)</td>
+        <td>✅ Full ACID SQLite transactions</td>
+      </tr>
+      <tr>
+        <td><strong>Error Handling</strong></td>
+        <td>❌ Silent failure</td>
+        <td>✅ Propagates <code>IOException</code></td>
+        <td>✅ <code>CorruptionHandler</code> + <code>IOException</code></td>
+        <td>✅ SQLite exception propagation</td>
+      </tr>
+      <tr>
+        <td><strong>Complex Queries / Indexes</strong></td>
+        <td>❌ None</td>
+        <td>❌ None</td>
+        <td>❌ None</td>
+        <td>✅ SQL joins, indices, paging</td>
+      </tr>
+    </table></div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Core Guarantee</div>
+      DataStore guarantees that writes complete before reads return the updated value. <code>SharedPreferences.commit()</code> blocks the calling thread. <code>SharedPreferences.apply()</code> is async but the App framework waits for all pending applies during <code>Activity.onStop()</code> — causing ANRs in large apps.
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div>2. Preferences DataStore</div>
+    <p>Preferences DataStore is the direct, lightweight replacement for SharedPreferences. It utilizes typed keys (<code>stringPreferencesKey</code>, <code>booleanPreferencesKey</code>, <code>intPreferencesKey</code>, etc.) and exposes a reactive <code>Flow&lt;Preferences&gt;</code>.</p>
+
+    <h3>1. Dependency Setup</h3>
+    <pre><code><span class="cm">// build.gradle.kts (Module: app)</span>
+dependencies {
+    implementation(<span class="str">"androidx.datastore:datastore-preferences:1.1.1"</span>)
+}</code></pre>
+
+    <h3>2. Singleton Instance Creation</h3>
+    <p>DataStore must <strong>always</strong> be instantiated as a singleton per backing file. Creating multiple instances pointing to the same file leads to concurrent disk access, broken caching, and <code>IllegalStateException</code>.</p>
+    <pre><code><span class="kw">import</span> android.content.<span class="cl">Context</span>
+<span class="kw">import</span> androidx.datastore.core.<span class="cl">DataStore</span>
+<span class="kw">import</span> androidx.datastore.preferences.core.<span class="cl">Preferences</span>
+<span class="kw">import</span> androidx.datastore.preferences.preferencesDataStore
+
+<span class="cm">// Top-level property delegate ensures a strict singleton per filename</span>
+<span class="kw">val</span> <span class="cl">Context</span>.userPreferencesDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt; <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(
+    name = <span class="str">"user_preferences"</span>
+)</code></pre>
+
+    <h3>3. Complete Repository Implementation</h3>
+    <pre><code><span class="kw">import</span> androidx.datastore.core.<span class="cl">DataStore</span>
+<span class="kw">import</span> androidx.datastore.preferences.core.*
+<span class="kw">import</span> kotlinx.coroutines.flow.*
+<span class="kw">import</span> java.io.<span class="cl">IOException</span>
+<span class="kw">import</span> javax.inject.<span class="cl">Inject</span>
+<span class="kw">import</span> javax.inject.<span class="cl">Singleton</span>
+
+<span class="kw">enum class</span> <span class="cl">AppTheme</span> { LIGHT, DARK, SYSTEM }
+<span class="kw">enum class</span> <span class="cl">SortOrder</span> { BY_DATE, BY_NAME, BY_PRIORITY }
+
+<span class="kw">data class</span> <span class="cl">UserPreferences</span>(
+    <span class="kw">val</span> theme: <span class="cl">AppTheme</span>,
+    <span class="kw">val</span> notificationsEnabled: <span class="cl">Boolean</span>,
+    <span class="kw">val</span> sortOrder: <span class="cl">SortOrder</span>
+)
+
+<span class="an">@Singleton</span>
+<span class="kw">class</span> <span class="cl">UserPreferencesRepository</span> <span class="an">@Inject constructor</span>(
+    <span class="kw">private val</span> dataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt;
+) {
+    <span class="kw">private object</span> <span class="cl">PreferencesKeys</span> {
+        <span class="kw">val</span> THEME = <span class="fn">stringPreferencesKey</span>(<span class="str">"app_theme"</span>)
+        <span class="kw">val</span> NOTIFICATIONS_ENABLED = <span class="fn">booleanPreferencesKey</span>(<span class="str">"notifications_enabled"</span>)
+        <span class="kw">val</span> SORT_ORDER = <span class="fn">stringPreferencesKey</span>(<span class="str">"sort_order"</span>)
+    }
+
+    <span class="cm">// Read stream with robust IOException error handling</span>
+    <span class="kw">val</span> userPreferencesFlow: <span class="cl">Flow</span>&lt;<span class="cl">UserPreferences</span>&gt; = dataStore.data
+        .<span class="fn">catch</span> { exception ->
+            <span class="kw">if</span> (exception <span class="kw">is</span> <span class="cl">IOException</span>) {
+                <span class="cm">// Disk read error or corrupted file -> emit default empty preferences</span>
+                <span class="fn">emit</span>(<span class="fn">emptyPreferences</span>())
+            } <span class="kw">else</span> {
+                <span class="kw">throw</span> exception
+            }
+        }
+        .<span class="fn">map</span> { preferences ->
+            <span class="kw">val</span> themeName = preferences[<span class="cl">PreferencesKeys</span>.THEME] ?: <span class="cl">AppTheme</span>.SYSTEM.name
+            <span class="kw">val</span> notifications = preferences[<span class="cl">PreferencesKeys</span>.NOTIFICATIONS_ENABLED] ?: <span class="kw">true</span>
+            <span class="kw">val</span> sortName = preferences[<span class="cl">PreferencesKeys</span>.SORT_ORDER] ?: <span class="cl">SortOrder</span>.BY_DATE.name
+
+            <span class="cl">UserPreferences</span>(
+                theme = <span class="cl">AppTheme</span>.<span class="fn">valueOf</span>(themeName),
+                notificationsEnabled = notifications,
+                sortOrder = <span class="cl">SortOrder</span>.<span class="fn">valueOf</span>(sortName)
+            )
+        }
+
+    <span class="cm">// Transactional, atomic write operations</span>
+    <span class="kw">suspend fun</span> <span class="fn">updateTheme</span>(theme: <span class="cl">AppTheme</span>) {
+        dataStore.<span class="fn">edit</span> { preferences ->
+            preferences[<span class="cl">PreferencesKeys</span>.THEME] = theme.name
+        }
+    }
+
+    <span class="kw">suspend fun</span> <span class="fn">setNotificationsEnabled</span>(enabled: <span class="cl">Boolean</span>) {
+        dataStore.<span class="fn">edit</span> { preferences ->
+            preferences[<span class="cl">PreferencesKeys</span>.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    <span class="kw">suspend fun</span> <span class="fn">updateSortOrder</span>(order: <span class="cl">SortOrder</span>) {
+        dataStore.<span class="fn">edit</span> { preferences ->
+            preferences[<span class="cl">PreferencesKeys</span>.SORT_ORDER] = order.name
+        }
+    }
+}</code></pre>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128736;</div>3. Proto DataStore</div>
+    <p><strong>Proto DataStore</strong> uses Google Protocol Buffers to persist custom structured data models. Instead of managing individual string keys, you define a schema file and generate strongly typed Kotlin/Java classes with compile-time type verification.</p>
+
+    <h3>When to Choose Proto DataStore</h3>
+    <ul>
+      <li>Your data model has nested objects, lists, or multiple related fields.</li>
+      <li>You want 100% compile-time schema safety without accidental key name typos.</li>
+      <li>You need backward-compatible schema migrations handled automatically via Protobuf tags.</li>
+      <li>You require fast binary serialization and minimal disk footprint.</li>
+    </ul>
+
+    <h3>1. Gradle Configuration</h3>
+    <pre><code><span class="cm">// build.gradle.kts (Project)</span>
+plugins {
+    id(<span class="str">"com.google.protobuf"</span>) version <span class="str">"0.9.4"</span> apply <span class="kw">false</span>
+}
+
+<span class="cm">// build.gradle.kts (Module: app)</span>
+plugins {
+    id(<span class="str">"com.android.application"</span>)
+    id(<span class="str">"org.jetbrains.kotlin.android"</span>)
+    id(<span class="str">"com.google.protobuf"</span>)
+}
+
+dependencies {
+    implementation(<span class="str">"androidx.datastore:datastore:1.1.1"</span>)
+    implementation(<span class="str">"com.google.protobuf:protobuf-javalite:3.25.1"</span>)
+}
+
+protobuf {
+    protoc {
+        artifact = <span class="str">"com.google.protobuf:protoc:3.25.1"</span>
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create(<span class="str">"java"</span>) {
+                    option(<span class="str">"lite"</span>)
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>2. Schema Definition (user_settings.proto)</h3>
+    <p>Place this file in <code>app/src/main/proto/user_settings.proto</code>:</p>
+    <pre><code>syntax = "proto3";
+
+option java_package = "com.example.app.datastore";
+option java_multiple_files = true;
+
+enum ProtoTheme {
+  THEME_UNSPECIFIED = 0;
+  THEME_LIGHT = 1;
+  THEME_DARK = 2;
+  THEME_SYSTEM = 3;
+}
+
+message UserSettings {
+  ProtoTheme theme = 1;
+  bool notifications_enabled = 2;
+  int32 session_timeout_seconds = 3;
+  repeated string favorite_tags = 4;
+}</code></pre>
+
+    <h3>3. Implementing the Serializer</h3>
+    <pre><code><span class="kw">import</span> androidx.datastore.core.<span class="cl">CorruptionException</span>
+<span class="kw">import</span> androidx.datastore.core.<span class="cl">Serializer</span>
+<span class="kw">import</span> com.example.app.datastore.<span class="cl">UserSettings</span>
+<span class="kw">import</span> com.example.app.datastore.<span class="cl">ProtoTheme</span>
+<span class="kw">import</span> com.google.protobuf.<span class="cl">InvalidProtocolBufferException</span>
+<span class="kw">import</span> java.io.<span class="cl">InputStream</span>
+<span class="kw">import</span> java.io.<span class="cl">OutputStream</span>
+
+<span class="kw">object</span> <span class="cl">UserSettingsSerializer</span> : <span class="cl">Serializer</span>&lt;<span class="cl">UserSettings</span>&gt; {
+    <span class="kw">override val</span> defaultValue: <span class="cl">UserSettings</span> = <span class="cl">UserSettings</span>.<span class="fn">newBuilder</span>()
+        .<span class="fn">setTheme</span>(<span class="cl">ProtoTheme</span>.THEME_SYSTEM)
+        .<span class="fn">setNotificationsEnabled</span>(<span class="kw">true</span>)
+        .<span class="fn">setSessionTimeoutSeconds</span>(<span class="nu">300</span>)
+        .<span class="fn">build</span>()
+
+    <span class="kw">override suspend fun</span> <span class="fn">readFrom</span>(input: <span class="cl">InputStream</span>): <span class="cl">UserSettings</span> {
+        <span class="kw">try</span> {
+            <span class="kw">return</span> <span class="cl">UserSettings</span>.<span class="fn">parseFrom</span>(input)
+        } <span class="kw">catch</span> (exception: <span class="cl">InvalidProtocolBufferException</span>) {
+            <span class="kw">throw</span> <span class="cl">CorruptionException</span>(<span class="str">"Cannot read proto. File is corrupted."</span>, exception)
+        }
+    }
+
+    <span class="kw">override suspend fun</span> <span class="fn">writeTo</span>(t: <span class="cl">UserSettings</span>, output: <span class="cl">OutputStream</span>) {
+        t.<span class="fn">writeTo</span>(output)
+    }
+}</code></pre>
+
+    <h3>4. Creating DataStore and Repository</h3>
+    <pre><code><span class="kw">val</span> <span class="cl">Context</span>.userSettingsDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">UserSettings</span>&gt; <span class="kw">by</span> <span class="fn">dataStore</span>(
+    fileName = <span class="str">"user_settings.pb"</span>,
+    serializer = <span class="cl">UserSettingsSerializer</span>
+)
+
+<span class="an">@Singleton</span>
+<span class="kw">class</span> <span class="cl">ProtoSettingsRepository</span> <span class="an">@Inject constructor</span>(
+    <span class="kw">private val</span> userSettingsDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">UserSettings</span>&gt;
+) {
+    <span class="kw">val</span> userSettingsFlow: <span class="cl">Flow</span>&lt;<span class="cl">UserSettings</span>&gt; = userSettingsDataStore.data
+        .<span class="fn">catch</span> { exception ->
+            <span class="kw">if</span> (exception <span class="kw">is</span> <span class="cl">IOException</span>) {
+                <span class="fn">emit</span>(<span class="cl">UserSettingsSerializer</span>.defaultValue)
+            } <span class="kw">else</span> {
+                <span class="kw">throw</span> exception
+            }
+        }
+
+    <span class="kw">suspend fun</span> <span class="fn">setTheme</span>(theme: <span class="cl">ProtoTheme</span>) {
+        userSettingsDataStore.<span class="fn">updateData</span> { currentSettings ->
+            currentSettings.<span class="fn">toBuilder</span>()
+                .<span class="fn">setTheme</span>(theme)
+                .<span class="fn">build</span>()
+        }
+    }
+
+    <span class="kw">suspend fun</span> <span class="fn">addFavoriteTag</span>(tag: <span class="cl">String</span>) {
+        userSettingsDataStore.<span class="fn">updateData</span> { currentSettings ->
+            currentSettings.<span class="fn">toBuilder</span>()
+                .<span class="fn">addFavoriteTags</span>(tag)
+                .<span class="fn">build</span>()
+        }
+    }
+}</code></pre>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128260;</div>4. Migration from SharedPreferences</div>
+    <p>DataStore provides built-in migration helpers to seamlessly migrate existing SharedPreferences files during initialization without losing user data or causing synchronization races.</p>
+
+    <h3>One-Time Atomic Migration</h3>
+    <p>The <code>SharedPreferencesMigration</code> helper performs the migration only once when the DataStore file is first created. It copies all keys (or a filtered subset) into DataStore and automatically cleans up the legacy SharedPreferences file.</p>
+
+    <pre><code><span class="kw">import</span> androidx.datastore.preferences.<span class="cl">SharedPreferencesMigration</span>
+<span class="kw">import</span> androidx.datastore.preferences.preferencesDataStore
+
+<span class="kw">private const val</span> LEGACY_PREFS_NAME = <span class="str">"user_prefs_legacy"</span>
+<span class="kw">private const val</span> DATASTORE_NAME = <span class="str">"app_preferences"</span>
+
+<span class="kw">val</span> <span class="cl">Context</span>.appDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt; <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(
+    name = DATASTORE_NAME,
+    produceMigrations = { context ->
+        <span class="fn">listOf</span>(
+            <span class="cm">// Migrates ALL keys from legacy_prefs and deletes the file upon success</span>
+            <span class="cl">SharedPreferencesMigration</span>(
+                context = context,
+                sharedPreferencesName = LEGACY_PREFS_NAME
+            )
+        )
+    }
+)</code></pre>
+
+    <h3>Selective Key Migration &amp; Multi-Step Migrations</h3>
+    <pre><code><span class="kw">val</span> <span class="cl">Context</span>.selectiveDataStore: <span class="cl">DataStore</span>&lt;<span class="cl">Preferences</span>&gt; <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(
+    name = <span class="str">"secure_settings"</span>,
+    produceMigrations = { context ->
+        <span class="fn">listOf</span>(
+            <span class="cm">// Migrate only specific keys from user_auth_prefs</span>
+            <span class="cl">SharedPreferencesMigration</span>(
+                context = context,
+                sharedPreferencesName = <span class="str">"user_auth_prefs"</span>,
+                keysToMigrate = <span class="fn">setOf</span>(<span class="str">"auth_token"</span>, <span class="str">"user_id"</span>)
+            ),
+            <span class="cm">// Migrate general UI preferences from another file</span>
+            <span class="cl">SharedPreferencesMigration</span>(
+                context = context,
+                sharedPreferencesName = <span class="str">"ui_config_prefs"</span>
+            )
+        )
+    }
+)</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Critical Migration Rule</div>
+      Never read from SharedPreferences and DataStore simultaneously after migration starts. DataStore guarantees atomicity of the migration — once it starts, always read from DataStore. If an error occurs during migration, DataStore wraps the failure in an <code>IOException</code> and will retry migration on the subsequent startup.
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#128187;</div>5. DataStore + ViewModel</div>
+    <p>Integrating DataStore with ViewModel and Jetpack Compose ensures unidirectional data flow (UDF), lifecycle-aware state collection, and resilience to screen rotations and process death.</p>
+
+    <h3>ViewModel with StateFlow Pattern</h3>
+    <pre><code><span class="kw">import</span> androidx.lifecycle.<span class="cl">ViewModel</span>
+<span class="kw">import</span> androidx.lifecycle.viewModelScope
+<span class="kw">import</span> dagger.hilt.android.lifecycle.<span class="cl">HiltViewModel</span>
+<span class="kw">import</span> kotlinx.coroutines.flow.*
+<span class="kw">import</span> kotlinx.coroutines.launch
+<span class="kw">import</span> javax.inject.<span class="cl">Inject</span>
+
+<span class="kw">sealed interface</span> <span class="cl">SettingsUiState</span> {
+    <span class="kw">object</span> <span class="cl">Loading</span> : <span class="cl">SettingsUiState</span>
+    <span class="kw">data class</span> <span class="cl">Success</span>(<span class="kw">val</span> preferences: <span class="cl">UserPreferences</span>) : <span class="cl">SettingsUiState</span>
+    <span class="kw">data class</span> <span class="cl">Error</span>(<span class="kw">val</span> message: <span class="cl">String</span>) : <span class="cl">SettingsUiState</span>
+}
+
+<span class="an">@HiltViewModel</span>
+<span class="kw">class</span> <span class="cl">SettingsViewModel</span> <span class="an">@Inject constructor</span>(
+    <span class="kw">private val</span> repository: <span class="cl">UserPreferencesRepository</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">SettingsUiState</span>&gt; = repository.userPreferencesFlow
+        .<span class="fn">map</span>&lt;<span class="cl">UserPreferences</span>, <span class="cl">SettingsUiState</span>&gt; { prefs ->
+            <span class="cl">SettingsUiState</span>.<span class="cl">Success</span>(prefs)
+        }
+        .<span class="fn">catch</span> { emit(<span class="cl">SettingsUiState</span>.<span class="cl">Error</span>(it.message ?: <span class="str">"Storage Error"</span>)) }
+        .<span class="fn">stateIn</span>(
+            scope = viewModelScope,
+            started = <span class="cl">SharingStarted</span>.<span class="fn">WhileSubscribed</span>(<span class="nu">5_000</span>),
+            initialValue = <span class="cl">SettingsUiState</span>.<span class="cl">Loading</span>
+        )
+
+    <span class="kw">fun</span> <span class="fn">onThemeSelected</span>(theme: <span class="cl">AppTheme</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            repository.<span class="fn">updateTheme</span>(theme)
+        }
+    }
+
+    <span class="kw">fun</span> <span class="fn">onNotificationsToggled</span>(enabled: <span class="cl">Boolean</span>) {
+        viewModelScope.<span class="fn">launch</span> {
+            repository.<span class="fn">setNotificationsEnabled</span>(enabled)
+        }
+    }
+}</code></pre>
+
+    <h3>Jetpack Compose Integration</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SettingsScreen</span>(
+    viewModel: <span class="cl">SettingsViewModel</span> = <span class="fn">hiltViewModel</span>()
+) {
+    <span class="kw">val</span> uiState <span class="kw">by</span> viewModel.uiState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="kw">when</span> (<span class="kw">val</span> state = uiState) {
+        <span class="kw">is</span> <span class="cl">SettingsUiState</span>.<span class="cl">Loading</span> -> <span class="cl">CircularProgressIndicator</span>()
+        <span class="kw">is</span> <span class="cl">SettingsUiState</span>.<span class="cl">Error</span> -> <span class="cl">Text</span>(text = <span class="str">"Error: ${state.message}"</span>)
+        <span class="kw">is</span> <span class="cl">SettingsUiState</span>.<span class="cl">Success</span> -> {
+            <span class="cl">Column</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">padding</span>(<span class="nu">16</span>.dp)) {
+                <span class="cl">Text</span>(text = <span class="str">"Current Theme: ${state.preferences.theme.name}"</span>)
+                <span class="cl">Switch</span>(
+                    checked = state.preferences.notificationsEnabled,
+                    onCheckedChange = { viewModel.<span class="fn">onNotificationsToggled</span>(it) }
+                )
+            }
+        }
+    }
+}</code></pre>
+
+    <div class="callout callout-green">
+      <div class="callout-label">WhileSubscribed(5_000) Optimization</div>
+      Use <code>WhileSubscribed(5_000)</code> in <code>stateIn()</code> so the DataStore Flow subscription is kept alive for 5 seconds after the last UI collector disappears. This prevents unnecessarily restarting the Flow, reading from disk, or triggering re-emissions when the user rotates the screen or transitions between activities.
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#128300;</div>6. Testing DataStore</div>
+    <p>Testing repositories backed by DataStore requires avoiding shared disk state between test runs and isolating coroutine dispatchers using <code>TestScope</code>.</p>
+
+    <h3>Unit Testing Pattern</h3>
+    <ul>
+      <li>Use <code>PreferenceDataStoreFactory.create()</code> or <code>DataStoreFactory.create()</code> instead of the property delegate.</li>
+      <li>Pass <code>TestScope.testScheduler</code> to the <code>scope</code> parameter.</li>
+      <li>Provide a unique temporary file per test using JUnit's <code>@TempDir</code> or <code>File.createTempFile()</code>.</li>
+      <li>Use <strong>Turbine</strong> or <code>first()</code> to assert emissions deterministically under <code>runTest</code>.</li>
+    </ul>
+
+    <pre><code><span class="kw">import</span> androidx.datastore.preferences.core.<span class="cl">PreferenceDataStoreFactory</span>
+<span class="kw">import</span> androidx.datastore.preferences.core.edit
+<span class="kw">import</span> app.cash.turbine.test
+<span class="kw">import</span> kotlinx.coroutines.<span class="cl">ExperimentalCoroutinesApi</span>
+<span class="kw">import</span> kotlinx.coroutines.test.*
+<span class="kw">import</span> org.junit.jupiter.api.<span class="cl">Assertions</span>.assertEquals
+<span class="kw">import</span> org.junit.jupiter.api.<span class="cl">Test</span>
+<span class="kw">import</span> org.junit.jupiter.api.io.<span class="cl">TempDir</span>
+<span class="kw">import</span> java.io.<span class="cl">File</span>
+
+<span class="an">@OptIn</span>(<span class="cl">ExperimentalCoroutinesApi</span>::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">UserPreferencesRepositoryTest</span> {
+
+    <span class="an">@TempDir</span>
+    <span class="kw">lateinit var</span> tempFolder: <span class="cl">File</span>
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">defaultPreferencesAreReturnedInitially</span>() = <span class="fn">runTest</span> {
+        <span class="kw">val</span> testFile = <span class="cl">File</span>(tempFolder, <span class="str">"test_user_prefs.preferences_pb"</span>)
+        <span class="kw">val</span> testDataStore = <span class="cl">PreferenceDataStoreFactory</span>.<span class="fn">create</span>(
+            scope = <span class="cl">TestScope</span>(testScheduler),
+            produceFile = { testFile }
+        )
+        <span class="kw">val</span> repository = <span class="cl">UserPreferencesRepository</span>(testDataStore)
+
+        repository.userPreferencesFlow.<span class="fn">test</span> {
+            <span class="kw">val</span> initial = <span class="fn">awaitItem</span>()
+            <span class="fn">assertEquals</span>(<span class="cl">AppTheme</span>.SYSTEM, initial.theme)
+            <span class="fn">assertEquals</span>(<span class="kw">true</span>, initial.notificationsEnabled)
+            <span class="fn">assertEquals</span>(<span class="cl">SortOrder</span>.BY_DATE, initial.sortOrder)
+            <span class="fn">cancelAndIgnoreRemainingEvents</span>()
+        }
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">updatingThemeEmitsUpdatedValue</span>() = <span class="fn">runTest</span> {
+        <span class="kw">val</span> testFile = <span class="cl">File</span>(tempFolder, <span class="str">"test_user_prefs_2.preferences_pb"</span>)
+        <span class="kw">val</span> testDataStore = <span class="cl">PreferenceDataStoreFactory</span>.<span class="fn">create</span>(
+            scope = <span class="cl">TestScope</span>(testScheduler),
+            produceFile = { testFile }
+        )
+        <span class="kw">val</span> repository = <span class="cl">UserPreferencesRepository</span>(testDataStore)
+
+        repository.userPreferencesFlow.<span class="fn">test</span> {
+            <span class="fn">assertEquals</span>(<span class="cl">AppTheme</span>.SYSTEM, <span class="fn">awaitItem</span>().theme)
+
+            repository.<span class="fn">updateTheme</span>(<span class="cl">AppTheme</span>.DARK)
+
+            <span class="kw">val</span> updated = <span class="fn">awaitItem</span>()
+            <span class="fn">assertEquals</span>(<span class="cl">AppTheme</span>.DARK, updated.theme)
+            <span class="fn">cancelAndIgnoreRemainingEvents</span>()
+        }
+    }
+}</code></pre>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#9888;</div>7. Pitfalls &amp; Gotchas</div>
+    
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 1: Multiple DataStore Instances for the Same File</div>
+      Creating more than one instance of <code>DataStore</code> for the same file in the same process leads to broken in-memory caching, synchronization violations, and <code>IllegalStateException: There are multiple DataStores active for the same file</code>. Always enforce a strict singleton via the top-level <code>preferencesDataStore</code> delegate or Dependency Injection (Hilt <code>@Singleton</code>).
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 2: Blocking Coroutines with runBlocking or first() on Main Thread</div>
+      Calling <code>runBlocking { dataStore.data.first() }</code> on the Android main thread causes severe UI freezes and defeats the entire non-blocking design of DataStore. Always collect DataStore flows within <code>lifecycleScope</code>, <code>viewModelScope</code>, or pass them as <code>StateFlow</code> to the UI.
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 3: Catching Generic Exception Instead of IOException</div>
+      DataStore guarantees that underlying file I/O and disk parsing errors throw <code>IOException</code>. Catching generic <code>Exception</code> or <code>Throwable</code> hides business logic bugs, mapping exceptions, and Coroutine <code>CancellationException</code>. Always catch <code>IOException</code> explicitly in the <code>.catch { }</code> operator.
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Pitfall 4: Unhandled Data Corruption</div>
+      If a file on disk gets corrupted by abnormal OS shutdowns or partial bit rot, DataStore throws <code>CorruptionException</code> during deserialization. If not handled via a <code>CorruptionHandler</code> or <code>.catch</code> block, the Flow crashes the collector permanently.
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Pitfall 5: Using DataStore as a Database Replacement</div>
+      DataStore rewrites the complete file on every <code>edit {}</code> / <code>updateData {}</code> invocation. It does not support partial field patching on disk, indexing, relations, or selective querying. Storing large lists or complex relational entities will degrade I/O performance. Use <strong>Room</strong> for relational datasets and DataStore strictly for key-value preferences and small app configurations.
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#127942;</div>8. Interview Framework</div>
+    
+    <h3>30-Second Elevator Pitch</h3>
+    <div class="answer-box">
+      "Jetpack DataStore is Google's modern replacement for SharedPreferences, engineered with Kotlin Coroutines and Flow. It solves all legacy SharedPreferences pitfalls: eliminates UI thread blocking on init and commit, avoids hidden ANRs during Activity.onStop() caused by apply(), provides atomic single-writer transactions, and propagates I/O errors explicitly through Flow. It comes in two variants: Preferences DataStore for typed key-value pairs and Proto DataStore for schema-enforced, type-safe protobuf models."
+    </div>
+
+    <h3>2-Minute Deep Dive</h3>
+    <div class="answer-box">
+      "Under the hood, DataStore is implemented as an actor-style SingleProcessDataStore that serializes all write operations via an internal channel and a Mutex on Dispatchers.IO. When you call <code>dataStore.edit {}</code> or <code>updateData {}</code>, DataStore executes an atomic write-to-temp-file followed by a file rename operation, ensuring zero file corruption even if the process or device crashes mid-write.<br><br>
+      Reads are exposed as a hot cold-shared Flow backed by an in-memory cached snapshot. When the file changes, all collectors receive the updated value automatically. Migration from SharedPreferences is turnkey using <code>SharedPreferencesMigration</code>, which performs a safe, one-time atomic migration and removes the old XML file. For ViewModel integration, we convert DataStore flows to StateFlow using <code>stateIn(viewModelScope, WhileSubscribed(5_000), Loading)</code> to keep Flow subscriptions active across configuration changes while releasing them during prolonged backgrounding."
+    </div>
+
+    <h3>Must-Mention Points</h3>
+    <div class="must-mention">
+      <div class="must-item">
+        <div class="must-num">1</div>
+        <div><strong>Non-blocking Asynchronous I/O:</strong> Built on Coroutines &amp; Flow; no UI thread blocking or ANRs on <code>Activity.onStop()</code>.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">2</div>
+        <div><strong>Preferences vs Proto:</strong> Preferences for schemaless key-value; Proto for compile-time typed schema with Protocol Buffers.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">3</div>
+        <div><strong>Transactional Atomic Writes:</strong> Write-to-temp then atomic rename ensures zero partial writes or disk corruption.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">4</div>
+        <div><strong>Explicit Error Propagation:</strong> Throws <code>IOException</code> and <code>CorruptionException</code>; allows graceful fallback to default state.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">5</div>
+        <div><strong>Strict Singleton Requirement:</strong> Must use a single instance per file to prevent caching bugs and concurrency collisions.</div>
+      </div>
+      <div class="must-item">
+        <div class="must-num">6</div>
+        <div><strong>Safe Migration Pipeline:</strong> Turnkey <code>SharedPreferencesMigration</code> executes an atomic, one-time transfer.</div>
+      </div>
+    </div>
+
+    <h3>Follow-up Q&amp;A Reference</h3>
+    <div class="table-wrap"><table>
+      <tr>
+        <th>Follow-up Question</th>
+        <th>Key Takeaway</th>
+      </tr>
+      <tr>
+        <td>"Why does SharedPreferences.apply() cause ANRs?"</td>
+        <td>The Android framework enqueues <code>apply()</code> tasks onto <code>QueuedWork</code>. During <code>Activity.onStop()</code>, <code>Service.onDestroy()</code>, and broadcast receiver handling, the framework calls <code>QueuedWork.waitToFinish()</code> on the UI thread, blocking until all disk writes complete.</td>
+      </tr>
+      <tr>
+        <td>"How does DataStore handle concurrent writes?"</td>
+        <td>Writes are serialized internally through an actor channel and Mutex. Concurrent <code>edit {}</code> blocks execute sequentially; each transaction receives the latest state snapshot.</td>
+      </tr>
+      <tr>
+        <td>"Can DataStore be used across multiple processes?"</td>
+        <td>By default, DataStore is single-process (<code>SingleProcessDataStore</code>). For multi-process apps, Jetpack provides <code>MultiProcessDataStore</code> in newer DataStore versions, using file locks (<code>FileChannel.lock()</code>) for inter-process synchronization.</td>
+      </tr>
+    </table></div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Signal</div>
+      A senior candidate immediately highlights the internal write-to-temp and atomic rename mechanism, explains the exact ANR trigger inside <code>QueuedWork.waitToFinish()</code> for <code>SharedPreferences.apply()</code>, and explains why <code>WhileSubscribed(5_000)</code> is essential for ViewModel <code>StateFlow</code> integration.
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">1. What architectural and threading issues in SharedPreferences prompted Google to create Jetpack DataStore?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>SharedPreferences suffered from several major architectural flaws:</p>
+        <ol>
+          <li><strong>UI Thread Disk I/O:</strong> Loading SharedPreferences parses XML on the calling thread synchronously. Calling <code>getSharedPreferences()</code> blocks until the initial disk read finishes.</li>
+          <li><strong>Hidden ANRs via QueuedWork:</strong> While <code>apply()</code> is asynchronous, the OS blocks the UI thread in <code>Activity.onStop()</code>, <code>onPause()</code>, and <code>BroadcastReceiver.onReceive()</code> waiting for <code>QueuedWork.waitToFinish()</code>.</li>
+          <li><strong>No Error Signaling:</strong> Disk read/write errors fail silently with no catchable exception or recovery mechanism.</li>
+          <li><strong>Lack of Type Safety:</strong> Modifying key types produces runtime <code>ClassCastException</code> crashes.</li>
+          <li><strong>No Transactional Guarantees:</strong> Concurrent edits across multiple editor instances overwrite each other without atomic guarantees.</li>
+        </ol>
+        <p>DataStore replaces this with Coroutines, Flow-based reactive reads, non-blocking disk operations on <code>Dispatchers.IO</code>, and atomic transactional writes.</p>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">2. How do read and write operations fundamentally differ between SharedPreferences and DataStore?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Reads:</strong></p>
+        <ul>
+          <li><strong>SharedPreferences:</strong> Synchronous method calls (e.g., <code>prefs.getString("key", null)</code>) that return the in-memory value directly, but block if the initial XML load has not completed.</li>
+          <li><strong>DataStore:</strong> Asynchronous <code>Flow&lt;T&gt;</code> (e.g., <code>dataStore.data.map { ... }</code>) executed on <code>Dispatchers.IO</code>, emitting updates reactively whenever the underlying disk file changes.</li>
+        </ul>
+        <p><strong>Writes:</strong></p>
+        <ul>
+          <li><strong>SharedPreferences:</strong> <code>editor.putString().apply()</code> (fire-and-forget, queued) or <code>commit()</code> (blocking synchronous boolean return).</li>
+          <li><strong>DataStore:</strong> Suspend function <code>dataStore.edit { ... }</code> (or <code>updateData { ... }</code> for Proto) that executes transactionally, writes to a temporary file, and performs an atomic rename before resuming the coroutine.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">3. What is the difference between Preferences DataStore and Proto DataStore, and when should you choose each?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Preferences DataStore:</strong></p>
+        <ul>
+          <li>Stores key-value pairs using typed keys (e.g. <code>stringPreferencesKey</code>).</li>
+          <li>No predefined schema or Protobuf compiler required.</li>
+          <li>Best for simple UI preferences, flags, and basic app configuration.</li>
+        </ul>
+        <p><strong>Proto DataStore:</strong></p>
+        <ul>
+          <li>Stores a custom typed object generated from a <code>.proto</code> schema file.</li>
+          <li>Guarantees strict compile-time type safety for complex nested models, lists, and enums.</li>
+          <li>Provides robust schema versioning and fast binary serialization.</li>
+          <li>Best for structured user settings, complex state configurations, and teams wanting strict type contracts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">4. How do you migrate existing SharedPreferences data to DataStore safely without data loss?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>DataStore includes <code>SharedPreferencesMigration</code>, which is supplied to the DataStore builder via <code>produceMigrations</code>:</p>
+        <pre><code><span class="kw">val</span> <span class="cl">Context</span>.dataStore <span class="kw">by</span> <span class="fn">preferencesDataStore</span>(
+    name = <span class="str">"app_prefs"</span>,
+    produceMigrations = { context ->
+        <span class="fn">listOf</span>(<span class="cl">SharedPreferencesMigration</span>(context, <span class="str">"legacy_prefs"</span>))
+    }
+)</code></pre>
+        <p><strong>Execution Flow:</strong></p>
+        <ol>
+          <li>On the very first DataStore read or write, the migration runs before any user code accesses data.</li>
+          <li>It reads all key-values from the legacy XML, writes them into the DataStore file, and deletes the old SharedPreferences file upon successful completion.</li>
+          <li>If an error occurs, the migration fails transactionally, throwing an <code>IOException</code>, and will retry on subsequent app launch without losing the original SharedPreferences file.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">5. Why must DataStore instances be strict singletons, and what happens if you instantiate multiple instances for the same file?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>DataStore maintains an active in-memory cache and uses an internal coroutine actor/Mutex to serialize writes for a given file. If multiple instances of DataStore point to the same physical file:</p>
+        <ul>
+          <li>Instance A will not know when Instance B modifies the disk file, resulting in stale in-memory reads and race conditions.</li>
+          <li>Concurrent writes from separate instances bypass the single-instance write lock, causing file corruption.</li>
+          <li>DataStore actively detects active duplicate instances within the same process and throws: <code>IllegalStateException: There are multiple DataStores active for the same file</code>.</li>
+        </ul>
+        <p>Enforce singleton access using the top-level <code>preferencesDataStore</code> delegate or Hilt's <code>@Singleton</code> scope.</p>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">6. How does DataStore achieve transactional write safety and crash resilience under the hood?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>Under the hood, DataStore utilizes <code>SingleProcessDataStore</code> with the following mechanisms:</p>
+        <ol>
+          <li><strong>Actor Serialization:</strong> Write requests are queued into an internal channel managed by a single coroutine actor, ensuring sequential execution without lock contention.</li>
+          <li><strong>Atomic File Operations:</strong> Writes do not overwrite the existing file in place. DataStore writes the new serialized payload to a temporary file (<code>filename.tmp</code>) on disk.</li>
+          <li><strong>Atomic File Rename:</strong> Once the temporary file is completely written and flushed to storage, DataStore calls the OS atomic rename system call (<code>renameTo</code>) to replace the target file.</li>
+          <li><strong>Crash Resilience:</strong> If power is lost or the process is killed mid-write, the original file remains uncorrupted, and the temporary file is cleaned up on next initialization.</li>
+          <li><strong>In-Memory Snapshot Update:</strong> Only after the atomic rename succeeds is the in-memory cache updated and emitted to all active Flow collectors.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">7. How do you unit test a repository that depends on DataStore without flakiness or I/O race conditions?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>To unit test DataStore reliably:</p>
+        <ol>
+          <li><strong>Use Factory Builders:</strong> Use <code>PreferenceDataStoreFactory.create()</code> or <code>DataStoreFactory.create()</code> instead of the context property delegate.</li>
+          <li><strong>Inject Test Coroutine Scope:</strong> Pass a <code>TestScope(testScheduler)</code> to the DataStore factory so all internal disk coroutines synchronize with <code>runTest</code> virtual time.</li>
+          <li><strong>Use Unique Temporary Files:</strong> Use JUnit's <code>@TempDir</code> to generate an isolated scratch directory per test, guaranteeing no cross-test state leakage.</li>
+          <li><strong>Assert with Turbine:</strong> Use Cash App's Turbine library to verify Flow emissions (e.g., initial state, intermediate updates) sequentially.</li>
+          <li><strong>Scope Cancellation:</strong> Ensure the <code>TestScope</code> is cleanly cancelled after the test to close file streams and coroutine channels.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">8. How should corruption errors (CorruptionException) and I/O failures be handled gracefully across the app architecture?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>A resilient DataStore architecture handles errors at two distinct layers:</p>
+        <ol>
+          <li><strong>Factory-Level CorruptionHandler:</strong> When constructing DataStore, pass a <code>CorruptionHandler</code> that catches <code>CorruptionException</code> and produces a safe fallback default object, effectively resetting corrupted storage:
+            <pre><code><span class="kw">val</span> corruptionHandler = <span class="cl">CorruptionHandler</span> { exception ->
+    <span class="cm">// Log exception to crash reporting, return default clean state</span>
+    <span class="cl">UserSettingsSerializer</span>.defaultValue
+}</code></pre>
+          </li>
+          <li><strong>Repository-Level Flow Catch:</strong> In the repository's <code>data</code> flow, use the Flow <code>.catch { }</code> operator to catch <code>IOException</code> specifically and emit default preferences (<code>emptyPreferences()</code>), while rethrowing any non-IO runtime exceptions:
+            <pre><code>dataStore.data.<span class="fn">catch</span> { exception ->
+    <span class="kw">if</span> (exception <span class="kw">is</span> <span class="cl">IOException</span>) {
+        <span class="fn">emit</span>(<span class="fn">emptyPreferences</span>())
+    } <span class="kw">else</span> {
+        <span class="kw">throw</span> exception
+    }
+}</code></pre>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+(function(){
+  var secs=Array.from(document.querySelectorAll('.section[id]'));
+  var navs=Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var pf=document.getElementById('progressFill');
+  function getActive(){var off=120,act=secs[0];for(var i=0;i<secs.length;i++){var r=secs[i].getBoundingClientRect();if(r.top<=off)act=secs[i];}return act;}
+  function update(){var a=getActive();if(!a)return;navs.forEach(function(n){var ok=n.dataset.section===a.id;n.classList.toggle('active',ok);n.classList.toggle('aip-nav-active',ok);});if(pf){var d=document.documentElement.scrollHeight-window.innerHeight;pf.style.width=(d>0?Math.min(window.scrollY/d*100,100):0)+'%';}var ai=navs.find(function(n){return n.dataset.section===a.id;});if(ai){var sb=ai.closest('.sidebar')||ai.closest('nav:not(#aip-topbar)');if(sb){var it=ai.offsetTop,sh=sb.clientHeight,ss=sb.scrollTop;if(it<ss+44||it>ss+sh-64)sb.scrollTop=Math.max(0,it-sh/2+24);}}}
+  window.addEventListener('scroll',update,{passive:true});
+  var me=document.getElementById('mainScroll')||document.querySelector('.main');
+  if(me&&me!==document.body)me.addEventListener('scroll',update,{passive:true});
+  setTimeout(update,100);
+  navs.forEach(function(n){n.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(n.dataset.section);if(!t)return;var tb=document.getElementById('aip-topbar');var off=(tb?tb.offsetHeight:0)+12;window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});});});
+}());
+function toggleQuiz(el){var a=el.nextElementSibling,i=el.querySelector('.toggle-icon');if(a)a.classList.toggle('open');if(i)i.classList.toggle('open');}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

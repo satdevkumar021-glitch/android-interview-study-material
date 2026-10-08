@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>21B — Baseline Profiles &amp; Macrobenchmark</title>
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+.sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+.nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;flex-shrink:0;}
+.nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+.main{flex:1;}
+.hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+.hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+.hero h1 span{color:var(--accent);}
+.hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+.hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+.badge-tier1{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25);}
+.badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+.badge-hot{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+.section{display:block!important;padding:40px 48px;max-width:920px;border-bottom:1px solid var(--border);}
+.section:last-of-type{border-bottom:none;}
+.section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+p{color:var(--muted);margin-bottom:14px;}p strong{color:var(--text);}
+li{color:var(--muted);margin-bottom:6px;}li strong{color:var(--text);}
+ul,ol{padding-left:20px;margin-bottom:14px;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+.kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+.table-wrap{overflow-x:auto;margin:14px 0 20px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td:first-child{color:var(--text);font-weight:600;}td strong{color:var(--text);}
+.callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+.callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+.callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+.callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+.callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+.callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+.callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.callout-green .callout-label{color:var(--green);}.callout-red .callout-label{color:var(--red);}.callout-yellow .callout-label{color:var(--yellow);}.callout-blue .callout-label{color:var(--accent2);}.callout-purple .callout-label{color:var(--accent);}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+.quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+.quiz-q:hover{background:rgba(255,255,255,.02);}
+.quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+.quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+.diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+.diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+.diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+.toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+.quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+.quiz-a.open{display:block;}
+.toggle-icon.open{transform:rotate(180deg);}
+.answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+.must-mention{display:grid;gap:10px;margin:14px 0;}
+.must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+.must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .1s linear;}
+.nav-buttons{display:none!important;}
+.nav-item.active,.nav-item.aip-nav-active{background:rgba(124,106,247,.15)!important;color:var(--accent)!important;}
+.nav-item.active .nav-num,.nav-item.aip-nav-active .nav-num{background:rgba(124,106,247,.25)!important;color:var(--accent)!important;}
+@media(max-width:768px){.sidebar{display:none!important;}.section{padding:24px 16px!important;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sidebar-back{display:flex;align-items:center;gap:8px;padding:8px 12px 12px;margin-bottom:8px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--muted);font-size:12px;font-weight:600;transition:color .15s;}
+.sidebar-back:hover{color:var(--accent);}
+.sidebar-back svg{width:14px;height:14px;flex-shrink:0;fill:currentColor;}
+.hero-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:14px;transition:color .15s;font-weight:500;}
+.hero-back:hover{color:var(--accent);}
+.hero-back svg{width:12px;height:12px;fill:currentColor;}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-back">
+      <svg viewBox="0 0 16 16"><path d="M10.5 3.5L6 8l4.5 4.5"/></svg>
+      Back to Index
+    </a>
+    <div class="sidebar-header">21B — Baseline Profiles</div>
+    <a class="nav-item active" data-section="s1" href="#s1"><span class="nav-num">1</span>Overview</a>
+    <a class="nav-item" data-section="s2" href="#s2"><span class="nav-num">2</span>How Baseline Profiles Work</a>
+    <a class="nav-item" data-section="s3" href="#s3"><span class="nav-num">3</span>Writing Baseline Profiles</a>
+    <a class="nav-item" data-section="s4" href="#s4"><span class="nav-num">4</span>Macrobenchmark Setup</a>
+    <a class="nav-item" data-section="s5" href="#s5"><span class="nav-num">5</span>Measuring with Macrobenchmark</a>
+    <a class="nav-item" data-section="s6" href="#s6"><span class="nav-num">6</span>Cloud &amp; Automatic Profiles</a>
+    <a class="nav-item" data-section="s7" href="#s7"><span class="nav-num">7</span>Pitfalls &amp; CI Integration</a>
+    <a class="nav-item" data-section="s8" href="#s8"><span class="nav-num">8</span>Interview Framework</a>
+    <a class="nav-item" data-section="s9" href="#s9"><span class="nav-num">9</span>Interview Questions</a>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main" id="mainScroll">
+
+    <!-- HERO -->
+    <div class="hero">
+      <a href="index.html" class="hero-back">
+        <svg viewBox="0 0 16 16"><path d="M10.5 3.5L6 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        Android Interview Prep
+      </a>
+      <div class="hero-tag">⚡ Performance</div>
+      <h1><span>21B</span> — Baseline Profiles &amp; Macrobenchmark</h1>
+      <p class="hero-desc">Profile-guided optimisation for Android apps: writing Baseline Profiles, measuring startup and scrolling with Macrobenchmark, automatic profiles via Play Store, and CI integration for performance regression detection.</p>
+      <div class="hero-meta">
+        <span class="badge badge-id">ID: 21B</span>
+        <span class="badge badge-tier1">⭐ Tier 1</span>
+        <span class="badge badge-hot">🔥 Hot Topic</span>
+      </div>
+    </div>
+
+    <!-- S1: OVERVIEW -->
+    <div class="section" id="s1">
+      <div class="section-title"><div class="section-icon">📋</div>Overview</div>
+
+      <p>A <strong>Baseline Profile</strong> is a plain-text file listing class and method signatures that the Android Runtime (ART) should pre-compile <em>ahead of first use</em>. Without profiles, ART uses <strong>JIT (just-in-time) compilation</strong> — code runs interpreted until it's "hot" enough to JIT-compile into native code. With Baseline Profiles, critical startup and UI interaction code is <strong>AOT (ahead-of-time) compiled</strong> on device install, so the first launch uses pre-compiled native code.</p>
+
+      <p><strong>Measurable impact:</strong> Google reports up to <strong>40% faster startup</strong>, smoother first-frame rendering, and significantly reduced jank on first scroll. Supported since Android 7 via ART's profile-guided compilation infrastructure. Delivered to apps via the <strong>ProfileInstaller</strong> library — no Play Store required for development testing.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Compilation Mode</th><th>How it Works</th><th>Startup Latency</th><th>Code Size</th><th>When Applied</th></tr></thead>
+          <tbody>
+            <tr><td>Interpreted (no JIT yet)</td><td>Bytecode executed directly by interpreter</td><td>Highest — 2–5× slower</td><td>Smallest</td><td>First few executions of any method</td></tr>
+            <tr><td>JIT (Just-in-Time)</td><td>Hot methods compiled at runtime as detected</td><td>High initially, improves over time</td><td>Medium</td><td>After ~30–60 method invocations</td></tr>
+            <tr><td>AOT (Ahead-of-Time) — full</td><td>All code compiled to native at install</td><td>Lowest</td><td>Largest — slow install, high storage</td><td>At install (historically speed mode)</td></tr>
+            <tr><td><strong>Profile-guided (Baseline Profile)</strong></td><td>Only listed methods AOT-compiled on install</td><td><strong>Low for startup path</strong></td><td>Balanced — only hot code compiled</td><td>On install via ProfileInstaller</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-purple">
+        <div class="callout-label">💡 Key Insight</div>
+        Baseline Profiles are the <strong>single highest-ROI performance optimisation</strong> for most apps. A few hours of setup gives 20–40% startup improvement with <em>no code changes</em> — just a profile file shipped in your AAB.
+      </div>
+    </div>
+
+    <!-- S2: HOW BASELINE PROFILES WORK -->
+    <div class="section" id="s2">
+      <div class="section-title"><div class="section-icon">⚙️</div>How Baseline Profiles Work</div>
+
+      <h3>The Compilation Pipeline</h3>
+      <ol>
+        <li>Developer writes profile rules (or auto-generates with <code>BaselineProfileRule</code>)</li>
+        <li><strong>ProfileInstaller</strong> compiles profile on device install (converts text → binary .prof)</li>
+        <li>ART pre-compiles matching methods to native code in the background</li>
+        <li>First app launch uses pre-compiled native code — no interpretation overhead</li>
+      </ol>
+
+      <h3>Profile Rule Format</h3>
+      <p>Rules are written in <strong>human-readable method descriptor format</strong>. Each line is one class or method:</p>
+      <pre><code><span class="cm"># Class rule — all methods in this class get warm-compiled</span>
+<span class="kw">L</span>com/example/MainActivity;
+
+<span class="cm"># Startup method rule — compiled for startup path</span>
+<span class="kw">HSP</span>Lcom/example/MainActivity;-><span class="fn">onCreate</span>(Landroid/os/Bundle;)<span class="kw">V</span>
+
+<span class="cm"># Post-startup rule</span>
+<span class="kw">P</span>Lcom/example/ui/ProductListFragment;-><span class="fn">onViewCreated</span>(Landroid/view/View;Landroid/os/Bundle;)<span class="kw">V</span></code></pre>
+
+      <h4>Rule Prefixes</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Prefix</th><th>Meaning</th><th>Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code>H</code></td><td>Hot — frequently called</td><td>Core business logic, render methods</td></tr>
+            <tr><td><code>S</code></td><td>Startup — called during app startup</td><td>Application.onCreate, Activity.onCreate</td></tr>
+            <tr><td><code>P</code></td><td>Post-startup — called shortly after startup</td><td>Fragment transitions, ViewModels</td></tr>
+            <tr><td><code>L</code></td><td>Class-level (no prefix) — warm compile entire class</td><td>Data classes, utility classes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What Gets Included</h3>
+      <ul>
+        <li>Activities and Fragments launched at startup</li>
+        <li>ViewModels initialised at startup</li>
+        <li>Key Compose composables for the first screen</li>
+        <li>DI graph construction code (Hilt/Dagger modules)</li>
+        <li>Network/database initialisation paths</li>
+      </ul>
+
+      <h3>Delivery Mechanism</h3>
+      <p>Profiles are shipped inside your <strong>AAB</strong> at <code>assets/dexopt/baseline.prof</code> (binary format). The <code>ProfileInstaller</code> library (included transitively by many Jetpack libs) detects this file on first launch and triggers ART profile compilation in the background. On subsequent cold starts, the compiled code is ready.</p>
+
+      <div class="callout callout-blue">
+        <div class="callout-label">Play Store Enhancement</div>
+        <strong>Cloud Profiles:</strong> Play Store aggregates anonymous profiles from real early-adopter users. Subsequent installs receive pre-compiled code <em>before the user ever launches the app</em> — even better than your shipped Baseline Profile alone.
+      </div>
+    </div>
+
+    <!-- S3: WRITING BASELINE PROFILES -->
+    <div class="section" id="s3">
+      <div class="section-title"><div class="section-icon">✍️</div>Writing Baseline Profiles</div>
+
+      <h3>Two Approaches</h3>
+      <p><strong>(1) Manual:</strong> Write <code>baseline-prof.txt</code> by hand after inspecting a startup trace. Tedious and error-prone — method descriptors must be exact.<br>
+      <strong>(2) Automated with <code>BaselineProfileRule</code> (recommended):</strong> Run a UI automation test; the framework records which classes and methods were called and outputs a ready-to-use profile file.</p>
+
+      <h3>Gradle Module Setup</h3>
+      <pre><code><span class="cm">// :baseline-profile/build.gradle.kts</span>
+<span class="fn">plugins</span> {
+    id(<span class="str">"com.android.test"</span>)
+    id(<span class="str">"androidx.baselineprofile"</span>)
+}
+
+<span class="fn">android</span> {
+    targetProjectPath = <span class="str">":app"</span>
+    defaultConfig {
+        minSdk = <span class="nu">28</span>
+        testInstrumentationRunner = <span class="str">"androidx.test.runner.AndroidJUnitRunner"</span>
+    }
+}
+
+<span class="fn">dependencies</span> {
+    implementation(<span class="str">"androidx.test.ext:junit:1.1.5"</span>)
+    implementation(<span class="str">"androidx.test.uiautomator:uiautomator:2.3.0"</span>)
+    implementation(<span class="str">"androidx.benchmark:benchmark-macro-junit4:1.2.4"</span>)
+}</code></pre>
+
+      <h3>Profile Generator Test</h3>
+      <pre><code><span class="an">@RunWith</span>(AndroidJUnit4::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">BaselineProfileGenerator</span> {
+    <span class="an">@get:Rule</span> <span class="kw">val</span> rule = <span class="cl">BaselineProfileRule</span>()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">generate</span>() = rule.<span class="fn">collect</span>(
+        packageName = <span class="str">"com.example.myapp"</span>
+    ) {
+        <span class="fn">pressHome</span>()
+        <span class="fn">startActivityAndWait</span>()
+
+        <span class="cm">// Navigate to key screens the user visits at startup</span>
+        device.<span class="fn">findObject</span>(<span class="cl">By</span>.<span class="fn">text</span>(<span class="str">"Products"</span>)).<span class="fn">click</span>()
+        device.<span class="fn">waitForIdle</span>()
+
+        <span class="cm">// Scroll through a list (captures RecyclerView / LazyColumn paths)</span>
+        device.<span class="fn">findObject</span>(<span class="cl">By</span>.<span class="fn">scrollable</span>(<span class="kw">true</span>)).<span class="fn">fling</span>(<span class="cl">Direction</span>.DOWN)
+        device.<span class="fn">waitForIdle</span>()
+
+        <span class="cm">// Open a detail screen</span>
+        device.<span class="fn">findObject</span>(<span class="cl">By</span>.<span class="fn">res</span>(<span class="str">"com.example.myapp:id/product_item"</span>)).<span class="fn">click</span>()
+        device.<span class="fn">waitForIdle</span>()
+    }
+}</code></pre>
+
+      <h3>Running the Generator</h3>
+      <pre><code><span class="cm"># Generates the profile and copies it to the correct location</span>
+./gradlew :baseline-profile:generateBaselineProfile</code></pre>
+
+      <p>Output: <code>app/src/main/baseline-prof.txt</code> — automatically formatted and ready to ship in your next release build.</p>
+
+      <h3>App Module Configuration</h3>
+      <pre><code><span class="cm">// app/build.gradle.kts</span>
+<span class="fn">plugins</span> {
+    id(<span class="str">"com.android.application"</span>)
+    id(<span class="str">"androidx.baselineprofile"</span>)
+}
+
+<span class="fn">dependencies</span> {
+    implementation(<span class="str">"androidx.profileinstaller:profileinstaller:1.3.1"</span>)
+    baselineProfile(<span class="fn">project</span>(<span class="str">":baseline-profile"</span>))
+}
+
+<span class="fn">baselineProfile</span> {
+    <span class="cm">// Automatically merge generated profiles</span>
+    automaticGenerationDuringBuild = <span class="kw">false</span>
+    <span class="cm">// Save to src/main/baseline-prof.txt</span>
+    saveInSrc = <span class="kw">true</span>
+}</code></pre>
+
+      <div class="callout callout-green">
+        <div class="callout-label">✅ Best Practice</div>
+        Cover <strong>all critical user journeys</strong> in your generator: app launch, first screen interaction, navigation to the 2–3 most-visited screens, and at least one list-scroll. The more real-world code paths you cover, the higher the first-launch improvement.
+      </div>
+    </div>
+
+    <!-- S4: MACROBENCHMARK SETUP -->
+    <div class="section" id="s4">
+      <div class="section-title"><div class="section-icon">🔬</div>Macrobenchmark Setup</div>
+
+      <p><strong>Macrobenchmark</strong> is the measurement framework for real-world app performance — startup time, scrolling smoothness, and arbitrary UI interactions. Unlike unit benchmarks, Macrobenchmark runs your <em>actual app process</em> in a separate instrumented test process, measuring real end-to-end timing.</p>
+
+      <div class="callout callout-red">
+        <div class="callout-label">⚠️ Requirement</div>
+        Macrobenchmark <strong>requires a physical device or Firebase Test Lab</strong>. Emulators share CPU with the host machine and produce completely unreliable results — variance can exceed 200%.
+      </div>
+
+      <h3>Gradle Module Setup</h3>
+      <pre><code><span class="cm">// :macrobenchmark/build.gradle.kts</span>
+<span class="fn">plugins</span> {
+    id(<span class="str">"com.android.test"</span>)
+}
+
+<span class="fn">android</span> {
+    targetProjectPath = <span class="str">":app"</span>
+    defaultConfig {
+        minSdk = <span class="nu">29</span>
+        testInstrumentationRunner = <span class="str">"androidx.benchmark.junit4.AndroidBenchmarkRunner"</span>
+        testInstrumentationRunnerArguments[<span class="str">"androidx.benchmark.suppressErrors"</span>] =
+            <span class="str">"EMULATOR,LOW-BATTERY,UNLOCKED"</span>
+    }
+    buildTypes {
+        <span class="fn">create</span>(<span class="str">"benchmark"</span>) {
+            isDebuggable = <span class="kw">false</span>
+            signingConfig = signingConfigs.<span class="fn">getByName</span>(<span class="str">"debug"</span>)
+            matchingFallbacks += <span class="fn">listOf</span>(<span class="str">"release"</span>)
+        }
+    }
+}
+
+<span class="fn">dependencies</span> {
+    implementation(<span class="str">"androidx.benchmark:benchmark-macro-junit4:1.2.4"</span>)
+    implementation(<span class="str">"androidx.test.ext:junit:1.1.5"</span>)
+    implementation(<span class="str">"androidx.test.uiautomator:uiautomator:2.3.0"</span>)
+}</code></pre>
+
+      <h3>App Build Variant</h3>
+      <pre><code><span class="cm">// app/build.gradle.kts — add benchmarkRelease build type</span>
+<span class="fn">buildTypes</span> {
+    <span class="fn">create</span>(<span class="str">"benchmark"</span>) {
+        initWith(<span class="fn">getByName</span>(<span class="str">"release"</span>))
+        signingConfig = signingConfigs.<span class="fn">getByName</span>(<span class="str">"debug"</span>)
+        matchingFallbacks += <span class="fn">listOf</span>(<span class="str">"release"</span>)
+        isDebuggable = <span class="kw">false</span>
+        <span class="cm">// Enable profiling for Macrobenchmark</span>
+        proguardFiles(<span class="fn">getDefaultProguardFile</span>(<span class="str">"proguard-android-optimize.txt"</span>))
+    }
+}</code></pre>
+
+      <h4>Stabilise CPU for Consistent Results</h4>
+      <pre><code><span class="cm"># Lock CPU clocks before running benchmarks (requires rooted device or eng build)</span>
+./gradlew :macrobenchmark:lockClocks
+<span class="cm"># Run benchmarks</span>
+./gradlew :macrobenchmark:connectedBenchmarkAndroidTest
+<span class="cm"># Restore CPU scaling</span>
+./gradlew :macrobenchmark:unlockClocks</code></pre>
+    </div>
+
+    <!-- S5: MEASURING WITH MACROBENCHMARK -->
+    <div class="section" id="s5">
+      <div class="section-title"><div class="section-icon">📊</div>Measuring with Macrobenchmark</div>
+
+      <h3>Full Benchmark Test</h3>
+      <pre><code><span class="an">@RunWith</span>(AndroidJUnit4::<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">StartupBenchmark</span> {
+    <span class="an">@get:Rule</span> <span class="kw">val</span> benchmarkRule = <span class="cl">MacrobenchmarkRule</span>()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">startup_cold</span>() = benchmarkRule.<span class="fn">measureRepeated</span>(
+        packageName = <span class="str">"com.example.myapp"</span>,
+        metrics = <span class="fn">listOf</span>(<span class="cl">StartupTimingMetric</span>()),
+        iterations = <span class="nu">5</span>,
+        startupMode = <span class="cl">StartupMode</span>.COLD,
+        setupBlock = { <span class="fn">pressHome</span>() }
+    ) {
+        <span class="fn">startActivityAndWait</span>()
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">startup_warm</span>() = benchmarkRule.<span class="fn">measureRepeated</span>(
+        packageName = <span class="str">"com.example.myapp"</span>,
+        metrics = <span class="fn">listOf</span>(<span class="cl">StartupTimingMetric</span>()),
+        iterations = <span class="nu">5</span>,
+        startupMode = <span class="cl">StartupMode</span>.WARM
+    ) {
+        <span class="fn">startActivityAndWait</span>()
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">scrolling_smoothness</span>() = benchmarkRule.<span class="fn">measureRepeated</span>(
+        packageName = <span class="str">"com.example.myapp"</span>,
+        metrics = <span class="fn">listOf</span>(<span class="cl">FrameTimingMetric</span>()),
+        iterations = <span class="nu">5</span>,
+        startupMode = <span class="cl">StartupMode</span>.WARM
+    ) {
+        <span class="fn">startActivityAndWait</span>()
+        <span class="kw">val</span> recycler = device.<span class="fn">findObject</span>(<span class="cl">By</span>.<span class="fn">res</span>(<span class="str">"com.example.myapp:id/product_list"</span>))
+        <span class="fn">repeat</span>(<span class="nu">3</span>) { recycler.<span class="fn">fling</span>(<span class="cl">Direction</span>.DOWN) }
+    }
+}</code></pre>
+
+      <h3>Key Metrics</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metric</th><th>Class</th><th>What it Measures</th><th>Target</th></tr></thead>
+          <tbody>
+            <tr><td><code>timeToInitialDisplay</code> (TTID)</td><td><code>StartupTimingMetric</code></td><td>Time from app launch to first frame drawn</td><td>&lt; 500ms excellent</td></tr>
+            <tr><td><code>timeToFullDisplay</code> (TTFD)</td><td><code>StartupTimingMetric</code></td><td>Time until <code>reportFullyDrawn()</code> called</td><td>&lt; 1000ms</td></tr>
+            <tr><td><code>frameOverrunMs</code></td><td><code>FrameTimingMetric</code></td><td>Frame deadline overruns (jank indicator)</td><td>P90 &lt; 8ms</td></tr>
+            <tr><td><code>frameDurationCpuMs</code></td><td><code>FrameTimingMetric</code></td><td>CPU time per frame on main thread</td><td>&lt; 16ms for 60fps</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Comparing With vs Without Baseline Profile</h3>
+      <pre><code><span class="cm"># 1. Build and install WITHOUT profile (comment out baseline-prof.txt temporarily)</span>
+./gradlew :app:installBenchmark
+./gradlew :macrobenchmark:connectedBenchmarkAndroidTest  <span class="cm"># Record baseline</span>
+
+<span class="cm"># 2. Build and install WITH profile</span>
+./gradlew :app:installBenchmark
+./gradlew :macrobenchmark:connectedBenchmarkAndroidTest  <span class="cm"># Record with profile</span>
+
+<span class="cm"># Typical result: 30–80ms improvement in timeToInitialDisplay on cold start</span></code></pre>
+
+      <div class="callout callout-green">
+        <div class="callout-label">📈 Typical Numbers</div>
+        A well-tuned Baseline Profile typically reduces <strong>cold start TTID by 30–80ms</strong> (15–40% depending on app complexity). For Compose-heavy apps, the improvement is often larger due to Compose's larger class count.
+      </div>
+    </div>
+
+    <!-- S6: CLOUD & AUTOMATIC PROFILES -->
+    <div class="section" id="s6">
+      <div class="section-title"><div class="section-icon">☁️</div>Cloud Profiles &amp; Automatic Profiles</div>
+
+      <h3>Cloud Profiles (Play Store)</h3>
+      <p>Play Store aggregates <strong>anonymous performance profiles</strong> from early adopter users. After your app has enough install volume (typically after a few thousand installs), Play delivers pre-compiled code to <em>new installs</em> — before the user ever launches the app. This is separate from your shipped Baseline Profile and adds on top of it.</p>
+
+      <h3>Automatic Profiles (Android 9+)</h3>
+      <p>ART collects execution profiles per-device in the background and updates them nightly via a background <code>dex2oat</code> pass. Over the first 1–3 days of use, the app becomes progressively faster as more methods are AOT-compiled based on real usage.</p>
+
+      <h3>How They Layer Together</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Profile Type</th><th>When Applied</th><th>Source</th><th>Covers</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Baseline Profile</strong></td><td>On install (via ProfileInstaller)</td><td>Developer-shipped in AAB</td><td>Day-0 first launch</td></tr>
+            <tr><td><strong>Cloud Profile</strong></td><td>Before first launch (Play pre-compilation)</td><td>Aggregated real user profiles from Play</td><td>Day-0 + common paths</td></tr>
+            <tr><td><strong>Automatic Profile</strong></td><td>Night 1–3 after install</td><td>Device-local ART profiling</td><td>This user's specific usage</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Startup Profiles (Android 13+)</h3>
+      <p>A <strong>Startup Profile</strong> is a subset of the Baseline Profile applied <em>even earlier</em> in the compilation pipeline — specifically for methods called in the first 5 seconds of app startup. Defined with the <code>S</code> prefix in your profile rules. Provides the fastest possible first-frame on Android 13+ devices.</p>
+
+      <h3>Verifying Profile Installation</h3>
+      <pre><code><span class="cm"># Force profile compilation on device (for testing)</span>
+adb shell cmd package compile -m speed-profile com.example.myapp
+
+<span class="cm"># Check profile data exists</span>
+adb shell ls -la /data/misc/profiles/cur/0/com.example.myapp/
+
+<span class="cm"># View compilation state</span>
+adb shell dumpsys package com.example.myapp | grep -i compile</code></pre>
+    </div>
+
+    <!-- S7: PITFALLS & CI -->
+    <div class="section" id="s7">
+      <div class="section-title"><div class="section-icon">⚠️</div>Pitfalls &amp; CI Integration</div>
+
+      <h3>Common Pitfalls</h3>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Running Macrobenchmark on Emulator</div>
+        Emulators share CPU with the host machine. Results are unreliable — variance exceeds 200%, making it impossible to detect real regressions.
+        <strong style="color:var(--green)">✅ Fix:</strong> Use a physical device or Firebase Test Lab with <code>EMULATOR</code> error suppressed only if you understand the limitations.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Not Locking CPU Clocks</div>
+        Thermal throttling and CPU governor changes during the benchmark run skew results significantly.
+        <strong style="color:var(--green)">✅ Fix:</strong> Run <code>./gradlew :macrobenchmark:lockClocks</code> before benchmarking on rooted/eng devices.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Generating Profiles on Debug Builds</div>
+        Debug builds include extra logging, disable R8, and add overhead not present in production. Your generated profile will include non-production code paths.
+        <strong style="color:var(--green)">✅ Fix:</strong> Always generate on the <code>benchmarkRelease</code> (or <code>benchmark</code>) build variant.
+      </div>
+
+      <div class="callout callout-red">
+        <div class="callout-label">❌ Not Regenerating After Major Refactors</div>
+        Class and method names change with refactoring. The old profile refers to methods that no longer exist — it becomes effectively useless or actively misleading.
+        <strong style="color:var(--green)">✅ Fix:</strong> Regenerate profiles in CI on each release branch, or when the diff includes significant renames/restructuring.
+      </div>
+
+      <h3>CI Integration</h3>
+      <p>Add a benchmark step to your release CI pipeline using Firebase Test Lab as the device farm:</p>
+
+      <pre><code><span class="cm"># .github/workflows/benchmark.yml</span>
+name: Performance Benchmarks
+<span class="kw">on</span>:
+  push:
+    branches: [release/<span class="str">"**"</span>]
+  schedule:
+    - cron: <span class="str">"0 2 * * 1"</span>  <span class="cm"># Weekly on Monday 2am</span>
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - <span class="kw">uses</span>: actions/checkout@v4
+      - name: Build benchmark APKs
+        run: |
+          ./gradlew :app:assembleBenchmark
+          ./gradlew :macrobenchmark:assembleBenchmark
+      - name: Run on Firebase Test Lab
+        run: |
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app app/build/outputs/apk/benchmark/app-benchmark.apk \
+            --test macrobenchmark/build/outputs/apk/benchmark/macrobenchmark-benchmark.apk \
+            --device model=redfin,version=30,locale=en,orientation=portrait \
+            --results-bucket gs://my-benchmark-results
+      - name: Check for regressions
+        run: python3 scripts/check_benchmark_regression.py --threshold 10</code></pre>
+
+      <div class="callout callout-yellow">
+        <div class="callout-label">🎯 Regression Threshold</div>
+        Set your CI regression threshold at <strong>10% degradation in TTID</strong> as a starting point. This balances noise (device variance is ~5%) with real regression detection. Tighten to 5% once you have stable measurements from consistent devices.
+      </div>
+    </div>
+
+    <!-- S8: INTERVIEW FRAMEWORK -->
+    <div class="section" id="s8">
+      <div class="section-title"><div class="section-icon">🎯</div>Interview Framework</div>
+
+      <h3>30-Second Answer</h3>
+      <div class="answer-box">
+        "Baseline Profiles are a text file listing class and method signatures that ART should AOT-compile on device install. Without them, code starts interpreted and JIT-compiled on first use — causing slow first launch. Adding a Baseline Profile typically improves cold start by 20–40%. I use <code>BaselineProfileRule</code> to auto-generate them from real app flows, and Macrobenchmark to measure the improvement. Profiles are included in the AAB and applied by ProfileInstaller on install."
+      </div>
+
+      <h3>2-Minute Deep Dive Structure</h3>
+      <ol>
+        <li><strong>Problem:</strong> JIT compilation means first launch is always slow — code starts interpreted</li>
+        <li><strong>Solution:</strong> Baseline Profiles tell ART which methods to AOT-compile at install time</li>
+        <li><strong>Generation:</strong> <code>BaselineProfileRule</code> records actual app usage during a UI test</li>
+        <li><strong>Measurement:</strong> Macrobenchmark with <code>StartupTimingMetric</code> — compare TTID before/after</li>
+        <li><strong>Play Store layer:</strong> Cloud Profiles aggregate real user data and pre-compile before delivery</li>
+        <li><strong>CI:</strong> Regenerate on release branches, run on physical device, alert on &gt;10% regression</li>
+      </ol>
+
+      <h3>Must-Mention Points</h3>
+      <div class="must-mention">
+        <div class="must-item"><div class="must-num">1</div><div><strong>AOT compilation</strong> — the mechanism: methods listed in profile are compiled to native code on device install, eliminating interpretation overhead on first launch</div></div>
+        <div class="must-item"><div class="must-num">2</div><div><strong>ProfileInstaller library</strong> — how profiles are applied: converts the text profile to binary format and triggers ART compilation; works without Play Store</div></div>
+        <div class="must-item"><div class="must-num">3</div><div><strong>BaselineProfileRule generator</strong> — automated generation: UI automation test records real code paths; run with <code>generateBaselineProfile</code> Gradle task</div></div>
+        <div class="must-item"><div class="must-num">4</div><div><strong>Macrobenchmark</strong> — measurement: separate test module running against real app binary; requires physical device for valid results</div></div>
+        <div class="must-item"><div class="must-num">5</div><div><strong>TTID / TTFD metrics</strong> — what to measure: Time to Initial Display (first frame) and Time to Full Display (all content loaded); <code>StartupTimingMetric</code></div></div>
+        <div class="must-item"><div class="must-num">6</div><div><strong>Cloud Profiles via Play Store</strong> — the next level: aggregated real-user profiles deliver pre-compiled code even before first launch on new installs</div></div>
+      </div>
+    </div>
+
+    <!-- S9: INTERVIEW QUESTIONS -->
+    <div class="section" id="s9">
+      <div class="section-title"><div class="section-icon">❓</div>Interview Questions</div>
+
+      <!-- Q1 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What is a Baseline Profile and what problem does it solve?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>A Baseline Profile is a text file listing class and method signatures that ART should compile ahead-of-time (AOT) on device install.</p>
+          <p><strong>Problem it solves:</strong> Without profiles, the Android Runtime starts by interpreting bytecode and only JIT-compiles "hot" methods after they've been called many times. This means the first app launch — and first interactions — are always slow due to interpretation overhead. The user experiences slow startup, dropped frames, and jank specifically on first use.</p>
+          <p><strong>Solution:</strong> ProfileInstaller converts the profile to binary format at install time. ART pre-compiles all listed methods to native code in the background. On next cold start, those methods execute at native speed — no interpretation or JIT compilation latency.</p>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What is the difference between cold, warm, and hot app starts?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ul>
+            <li><strong>Cold start:</strong> App process does not exist. System forks from Zygote, creates Application, creates Activity, inflates layout, draws first frame. Slowest — full initialization path.</li>
+            <li><strong>Warm start:</strong> App process still exists but Activity was destroyed (e.g., back pressed, memory pressure). System recreates the Activity only — no Application.onCreate(). Faster than cold.</li>
+            <li><strong>Hot start:</strong> Both process and Activity exist (e.g., user switched to another app briefly). Activity just brought to foreground — fastest, nearly instant.</li>
+          </ul>
+          <p>Baseline Profiles primarily improve <strong>cold start</strong>, since that's when all the JIT/AOT decisions happen. Macrobenchmark's <code>StartupMode.COLD</code> kills the app process before each measurement to ensure a true cold start.</p>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">How do you generate a Baseline Profile automatically? Walk through the setup.</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ol>
+            <li>Create a separate <code>:baseline-profile</code> Gradle module with <code>com.android.test</code> and <code>androidx.baselineprofile</code> plugins.</li>
+            <li>Write a test class using <code>BaselineProfileRule</code> that navigates the critical user journeys using UiAutomator: app launch, main screen interaction, navigation to key screens, list scrolling.</li>
+            <li>In the app module, apply the <code>androidx.baselineprofile</code> plugin and add a <code>baselineProfile(project(":baseline-profile"))</code> dependency.</li>
+            <li>Run <code>./gradlew :baseline-profile:generateBaselineProfile</code> on a physical device (connected via ADB).</li>
+            <li>The plugin automatically generates <code>app/src/main/baseline-prof.txt</code> and it will be packaged into the AAB on next release build.</li>
+          </ol>
+          <p><strong>Key point:</strong> Run on <code>benchmarkRelease</code> build variant, not debug — debug builds include extra overhead and the profile will contain non-production paths.</p>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">How do you measure the improvement from a Baseline Profile using Macrobenchmark?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <ol>
+            <li>Create a <code>:macrobenchmark</code> module with <code>com.android.test</code> plugin, targeting the app module.</li>
+            <li>Write a benchmark using <code>MacrobenchmarkRule.measureRepeated()</code> with <code>StartupTimingMetric()</code>, <code>StartupMode.COLD</code>, and at least 5 iterations.</li>
+            <li>Build the benchmark APK and app APK in <code>benchmark</code> build type (release optimisations, debuggable=false).</li>
+            <li>Run the benchmark <strong>without</strong> the profile (comment out or remove baseline-prof.txt), record <code>timeToInitialDisplay</code>.</li>
+            <li>Restore the profile, rebuild, run again — compare TTID.</li>
+          </ol>
+          <p><strong>Typical result:</strong> 30–80ms reduction in cold start TTID, which represents 15–40% improvement depending on app complexity and how much startup code the profile covers.</p>
+          <p><strong>Important:</strong> Run on a physical device. Lock CPU clocks with <code>./gradlew lockClocks</code> for stable results.</p>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">When should you regenerate your Baseline Profile?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Regenerate when the listed class/method names are no longer valid. Specifically:</p>
+          <ul>
+            <li><strong>Major refactoring:</strong> Any significant rename of Activity, Fragment, ViewModel, or composable classes invalidates profile rules pointing to the old names. Old profile becomes useless — methods no longer exist under those signatures.</li>
+            <li><strong>New major features added to startup path:</strong> Profile only covers what was in the app when it was generated. New startup code won't be pre-compiled.</li>
+            <li><strong>Each release branch:</strong> As a CI step, regenerate and commit the updated profile so shipping code always has a fresh profile.</li>
+            <li><strong>After upgrading major dependencies:</strong> Library method signatures can change between versions, especially Compose.</li>
+          </ul>
+          <p><strong>Best practice:</strong> Automate profile generation in CI on each release branch. The <code>generateBaselineProfile</code> Gradle task makes this straightforward.</p>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">What are Cloud Profiles and how do they relate to your shipped Baseline Profile?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Cloud Profiles are aggregated anonymous performance data collected by Play Store from real users across all installs of your app. Play uses this data to pre-compile the app before delivering it to new users.</p>
+          <p><strong>Relationship to Baseline Profile:</strong></p>
+          <ul>
+            <li>Your <strong>Baseline Profile</strong> covers <em>day-0</em>: developer-specified methods guaranteed to be AOT-compiled on any install via ProfileInstaller, even without Play Store (sideloaded, dev testing).</li>
+            <li><strong>Cloud Profiles</strong> enhance this with real-world data: which methods <em>actual users</em> call most. This includes user-journey-specific paths that your generator might not cover.</li>
+            <li><strong>Automatic device profiles</strong> (collected nightly by ART) further personalise for each user's specific usage pattern over days 1–3.</li>
+          </ul>
+          <p>The profiles stack: Baseline Profile guarantees a minimum performance floor at install. Cloud + Automatic profiles improve further over time for Play-distributed apps.</p>
+          <p><strong>Implication:</strong> Never rely solely on Cloud Profiles — they only apply to Play Store installs and require sufficient install volume (~thousands). Always ship a Baseline Profile for day-0 coverage.</p>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">How would you integrate Baseline Profile generation and Macrobenchmark regression detection into your CI pipeline?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p><strong>Two separate CI jobs:</strong></p>
+          <p><strong>1. Profile Generation Job (on each release branch):</strong></p>
+          <ul>
+            <li>Build <code>benchmark</code> variant of app + baseline-profile test module</li>
+            <li>Run on physical device via Firebase Test Lab or connected device</li>
+            <li>Execute <code>generateBaselineProfile</code> task</li>
+            <li>Commit updated <code>baseline-prof.txt</code> back to the release branch</li>
+          </ul>
+          <p><strong>2. Regression Detection Job (on each PR or scheduled):</strong></p>
+          <ul>
+            <li>Build <code>benchmark</code> APKs for both app and macrobenchmark module</li>
+            <li>Run on Firebase Test Lab with a consistent device model (same model every time)</li>
+            <li>Download benchmark results JSON from GCS bucket</li>
+            <li>Parse <code>timeToInitialDisplay</code> and compare against stored baseline</li>
+            <li>Fail the job if P50 TTID degrades more than 10% from baseline</li>
+            <li>Post results as PR comment with before/after numbers</li>
+          </ul>
+          <p><strong>Key considerations:</strong> Use the same device model consistently (variance between models is huge). Lock CPU clocks if using rooted test devices. Store historical baselines in a database or artifact store to detect gradual regressions.</p>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="quiz-card">
+        <div class="quiz-q" onclick="toggleQuiz(this)">
+          <div class="quiz-q-text">A Baseline Profile was added but Macrobenchmark shows no improvement in cold start TTID. What are the likely causes?</div>
+          <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">▾</span></div>
+        </div>
+        <div class="quiz-a">
+          <p>Diagnose systematically:</p>
+          <ol>
+            <li><strong>Profile not being applied:</strong> Run <code>adb shell cmd package compile -m speed-profile com.example.myapp</code> and check <code>dumpsys package</code> for compilation state. If profile shows 0 methods compiled, ProfileInstaller may not be initialised.</li>
+            <li><strong>Profile generated from debug build:</strong> Methods listed include debug-only overhead. Regenerate from <code>benchmarkRelease</code> build.</li>
+            <li><strong>Benchmark running on emulator:</strong> Emulator results are meaningless. Must use physical device.</li>
+            <li><strong>CPU clocks not locked:</strong> Thermal throttling causes high variance masking the real improvement. Lock clocks before benchmarking.</li>
+            <li><strong>Too few iterations:</strong> With 3 iterations the variance is too high. Use at least 5, ideally 10.</li>
+            <li><strong>Profile is stale:</strong> After refactoring, old method names don't exist. Profile has zero effect. Check that <code>baseline-prof.txt</code> contains method names present in current build by cross-referencing with APK's dex classes.</li>
+            <li><strong>Startup bottleneck is I/O, not JIT:</strong> If cold start is dominated by disk I/O (SharedPreferences, SQLite), AOT compilation won't help. Check with Perfetto to identify the actual bottleneck.</li>
+          </ol>
+        </div>
+      </div>
+
+    </div><!-- end s9 -->
+  </div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+(function(){
+  var secs=Array.from(document.querySelectorAll('.section[id]'));
+  var navs=Array.from(document.querySelectorAll('.nav-item[data-section]'));
+  var pf=document.getElementById('progressFill');
+  function getActive(){var off=120,act=secs[0];for(var i=0;i<secs.length;i++){var r=secs[i].getBoundingClientRect();if(r.top<=off)act=secs[i];}return act;}
+  function update(){var a=getActive();if(!a)return;navs.forEach(function(n){var ok=n.dataset.section===a.id;n.classList.toggle('active',ok);n.classList.toggle('aip-nav-active',ok);});if(pf){var d=document.documentElement.scrollHeight-window.innerHeight;pf.style.width=(d>0?Math.min(window.scrollY/d*100,100):0)+'%';}var ai=navs.find(function(n){return n.dataset.section===a.id;});if(ai){var sb=ai.closest('.sidebar')||ai.closest('nav:not(#aip-topbar)');if(sb){var it=ai.offsetTop,sh=sb.clientHeight,ss=sb.scrollTop;if(it<ss+44||it>ss+sh-64)sb.scrollTop=Math.max(0,it-sh/2+24);}}}
+  window.addEventListener('scroll',update,{passive:true});
+  var me=document.getElementById('mainScroll')||document.querySelector('.main');
+  if(me&&me!==document.body)me.addEventListener('scroll',update,{passive:true});
+  setTimeout(update,100);
+  navs.forEach(function(n){n.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(n.dataset.section);if(!t)return;var tb=document.getElementById('aip-topbar');var off=(tb?tb.offsetHeight:0)+12;window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});});});
+}());
+function toggleQuiz(el){var a=el.nextElementSibling,i=el.querySelector('.toggle-icon');if(a)a.classList.toggle('open');if(i)i.classList.toggle('open');}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

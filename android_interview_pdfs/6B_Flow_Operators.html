@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main{flex:1;overflow-y:auto;}
+  .main {flex:1;overflow-y:auto;}
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -90,25 +90,91 @@
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
   @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
   ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="layout">
 <nav class="sidebar">
   <div class="sidebar-header">6B · Flow Operators</div>
-  <button class="nav-item active" onclick="show('s1',1)"><span class="nav-num">1</span> Overview</button>
-  <button class="nav-item" onclick="show('s2',2)"><span class="nav-num">2</span> Transform &amp; Filter</button>
-  <button class="nav-item" onclick="show('s3',3)"><span class="nav-num">3</span> Combining Flows</button>
-  <button class="nav-item" onclick="show('s4',4)"><span class="nav-num">4</span> FlatMap Operators</button>
-  <button class="nav-item" onclick="show('s5',5)"><span class="nav-num">5</span> Timing &amp; Error Handling</button>
-  <button class="nav-item" onclick="show('s6',6)"><span class="nav-num">6</span> Lifecycle Operators</button>
-  <button class="nav-item" onclick="show('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="show('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
-  <button class="nav-item" onclick="show('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Transform &amp; Filter</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Combining Flows</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> FlatMap Operators</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Timing &amp; Error Handling</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Lifecycle Operators</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision Sheet</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
 </nav>
-<main class="main">
+<main class="main" id="mainScroll">
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; Android Interview Prep</div>
     <h1><span>6B</span> — Flow Operators</h1>
     <p class="hero-desc">Transforming, combining, flatMapping, timing, error handling, and lifecycle operators. Production examples for each. flatMapConcat vs flatMapMerge vs flatMapLatest comparison.</p>
@@ -119,7 +185,7 @@
   </div>
 
   <!-- S1 -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
     <h3>Operator categories</h3>
     <ul>
@@ -134,7 +200,6 @@
       <div class="callout-label">Mental Model</div>
       Flow operators are lazy — they don't execute until <code>collect()</code> is called. Each operator creates a new Flow that wraps the upstream. Think of the chain as a pipeline declaration, not execution. The entire chain runs when collected.
     </div>
-    <div class="nav-buttons"><button class="btn btn-primary" onclick="show('s2',2)">Next: Transform &amp; Filter →</button></div>
   </div>
 
   <!-- S2 -->
@@ -165,10 +230,6 @@ userFlow
 eventFlow
     .<span class="fn">mapNotNull</span> { event -> event <span class="kw">as</span>? <span class="cl">PaymentEvent</span> }
     .<span class="fn">collect</span> { <span class="fn">handlePayment</span>(it) }</code></pre>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s1',1)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s3',3)">Next: Combining →</button>
-    </div>
   </div>
 
   <!-- S3 -->
@@ -212,10 +273,6 @@ uiUpdates.<span class="fn">collect</span> { update -> <span class="fn">handleUpd
       <tr><td>merge</td><td>Any source emits</td><td>N/A</td><td>Multiple event sources into one</td></tr>
     </table>
     </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s2',2)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s4',4)">Next: FlatMap Operators →</button>
-    </div>
   </div>
 
   <!-- S4 -->
@@ -258,10 +315,6 @@ searchQuery
       <tr><td>flatMapLatest</td><td>Cancel + restart</td><td>N/A</td><td>Cancels previous</td><td>Search, live updates</td></tr>
     </table>
     </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s3',3)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s5',5)">Next: Timing &amp; Errors →</button>
-    </div>
   </div>
 
   <!-- S5 -->
@@ -303,10 +356,6 @@ apiFlow
         } <span class="kw">else</span> <span class="kw">false</span>   <span class="cm">// don't retry</span>
     }
     .<span class="fn">collect</span> { <span class="fn">handleData</span>(it) }</code></pre>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s4',4)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s6',6)">Next: Lifecycle Operators →</button>
-    </div>
   </div>
 
   <!-- S6 -->
@@ -330,10 +379,6 @@ repo.<span class="fn">getProducts</span>()
         .<span class="fn">map</span> { <span class="cl">Resource</span>.<span class="cl">Success</span>(it) }
         .<span class="fn">catch</span> { <span class="fn">emit</span>(<span class="cl">Resource</span>.<span class="cl">Error</span>(it)) }
         .<span class="fn">onCompletion</span> { <span class="cm">/* cleanup */</span> }</code></pre>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s5',5)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s7',7)">Next: Interview Framework →</button>
-    </div>
   </div>
 
   <!-- S7 -->
@@ -364,10 +409,6 @@ repo.<span class="fn">getProducts</span>()
     <div class="callout callout-purple">
       <div class="callout-label">Senior Insight</div>
       In a banking app, combine the search query flow with the account filter flow and the sort preference flow using <code>combine</code>: <code>combine(searchFlow, filterFlow, sortFlow) { q, f, s → Query(q,f,s) }.flatMapLatest { query → repo.search(query) }.catch { emit(Error(it)) }</code>. This creates a reactive search that automatically re-fetches whenever any input changes, with only the latest result kept.
-    </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s6',6)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s8',8)">Next: Revision Sheet →</button>
     </div>
   </div>
 
@@ -402,10 +443,6 @@ merge(a, b, c)           interleave all</code></pre>
 distinctUntilChanged() skip duplicates
 sample(1000)           emit every 1s</code></pre>
       </div>
-    </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s7',7)">← Back</button>
-      <button class="btn btn-primary" onclick="show('s9',9)">Next: Questions →</button>
     </div>
   </div>
 
@@ -492,30 +529,134 @@ sample(1000)           emit every 1s</code></pre>
       </div>
       <div class="quiz-a">Wrap the repository flow: <code>fun getDataFlow(id: String): Flow&lt;Resource&lt;Data&gt;&gt; = repo.getStream(id).map&lt;Data, Resource&lt;Data&gt;&gt; { Resource.Success(it) }.onStart { emit(Resource.Loading) }.catch { emit(Resource.Error(it)) }</code>. The <code>onStart</code> emits Loading before any data arrives. <code>map</code> wraps success data. <code>catch</code> catches upstream errors and emits Error. The UI collects a single flow that handles all three states. Important: <code>onStart</code> must come before <code>catch</code> so the Loading emission isn't caught by catch.</div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="show('s8',8)">← Back</button>
-    </div>
   </div>
 </main>
 </div>
+
+
+
+
+
+
+
+
+
 <script>
-function show(id, num) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-  document.getElementById('progressFill').style.width = (num/9*100)+'%';
-  document.querySelector('.main').scrollTop = 0;
-}
-function toggleQuiz(el) {
-  const ans = el.nextElementSibling;
-  const icon = el.querySelector('.toggle-icon');
-  ans.classList.toggle('open');
-  icon.classList.toggle('open');
+(function () {
+  'use strict';
+
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
+  }
+
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
+  }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
 }
 </script>
-
 <script src="shared.js"></script>
 </body>
 </html>

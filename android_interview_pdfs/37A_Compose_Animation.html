@@ -13,7 +13,7 @@
     --text: #e2e4f0;
     --muted: #8b90b8;
     --accent: #7c6af7;
-    --accent2: #4f9eff;
+    --accent2: #56cfb2;
     --green: #3ecf8e;
     --red: #ff6b6b;
     --yellow: #f5c842;
@@ -90,7 +90,7 @@
   /* MAIN */
   .main {
     flex: 1;
-    overflow-y: auto;
+    overflow-y:auto;
     padding: 0;
   }
 
@@ -418,33 +418,99 @@
 
   .tag-coding { background: rgba(79,158,255,0.15); color: var(--accent2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
   .tag-scenario { background: rgba(245,200,66,0.15); color: var(--yellow); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; }
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
 </style>
 </head>
 <body>
 
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
 <div class="layout">
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-header">37A · Jetpack Compose Animation</div>
-  <button class="nav-item active" onclick="showSection('s1',1)"><span class="nav-num">1</span> Overview</button>
-  <button class="nav-item" onclick="showSection('s2',2)"><span class="nav-num">2</span> How It Works</button>
-  <button class="nav-item" onclick="showSection('s3',3)"><span class="nav-num">3</span> When to Use</button>
-  <button class="nav-item" onclick="showSection('s4',4)"><span class="nav-num">4</span> Production Example</button>
-  <button class="nav-item" onclick="showSection('s5',5)"><span class="nav-num">5</span> Alternatives & Trade-offs</button>
-  <button class="nav-item" onclick="showSection('s6',6)"><span class="nav-num">6</span> Pitfalls & Best Practices</button>
-  <button class="nav-item" onclick="showSection('s7',7)"><span class="nav-num">7</span> Interview Framework</button>
-  <button class="nav-item" onclick="showSection('s8',8)"><span class="nav-num">8</span> Quick Revision Sheet</button>
-  <button class="nav-item" onclick="showSection('s9',9)"><span class="nav-num">9</span> Interview Questions</button>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> How It Works</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> When to Use</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> Production Example</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Alternatives & Trade-offs</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Pitfalls & Best Practices</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision Sheet</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
 </nav>
 
 <!-- MAIN CONTENT -->
-<main class="main">
+<main class="main" id="mainScroll">
 
   <!-- HERO -->
   <div class="hero">
+    <a class="hero-back" href="index.html"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> &#8592; Back to Dashboard</a>
     <div class="hero-tag">&#9679; Android Interview Prep</div>
     <h1><span>37A</span> — Jetpack Compose Animation</h1>
     <p class="hero-desc">Complete guide to Compose animation APIs: animateAsState, updateTransition, AnimatedVisibility, AnimatedContent, rememberInfiniteTransition, and Motion.</p>
@@ -455,7 +521,7 @@
   </div>
 
   <!-- SECTION 1: OVERVIEW -->
-  <div class="section active" id="s1">
+  <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128269;</div> 1. Overview</div>
 
     <h3>Why Compose Animation is Fundamentally Different</h3>
@@ -479,10 +545,6 @@
     <div class="callout callout-purple">
       <div class="callout-label">Senior Mental Model</div>
       Never "run" an animation imperatively in Compose. Instead, <strong>describe the target state</strong> and provide an <code>AnimationSpec</code>. Compose calculates the delta, tracks velocity, and manages the interpolation loop within the snapshot state system.
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-primary" onclick="showSection('s2',2)">Next: How It Works →</button>
     </div>
   </div>
 
@@ -624,11 +686,6 @@
     <h3>Compose Animation Architecture</h3>
     <div class="ascii-box">State Change → animate*AsState → AnimationSpec (tween/spring/keyframes) → recomposition with interpolated value → UI update
 updateTransition → multiple child animations → synchronized state machine</div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s1',1)">← Overview</button>
-      <button class="btn btn-primary" onclick="showSection('s3',3)">Next: When to Use →</button>
-    </div>
   </div>
 
   <!-- SECTION 3: WHEN TO USE -->
@@ -657,11 +714,6 @@ updateTransition → multiple child animations → synchronized state machine</d
         <li><strong>Every List Item Scroll:</strong> Triggering heavy layout animations on fast scrolling <code>LazyColumn</code> causes frame drops and jank.</li>
         <li><strong>Accessibility "Reduce Motion" Active:</strong> When users have enabled reduced motion in OS accessibility settings, heavy scale/slide animations must fall back to snap or subtle alpha fades.</li>
       </ul>
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s2',2)">← How It Works</button>
-      <button class="btn btn-primary" onclick="showSection('s4',4)">Next: Production Example →</button>
     </div>
   </div>
 
@@ -786,11 +838,6 @@ updateTransition → multiple child animations → synchronized state machine</d
       <li><code>transition.AnimatedContent { state -&gt; ... }</code> — Nesting <code>AnimatedContent</code> inside <code>updateTransition</code> guarantees child icon/text swap runs in sync with width morphing.</li>
       <li><code>rememberInfiniteTransition(label = "shimmer")</code> — Runs a continuous gradient offset loop for placeholder shimmer without creating thread leaks.</li>
     </ul>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s3',3)">← When to Use</button>
-      <button class="btn btn-primary" onclick="showSection('s5',5)">Next: Alternatives →</button>
-    </div>
   </div>
 
   <!-- SECTION 5: ALTERNATIVES -->
@@ -844,11 +891,6 @@ updateTransition → multiple child animations → synchronized state machine</d
       <div class="callout-label">Architectural Trade-Off</div>
       <p><strong><code>updateTransition</code> vs Multiple <code>animate*AsState</code>:</strong> While writing three <code>animate*AsState</code> calls looks simpler, they operate as three independent state listeners. If state switches mid-animation, their individual velocity calculations can desynchronize, causing visual jitter. <code>updateTransition</code> treats the state change as an atomic event across all properties.</p>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s4',4)">← Production Example</button>
-      <button class="btn btn-primary" onclick="showSection('s6',6)">Next: Pitfalls →</button>
-    </div>
   </div>
 
   <!-- SECTION 6: PITFALLS -->
@@ -901,11 +943,6 @@ updateTransition → multiple child animations → synchronized state machine</d
 <span class="kw">val</span> slideOffset <span class="kw">by</span> <span class="fn">animateDpAsState</span>(targetValue = <span class="nu">500.dp</span>, label = <span class="str">"slide"</span>)</code></pre>
     <pre><code><span class="cm">// ✅ GOOD — Check reduceMotion and swap physics springs for instant snaps or gentle fades</span>
 <span class="kw">val</span> spec = <span class="kw">if</span> (isReduceMotionEnabled) <span class="fn">snap</span>() <span class="kw">else</span> <span class="fn">spring</span>()</code></pre>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s5',5)">← Alternatives</button>
-      <button class="btn btn-primary" onclick="showSection('s7',7)">Next: Interview Framework →</button>
-    </div>
   </div>
 
   <!-- SECTION 7: INTERVIEW FRAMEWORK -->
@@ -963,11 +1000,6 @@ updateTransition → multiple child animations → synchronized state machine</d
     <div class="callout callout-green">
       <div class="callout-label">Say This</div>
       "I reach for <code>updateTransition</code> over multiple <code>animateAsState</code> calls whenever two or more values must stay in sync — race conditions between separate animations produce jank. Furthermore, in production design systems, I encapsulate transitions into reusable child transition extensions and enforce a global accessibility check that replaces spring dynamics with <code>snap()</code> when <code>reduceMotion</code> is enabled in system accessibility settings."
-    </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s6',6)">← Pitfalls</button>
-      <button class="btn btn-primary" onclick="showSection('s8',8)">Next: Quick Revision →</button>
     </div>
   </div>
 
@@ -1038,11 +1070,6 @@ val spec = if (reduceMotion) snap()
                     ├── Multiple synchronized values? → updateTransition
                     ├── Continuous endless loop? → rememberInfiniteTransition
                     └── Gesture / Coroutine Imperative? → Animatable</div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s7',7)">← Interview Framework</button>
-      <button class="btn btn-primary" onclick="showSection('s9',9)">Next: Interview Questions →</button>
-    </div>
   </div>
 
   <!-- SECTION 9: QUIZ -->
@@ -1210,42 +1237,136 @@ val spec = if (reduceMotion) snap()
         This cleanly replaces complex bouncing scale/slide transitions with instant snaps or subtle opacity crossfades without modifying individual feature composables.
       </div>
     </div>
-
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="showSection('s8',8)">← Quick Revision</button>
-      <button class="btn btn-primary" onclick="showSection('s1',1)">↑ Back to Top</button>
-    </div>
   </div>
 
 </main>
 </div>
 
+
+
+
+
+
+
+
+
+
 <script>
-  const sections = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
-  const total = sections.length;
+(function () {
+  'use strict';
 
-  function showSection(id, num) {
-    sections.forEach(s => {
-      document.getElementById(s).classList.remove('active');
-    });
-    document.querySelectorAll('.nav-item').forEach((btn, i) => {
-      btn.classList.toggle('active', i === num - 1);
-    });
-    document.getElementById(id).classList.add('active');
-    const pct = Math.round((num / total) * 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+  // Neutralise legacy tab-switching functions
+  window.show        = function () {};
+  window.showSection = function () {};
+
+  // ── Collect sections & nav items ───────────────────────────────────────────
+  var sections = Array.from(
+    document.querySelectorAll('.section[id], section[id]')
+  ).filter(function (s) {
+    return s.id && !s.id.startsWith('aip-') && s.id !== 'aip-flip-section';
+  });
+
+  var navItems = Array.from(
+    document.querySelectorAll('.nav-item[data-section]')
+  );
+
+  var progressFill = document.getElementById('progressFill');
+
+  // ── Determine which section is currently "active" ──────────────────────────
+  // Uses getBoundingClientRect so it works with ANY scroll container
+  // (window scroll OR inner div scroll — shared.js forces window scroll)
+  function getActiveSection () {
+    var topbarH = 0;
+    var tb = document.getElementById('aip-topbar');
+    if (tb) topbarH = tb.offsetHeight;
+
+    // The active section is the LAST one whose top edge is above 40% of viewport
+    var viewH   = window.innerHeight || document.documentElement.clientHeight;
+    var threshold = topbarH + viewH * 0.38;
+    var active  = sections[0];
+
+    for (var i = 0; i < sections.length; i++) {
+      var rect = sections[i].getBoundingClientRect();
+      if (rect.top <= threshold) {
+        active = sections[i];
+      }
+    }
+    return active;
   }
 
-  function toggleQuiz(el) {
-    const answer = el.nextElementSibling;
-    const icon = el.querySelector('.toggle-icon');
-    const isOpen = answer.classList.contains('open');
-    answer.classList.toggle('open', !isOpen);
-    icon.classList.toggle('open', !isOpen);
+  // ── Update sidebar highlight + progress bar ─────────────────────────────────
+  function updateSidebar () {
+    var active = getActiveSection();
+    if (!active) return;
+
+    navItems.forEach(function (item) {
+      var isActive = item.dataset.section === active.id;
+      // Support BOTH class systems: our .active AND shared.js .aip-nav-active
+      item.classList.toggle('active',          isActive);
+      item.classList.toggle('aip-nav-active',  isActive);
+    });
+
+    // Progress bar (top thin gradient bar)
+    if (progressFill) {
+      var docH  = document.documentElement.scrollHeight - window.innerHeight;
+      var pct   = docH > 0 ? Math.min((window.scrollY / docH) * 100, 100) : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    // Keep the active sidebar link scrolled into view
+    var activeItem = navItems.find(function (it) {
+      return it.dataset.section === active.id;
+    });
+    if (activeItem) {
+      var sb = activeItem.closest('.sidebar') ||
+               activeItem.closest('nav:not(#aip-topbar)');
+      if (sb) {
+        var iTop = activeItem.offsetTop;
+        var sbH  = sb.clientHeight;
+        var sbS  = sb.scrollTop;
+        if (iTop < sbS + 44 || iTop > sbS + sbH - 64) {
+          sb.scrollTop = Math.max(0, iTop - sbH / 2 + 24);
+        }
+      }
+    }
   }
+
+  // Listen on WINDOW (shared.js forces main to overflow:visible so window scrolls)
+  window.addEventListener('scroll', updateSidebar, { passive: true });
+  // Also listen on any inner scroll container as fallback
+  var mainEl = document.getElementById('mainScroll') ||
+               document.querySelector('.main') ||
+               document.querySelector('main');
+  if (mainEl && mainEl !== document.body) {
+    mainEl.addEventListener('scroll', updateSidebar, { passive: true });
+  }
+
+  // Run after layout is complete
+  setTimeout(updateSidebar, 100);
+
+  // ── Sidebar clicks → smooth scroll ─────────────────────────────────────────
+  navItems.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb     = document.getElementById('aip-topbar');
+      var offset = (tb ? tb.offsetHeight : 0) + 12;
+      var y      = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+}());
+
+// ── Quiz accordion ────────────────────────────────────────────────────────────
+function toggleQuiz (el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
 </script>
-
 <script src="shared.js"></script>
 </body>
 </html>

@@ -33,10 +33,30 @@ MODULE_NAMES = {
     16: "Broadcast Receivers & IPC Events",
     17: "Content Providers & Scoped Data Sharing",
     18: "Jetpack Navigation & Deep Linking",
-    19: "Android Security, Cryptography & App Hardening",
-    20: "Performance, Profiling & Memory Optimization",
-    21: "Automated Testing (Unit & UI Tests)",
-    22: "Gradle, Build System & CI/CD",
+    19: "Android Security, Cryptography & Hardening",
+    20: "Automated Testing (Unit, Coroutines, UI)",
+    21: "Android Performance & Profiling",
+    22: "Memory Management & Leak Detection",
+    23: "Gradle Build System & Convention Plugins",
+    24: "Modularization Architecture",
+    25: "CI/CD Pipelines & Mobile DevOps",
+    26: "Code Quality, Linters & Static Analysis",
+    27: "Android Permissions System & Scoped Storage",
+    28: "RecyclerView & Legacy Android Views",
+    29: "Paging 3 Architecture & Large Datasets",
+    30: "Senior Android System Design Case Studies",
+    31: "Firebase Integration & Cloud Architecture",
+    32: "App Release, Signing & Play Store Deployment",
+    33: "Scenario-Based Debugging & Troubleshooting",
+    34: "Data Structures, Algorithms & Coding Practice",
+    35: "Behavioral & Senior Engineering Leadership",
+    36: "AI Developer Tools & MCP for Android",
+    37: "Jetpack Compose Animation & Motion",
+    38: "Kotlin Multiplatform (KMP/KMM) in Production",
+    39: "Android Accessibility (a11y) & Inclusive UI",
+    40: "Modern Android Platform APIs (Android 12–16)",
+    41: "Advanced Android Debugging, Tracing & Telemetry",
+    42: "Compose Design Systems & Multi-Brand Theming",
 }
 
 def natural_sort_key(filename):
@@ -345,13 +365,18 @@ def generate_index_html(topics):
   /* TOOLBAR / CONTROLS */
   .controls-bar {{
     max-width: 1440px;
-    margin: 24px auto 0;
-    padding: 0 40px;
+    margin: 0 auto;
+    padding: 14px 40px;
     display: flex;
     gap: 16px;
     align-items: center;
     flex-wrap: wrap;
     justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-subtle);
   }}
 
   .search-box {{
@@ -447,8 +472,8 @@ def generate_index_html(topics):
     border-radius: var(--radius);
     padding: 18px 14px;
     position: sticky;
-    top: 24px;
-    max-height: calc(100vh - 48px);
+    top: 76px;
+    max-height: calc(100vh - 96px);
     overflow-y: auto;
   }}
 
@@ -810,6 +835,128 @@ def generate_index_html(topics):
     transform: translateX(3px);
   }}
 
+  
+  /* MODALS FOR ROADMAP & AI PLAYBOOK */
+  .portal-modal-backdrop {{
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 10, 16, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }}
+  .portal-modal-backdrop.active {{
+    display: flex;
+  }}
+  .portal-modal {{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 980px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.25s ease;
+  }}
+  @keyframes modalSlideIn {{
+    from {{ opacity: 0; transform: translateY(16px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+  }}
+  .portal-modal-header {{
+    background: #10121e;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }}
+  .portal-modal-header h2 {{
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }}
+  .portal-modal-body {{
+    padding: 28px;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.7;
+  }}
+  .portal-modal-body h3 {{
+    font-size: 16px;
+    color: var(--accent);
+    margin: 22px 0 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 6px;
+  }}
+  .portal-modal-body h4 {{
+    font-size: 14.5px;
+    color: var(--yellow);
+    margin: 16px 0 6px;
+  }}
+  .portal-modal-body p {{
+    color: var(--muted);
+    margin-bottom: 12px;
+  }}
+  .portal-modal-body ul, .portal-modal-body ol {{
+    margin: 8px 0 16px 24px;
+    color: var(--muted);
+  }}
+  .portal-modal-body li {{
+    margin-bottom: 6px;
+  }}
+  .portal-modal-body li strong {{
+    color: var(--text);
+  }}
+  .roadmap-tabs {{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    flex-wrap: wrap;
+  }}
+  .roadmap-tab-btn {{
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }}
+  .roadmap-tab-btn:hover {{ color: var(--text); border-color: var(--border); }}
+  .roadmap-tab-btn.active {{
+    background: rgba(124, 106, 247, 0.15);
+    color: var(--accent);
+    border-color: var(--accent);
+  }}
+  .roadmap-content-pane {{ display: none; }}
+  .roadmap-content-pane.active {{ display: block; }}
+  .code-snippet {{
+    background: #0d0f17;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: #abb2bf;
+    overflow-x: auto;
+    margin: 10px 0 16px;
+  }}
+
   /* EMPTY SEARCH STATE */
   #noResults {{
     display: none;
@@ -845,14 +992,26 @@ def generate_index_html(topics):
         <p>Complete curriculum covering Android & Kotlin senior/staff engineering topics. Click any topic card to open the complete study material, or use the interactive Study Reader or All-in-One Compendium.</p>
       </div>
       <div class="header-actions">
-        <a href="all_topics_combined.html" class="btn btn-primary" target="_blank">
-          📚 Open Full Master Compendium
+        <a href="Android_Interview_Topic_Wise_PDFs.zip" class="btn btn-accent2" download style="background: linear-gradient(135deg, #4338ca, #6366f1); border:none; box-shadow: 0 4px 16px rgba(99,102,241,0.35);">
+          📦 All 97 Topic PDFs (ZIP)
         </a>
-        <button class="btn btn-secondary" onclick="openStudyReader(currentTopicCode)">
-          📖 Study Reader
+        <a href="Android_Interview_Compact_Handbook.pdf" class="btn btn-primary" download style="background: linear-gradient(135deg, #059669, #10b981); border:none; box-shadow: 0 4px 16px rgba(16,185,129,0.35);">
+          📄 Compact PDF (219 Pgs)
+        </a>
+        <a href="Android_Interview_Complete_Master.pdf" class="btn btn-secondary" download style="border-color: #6366f1; color: #a5b4fc;">
+          📚 Complete PDF (1,037 Pgs)
+        </a>
+        <button class="btn btn-accent2" onclick="openRoadmapModal()">
+          🗺️ Roadmap
         </button>
+        <button class="btn btn-secondary" style="border-color:var(--accent); color:var(--accent-light);" onclick="openAiModal()">
+          🤖 AI Playbook
+        </button>
+        <a href="all_topics_combined.html" class="btn btn-secondary" target="_blank">
+          🌐 Compendium
+        </a>
         <button class="btn btn-secondary" onclick="resetProgress()">
-          🔄 Reset Progress
+          🔄 Reset
         </button>
       </div>
     </div>
@@ -894,6 +1053,9 @@ def generate_index_html(topics):
     <div class="pill" data-filter="Tier 1" onclick="setFilter('Tier 1')">Tier 1: Core ({tier1_cnt})</div>
     <div class="pill" data-filter="Tier 2" onclick="setFilter('Tier 2')">Tier 2: Advanced ({tier2_cnt})</div>
     <div class="pill" data-filter="Tier 3" onclick="setFilter('Tier 3')">Tier 3: Specialized ({tier3_cnt})</div>
+    <div class="pill" data-filter="sysdesign" onclick="setFilter('sysdesign')">🏛️ System Design</div>
+    <div class="pill" data-filter="coding" onclick="setFilter('coding')">💻 Coding / DS</div>
+    <div class="pill" data-filter="aimodern" onclick="setFilter('aimodern')">🤖 AI & Modern</div>
     <div class="pill" data-filter="studied" onclick="setFilter('studied')">Studied (<span id="studiedCount">0</span>)</div>
     <div class="pill" data-filter="unstudied" onclick="setFilter('unstudied')">Remaining (<span id="unstudiedCount">{total_topics}</span>)</div>
   </div>
@@ -929,6 +1091,165 @@ def generate_index_html(topics):
         </div>
       </div>
       <iframe id="studyIframe" class="reader-iframe" src="about:blank"></iframe>
+    </div>
+
+
+    <!-- PREPARATION ROADMAP MODAL -->
+    <div id="roadmapModal" class="portal-modal-backdrop" onclick="closeModalOnBackdrop(event, 'roadmapModal')">
+      <div class="portal-modal">
+        <div class="portal-modal-header">
+          <h2>🗺️ Android Senior & Staff Preparation Roadmap</h2>
+          <button class="btn btn-secondary btn-sm" onclick="closeRoadmapModal()">Close ✕</button>
+        </div>
+        <div class="portal-modal-body">
+          <p>Choose your preparation track based on your target timeline and interview goals. All 97 topics are mapped below:</p>
+          
+          <div class="roadmap-tabs">
+            <button class="roadmap-tab-btn active" onclick="switchRoadmapTab('tab30')">⚡ 30-Day Senior Sprint</button>
+            <button class="roadmap-tab-btn" onclick="switchRoadmapTab('tab60')">🏆 60-Day Full Staff Mastery</button>
+            <button class="roadmap-tab-btn" onclick="switchRoadmapTab('tabSys')">🏛️ 14-Day System Design Track</button>
+            <button class="roadmap-tab-btn" onclick="switchRoadmapTab('tabCoding')">💻 Live Coding & Algorithms</button>
+            <button class="roadmap-tab-btn" onclick="switchRoadmapTab('tabMethod')">📖 5-Step Study Protocol</button>
+          </div>
+
+          <!-- TAB 1: 30-DAY -->
+          <div id="tab30" class="roadmap-content-pane active">
+            <h4>Week 1: Kotlin Core, Coroutines & Reactive Flow</h4>
+            <ul>
+              <li><strong>Days 1–2: Kotlin Core Essentials</strong> — Topics 1A (Null Safety), 1C (Scope Functions), 1D (OOP), 1E (Special Classes), 1F (Generics & Variance).</li>
+              <li><strong>Days 3–5: Coroutines & Concurrency</strong> — Topics 5A (Fundamentals), 5B (Dispatchers), 5C (Structured Concurrency), 5D (Cancellation & Exceptions), 5E (Testing).</li>
+              <li><strong>Days 6–7: Kotlin Flow</strong> — Topics 6A (Cold vs Hot), 6B (Operators), 6C (Channels), 6D (stateIn / shareIn).</li>
+            </ul>
+
+            <h4>Week 2: Jetpack Compose & Clean Architecture</h4>
+            <ul>
+              <li><strong>Days 8–10: Jetpack Compose</strong> — Topics 7A (Fundamentals), 7B (State & Recomposition), 7C (Side Effects), 7D (Performance & Stability), 7E (UI), 7F (Navigation).</li>
+              <li><strong>Days 11–12: Architecture & Dependency Injection</strong> — Topics 8A (MVI/MVVM), 8B (Clean Architecture), 9A (SOLID), 11A–11B (Hilt DI).</li>
+              <li><strong>Days 13–14: Networking & Offline Storage</strong> — Topics 12A–12C (Retrofit, OkHttp, SSL Pinning) and 13A–13C (Room Database & DataStore).</li>
+            </ul>
+
+            <h4>Week 3: System Design & Platform Scenarios</h4>
+            <ul>
+              <li><strong>Days 15–18: System Design Case Studies</strong> — Topics 30A (Offline Catalog), 30B (Auth Flow), 30D (Chat App), 30F (Image Feed), 30G (Modular Scale).</li>
+              <li><strong>Days 19–21: Debugging & Real-World Troubleshooting</strong> — Topics 33A (Crashes & ANRs), 33B (Concurrency Races), 33C (Scale & Leak Issues).</li>
+            </ul>
+
+            <h4>Week 4: Testing, Performance & Mock Interviews</h4>
+            <ul>
+              <li><strong>Days 22–24: Testing & Quality</strong> — Topics 20A–20C (Unit Tests, Turbine for Flow, Compose UI Tests).</li>
+              <li><strong>Days 25–27: Performance, Memory & Leaks</strong> — Topics 21A (Systrace/Perfetto) and 22A (LeakCanary & Heap Dumps).</li>
+              <li><strong>Days 28–30: Behavioral & Leadership</strong> — Topic 35A (STAR Method, Technical Strategy, Conflict Resolution) and mock practice.</li>
+            </ul>
+          </div>
+
+          <!-- TAB 2: 60-DAY -->
+          <div id="tab60" class="roadmap-content-pane">
+            <p><strong>The Complete 8-Week Curriculum for Staff / Principal Engineer candidates:</strong></p>
+            <ul>
+              <li><strong>Phase 1 (Weeks 1–2): Language & Concurrency Mastery</strong> — Modules 1A–1J, 5A–5E, 6A–6D (19 Topics).</li>
+              <li><strong>Phase 2 (Weeks 3–4): Android Platform Internals & Lifecycle</strong> — Modules 2A–2E, 3A–3D (Binder, Looper, LMK), 4A–4C, 14A–17A (Services, Receivers, Providers).</li>
+              <li><strong>Phase 3 (Weeks 5–6): Modern UI, Design Patterns & Architecture</strong> — Modules 7A–7F, 8A–8B, 9A, 10A–10C, 11A–11B, 18A (Compose, Hilt, Clean Arch).</li>
+              <li><strong>Phase 4 (Weeks 7–8): System Design, Enterprise Tooling & Modern Tech</strong> — Modules 19A–19B (Security), 21A–26A (Performance, Gradle, CI/CD), 30A–30G (System Design), 36A–41A (AI, KMP, a11y, Modern APIs).</li>
+            </ul>
+          </div>
+
+          <!-- TAB 3: SYSTEM DESIGN -->
+          <div id="tabSys" class="roadmap-content-pane">
+            <h4>The 14-Day Senior System Design Checklist</h4>
+            <p>Focus purely on high-level architecture rounds (Google, Meta, Uber, Amazon):</p>
+            <ol>
+              <li><strong>Framework: The 5-Step Mobile Design Framework</strong> (Requirements & Scope -> High-Level Architecture -> Data Layer & Cache -> Concurrency & Offline Sync -> Deep-Dives / Bottlenecks).</li>
+              <li><strong>Case Study 30A: Offline-First Product Catalog</strong> — Master cache-aside, Room caching, WorkManager periodic sync, conflict resolution.</li>
+              <li><strong>Case Study 30B: Login / Auth Architecture</strong> — Token refresh interceptors, biometrics, secure Keystore storage, session expiration.</li>
+              <li><strong>Case Study 30D: Real-time Chat App</strong> — WebSocket connection management, SQLite message buffer, read receipts, push notification wakeup.</li>
+              <li><strong>Case Study 30F: Image-Heavy Feed (Instagram clone)</strong> — Three-tier caching (L1 Memory, L2 Disk, L3 Network), prefetching, bitmap pooling.</li>
+              <li><strong>Case Study 30G: Large-Scale Modular App</strong> — Core-api / Core-impl pattern, feature isolation, dynamic feature delivery.</li>
+            </ol>
+          </div>
+
+          <!-- TAB 4: CODING -->
+          <div id="tabCoding" class="roadmap-content-pane">
+            <h4>Live Coding & DS/Algo for Android Devs</h4>
+            <p>Master the top 50 coding problems commonly asked in Android technical rounds:</p>
+            <ul>
+              <li><strong>Module 34A: Strings Coding</strong> — Two-pointers, anagrams, palindrome partitioning, regex matchers.</li>
+              <li><strong>Module 34B: Arrays & Collections</strong> — Sliding window, prefix sums, duplicate detection, Kotlin collection operations.</li>
+              <li><strong>Module 34C: Math & Recursion</strong> — Backtracking, permutation generation, tree traversal, dynamic programming memoization.</li>
+              <li><strong>Module 34D: Data Structures & Search</strong> — Custom LRU Cache in Kotlin, Trie for search autocomplete, binary search variants.</li>
+              <li><strong>Module 34E: Android-Specific Coding</strong> — Custom Flow operators, debounce implementations, throttleFirst, SparseArray vs HashMap.</li>
+            </ul>
+          </div>
+
+          <!-- TAB 5: METHOD -->
+          <div id="tabMethod" class="roadmap-content-pane">
+            <h4>The 5-Step Daily Study Protocol</h4>
+            <p>How to study each topic in 25–35 minutes for maximum retention:</p>
+            <ol>
+              <li><strong>Step 1: Read the 1-Line Summary & Problem Statement (3 min)</strong> — Understand <em>why</em> this technology was created and what problem it solves.</li>
+              <li><strong>Step 2: Trace the Internal Architecture / ASCII Flow (5 min)</strong> — Visualize how objects interact in memory or across IPC threads.</li>
+              <li><strong>Step 3: Review the Production Code Example (7 min)</strong> — Focus on idiomatic Kotlin and real-world edge-case handling.</li>
+              <li><strong>Step 4: Memorize the Traps & Anti-Patterns (5 min)</strong> — Interviewers love asking about what breaks or causes leaks in production.</li>
+              <li><strong>Step 5: Test Yourself on the 10 Interview Quizzes (10 min)</strong> — Read the question, attempt the answer out loud, then toggle to reveal the solution.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI & MCP PLAYBOOK MODAL -->
+    <div id="aiModal" class="portal-modal-backdrop" onclick="closeModalOnBackdrop(event, 'aiModal')">
+      <div class="portal-modal">
+        <div class="portal-modal-header">
+          <h2>🤖 AI & Model Context Protocol (MCP) for Android Developers</h2>
+          <button class="btn btn-secondary btn-sm" onclick="closeAiModal()">Close ✕</button>
+        </div>
+        <div class="portal-modal-body">
+          <p>How senior and staff Android developers leverage AI and MCP servers to multiply development speed, automate code review, and build on-device AI features in 2024–2026:</p>
+          
+          <h3>1. Two Pillars of AI in Android Development</h3>
+          <ul>
+            <li><strong>Pillar 1: On-Device AI in the App</strong> — Running local models directly on mobile silicon (NPU/GPU) using <em>Gemini Nano</em>, <em>Google AICore</em>, and <em>LiteRT (TensorFlow Lite)</em>. No network latency, 100% offline, zero cloud API cost, and private user data. (Covered in <strong>Topic 36A</strong>).</li>
+            <li><strong>Pillar 2: AI-Powered Developer Tooling</strong> — Using Cursor, GitHub Copilot, Claude Code, and Model Context Protocol (MCP) to automate testing, code reviews, and architecture refactoring. (Covered in <strong>Topic 36B</strong>).</li>
+          </ul>
+
+          <h3>2. What is Model Context Protocol (MCP) & Why It Matters for Android</h3>
+          <p>MCP (created by Anthropic) is an open standard that allows AI assistants (like Claude, Cursor, or IDE plugins) to securely connect to external tools, local emulators, databases, and project documentation.</p>
+          
+          <h4>Practical MCP Servers Every Android Developer Should Use:</h4>
+          <ul>
+            <li><strong>1. `adb-mcp`</strong> — Enables AI to run ADB commands directly from chat: capture device screenshots, inspect View/Compose hierarchy, dump memory (`dumpsys meminfo`), install APKs, and retrieve logcat stack traces automatically.</li>
+            <li><strong>2. `android-docs-mcp`</strong> — Indexes local Android Jetpack, Compose, and Coroutines documentation so your AI generates hallucination-free code using the latest 2024–2026 APIs.</li>
+            <li><strong>3. `git-pr-review-mcp`</strong> — Automated code review bot that checks your PR diffs for Compose recomposition anti-patterns, missing a11y labels, and unhandled coroutine cancellations.</li>
+          </ul>
+
+          <h3>3. Production `.cursorrules` for Android Projects</h3>
+          <p>Drop this configuration into your project root (`.cursorrules`) to force your AI assistant to generate senior-grade Kotlin & Compose code:</p>
+          <div class="code-snippet">
+# Android Senior Engineering AI Rules
+- Language: Kotlin 2.0+ (K2 compiler). Follow official Kotlin style guides.
+- Architecture: Unidirectional Data Flow (MVI/MVVM) with StateFlow and immutable UiState.
+- UI: Jetpack Compose only. Never use XML unless specifically requested.
+- Compose Guidelines:
+  * Hoist state to callers; pass stateless event lambdas.
+  * Annotate domain models with @Immutable or @Stable to guarantee recomposition skipping.
+  * Use rememberUpdatedState for callbacks passed into LaunchedEffect.
+  * Minimum touch target: 48dp on all interactive composables. Always provide contentDescription for icons.
+- Concurrency:
+  * Never use GlobalScope. Always inject CoroutineDispatcher via constructor.
+  * Use Turbine and StandardTestDispatcher for testing Flows and StateFlows.
+- Clean Code:
+  * Prefer sealed interfaces for UiState and UiEvents.
+  * Catch specific exceptions (CancellationException must always be rethrown!).
+          </div>
+
+          <h3>4. High-Yield AI Prompting Templates for Android</h3>
+          <ul>
+            <li><strong>Refactoring XML to Compose:</strong> <em>"Convert this Android XML layout and ViewBinding Activity into idiomatic Jetpack Compose. Hoist all state into a single immutable UiState data class and expose events via sealed interface."</em></li>
+            <li><strong>Writing Turbine Flow Tests:</strong> <em>"Generate a complete JUnit 5 test suite for this ViewModel using MockK, Turbine, and StandardTestDispatcher. Test success, loading, network failure, and empty states."</em></li>
+            <li><strong>Performance Optimization:</strong> <em>"Analyze this Composable function for unnecessary recompositions. Identify non-stable parameters, missing derivedStateOf calls, and suggest layout optimizations."</em></li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <!-- ROADMAP MODULE SECTIONS -->
@@ -971,6 +1292,7 @@ def generate_index_html(topics):
                   <span class="check-box-display">⚪</span>
                 </button>
                 <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openStudyReader('{t['code']}');" title="Open inside portal study reader">Reader 📖</button>
+                <a href="topic_pdfs/{t['file'].replace('.html', '.pdf')}" class="btn btn-secondary btn-sm" download title="Download this topic's PDF" onclick="event.stopPropagation();" style="border-color:#38bdf8; color:#7dd3fc;">PDF 📄</a>
                 <span class="open-arrow">Study →</span>
               </div>
             </div>
@@ -1154,6 +1476,36 @@ def generate_index_html(topics):
     applyFilters();
   }}
 
+
+  // Modal controllers
+  function openRoadmapModal() {{
+    document.getElementById('roadmapModal').classList.add('active');
+  }}
+  function closeRoadmapModal() {{
+    document.getElementById('roadmapModal').classList.remove('active');
+  }}
+  function openAiModal() {{
+    document.getElementById('aiModal').classList.add('active');
+  }}
+  function closeAiModal() {{
+    document.getElementById('aiModal').classList.remove('active');
+  }}
+  function closeModalOnBackdrop(e, modalId) {{
+    if (e.target.id === modalId) {{
+      document.getElementById(modalId).classList.remove('active');
+    }}
+  }}
+
+  function switchRoadmapTab(tabId) {{
+    document.querySelectorAll('.roadmap-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.roadmap-content-pane').forEach(pane => pane.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }}
+
+  // Enhanced Filter Logic
+
   function handleSearch() {{
     searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
     applyFilters();
@@ -1172,6 +1524,12 @@ def generate_index_html(topics):
         matchesFilter = isStudied;
       }} else if (currentFilter === 'unstudied') {{
         matchesFilter = !isStudied;
+      }} else if (currentFilter === 'sysdesign') {{
+        matchesFilter = (t.mod_num === 30 || t.mod_num === 8);
+      }} else if (currentFilter === 'coding') {{
+        matchesFilter = (t.mod_num === 34);
+      }} else if (currentFilter === 'aimodern') {{
+        matchesFilter = (t.mod_num >= 36);
       }}
 
       let matchesSearch = true;
