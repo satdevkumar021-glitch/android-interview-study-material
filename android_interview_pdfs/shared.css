@@ -4,7 +4,39 @@
  * Study-optimised typography & UI additions
  */
 
-/* ── Google Fonts (Inter + JetBrains Mono) loaded via shared.js ── */
+/* ── Self-hosted fonts (Inter + JetBrains Mono) — no external CDN requests ── */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/Inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/JetBrainsMono-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/JetBrainsMono-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                 U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 /* ── Top Navigation Bar ──────────────────────────────────────────── */
 #aip-topbar {
@@ -131,14 +163,27 @@
   transition: width .4s ease;
 }
 
-/* Push body content below topbar */
+/* Push body content below topbar — body is natural document scroll container */
 body.aip-injected {
   padding-top: 52px !important;
+  height: auto !important;
+  min-height: 100vh !important;
 }
-body.aip-injected .layout,
-body.aip-injected .sidebar {
+/* Sidebar: FIXED to viewport, never scrolls with page content */
+body.aip-injected .sidebar,
+body.aip-injected nav:not(#aip-topbar):not(#aip-mob-overlay) {
+  position: fixed !important;
+  left: 0 !important;
   top: 52px !important;
+  width: 260px !important;
   height: calc(100vh - 52px) !important;
+  overflow-y: auto !important;
+  z-index: 100 !important;
+}
+/* Main content offset to clear the fixed sidebar */
+body.aip-injected .main,
+body.aip-injected main {
+  margin-left: 260px !important;
 }
 
 /* ── Study Progress Banner ───────────────────────────────────────── */
@@ -289,6 +334,7 @@ body.aip-injected .sidebar {
 }
 .aip-filter-btn:hover,
 .aip-filter-btn.active { background: rgba(124,106,247,.15); border-color: rgba(124,106,247,.5); color: #7c6af7; }
+.aip-filter-btn:focus-visible { outline: 2px solid #7c6af7; outline-offset: 2px; }
 .aip-filter-btn.easy.active { background: rgba(62,207,142,.12); border-color: #3ecf8e; color: #3ecf8e; }
 .aip-filter-btn.medium.active { background: rgba(245,200,66,.1); border-color: #f5c842; color: #f5c842; }
 .aip-filter-btn.hard.active { background: rgba(255,107,107,.1); border-color: #ff6b6b; color: #ff6b6b; }
@@ -327,6 +373,17 @@ body.aip-injected .sidebar {
   perspective: 1000px;
   height: 160px;
   cursor: pointer;
+  border-radius: 12px;
+}
+.aip-flip-card:focus-visible {
+  outline: 2px solid #7c6af7;
+  outline-offset: 3px;
+}
+/* Score modal option keyboard focus */
+.aip-score-opt:focus-visible {
+  outline: 2px solid #7c6af7;
+  outline-offset: 3px;
+  border-color: #7c6af7 !important;
 }
 .aip-flip-inner {
   position: relative;

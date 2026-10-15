@@ -57,6 +57,7 @@ MODULE_NAMES = {
     40: "Modern Android Platform APIs (Android 12–16)",
     41: "Advanced Android Debugging, Tracing & Telemetry",
     42: "Compose Design Systems & Multi-Brand Theming",
+    43: "Platform APIs: Camera, Adaptive UI & Passkeys",
 }
 
 def natural_sort_key(filename):
@@ -993,7 +994,7 @@ def generate_index_html(topics):
       </div>
       <div class="header-actions">
         <a href="Android_Interview_Topic_Wise_PDFs.zip" class="btn btn-accent2" download style="background: linear-gradient(135deg, #4338ca, #6366f1); border:none; box-shadow: 0 4px 16px rgba(99,102,241,0.35);">
-          📦 All 97 Topic PDFs (ZIP)
+          📦 All 109 Topic PDFs (ZIP)
         </a>
         <a href="Android_Interview_Compact_Handbook.pdf" class="btn btn-primary" download style="background: linear-gradient(135deg, #059669, #10b981); border:none; box-shadow: 0 4px 16px rgba(16,185,129,0.35);">
           📄 Compact PDF (219 Pgs)
@@ -1102,7 +1103,7 @@ def generate_index_html(topics):
           <button class="btn btn-secondary btn-sm" onclick="closeRoadmapModal()">Close ✕</button>
         </div>
         <div class="portal-modal-body">
-          <p>Choose your preparation track based on your target timeline and interview goals. All 97 topics are mapped below:</p>
+          <p>Choose your preparation track based on your target timeline and interview goals. All 109 topics are mapped below:</p>
           
           <div class="roadmap-tabs">
             <button class="roadmap-tab-btn active" onclick="switchRoadmapTab('tab30')">⚡ 30-Day Senior Sprint</button>
@@ -1116,7 +1117,7 @@ def generate_index_html(topics):
           <div id="tab30" class="roadmap-content-pane active">
             <h4>Week 1: Kotlin Core, Coroutines & Reactive Flow</h4>
             <ul>
-              <li><strong>Days 1–2: Kotlin Core Essentials</strong> — Topics 1A (Null Safety), 1C (Scope Functions), 1D (OOP), 1E (Special Classes), 1F (Generics & Variance).</li>
+              <li><strong>Days 1–2: Kotlin Core Essentials</strong> — Topics 1A (Null Safety), 1B (Functions &amp; Lambdas), 1C (Scope Functions), 1D (OOP), 1E (Special Classes), 1F (Generics &amp; Variance), 1G (Delegation &amp; by lazy).</li>
               <li><strong>Days 3–5: Coroutines & Concurrency</strong> — Topics 5A (Fundamentals), 5B (Dispatchers), 5C (Structured Concurrency), 5D (Cancellation & Exceptions), 5E (Testing).</li>
               <li><strong>Days 6–7: Kotlin Flow</strong> — Topics 6A (Cold vs Hot), 6B (Operators), 6C (Channels), 6D (stateIn / shareIn).</li>
             </ul>
@@ -1125,7 +1126,7 @@ def generate_index_html(topics):
             <ul>
               <li><strong>Days 8–10: Jetpack Compose</strong> — Topics 7A (Fundamentals), 7B (State & Recomposition), 7C (Side Effects), 7D (Performance & Stability), 7E (UI), 7F (Navigation).</li>
               <li><strong>Days 11–12: Architecture & Dependency Injection</strong> — Topics 8A (MVI/MVVM), 8B (Clean Architecture), 9A (SOLID), 11A–11B (Hilt DI).</li>
-              <li><strong>Days 13–14: Networking & Offline Storage</strong> — Topics 12A–12C (Retrofit, OkHttp, SSL Pinning) and 13A–13C (Room Database & DataStore).</li>
+              <li><strong>Days 13–14: Networking, Storage &amp; Security</strong> — Topics 12A–12C (Retrofit, OkHttp, SSL Pinning), 13A–13D (Room, DataStore &amp; Other Storage), 19A–19C (Data Security, App Hardening, Secrets &amp; API Keys).</li>
             </ul>
 
             <h4>Week 3: System Design & Platform Scenarios</h4>
@@ -1136,9 +1137,10 @@ def generate_index_html(topics):
 
             <h4>Week 4: Testing, Performance & Mock Interviews</h4>
             <ul>
-              <li><strong>Days 22–24: Testing & Quality</strong> — Topics 20A–20C (Unit Tests, Turbine for Flow, Compose UI Tests).</li>
-              <li><strong>Days 25–27: Performance, Memory & Leaks</strong> — Topics 21A (Systrace/Perfetto) and 22A (LeakCanary & Heap Dumps).</li>
-              <li><strong>Days 28–30: Behavioral & Leadership</strong> — Topic 35A (STAR Method, Technical Strategy, Conflict Resolution) and mock practice.</li>
+              <li><strong>Days 22–24: Testing & Quality</strong> — Topics 20A (Unit Testing), 20B (Coroutines & Flow Testing), 20C (UI & Network Testing), 20D (Compose Testing).</li>
+              <li><strong>Days 25–26: Performance, Memory & Leaks</strong> — Topics 21A (Systrace/Perfetto), 21B (Baseline Profiles), 22A (LeakCanary & Heap Dumps).</li>
+              <li><strong>Days 27–28: Advanced Coding Patterns</strong> — Topics 34C (Math & Recursion), 34E (Android Coding — debounce, throttle, Flow operators), 34F (Graphs, DP & Monotonic Stack).</li>
+              <li><strong>Days 29–30: Behavioral & Leadership + Mock Practice</strong> — Topic 35A (STAR Method, Technical Strategy, Conflict Resolution) and full mock interviews.</li>
             </ul>
           </div>
 
@@ -1149,7 +1151,7 @@ def generate_index_html(topics):
               <li><strong>Phase 1 (Weeks 1–2): Language & Concurrency Mastery</strong> — Modules 1A–1J, 5A–5E, 6A–6D (19 Topics).</li>
               <li><strong>Phase 2 (Weeks 3–4): Android Platform Internals & Lifecycle</strong> — Modules 2A–2E, 3A–3D (Binder, Looper, LMK), 4A–4C, 14A–17A (Services, Receivers, Providers).</li>
               <li><strong>Phase 3 (Weeks 5–6): Modern UI, Design Patterns & Architecture</strong> — Modules 7A–7F, 8A–8B, 9A, 10A–10C, 11A–11B, 18A (Compose, Hilt, Clean Arch).</li>
-              <li><strong>Phase 4 (Weeks 7–8): System Design, Enterprise Tooling & Modern Tech</strong> — Modules 19A–19B (Security), 21A–26A (Performance, Gradle, CI/CD), 30A–30G (System Design), 36A–41A (AI, KMP, a11y, Modern APIs).</li>
+              <li><strong>Phase 4 (Weeks 7–8): System Design, Security, Enterprise Tooling &amp; Modern Tech</strong> — Modules 19A–19C (Security complete, including Secrets &amp; API Keys), 21A–21C (Performance), 22A (Memory), 23A (Gradle), 24A (Modularization), 25A (CI/CD), 26A (Code Quality), 27A (Permissions), 30A–30G (System Design), 32A (App Release), 34A–34E (Coding), 36A–36B (AI), 38A (KMP), 39A (Accessibility), 40A (New APIs), 41A (Advanced Debugging), 42A–42C (Compose Design System, Trustworthy AI, Security Hardening) — 35+ Topics.</li>
             </ul>
           </div>
 

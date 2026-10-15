@@ -13,13 +13,7 @@
 (function () {
   'use strict';
 
-  // ── Google Fonts ─────────────────────────────────────────────────
-  const fontLink = document.createElement('link');
-  fontLink.rel = 'stylesheet';
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap';
-  document.head.appendChild(fontLink);
-
-  // ── Shared CSS ───────────────────────────────────────────────────
+  // ── Shared CSS (includes self-hosted @font-face declarations) ────
   const cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
   // Resolve shared.css relative to this script's own URL (document.currentScript
@@ -88,6 +82,7 @@
     {id:'13A',name:'Room',file:'13A_Room.html',tier:1},
     {id:'13B',name:'Room vs SQLite',file:'13B_Room_vs_SQLite.html',tier:1},
     {id:'13C',name:'Other Storage',file:'13C_Other_Storage.html',tier:1},
+    {id:'13D',name:'DataStore: Preferences & Proto',file:'13D_DataStore.html',tier:1},
     {id:'14A',name:'WorkManager',file:'14A_WorkManager.html',tier:2},
     {id:'14B',name:'Choosing the Right Tool',file:'14B_Choosing_Right_Tool.html',tier:2},
     {id:'15A',name:'Services',file:'15A_Services.html',tier:2},
@@ -96,10 +91,14 @@
     {id:'18A',name:'Navigation & Deep Linking',file:'18A_Navigation.html',tier:2},
     {id:'19A',name:'Data & Network Security',file:'19A_Data_Network_Security.html',tier:2},
     {id:'19B',name:'App Hardening & Auth',file:'19B_App_Hardening.html',tier:2},
+    {id:'19C',name:'Secrets & API Key Security',file:'19C_Secrets_API_Key_Security.html',tier:1},
     {id:'20A',name:'Unit Testing',file:'20A_Unit_Testing.html',tier:2},
     {id:'20B',name:'Coroutines & Flow Testing',file:'20B_Coroutines_Flow_Testing.html',tier:2},
     {id:'20C',name:'UI & Network Testing',file:'20C_UI_Network_Testing.html',tier:2},
+    {id:'20D',name:'Compose UI Testing',file:'20D_Compose_Testing.html',tier:1},
     {id:'21A',name:'Performance',file:'21A_Performance.html',tier:2},
+    {id:'21B',name:'Baseline Profiles & Macrobenchmark',file:'21B_Baseline_Profiles.html',tier:1},
+    {id:'21C',name:'App Startup Performance',file:'21C_App_Startup_Performance.html',tier:1},
     {id:'22A',name:'Memory Management',file:'22A_Memory_Management.html',tier:2},
     {id:'23A',name:'Gradle / Build System',file:'23A_Gradle.html',tier:3},
     {id:'24A',name:'Modularization',file:'24A_Modularization.html',tier:2},
@@ -137,11 +136,10 @@
     {id:'42A',name:'Compose Design System & Multi-Brand Theming',file:'42A_Compose_Design_System.html',tier:1},
     {id:'42B',name:'Trustworthy AI: Principles & Responsible Development',file:'42B_Trustworthy_AI.html',tier:1},
     {id:'42C',name:'Advanced App Security: FLAG_SECURE & Hardening',file:'42C_Security_Hardening.html',tier:1},
-    {id:'13D',name:'DataStore: Preferences & Proto',file:'13D_DataStore.html',tier:1},
-    {id:'19C',name:'Secrets & API Key Security',file:'19C_Secrets_API_Key_Security.html',tier:1},
-    {id:'20D',name:'Compose UI Testing',file:'20D_Compose_Testing.html',tier:1},
-    {id:'21B',name:'Baseline Profiles & Macrobenchmark',file:'21B_Baseline_Profiles.html',tier:1},
-    {id:'21C',name:'App Startup Performance',file:'21C_App_Startup_Performance.html',tier:1},
+    {id:'43A',name:'CameraX, Photo Picker & Media',file:'43A_CameraX_Media.html',tier:2},
+    {id:'43B',name:'Adaptive UI, Edge-to-Edge & Foldables',file:'43B_Adaptive_UI_EdgeToEdge.html',tier:2},
+    {id:'43C',name:'Passkeys & Credential Manager',file:'43C_Passkeys_CredentialManager.html',tier:1},
+    {id:'34F',name:'Advanced DSA: Graphs, DP & Monotonic Structures',file:'34F_Advanced_DSA.html',tier:2},
   ];
 
   // ── Progress helpers ─────────────────────────────────────────────
@@ -179,76 +177,230 @@
   // ══════════════════════════════════════════════════════════════════
   function patchScrollMode() {
 
-    // ── 1. Hide OLD inline progress bar (Format A files have one) ──
-    //      and prevent show()/showSection() from hiding sections
+    // ── 1. Inject layout CSS as the LAST element in <head> so it wins the cascade.
+    //      Also force critical layout properties via JS inline styles (immune to CSS cascade).
     const killStyle = document.createElement('style');
+    killStyle.id = 'aip-layout-override';
     killStyle.textContent = `
-      /* Hide the original topic-page progress bar — shared.js replaces it */
+      /* ════════════════════════════════════════════════════════════
+         AIP LAYOUT OVERRIDE — injected last by shared.js, wins cascade
+         RULE: sidebar is position:fixed, window scrolls the content only.
+         The sidebar never moves. Only .main / main scrolls (via the window).
+         ════════════════════════════════════════════════════════════ */
+
+      /* 1. html/body: normal window scroll, no height constraints */
+      html { height: auto !important; overflow: auto !important; }
+      body {
+        height: auto !important;
+        min-height: 100vh !important;
+        display: block !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;   /* window is the scroll container */
+      }
+
+      /* 2. Layout wrapper: block, NOT flex — sidebar is out of flow */
+      .layout,
+      div.layout {
+        display: block !important;
+        min-height: 100vh !important;
+        overflow: visible !important;
+      }
+
+      /* 3. SIDEBAR — fixed to viewport, NEVER participates in scroll */
+      .sidebar,
+      nav.sidebar,
+      nav:not(#aip-topbar):not(#aip-mob-overlay):not(.topnav) {
+        position: fixed !important;
+        left: 0 !important;
+        top: 52px !important;          /* below topbar */
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+        height: calc(100vh - 52px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        z-index: 200 !important;
+        background: var(--surface, #1a1d27) !important;
+        border-right: 1px solid var(--border, #2e3148) !important;
+        /* Remove all flex/grid participation */
+        flex: none !important;
+        flex-shrink: 0 !important;
+        align-self: auto !important;
+      }
+
+      /* 4. Main content area: offset by sidebar width, scrolls naturally */
+      .main,
+      main,
+      main#mainScroll {
+        display: block !important;
+        margin-left: 260px !important;
+        margin-top: 0 !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
+        min-height: calc(100vh - 52px) !important;
+        padding-top: 0 !important;
+      }
+
+      /* 5. Sections — always visible (scroll mode, not tab mode) */
       .progress-bar { display: none !important; }
-      /* Kill the show/hide section animation — all sections stay visible */
-      .section, .section.active { display: block !important; opacity: 1 !important; animation: none !important; }
+      .section, .section.active {
+        display: block !important;
+        opacity: 1 !important;
+        animation: none !important;
+        transform: none !important;
+      }
       section[id] { display: block !important; opacity: 1 !important; }
-      /* Dividers between sections for visual separation */
-      .section + .section, section[id] + section[id] { border-top: 1px solid #2e3149; }
-      /* Kill nav-buttons (prev/next inside content) — scroll replaces them */
       .nav-buttons { display: none !important; }
-      /* Sidebar: sticky on desktop, full viewport height, internal scroll */
-      .sidebar { position: sticky !important; top: 52px !important; height: calc(100vh - 52px) !important; overflow-y: auto !important; flex-shrink: 0 !important; }
-      nav:not(.topnav):not(#aip-topbar) { position: sticky !important; top: 52px !important; height: calc(100vh - 52px) !important; overflow-y: auto !important; flex-shrink: 0 !important; }
-      /* Layout: flex row, main scrolls naturally with page */
-      .layout { display: flex !important; align-items: flex-start !important; }
-      /* CRITICAL FIX: main must NOT be the scroll container — page body scrolls */
-      .main, main { overflow: visible !important; height: auto !important; }
-      /* Section padding */
-      .section { padding: 40px 48px !important; max-width: 900px !important; }
-      section[id] { padding: 40px 48px !important; }
-      /* Active sidebar item */
-      .aip-nav-active { background: rgba(124,106,247,0.18) !important; color: #7c6af7 !important; }
-      .aip-nav-active .nav-num { background: rgba(124,106,247,0.28) !important; color: #7c6af7 !important; }
-      /* Nav dot — section visited indicator */
-      .aip-nav-dot { width:7px; height:7px; border-radius:50%; background:#2e3149; flex-shrink:0; margin-left:auto; transition:background 0.25s; display:inline-block; }
-      .aip-nav-dot.visited { background:#3ecf8e; }
-      .nav-item { display:flex !important; align-items:center !important; }
-      /* Scroll progress bar at very top */
-      #aip-scroll-progress { position:fixed; top:0; left:0; right:0; height:3px; background:#2e3149; z-index:10000; pointer-events:none; }
-      #aip-scroll-progress-fill { height:100%; background:linear-gradient(90deg,#7c6af7,#3ecf8e); width:0%; transition:width 0.1s linear; }
-      /* Hidden offset anchors for scroll-to with topbar offset */
-      .aip-anc { display:block; position:relative; top:-70px; visibility:hidden; pointer-events:none; height:0; }
-      /* Bottom "next topic" banner */
-      #aip-next-banner { margin:32px 48px 60px; max-width:900px; background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%); border:1px solid rgba(124,106,247,0.35); border-radius:16px; padding:28px 32px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+
+      /* 6. Active nav highlight */
+      .aip-nav-active {
+        background: rgba(124,106,247,0.18) !important;
+        color: #7c6af7 !important;
+        border-left-color: #7c6af7 !important;
+      }
+      .aip-nav-active .nav-num {
+        background: rgba(124,106,247,0.28) !important;
+        color: #7c6af7 !important;
+      }
+
+      /* 7. Nav dot */
+      .aip-nav-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #2e3149; flex-shrink: 0; margin-left: auto;
+        transition: background 0.25s; display: inline-block;
+      }
+      .aip-nav-dot.visited { background: #3ecf8e; }
+      .nav-item { display: flex !important; align-items: center !important; }
+
+      /* 8. Read-progress bar (thin line at very top) */
+      #aip-scroll-progress {
+        position: fixed; top: 0; left: 0; right: 0; height: 3px;
+        background: #2e3149; z-index: 10000; pointer-events: none;
+      }
+      #aip-scroll-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #7c6af7, #3ecf8e);
+        width: 0%; transition: width 0.1s linear;
+      }
+
+      /* 9. Scroll anchor offset */
+      .aip-anc {
+        display: block; position: relative; top: -70px;
+        visibility: hidden; pointer-events: none; height: 0;
+      }
+
+      /* 10. End-of-topic banner */
+      #aip-next-banner {
+        margin: 32px 48px 60px; max-width: 900px;
+        background: linear-gradient(135deg, #1a1d27 0%, #1d1538 100%);
+        border: 1px solid rgba(124,106,247,0.35); border-radius: 16px;
+        padding: 28px 32px; display: flex; align-items: center;
+        justify-content: space-between; gap: 20px; flex-wrap: wrap;
+      }
       .nb-text { font-size:15px; color:#e2e4f0; font-weight:600; }
-      .nb-sub { font-size:13px; color:#8b90b8; margin-top:4px; }
+      .nb-sub  { font-size:13px; color:#8b90b8; margin-top:4px; }
       .nb-btns { display:flex; gap:12px; flex-wrap:wrap; }
-      .nb-btn { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; border:none; transition:all .15s; font-family:inherit; }
+      .nb-btn  { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; border:none; transition:all .15s; font-family:inherit; }
       .nb-done { background:#3ecf8e; color:#0f1117; }
       .nb-done:hover { background:#2db87a; }
       .nb-next { background:#7c6af7; color:#fff; }
       .nb-next:hover { background:#6b5ce7; }
       .nb-home { background:#222535; color:#e2e4f0; border:1px solid #2e3149; }
       .nb-home:hover { background:#2e3149; }
-      /* Mobile: full-width sections, sidebar as slide-in drawer */
+
+      /* 11. Mobile: sidebar slides in as off-canvas drawer */
       @media (max-width: 768px) {
-        .section, section[id] { padding:24px 16px !important; }
-        #aip-next-banner { margin:24px 16px 48px; padding:20px; }
-        .sidebar, nav:not(.topnav) {
-          position:fixed !important; left:-270px !important; top:0 !important;
-          height:100vh !important; width:260px !important; z-index:9000 !important;
-          transition:transform 0.25s ease !important; overflow-y:auto !important;
-          background:#1a1d27 !important; box-shadow:4px 0 24px rgba(0,0,0,.6) !important;
+        .section, section[id] { padding: 24px 16px !important; }
+        #aip-next-banner { margin: 24px 16px 48px; padding: 20px; }
+
+        .sidebar,
+        nav.sidebar,
+        nav:not(#aip-topbar):not(#aip-mob-overlay):not(.topnav) {
+          left: -270px !important;
+          top: 0 !important;
+          height: 100vh !important;
+          z-index: 9000 !important;
+          transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          box-shadow: none !important;
         }
-        .sidebar.aip-open, nav.aip-open { left:0 !important; }
+        .sidebar.aip-open,
+        nav.sidebar.aip-open,
+        nav.aip-open {
+          left: 0 !important;
+          box-shadow: 4px 0 24px rgba(0,0,0,0.7) !important;
+        }
+        .main, main, main#mainScroll { margin-left: 0 !important; }
         #aip-mob-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:8999; }
         #aip-mob-overlay.open { display:block; }
         #aip-mob-fab { display:flex !important; }
       }
       #aip-mob-fab {
-        display:none; position:fixed; bottom:22px; left:18px; z-index:9001;
-        width:46px; height:46px; border-radius:50%; background:#7c6af7; color:#fff;
-        border:none; font-size:19px; cursor:pointer; align-items:center; justify-content:center;
-        box-shadow:0 4px 18px rgba(124,106,247,.55); font-family:inherit;
+        display: none; position: fixed; bottom: 22px; left: 18px; z-index: 9001;
+        width: 46px; height: 46px; border-radius: 50%; background: #7c6af7; color: #fff;
+        border: none; font-size: 19px; cursor: pointer;
+        align-items: center; justify-content: center;
+        box-shadow: 0 4px 18px rgba(124,106,247,0.55); font-family: inherit;
       }
     `;
+    // Append as LAST child of <head> so it wins specificity/order over all page styles
     document.head.appendChild(killStyle);
+
+    // ── Also force critical layout via JS inline styles (immune to any CSS) ──
+    // This runs after DOMContentLoaded so elements exist
+    function forceLayout() {
+      // html + body: normal window scroll
+      document.documentElement.style.cssText += ';height:auto!important;overflow:auto!important;';
+      document.body.style.cssText += ';display:block!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;';
+
+      // Layout wrapper: plain block
+      const layoutEl = document.querySelector('.layout');
+      if (layoutEl) {
+        layoutEl.style.display = 'block';
+        layoutEl.style.overflow = 'visible';
+      }
+
+      // Sidebar: fixed to viewport
+      const topbarH = (document.getElementById('aip-topbar') || {offsetHeight:52}).offsetHeight || 52;
+      const sidebar = document.querySelector('.sidebar') || document.querySelector('nav:not(#aip-topbar):not(#aip-mob-overlay)');
+      if (sidebar) {
+        sidebar.style.cssText +=
+          ';position:fixed!important' +
+          ';left:0!important' +
+          ';top:' + topbarH + 'px!important' +
+          ';width:260px!important' +
+          ';max-width:260px!important' +
+          ';height:calc(100vh - ' + topbarH + 'px)!important' +
+          ';overflow-y:auto!important' +
+          ';overflow-x:hidden!important' +
+          ';z-index:200!important' +
+          ';flex:none!important';
+      }
+
+      // Main: push right by sidebar width
+      const mainEl = document.querySelector('.main') || document.querySelector('main');
+      if (mainEl) {
+        mainEl.style.cssText +=
+          ';display:block!important' +
+          ';margin-left:260px!important' +
+          ';width:auto!important' +
+          ';overflow:visible!important' +
+          ';height:auto!important';
+      }
+    }
+
+    // Run immediately (for elements already in DOM) and after topbar is injected
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', forceLayout);
+    } else {
+      forceLayout();
+    }
+    // Re-run after topbar injection (setTimeout 0 = after current call stack)
+    setTimeout(forceLayout, 0);
+    // Re-run once more after all scripts settle
+    setTimeout(forceLayout, 100);
 
     // ── 2. Scroll progress bar (inserted AFTER topbar, which is inserted first) ──
     //      We use setTimeout(0) so topbar is already in DOM
@@ -454,14 +606,14 @@
           '<div class="nb-text">\uD83C\uDF89 You\'ve reached the end of this topic!</div>' +
           '<div class="nb-sub">' +
             (topicName
-              ? 'Up next: <strong style="color:#7c6af7">' + topicName + '</strong>'
+              ? 'Up next: <strong style="color:#7c6af7">' + escHtml(topicName) + '</strong>'
               : "You've completed the full syllabus \u2014 well done!") +
           '</div>' +
         '</div>' +
         '<div class="nb-btns">' +
           '<button class="nb-btn nb-home" id="nb-home-btn">\uD83C\uDFE0 Dashboard</button>' +
           '<button class="nb-btn nb-done" id="nb-done-btn">\u2713 Mark Done</button>' +
-          (nextTopic ? '<button class="nb-btn nb-next" id="nb-next-btn">Next: ' + topicName + ' \u2192</button>' : '') +
+          (nextTopic ? '<button class="nb-btn nb-next" id="nb-next-btn">Next: ' + escHtml(topicName) + ' \u2192</button>' : '') +
         '</div>';
 
       const main = document.querySelector('.main') || document.querySelector('main') || document.body;
@@ -545,19 +697,19 @@
         '<span class="tb-name">Android Prep</span>' +
       '</a>' +
       (curTopic
-        ? '<span class="tb-topic-id" style="color:' + tierColor + ';background:' + tierColor + '22;border-color:' + tierColor + '44">' + curTopic.id + '</span>' +
-          '<span class="tb-topic-name">' + curTopic.name + '</span>'
+        ? '<span class="tb-topic-id" style="color:' + tierColor + ';background:' + tierColor + '22;border-color:' + tierColor + '44">' + escHtml(curTopic.id) + '</span>' +
+          '<span class="tb-topic-name">' + escHtml(curTopic.name) + '</span>'
         : '') +
       '<div class="tb-progress-wrap">' +
         '<div class="tb-mini-bar"><div class="tb-mini-fill" style="width:' + overall.pct + '%"></div></div>' +
         '<span>' + overall.done + '/' + overall.total + '</span>' +
       '</div>' +
       '<div class="tb-actions">' +
-        '<button class="tb-btn prev-next" id="tb-prev" title="Previous topic"' + (!prevTopic ? ' disabled style="opacity:.35"' : '') + '>\u2039</button>' +
-        '<button class="tb-btn prev-next" id="tb-next" title="Next topic"' + (!nextTopic ? ' disabled style="opacity:.35"' : '') + '>\u203a</button>' +
-        '<button class="tb-btn' + (isDone ? ' done' : '') + '" id="tb-done">' + (isDone ? '\u2713 Done' : '\u25ef Mark Done') + '</button>' +
-        '<button class="tb-btn" id="tb-score" title="Rate your understanding">\uD83C\uDFAF Score</button>' +
-        '<button class="tb-btn" id="tb-pdf" title="Download as PDF">\u2193 PDF</button>' +
+        '<button class="tb-btn prev-next" id="tb-prev" title="Previous topic" aria-label="Previous topic"' + (!prevTopic ? ' disabled style="opacity:.35"' : '') + '>\u2039</button>' +
+        '<button class="tb-btn prev-next" id="tb-next" title="Next topic" aria-label="Next topic"' + (!nextTopic ? ' disabled style="opacity:.35"' : '') + '>\u203a</button>' +
+        '<button class="tb-btn' + (isDone ? ' done' : '') + '" id="tb-done" aria-label="' + (isDone ? 'Topic marked as done' : 'Mark topic as done') + '">' + (isDone ? '\u2713 Done' : '\u25ef Mark Done') + '</button>' +
+        '<button class="tb-btn" id="tb-score" title="Rate your understanding" aria-label="Rate your understanding of this topic">\uD83C\uDFAF Score</button>' +
+        '<button class="tb-btn" id="tb-pdf" title="Download as PDF" aria-label="Download this topic as PDF">\u2193 PDF</button>' +
       '</div>';
 
     document.body.insertBefore(bar, document.body.firstChild);
@@ -592,8 +744,15 @@
     const existing = document.getElementById('aip-score-modal');
     if (existing) existing.remove();
 
+    // Remember the element that triggered the modal so we can restore focus on close
+    const triggerEl = document.activeElement;
+    function closeModal(el) { el.remove(); if (triggerEl && triggerEl.focus) triggerEl.focus(); }
+
     const modal = document.createElement('div');
     modal.id = 'aip-score-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'aip-score-title');
     modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-family:"Inter",sans-serif;';
 
     const opts = [
@@ -605,36 +764,62 @@
 
     modal.innerHTML =
       '<div style="background:#1a1d27;border:1px solid #2e3149;border-radius:20px;padding:36px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);">' +
-        '<div style="font-size:32px;margin-bottom:10px">\uD83C\uDFAF</div>' +
-        '<h2 style="font-size:20px;font-weight:800;color:#e2e4f0;margin-bottom:8px">Rate Your Understanding</h2>' +
-        '<p style="font-size:13px;color:#8b90b8;margin-bottom:24px">How well do you know <strong style="color:#7c6af7">' + (curTopic ? curTopic.name : 'this topic') + '</strong>?</p>' +
+        '<div style="font-size:32px;margin-bottom:10px" aria-hidden="true">\uD83C\uDFAF</div>' +
+        '<h2 id="aip-score-title" style="font-size:20px;font-weight:800;color:#e2e4f0;margin-bottom:8px">Rate Your Understanding</h2>' +
+        '<p style="font-size:13px;color:#8b90b8;margin-bottom:24px">How well do you know <strong style="color:#7c6af7">' + escHtml(curTopic ? curTopic.name : 'this topic') + '</strong>?</p>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">' +
           opts.map(function(o) {
-            return '<div data-score="' + o.score + '" class="aip-score-opt" style="background:' + o.col + '18;border:2px solid ' + o.col + '44;border-radius:12px;padding:14px 8px;cursor:pointer;transition:all .15s;">' +
-              '<div style="font-size:26px;margin-bottom:5px">' + o.emoji + '</div>' +
+            return '<div data-score="' + o.score + '" class="aip-score-opt"' +
+              ' role="button" tabindex="0"' +
+              ' aria-label="' + o.label + ': ' + o.sub + '"' +
+              ' style="background:' + o.col + '18;border:2px solid ' + o.col + '44;border-radius:12px;padding:14px 8px;cursor:pointer;transition:all .15s;">' +
+              '<div style="font-size:26px;margin-bottom:5px" aria-hidden="true">' + o.emoji + '</div>' +
               '<div style="font-size:13px;font-weight:700;color:' + o.col + '">' + o.label + '</div>' +
               '<div style="font-size:11px;color:#8b90b8;margin-top:2px">' + o.sub + '</div>' +
             '</div>';
           }).join('') +
         '</div>' +
-        '<div id="aip-score-skip" style="font-size:13px;color:#8b90b8;cursor:pointer;text-decoration:underline">Skip for now</div>' +
+        '<button id="aip-score-skip" style="font-size:13px;color:#8b90b8;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;">Skip for now</button>' +
       '</div>';
 
     document.body.appendChild(modal);
 
+    // Focus first option when modal opens
+    const firstOpt = modal.querySelector('.aip-score-opt');
+    if (firstOpt) setTimeout(function() { firstOpt.focus(); }, 50);
+
+    // Focus trap — keep Tab inside the modal
+    const focusables = 'button, [tabindex="0"]';
+    modal.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeModal(modal); return; }
+      if (e.key !== 'Tab') return;
+      const els = Array.from(modal.querySelectorAll(focusables));
+      if (!els.length) return;
+      const first = els[0], last = els[els.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
     modal.querySelectorAll('.aip-score-opt').forEach(function(opt) {
       opt.addEventListener('mouseover', function() { opt.style.transform = 'scale(1.03)'; });
       opt.addEventListener('mouseout',  function() { opt.style.transform = ''; });
-      opt.addEventListener('click', function() {
+      function selectOpt() {
         const score = parseInt(opt.dataset.score);
-        if (curTopic) { setTP(curTopic.id, { score, status: 'completed' }); markDone(); }
-        modal.remove();
+        if (curTopic) { setTP(curTopic.id, { score: score, status: 'completed' }); markDone(); }
+        closeModal(modal);
         showProgressBanner(score);
+      }
+      opt.addEventListener('click', selectOpt);
+      opt.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectOpt(); }
       });
     });
 
-    document.getElementById('aip-score-skip').addEventListener('click', function() { modal.remove(); });
-    modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+    document.getElementById('aip-score-skip').addEventListener('click', function() { closeModal(modal); });
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(modal); });
   }
 
   // ── Progress banner ───────────────────────────────────────────────
@@ -761,25 +946,31 @@
         return mf && ms;
       });
       if (!filtered.length) {
-        grid.innerHTML = '<div class="aip-flip-empty" style="grid-column:1/-1;text-align:center;padding:40px;color:#8b90b8"><div style="font-size:32px;margin-bottom:8px">\uD83D\uDD0D</div>No cards match. <span onclick="resetFilter()" style="color:#7c6af7;cursor:pointer;text-decoration:underline">Clear filters</span></div>';
+        grid.innerHTML = '<div class="aip-flip-empty" style="grid-column:1/-1;text-align:center;padding:40px;color:#8b90b8"><div style="font-size:32px;margin-bottom:8px">\uD83D\uDD0D</div>No cards match. <span onclick="AIP.resetFilter()" style="color:#7c6af7;cursor:pointer;text-decoration:underline">Clear filters</span></div>';
         return;
       }
       grid.innerHTML = filtered.map(function(c) {
         const isKnown = cardState[c.index] === 'known';
-        return '<div class="aip-flip-card' + (isKnown ? ' aip-card-marked-known' : '') + '" data-idx="' + c.index + '" data-diff="' + c.diff + '" onclick="flipCard(this)">' +
+        const isFlipped = false; // initial state
+        return '<div class="aip-flip-card' + (isKnown ? ' aip-card-marked-known' : '') + '"' +
+          ' data-idx="' + c.index + '" data-diff="' + c.diff + '"' +
+          ' role="button" tabindex="0"' +
+          ' aria-label="Flashcard: ' + escHtml(c.q).replace(/"/g, '&quot;').substring(0, 80) + '"' +
+          ' onclick="AIP.flipCard(this)"' +
+          ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();AIP.flipCard(this);}">' +
           '<div class="aip-flip-inner">' +
             '<div class="aip-flip-front">' +
               '<div class="q-text">' + escHtml(c.q) + '</div>' +
-              '<div class="aip-flip-footer"><span class="aip-diff-tag diff-' + c.diff + '">' + c.diff + '</span><span class="flip-hint">\uD83D\uDC46 tap to reveal</span></div>' +
+              '<div class="aip-flip-footer"><span class="aip-diff-tag diff-' + c.diff + '">' + c.diff + '</span><span class="flip-hint">tap / Enter to reveal</span></div>' +
             '</div>' +
             '<div class="aip-flip-back">' +
               '<div class="a-text">' + (escHtml(c.a) || '<em style="color:#8b90b8">See topic content</em>') + '</div>' +
               '<div class="aip-flip-footer">' +
-                '<div class="aip-card-actions" onclick="event.stopPropagation()">' +
-                  '<button class="aip-know-btn" onclick="markCard(' + c.index + ',\'known\')">\u2713 Got it</button>' +
-                  '<button class="aip-review-btn" onclick="markCard(' + c.index + ',\'review\')">\u21A9 Review</button>' +
+                '<div class="aip-card-actions" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">' +
+                  '<button class="aip-know-btn" onclick="AIP.markCard(' + c.index + ',\'known\')">\u2713 Got it</button>' +
+                  '<button class="aip-review-btn" onclick="AIP.markCard(' + c.index + ',\'review\')">\u21A9 Review</button>' +
                 '</div>' +
-                '<span class="flip-hint" style="color:#7c6af7">\uD83D\uDC46 tap to close</span>' +
+                '<span class="flip-hint" style="color:#7c6af7">tap / Enter to close</span>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -798,8 +989,9 @@
       if (e3) e3.textContent = (cards.length ? Math.round((kn/cards.length)*100) : 0) + '% mastered';
     }
 
-    window.flipCard = function(el) { el.classList.toggle('flipped'); };
-    window.markCard = function(idx, state) {
+    window.AIP = window.AIP || {};
+    window.AIP.flipCard = function(el) { el.classList.toggle('flipped'); };
+    window.AIP.markCard = function(idx, state) {
       cardState[idx] = state;
       saveCS();
       updateFlipStats();
@@ -816,7 +1008,7 @@
         if (btn && !btn.classList.contains('done')) { btn.textContent = '\u2713 Done'; btn.classList.add('done'); }
       }
     };
-    window.resetFilter = function() {
+    window.AIP.resetFilter = function() {
       activeFilter = 'all'; searchQuery = '';
       const inp = document.getElementById('aip-flip-search');
       if (inp) inp.value = '';
@@ -850,7 +1042,15 @@
   }
 
   // ── Init ──────────────────────────────────────────────────────────
+  // Guard: skip all topic-page logic when shared.js is loaded by index.html
+  // (index.html has its own standalone JS and does not need the topbar/scroll-spy/flipcards)
+  function isDashboard() {
+    const p = window.location.pathname;
+    return p.endsWith('index.html') || p === '/' || p.endsWith('/');
+  }
+
   function init() {
+    if (isDashboard()) return;
     markStarted();
     buildTopBar();          // topbar first — adds body padding-top via shared.css
     patchScrollMode();      // then scroll mode — uses topbar height for offsets

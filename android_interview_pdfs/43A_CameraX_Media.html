@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>43A — CameraX, Photo Picker &amp; Media | Android Interview Prep</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222535;
+    --border: #2e3149;
+    --text: #e2e4f0;
+    --muted: #8b90b8;
+    --accent: #7c6af7;
+    --accent2: #56cfb2;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --yellow: #f5c842;
+    --orange: #ff9f43;
+    --code-bg: #13151f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .nav-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .nav-item.active .nav-num { background: rgba(124,106,247,0.25); color: var(--accent); }
+
+  /* MAIN */
+  .main { margin-left: 260px; overflow: visible; min-width: 0; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #17251a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 6px;
+  }
+  .badge-tier1 { background: rgba(62,207,142,0.12); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .badge-id { background: rgba(79,158,255,0.12); color: var(--accent2); border: 1px solid rgba(79,158,255,0.25); }
+
+  /* SECTION */
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: fadeIn 0.2s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.3px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(124,106,247,0.15);
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--accent2); margin: 24px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--yellow); margin: 20px 0 8px; }
+  p { color: var(--muted); margin-bottom: 14px; line-height: 1.7; }
+  p strong { color: var(--text); }
+  li { color: var(--muted); margin-bottom: 6px; }
+  li strong { color: var(--text); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    overflow-x: auto;
+    margin: 16px 0 22px;
+    font-size: 13px;
+    line-height: 1.65;
+    position: relative;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+  p code, li code, td code {
+    background: rgba(124,106,247,0.12);
+    color: #b8b0ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  .kw  { color: #c084fc; }
+  .fn  { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cm  { color: #6b7280; font-style: italic; }
+  .cl  { color: #fbbf24; }
+  .nu  { color: #f9a8d4; }
+  .an  { color: #fb923c; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 14px 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  td strong { color: var(--text); }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 18px 0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .callout-green  { border-color: var(--green);   background: rgba(62,207,142,0.06);  }
+  .callout-red    { border-color: var(--red);     background: rgba(255,107,107,0.06); }
+  .callout-yellow { border-color: var(--yellow);  background: rgba(245,200,66,0.06);  }
+  .callout-blue   { border-color: var(--accent2); background: rgba(79,158,255,0.06);  }
+  .callout-purple { border-color: var(--accent);  background: rgba(124,106,247,0.06); }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout-green  .callout-label { color: var(--green);   }
+  .callout-red    .callout-label { color: var(--red);     }
+  .callout-yellow .callout-label { color: var(--yellow);  }
+  .callout-blue   .callout-label { color: var(--accent2); }
+  .callout-purple .callout-label { color: var(--accent);  }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .quiz-card:hover { border-color: rgba(124,106,247,.4); }
+  .quiz-q {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .quiz-q:hover { background: rgba(255,255,255,0.02); }
+  .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .quiz-meta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .diff-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .diff-easy   { background: rgba(62,207,142,0.15);  color: var(--green);  }
+  .diff-medium { background: rgba(245,200,66,0.15);  color: var(--yellow); }
+  .diff-hard   { background: rgba(255,107,107,0.15); color: var(--red);    }
+  .toggle-icon { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+  .quiz-a {
+    display: none;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,106,247,0.04);
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .quiz-a.open { display: block; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  /* INTERVIEW FRAMEWORK */
+  .answer-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .must-mention { display: grid; gap: 10px; margin: 14px 0; }
+  .must-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+  }
+  .must-num {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .cheat-card h4 { margin-top: 0; margin-bottom: 10px; font-size: 12px; }
+  .cheat-card pre { margin: 0; padding: 12px; font-size: 11.5px; }
+
+  /* ASCII BOX */
+  .ascii-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    white-space: pre;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+
+  /* FLOW */
+  .flow-row { display: flex; align-items: center; gap: 0; margin: 8px 0; flex-wrap: wrap; }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; padding: 0 8px; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s ease;
+  }
+
+  /* NAV BUTTONS */
+  .nav-buttons { display: none !important; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .section { padding: 24px 20px; }
+    .hero { padding: 28px 20px 24px; }
+    .hero h1 { font-size: 22px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* Scroll-mode: all sections always visible */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+
+  /* Sidebar active highlights */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.13) !important;
+    color: var(--accent) !important;
+    border-left: 3px solid var(--accent);
+    padding-left: 9px !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.28) !important;
+    color: var(--accent) !important;
+  }
+
+  /* Smooth scroll offset */
+  .section[id]::before, section[id]::before {
+    content: '';
+    display: block;
+    height: 60px;
+    margin-top: -60px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* Section fade-in */
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-visible { animation: sectionIn 0.35s ease forwards; }
+
+  /* Dashboard back link */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
+
+  /* Keyboard hint */
+  .nav-hint {
+    font-size: 10px; color: var(--muted); text-align: center;
+    padding: 10px 0 4px; margin-top: auto; opacity: .5;
+    letter-spacing: .05em;
+  }
+
+  /* Progress bar hidden (shared.js owns it) */
+  .progress-bar { display: none !important; }
+
+  /* Section read bar */
+  .section-read-bar {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 1px;
+    margin-bottom: 20px;
+  }
+  .section.read .section-read-bar { width: 100%; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .section, section[id] { padding: 28px 18px !important; }
+    .hero { padding: 28px 18px 24px !important; }
+    .hero h1 { font-size: 22px !important; }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Flash card grid */
+  .flash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .flash-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .flash-q {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .flash-a {
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  @media (max-width: 768px) {
+    .flash-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+  <!-- FIXED SIDEBAR — locked to viewport, only content scrolls -->
+  <style id="aip-fixed-sidebar">
+    /* 1. Body: natural document scroll */
+    html { min-height: 100%; }
+    body {
+      display: block !important;
+      height: auto !important;
+      min-height: 100vh;
+      overflow-y: auto !important;
+      overflow-x: hidden;
+    }
+
+    /* 2. Layout wrapper */
+    .layout { display: block !important; min-height: 100vh; }
+
+    /* 3. SIDEBAR — fixed to viewport */
+    .sidebar,
+    nav.sidebar {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 260px !important;
+      min-width: 260px !important;
+      height: 100vh !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      z-index: 200 !important;
+      background: var(--surface, #1a1d27) !important;
+      border-right: 1px solid var(--border, #2e3148) !important;
+    }
+
+    /* 4. Main content: pushed right */
+    .main,
+    main#mainScroll,
+    main {
+      display: block !important;
+      margin-left: 260px !important;
+      width: auto !important;
+      max-width: none !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+
+    /* 5. Active sidebar highlight */
+    .nav-item.aip-nav-active,
+    nav a.aip-nav-active {
+      background: rgba(124,106,247,0.18) !important;
+      color: #7c6af7 !important;
+      border-left-color: #7c6af7 !important;
+    }
+    .nav-item.aip-nav-active .nav-num {
+      background: rgba(124,106,247,0.28) !important;
+      color: #7c6af7 !important;
+    }
+
+    /* 6. Mobile: off-canvas drawer */
+    @media (max-width: 768px) {
+      .sidebar, nav.sidebar {
+        left: -280px !important;
+        top: 0 !important;
+        height: 100vh !important;
+        z-index: 9000 !important;
+        transition: left 0.28s cubic-bezier(0.4,0,0.2,1) !important;
+        box-shadow: 4px 0 32px rgba(0,0,0,0.7) !important;
+      }
+      .sidebar.aip-open, nav.sidebar.aip-open {
+        left: 0 !important;
+      }
+      .main, main#mainScroll, main {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">43A · CameraX &amp; Media</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> How CameraX Works</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> Photo Picker</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> MediaStore &amp; Files</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Video Recording</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Image Analysis &amp; ML</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Pitfalls &amp; Bugs</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Interview Framework</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Flash Cards</a>
+  <a class="nav-item" href="#s10" data-section="s10"><span class="nav-num">10</span> Interview Questions</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainScroll">
+
+  <!-- HERO -->
+  <div class="hero">
+    <a class="hero-back" href="index.html">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      &#8592; Back to Dashboard
+    </a>
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>43A</span> — CameraX, Photo Picker &amp; Media</h1>
+    <p class="hero-desc">CameraX lifecycle-aware camera, Android 13+ Photo Picker (replaces READ_EXTERNAL_STORAGE), MediaStore, video recording, image analysis with ML Kit integration, and media permission changes across Android versions.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 43A</span>
+      <span class="badge badge-tier1">&#11088; Tier 2 — Camera &amp; Media</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 1: OVERVIEW                             -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-title"><div class="section-icon">&#128247;</div> 1. Overview &amp; Why It Matters</div>
+
+    <h3>Plain-Words Analogy</h3>
+    <p>Think of <strong>Camera2</strong> as raw engine parts — powerful but you have to assemble the crankshaft, pistons, and timing yourself. <strong>CameraX</strong> is the assembled engine with a warranty: same power, lifecycle-aware, consistent across every manufacturer's quirks. <strong>Photo Picker</strong> is the ATM machine of media access — the user gets to choose exactly which photos to hand you, and you never touch the vault yourself.</p>
+
+    <h3>Why CameraX Replaced Camera2 for Most Apps</h3>
+    <ul>
+      <li><strong>Lifecycle-aware:</strong> Binds to a <code>LifecycleOwner</code>; automatically starts/stops the camera stream without leaks.</li>
+      <li><strong>Use-case based API:</strong> Declare <em>what</em> you need (Preview, ImageCapture, ImageAnalysis, VideoCapture) — CameraX handles device-specific wiring.</li>
+      <li><strong>Cross-device consistency:</strong> Abstracts vendor-specific bugs on Samsung, Xiaomi, and others through the <code>camera-camera2</code> compatibility layer.</li>
+      <li><strong>Extensions support:</strong> Night mode, Portrait, HDR, Face Retouch — same API across OEMs that support them.</li>
+    </ul>
+
+    <h3>Photo Picker — Privacy by Design</h3>
+    <p><strong>Android 13 (API 33)</strong> introduced the system Photo Picker. Instead of granting an app broad access to the entire media library, the user selects specific items and the app receives only those URIs. The system never grants storage access — the permission dialog is gone entirely.</p>
+    <div class="callout callout-red">
+      <div class="callout-label">Breaking Change</div>
+      <code>READ_EXTERNAL_STORAGE</code> was grandfathered out in Android 13. Apps targeting API 33+ that still request it get no access. You must use the Photo Picker or the new granular permissions (<code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_AUDIO</code>).
+    </div>
+
+    <h3>What Interviewers Are Testing</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Competency</th><th>What They Want to Hear</th></tr>
+      <tr><td>Permission model evolution</td><td>Know the exact API level each permission changed (10, 11, 12, 13, 14) and why</td></tr>
+      <tr><td>Lifecycle integration</td><td><code>viewLifecycleOwner</code> in Fragments, not <code>this</code></td></tr>
+      <tr><td>Privacy compliance</td><td>Photo Picker as the default; fall back gracefully on older APIs</td></tr>
+      <tr><td>Resource management</td><td><code>ImageProxy.close()</code> in finally-block; no leaks</td></tr>
+      <tr><td>Scoped Storage</td><td>MediaStore write on API 29+, no <code>WRITE_EXTERNAL_STORAGE</code> needed</td></tr>
+    </table>
+    </div>
+
+    <h3>Permission Changes Across Android Versions</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Android Version</th><th>API Level</th><th>Media Permission Change</th></tr>
+      <tr><td>Android 9 and below</td><td>≤ 28</td><td><code>READ_EXTERNAL_STORAGE</code> + <code>WRITE_EXTERNAL_STORAGE</code> needed for all media</td></tr>
+      <tr><td>Android 10 (Q)</td><td>29</td><td>Scoped Storage introduced; <code>WRITE_EXTERNAL_STORAGE</code> no longer needed for own files in MediaStore; READ still needed for others' media</td></tr>
+      <tr><td>Android 11 (R)</td><td>30</td><td>Scoped Storage enforced. <code>MANAGE_EXTERNAL_STORAGE</code> for bulk access (requires Play approval)</td></tr>
+      <tr><td>Android 12 (S)</td><td>31/32</td><td>No media permission changes; but <code>READ_EXTERNAL_STORAGE</code> still valid</td></tr>
+      <tr><td>Android 13 (T)</td><td>33</td><td><code>READ_EXTERNAL_STORAGE</code> deprecated for media; replaced by <code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_AUDIO</code>; Photo Picker introduced</td></tr>
+      <tr><td>Android 14 (U)</td><td>34</td><td>Partial photo/video access: user can grant a subset; <code>READ_MEDIA_VISUAL_USER_SELECTED</code> permission added</td></tr>
+    </table>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Mental Model</div>
+      "Every feature that touches media has a permission cliff at API 33 and another at API 29. Before writing a single line of camera code, ask: 'Does this need to read <em>other apps'</em> media or only capture new content?' If capturing only, you need zero storage permissions — just CAMERA."
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 2: HOW CAMERAX WORKS                    -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#9881;</div> 2. How CameraX Works</div>
+
+    <h3>The Four Use Cases</h3>
+    <div class="ascii-box">┌─────────────────── CameraX Use Cases ───────────────────┐
+│  Preview         → Render live stream to PreviewView     │
+│  ImageCapture    → Take a still photo (JPEG/RAW)         │
+│  ImageAnalysis   → Real-time frame processing (ML Kit)   │
+│  VideoCapture    → Record video with audio               │
+└──────────────────────────────────────────────────────────┘
+    Bound together via ProcessCameraProvider + LifecycleOwner</div>
+
+    <h3>ProcessCameraProvider — The Binding Hub</h3>
+    <p><code>ProcessCameraProvider</code> is a singleton that manages camera lifecycle. You retrieve it asynchronously, then bind your use cases to a <code>LifecycleOwner</code>. When the lifecycle owner is destroyed, CameraX automatically releases the camera.</p>
+
+    <div class="flow-row">
+      <div class="flow-box">App requests ProcessCameraProvider</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Bind to LifecycleOwner</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Use cases start</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">ON_DESTROY → auto release</div>
+    </div>
+
+    <h3>Full Production Example: CameraX + Compose</h3>
+    <p>This example wires up <code>Preview</code> + <code>ImageCapture</code> inside a Compose screen using <code>AndroidView</code> to host the <code>PreviewView</code>.</p>
+
+<pre><code><span class="cm">// build.gradle.kts (app)</span>
+<span class="fn">dependencies</span> {
+    <span class="kw">val</span> cameraxVersion = <span class="str">"1.3.4"</span>
+    implementation(<span class="str">"androidx.camera:camera-core:$cameraxVersion"</span>)
+    implementation(<span class="str">"androidx.camera:camera-camera2:$cameraxVersion"</span>)  <span class="cm">// Camera2 compat layer</span>
+    implementation(<span class="str">"androidx.camera:camera-lifecycle:$cameraxVersion"</span>)
+    implementation(<span class="str">"androidx.camera:camera-view:$cameraxVersion"</span>)     <span class="cm">// PreviewView</span>
+    implementation(<span class="str">"androidx.camera:camera-video:$cameraxVersion"</span>)    <span class="cm">// VideoCapture</span>
+    implementation(<span class="str">"androidx.camera:camera-extensions:$cameraxVersion"</span>) <span class="cm">// Night, Portrait etc.</span>
+}</code></pre>
+
+<pre><code><span class="cm">// CameraScreen.kt</span>
+<span class="kw">import</span> android.content.Context
+<span class="kw">import</span> androidx.camera.core.CameraSelector
+<span class="kw">import</span> androidx.camera.core.ImageCapture
+<span class="kw">import</span> androidx.camera.core.ImageCaptureException
+<span class="kw">import</span> androidx.camera.core.Preview
+<span class="kw">import</span> androidx.camera.lifecycle.ProcessCameraProvider
+<span class="kw">import</span> androidx.camera.view.PreviewView
+<span class="kw">import</span> androidx.compose.foundation.layout.*
+<span class="kw">import</span> androidx.compose.material3.*
+<span class="kw">import</span> androidx.compose.runtime.*
+<span class="kw">import</span> androidx.compose.ui.Alignment
+<span class="kw">import</span> androidx.compose.ui.Modifier
+<span class="kw">import</span> androidx.compose.ui.platform.LocalContext
+<span class="kw">import</span> androidx.compose.ui.platform.LocalLifecycleOwner
+<span class="kw">import</span> androidx.compose.ui.viewinterop.AndroidView
+<span class="kw">import</span> androidx.core.content.ContextCompat
+<span class="kw">import</span> java.io.File
+<span class="kw">import</span> java.util.concurrent.Executors
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CameraScreen</span>(onPhotoSaved: (<span class="cl">File</span>) -> <span class="cl">Unit</span>) {
+    <span class="kw">val</span> context       = <span class="fn">LocalContext</span>.current
+    <span class="kw">val</span> lifecycleOwner = <span class="fn">LocalLifecycleOwner</span>.current  <span class="cm">// ✅ correct in Compose</span>
+
+    <span class="cm">// Hold a reference so we can call takePicture later</span>
+    <span class="kw">var</span> imageCapture by <span class="fn">remember</span> { mutableStateOf&lt;<span class="cl">ImageCapture</span>?&gt;(<span class="kw">null</span>) }
+
+    <span class="fn">Box</span>(modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()) {
+        <span class="cm">// AndroidView hosts the PreviewView (SurfaceView-based)</span>
+        <span class="fn">AndroidView</span>(
+            factory = { ctx: <span class="cl">Context</span> ->
+                <span class="kw">val</span> previewView = <span class="cl">PreviewView</span>(ctx)
+
+                <span class="kw">val</span> cameraProviderFuture = <span class="cl">ProcessCameraProvider</span>.<span class="fn">getInstance</span>(ctx)
+                cameraProviderFuture.<span class="fn">addListener</span>({
+                    <span class="kw">val</span> cameraProvider = cameraProviderFuture.<span class="fn">get</span>()
+
+                    <span class="cm">// 1. Preview use case — connects to PreviewView surface</span>
+                    <span class="kw">val</span> preview = <span class="cl">Preview</span>.<span class="cl">Builder</span>().<span class="fn">build</span>().<span class="fn">also</span> {
+                        it.<span class="fn">setSurfaceProvider</span>(previewView.surfaceProvider)
+                    }
+
+                    <span class="cm">// 2. ImageCapture use case</span>
+                    <span class="kw">val</span> capture = <span class="cl">ImageCapture</span>.<span class="cl">Builder</span>()
+                        .<span class="fn">setCaptureMode</span>(<span class="cl">ImageCapture</span>.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .<span class="fn">build</span>()
+                    imageCapture = capture
+
+                    <span class="cm">// 3. Select back camera (can switch to LENS_FACING_FRONT)</span>
+                    <span class="kw">val</span> cameraSelector = <span class="cl">CameraSelector</span>.DEFAULT_BACK_CAMERA
+
+                    <span class="kw">try</span> {
+                        <span class="cm">// Unbind all before re-binding</span>
+                        cameraProvider.<span class="fn">unbindAll</span>()
+                        cameraProvider.<span class="fn">bindToLifecycle</span>(
+                            lifecycleOwner,
+                            cameraSelector,
+                            preview,
+                            capture
+                        )
+                    } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) {
+                        e.<span class="fn">printStackTrace</span>()
+                    }
+                }, <span class="cl">ContextCompat</span>.<span class="fn">getMainExecutor</span>(ctx))
+
+                previewView
+            },
+            modifier = <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()
+        )
+
+        <span class="fn">Button</span>(
+            onClick = { <span class="fn">capturePhoto</span>(context, imageCapture, onPhotoSaved) },
+            modifier = <span class="cl">Modifier</span>.<span class="fn">align</span>(<span class="cl">Alignment</span>.BottomCenter).<span class="fn">padding</span>(bottom = <span class="nu">32</span>.dp)
+        ) {
+            <span class="fn">Text</span>(<span class="str">"Take Photo"</span>)
+        }
+    }
+}
+
+<span class="kw">private fun</span> <span class="fn">capturePhoto</span>(
+    context: <span class="cl">Context</span>,
+    imageCapture: <span class="cl">ImageCapture</span>?,
+    onPhotoSaved: (<span class="cl">File</span>) -> <span class="cl">Unit</span>
+) {
+    <span class="kw">val</span> capture = imageCapture ?: <span class="kw">return</span>
+    <span class="kw">val</span> photoFile = <span class="cl">File</span>(context.cacheDir, <span class="str">"photo_${System.currentTimeMillis()}.jpg"</span>)
+    <span class="kw">val</span> outputOptions = <span class="cl">ImageCapture</span>.<span class="cl">OutputFileOptions</span>.<span class="cl">Builder</span>(photoFile).<span class="fn">build</span>()
+    <span class="kw">val</span> executor = <span class="cl">Executors</span>.<span class="fn">newSingleThreadExecutor</span>()
+
+    capture.<span class="fn">takePicture</span>(
+        outputOptions, executor,
+        <span class="kw">object</span> : <span class="cl">ImageCapture</span>.<span class="cl">OnImageSavedCallback</span> {
+            <span class="kw">override fun</span> <span class="fn">onImageSaved</span>(output: <span class="cl">ImageCapture</span>.<span class="cl">OutputFileResults</span>) {
+                onPhotoSaved(photoFile)
+            }
+            <span class="kw">override fun</span> <span class="fn">onError</span>(exception: <span class="cl">ImageCaptureException</span>) {
+                exception.<span class="fn">printStackTrace</span>()
+            }
+        }
+    )
+}</code></pre>
+
+    <h3>CameraSelector — Front / Back Camera</h3>
+<pre><code><span class="cm">// Switch to front camera</span>
+<span class="kw">val</span> frontCamera = <span class="cl">CameraSelector</span>.<span class="cl">Builder</span>()
+    .<span class="fn">requireLensFacing</span>(<span class="cl">CameraSelector</span>.LENS_FACING_FRONT)
+    .<span class="fn">build</span>()
+
+<span class="cm">// Or use pre-built selectors</span>
+<span class="cl">CameraSelector</span>.DEFAULT_FRONT_CAMERA
+<span class="cl">CameraSelector</span>.DEFAULT_BACK_CAMERA
+
+<span class="cm">// Toggling front/back: unbind and rebind with new CameraSelector</span>
+cameraProvider.<span class="fn">unbindAll</span>()
+cameraProvider.<span class="fn">bindToLifecycle</span>(lifecycleOwner, newSelector, preview, imageCapture)</code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Key Insight</div>
+      You can bind at most <strong>3 concurrent use cases</strong> on most devices. Binding all 4 simultaneously (Preview + ImageCapture + ImageAnalysis + VideoCapture) may fail on lower-end hardware. Check <code>CameraInfo.isUseCasesCombinationSupported()</code> first in production apps.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 3: PHOTO PICKER                         -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128444;</div> 3. Photo Picker (Android 13+)</div>
+
+    <h3>Why Photo Picker Exists</h3>
+    <p>Before Android 13, an app needing to display a user's photo had to request <code>READ_EXTERNAL_STORAGE</code> — a permission that grants access to the <em>entire</em> media library. The Photo Picker fixes this: the system displays its own selection UI, and the app only receives URIs for the items the user chose. <strong>No storage permission is ever granted to the app.</strong></p>
+
+    <div class="ascii-box">Old flow:  App → request READ_EXTERNAL_STORAGE → user grants → app sees ALL media
+New flow:  App → launch Photo Picker → user selects items → app gets ONLY those URIs
+          (zero storage permission change; system handles access)</div>
+
+    <h3>PickVisualMedia Contract (API 33+)</h3>
+<pre><code><span class="cm">// Gradle dependency (backported to API 19+ via Jetpack)</span>
+implementation(<span class="str">"androidx.activity:activity-ktx:1.9.0"</span>)
+
+<span class="cm">// In your Fragment or Activity</span>
+<span class="kw">import</span> androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+<span class="kw">import</span> androidx.activity.result.contract.ActivityResultContracts.PickMultipleVisualMedia
+
+<span class="cm">// Single image picker</span>
+<span class="kw">val</span> pickMedia = <span class="fn">registerForActivityResult</span>(<span class="cl">PickVisualMedia</span>()) { uri: <span class="cl">Uri</span>? ->
+    <span class="kw">if</span> (uri != <span class="kw">null</span>) {
+        <span class="cm">// URI is valid for the lifetime of this app session</span>
+        <span class="cm">// Persist via takePersistableUriPermission() if needed across sessions</span>
+        viewModel.<span class="fn">onPhotoSelected</span>(uri)
+    } <span class="kw">else</span> {
+        <span class="cm">// User cancelled picker</span>
+    }
+}
+
+<span class="cm">// Launch — images only</span>
+pickMedia.<span class="fn">launch</span>(<span class="cl">PickVisualMedia</span>.<span class="cl">ImageOnly</span>)
+<span class="cm">// Or images + video</span>
+pickMedia.<span class="fn">launch</span>(<span class="cl">PickVisualMedia</span>.<span class="cl">ImageAndVideo</span>)
+<span class="cm">// Or a specific MIME type</span>
+pickMedia.<span class="fn">launch</span>(<span class="cl">PickVisualMedia</span>.<span class="cl">SingleMimeType</span>(<span class="str">"image/gif"</span>))
+
+<span class="cm">// Multiple selection (up to system max, typically 100)</span>
+<span class="kw">val</span> pickMultiple = <span class="fn">registerForActivityResult</span>(<span class="cl">PickMultipleVisualMedia</span>(<span class="nu">10</span>)) { uris ->
+    uris.<span class="fn">forEach</span> { uri -> viewModel.<span class="fn">addPhoto</span>(uri) }
+}</code></pre>
+
+    <h3>Fallback for API &lt; 33</h3>
+    <p>The <code>PickVisualMedia</code> contract is backported to API 19+ via Jetpack. On devices running API 21–32 <em>without</em> the Android 13 Photo Picker backport (available via Google Play System Updates), it automatically falls back to <code>ACTION_GET_CONTENT</code>. However, the fallback <em>does</em> require <code>READ_EXTERNAL_STORAGE</code> on those older devices.</p>
+
+<pre><code><span class="cm">// Permission decision: what to request at each API level</span>
+<span class="kw">fun</span> <span class="fn">requestMediaPermissionsIfNeeded</span>(activity: <span class="cl">ComponentActivity</span>) {
+    <span class="kw">when</span> {
+        <span class="cm">// API 34+: partial access may be needed for MediaStore queries</span>
+        <span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.UPSIDE_DOWN_CAKE -> {
+            <span class="cm">// If using Photo Picker only: no permission needed</span>
+            <span class="cm">// If querying MediaStore directly: request READ_MEDIA_IMAGES</span>
+            <span class="cm">// + READ_MEDIA_VISUAL_USER_SELECTED for partial access</span>
+            activity.<span class="fn">requestPermissions</span>(
+                arrayOf(
+                    <span class="cl">Manifest</span>.permission.READ_MEDIA_IMAGES,
+                    <span class="cl">Manifest</span>.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                ), REQUEST_CODE
+            )
+        }
+        <span class="cm">// API 33: granular media permissions</span>
+        <span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.TIRAMISU -> {
+            activity.<span class="fn">requestPermissions</span>(
+                arrayOf(
+                    <span class="cl">Manifest</span>.permission.READ_MEDIA_IMAGES,
+                    <span class="cl">Manifest</span>.permission.READ_MEDIA_VIDEO
+                ), REQUEST_CODE
+            )
+        }
+        <span class="cm">// API 29–32: scoped storage, READ_EXTERNAL_STORAGE</span>
+        <span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.Q -> {
+            activity.<span class="fn">requestPermissions</span>(
+                arrayOf(<span class="cl">Manifest</span>.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_CODE
+            )
+        }
+        <span class="cm">// API ≤ 28: READ + WRITE both needed for external storage</span>
+        <span class="kw">else</span> -> {
+            activity.<span class="fn">requestPermissions</span>(
+                arrayOf(
+                    <span class="cl">Manifest</span>.permission.READ_EXTERNAL_STORAGE,
+                    <span class="cl">Manifest</span>.permission.WRITE_EXTERNAL_STORAGE
+                ), REQUEST_CODE
+            )
+        }
+    }
+}</code></pre>
+
+    <h3>Permission Decision Table</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>API Level</th><th>Use Photo Picker?</th><th>MediaStore query?</th><th>Permission to request</th></tr>
+      <tr><td>≤ 28</td><td>No (fallback)</td><td>Yes</td><td>READ_EXTERNAL_STORAGE + WRITE_EXTERNAL_STORAGE</td></tr>
+      <tr><td>29–32</td><td>Partial backport</td><td>Yes</td><td>READ_EXTERNAL_STORAGE</td></tr>
+      <tr><td>33</td><td>✅ Native</td><td>Yes</td><td>READ_MEDIA_IMAGES / READ_MEDIA_VIDEO / READ_MEDIA_AUDIO</td></tr>
+      <tr><td>34+</td><td>✅ Native</td><td>Yes (partial)</td><td>READ_MEDIA_IMAGES + READ_MEDIA_VISUAL_USER_SELECTED</td></tr>
+      <tr><td>Any</td><td>✅ Photo Picker only</td><td>No</td><td><strong>No permission needed</strong></td></tr>
+    </table>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-label">Best Practice</div>
+      Prefer Photo Picker as the primary flow. Only fall back to direct MediaStore queries (and therefore request permissions) when you must display a gallery of the user's photos <em>without</em> them picking. For all other cases, Photo Picker gives the best privacy posture and user trust.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 4: MEDIASTORE & FILE ACCESS             -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128190;</div> 4. MediaStore &amp; File Access</div>
+
+    <h3>Scoped Storage Rules (API 29+)</h3>
+    <ul>
+      <li>Apps can read/write their <strong>own files</strong> in app-specific directories (<code>getExternalFilesDir()</code>) without any permission.</li>
+      <li>To contribute media to the shared MediaStore (Photos, Music, Downloads), use <code>ContentResolver.insert()</code> — no <code>WRITE_EXTERNAL_STORAGE</code> needed on API 29+.</li>
+      <li>To read <strong>other apps'</strong> media, you need <code>READ_MEDIA_IMAGES</code> (API 33+) or <code>READ_EXTERNAL_STORAGE</code> (API 29–32).</li>
+      <li>You can <strong>only delete</strong> your own contributed media without a permission dialog; deleting others' files triggers a system confirmation dialog.</li>
+    </ul>
+
+    <h3>Writing a Captured Photo to MediaStore</h3>
+<pre><code><span class="kw">import</span> android.content.ContentValues
+<span class="kw">import</span> android.provider.MediaStore
+<span class="kw">import</span> android.os.Build
+<span class="kw">import</span> android.os.Environment
+
+<span class="kw">fun</span> <span class="fn">savePhotoToMediaStore</span>(context: <span class="cl">Context</span>, jpegBytes: <span class="cl">ByteArray</span>): <span class="cl">Uri</span>? {
+    <span class="kw">val</span> contentValues = <span class="cl">ContentValues</span>().<span class="fn">apply</span> {
+        <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.DISPLAY_NAME, <span class="str">"photo_${System.currentTimeMillis()}.jpg"</span>)
+        <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.MIME_TYPE, <span class="str">"image/jpeg"</span>)
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.Q) {
+            <span class="cm">// IS_PENDING marks the file as "in progress" while we write bytes</span>
+            <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.IS_PENDING, <span class="nu">1</span>)
+            <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.RELATIVE_PATH,
+                <span class="cl">Environment</span>.DIRECTORY_PICTURES + <span class="str">"/MyApp"</span>)
+        }
+    }
+
+    <span class="kw">val</span> resolver = context.contentResolver
+    <span class="kw">val</span> collection = <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.Q) {
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.<span class="fn">getContentUri</span>(<span class="cl">MediaStore</span>.<span class="cl">VOLUME_EXTERNAL_PRIMARY</span>)
+    } <span class="kw">else</span> {
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.EXTERNAL_CONTENT_URI
+    }
+
+    <span class="kw">val</span> itemUri = resolver.<span class="fn">insert</span>(collection, contentValues) ?: <span class="kw">return null</span>
+
+    resolver.<span class="fn">openOutputStream</span>(itemUri).<span class="fn">use</span> { stream ->
+        stream?.<span class="fn">write</span>(jpegBytes)
+    }
+
+    <span class="cm">// Clear IS_PENDING so the photo is visible in the gallery</span>
+    <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.Q) {
+        contentValues.<span class="fn">clear</span>()
+        contentValues.<span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.IS_PENDING, <span class="nu">0</span>)
+        resolver.<span class="fn">update</span>(itemUri, contentValues, <span class="kw">null</span>, <span class="kw">null</span>)
+    }
+
+    <span class="kw">return</span> itemUri
+}</code></pre>
+
+    <h3>Querying MediaStore with ContentResolver</h3>
+<pre><code><span class="kw">fun</span> <span class="fn">queryRecentPhotos</span>(context: <span class="cl">Context</span>): <span class="cl">List</span>&lt;<span class="cl">Uri</span>&gt; {
+    <span class="kw">val</span> uris = mutableListOf&lt;<span class="cl">Uri</span>&gt;()
+    <span class="kw">val</span> projection = arrayOf(
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>._ID,
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.DISPLAY_NAME,
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.DATE_ADDED
+    )
+    <span class="kw">val</span> sortOrder = <span class="str">"${MediaStore.Images.Media.DATE_ADDED} DESC"</span>
+
+    context.contentResolver.<span class="fn">query</span>(
+        <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.EXTERNAL_CONTENT_URI,
+        projection, <span class="kw">null</span>, <span class="kw">null</span>, sortOrder
+    )?.<span class="fn">use</span> { cursor ->
+        <span class="kw">val</span> idCol = cursor.<span class="fn">getColumnIndexOrThrow</span>(<span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>._ID)
+        <span class="kw">while</span> (cursor.<span class="fn">moveToNext</span>()) {
+            <span class="kw">val</span> id = cursor.<span class="fn">getLong</span>(idCol)
+            <span class="kw">val</span> uri = <span class="cl">ContentUris</span>.<span class="fn">withAppendedId</span>(
+                <span class="cl">MediaStore</span>.<span class="cl">Images</span>.<span class="cl">Media</span>.EXTERNAL_CONTENT_URI, id
+            )
+            uris.<span class="fn">add</span>(uri)
+        }
+    }
+    <span class="kw">return</span> uris
+}</code></pre>
+
+    <h3>FileProvider — Sharing Files with Other Apps</h3>
+<pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;provider
+    android:name=<span class="str">"androidx.core.content.FileProvider"</span>
+    android:authorities=<span class="str">"${applicationId}.fileprovider"</span>
+    android:exported=<span class="str">"false"</span>
+    android:grantUriPermissions=<span class="str">"true"</span>&gt;
+    &lt;meta-data
+        android:name=<span class="str">"android.support.FILE_PROVIDER_PATHS"</span>
+        android:resource=<span class="str">"@xml/file_paths"</span> /&gt;
+&lt;/provider&gt;
+
+<span class="cm">&lt;!-- res/xml/file_paths.xml --&gt;</span>
+&lt;paths&gt;
+    &lt;cache-path name=<span class="str">"camera_photos"</span> path=<span class="str">"."</span>/&gt;
+    &lt;external-files-path name=<span class="str">"external_photos"</span> path=<span class="str">"Pictures/"</span>/&gt;
+&lt;/paths&gt;
+
+<span class="cm">// Kotlin: create a shareable URI</span>
+<span class="kw">val</span> shareUri = <span class="cl">FileProvider</span>.<span class="fn">getUriForFile</span>(
+    context, <span class="str">"${context.packageName}.fileprovider"</span>, photoFile
+)
+<span class="kw">val</span> intent = <span class="cl">Intent</span>(<span class="cl">Intent</span>.ACTION_SEND).<span class="fn">apply</span> {
+    type = <span class="str">"image/jpeg"</span>
+    <span class="fn">putExtra</span>(<span class="cl">Intent</span>.EXTRA_STREAM, shareUri)
+    <span class="fn">addFlags</span>(<span class="cl">Intent</span>.FLAG_GRANT_READ_URI_PERMISSION)
+}
+context.<span class="fn">startActivity</span>(<span class="cl">Intent</span>.<span class="fn">createChooser</span>(intent, <span class="str">"Share photo"</span>))</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Common Pitfall</div>
+      Never pass a raw <code>File</code> path to another app on Android 7+ — it will throw <code>FileUriExposedException</code>. Always use <code>FileProvider.getUriForFile()</code> to create a content URI.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 5: VIDEO RECORDING                      -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#127909;</div> 5. Video Recording with CameraX</div>
+
+    <h3>VideoCapture Use Case</h3>
+    <p>CameraX <code>VideoCapture</code> records video with synchronized audio. It returns a <code>Recording</code> object that supports pause/resume/stop.</p>
+
+<pre><code><span class="kw">import</span> androidx.camera.video.*
+<span class="kw">import</span> androidx.core.content.ContextCompat
+<span class="kw">import</span> android.Manifest
+
+<span class="cm">// 1. Build the Recorder (quality selector)</span>
+<span class="kw">val</span> recorder = <span class="cl">Recorder</span>.<span class="cl">Builder</span>()
+    .<span class="fn">setQualitySelector</span>(<span class="cl">QualitySelector</span>.<span class="fn">from</span>(<span class="cl">Quality</span>.HIGHEST))
+    .<span class="fn">build</span>()
+
+<span class="cm">// 2. Wrap in VideoCapture use case</span>
+<span class="kw">val</span> videoCapture = <span class="cl">VideoCapture</span>.<span class="fn">withOutput</span>(recorder)
+
+<span class="cm">// 3. Bind to lifecycle (alongside Preview)</span>
+cameraProvider.<span class="fn">bindToLifecycle</span>(
+    lifecycleOwner,
+    <span class="cl">CameraSelector</span>.DEFAULT_BACK_CAMERA,
+    preview,
+    videoCapture
+)
+
+<span class="cm">// 4. Start recording — MediaStore output</span>
+<span class="kw">var</span> activeRecording: <span class="cl">Recording</span>? = <span class="kw">null</span>
+
+<span class="kw">fun</span> <span class="fn">startRecording</span>(context: <span class="cl">Context</span>) {
+    <span class="kw">val</span> contentValues = <span class="cl">ContentValues</span>().<span class="fn">apply</span> {
+        <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Video</span>.<span class="cl">Media</span>.DISPLAY_NAME, <span class="str">"video_${System.currentTimeMillis()}.mp4"</span>)
+        <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Video</span>.<span class="cl">Media</span>.MIME_TYPE, <span class="str">"video/mp4"</span>)
+        <span class="kw">if</span> (<span class="cl">Build</span>.VERSION.SDK_INT >= <span class="cl">Build</span>.VERSION_CODES.Q) {
+            <span class="fn">put</span>(<span class="cl">MediaStore</span>.<span class="cl">Video</span>.<span class="cl">Media</span>.RELATIVE_PATH, <span class="str">"Movies/MyApp"</span>)
+        }
+    }
+
+    <span class="kw">val</span> mediaStoreOutput = <span class="cl">MediaStoreOutputOptions</span>.<span class="cl">Builder</span>(
+        context.contentResolver,
+        <span class="cl">MediaStore</span>.<span class="cl">Video</span>.<span class="cl">Media</span>.EXTERNAL_CONTENT_URI
+    ).<span class="fn">setContentValues</span>(contentValues).<span class="fn">build</span>()
+
+    <span class="cm">// RECORD_AUDIO permission must be granted before calling prepareRecording</span>
+    activeRecording = videoCapture.output
+        .<span class="fn">prepareRecording</span>(context, mediaStoreOutput)
+        .<span class="fn">withAudioEnabled</span>()   <span class="cm">// requires RECORD_AUDIO permission</span>
+        .<span class="fn">start</span>(<span class="cl">ContextCompat</span>.<span class="fn">getMainExecutor</span>(context)) { recordEvent ->
+            <span class="kw">when</span> (recordEvent) {
+                <span class="kw">is</span> <span class="cl">VideoRecordEvent</span>.<span class="cl">Start</span>  -> { <span class="cm">/* Recording started */</span> }
+                <span class="kw">is</span> <span class="cl">VideoRecordEvent</span>.<span class="cl">Pause</span>  -> { <span class="cm">/* Paused */</span> }
+                <span class="kw">is</span> <span class="cl">VideoRecordEvent</span>.<span class="cl">Resume</span> -> { <span class="cm">/* Resumed */</span> }
+                <span class="kw">is</span> <span class="cl">VideoRecordEvent</span>.<span class="cl">Finalize</span> -> {
+                    <span class="kw">if</span> (!recordEvent.hasError()) {
+                        <span class="kw">val</span> savedUri = recordEvent.outputResults.outputUri
+                        <span class="cm">// Handle saved video URI</span>
+                    } <span class="kw">else</span> {
+                        <span class="cm">// Handle error: recordEvent.error</span>
+                    }
+                }
+            }
+        }
+}
+
+<span class="cm">// Pause / Resume / Stop</span>
+<span class="kw">fun</span> <span class="fn">pauseRecording</span>()  { activeRecording?.<span class="fn">pause</span>() }
+<span class="kw">fun</span> <span class="fn">resumeRecording</span>() { activeRecording?.<span class="fn">resume</span>() }
+<span class="kw">fun</span> <span class="fn">stopRecording</span>()   { activeRecording?.<span class="fn">stop</span>(); activeRecording = <span class="kw">null</span> }</code></pre>
+
+    <h3>Output Options</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>OutputOptions Type</th><th>Use When</th></tr>
+      <tr><td><code>MediaStoreOutputOptions</code></td><td>Save to device gallery (recommended for API 29+)</td></tr>
+      <tr><td><code>FileOutputOptions</code></td><td>Save to app-private files directory</td></tr>
+      <tr><td><code>FileDescriptorOutputOptions</code></td><td>Stream to a file descriptor (e.g., upload pipeline)</td></tr>
+    </table>
+    </div>
+
+    <h3>Permissions Required</h3>
+<pre><code><span class="cm">&lt;!-- AndroidManifest.xml --&gt;</span>
+&lt;uses-permission android:name=<span class="str">"android.permission.CAMERA"</span> /&gt;
+&lt;uses-permission android:name=<span class="str">"android.permission.RECORD_AUDIO"</span> /&gt;
+<span class="cm">&lt;!-- No WRITE_EXTERNAL_STORAGE needed for MediaStore on API 29+ --&gt;</span></code></pre>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Audio Permission Timing</div>
+      Request <code>RECORD_AUDIO</code> permission <em>before</em> calling <code>prepareRecording().withAudioEnabled()</code>. If it's not granted, the call throws a <code>SecurityException</code>. Check <code>checkSelfPermission(RECORD_AUDIO) == PERMISSION_GRANTED</code> immediately before starting.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 6: IMAGE ANALYSIS & ML KIT              -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#129302;</div> 6. Image Analysis &amp; ML Kit</div>
+
+    <h3>ImageAnalysis Use Case</h3>
+    <p><code>ImageAnalysis</code> delivers frames to an <code>Analyzer</code> callback on a background thread. This is the integration point for ML Kit, OpenCV, or any real-time vision pipeline.</p>
+
+<pre><code><span class="kw">import</span> androidx.camera.core.ImageAnalysis
+<span class="kw">import</span> androidx.camera.core.ImageProxy
+<span class="kw">import</span> com.google.mlkit.vision.barcode.BarcodeScanning
+<span class="kw">import</span> com.google.mlkit.vision.common.InputImage
+<span class="kw">import</span> java.util.concurrent.Executors
+
+<span class="cm">// 1. Configure ImageAnalysis</span>
+<span class="kw">val</span> imageAnalysis = <span class="cl">ImageAnalysis</span>.<span class="cl">Builder</span>()
+    .<span class="fn">setTargetResolution</span>(<span class="cl">Size</span>(<span class="nu">1280</span>, <span class="nu">720</span>))
+    <span class="cm">// STRATEGY_KEEP_ONLY_LATEST: drops frames if analyzer is busy</span>
+    <span class="cm">// This prevents frame queuing which would cause ever-growing latency</span>
+    .<span class="fn">setBackpressureStrategy</span>(<span class="cl">ImageAnalysis</span>.STRATEGY_KEEP_ONLY_LATEST)
+    .<span class="fn">build</span>()
+
+<span class="cm">// 2. Set the analyzer on a background executor</span>
+<span class="kw">val</span> cameraExecutor = <span class="cl">Executors</span>.<span class="fn">newSingleThreadExecutor</span>()
+imageAnalysis.<span class="fn">setAnalyzer</span>(cameraExecutor, <span class="cl">BarcodeAnalyzer</span> { barcodes ->
+    barcodes.<span class="fn">forEach</span> { barcode ->
+        <span class="cm">// Handle detected barcodes on background thread</span>
+        <span class="cm">// Post UI updates back to main thread</span>
+    }
+})
+
+<span class="cm">// 3. Bind alongside Preview</span>
+cameraProvider.<span class="fn">bindToLifecycle</span>(lifecycleOwner, cameraSelector, preview, imageAnalysis)</code></pre>
+
+<pre><code><span class="cm">// BarcodeAnalyzer.kt — ML Kit integration</span>
+<span class="kw">class</span> <span class="cl">BarcodeAnalyzer</span>(
+    <span class="kw">private val</span> onBarcodeDetected: (<span class="cl">List</span>&lt;<span class="cl">Barcode</span>&gt;) -> <span class="cl">Unit</span>
+) : <span class="cl">ImageAnalysis</span>.<span class="cl">Analyzer</span> {
+
+    <span class="kw">private val</span> scanner = <span class="cl">BarcodeScanning</span>.<span class="fn">getClient</span>()
+
+    <span class="kw">override fun</span> <span class="fn">analyze</span>(imageProxy: <span class="cl">ImageProxy</span>) {
+        <span class="kw">val</span> mediaImage = imageProxy.image
+        <span class="kw">if</span> (mediaImage == <span class="kw">null</span>) {
+            imageProxy.<span class="fn">close</span>()  <span class="cm">// ✅ ALWAYS close in all code paths</span>
+            <span class="kw">return</span>
+        }
+
+        <span class="kw">val</span> image = <span class="cl">InputImage</span>.<span class="fn">fromMediaImage</span>(
+            mediaImage,
+            imageProxy.imageInfo.rotationDegrees
+        )
+
+        scanner.<span class="fn">process</span>(image)
+            .<span class="fn">addOnSuccessListener</span> { barcodes ->
+                <span class="kw">if</span> (barcodes.<span class="fn">isNotEmpty</span>()) {
+                    <span class="fn">onBarcodeDetected</span>(barcodes)
+                }
+            }
+            .<span class="fn">addOnFailureListener</span> { <span class="cm">/* log error */</span> }
+            .<span class="fn">addOnCompleteListener</span> {
+                <span class="cm">// ✅ CRITICAL: close ImageProxy in addOnCompleteListener</span>
+                <span class="cm">// This ensures it's closed even on failure, allowing the</span>
+                <span class="cm">// next frame to be delivered</span>
+                imageProxy.<span class="fn">close</span>()
+            }
+    }
+}</code></pre>
+
+    <h3>Backpressure Strategy — Why It Matters</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Strategy</th><th>Behavior</th><th>When to Use</th></tr>
+      <tr><td><code>STRATEGY_KEEP_ONLY_LATEST</code></td><td>Drops all frames while analyzer is busy; delivers only the most recent when free</td><td>Real-time ML processing (barcode, face detection) — always prefer this</td></tr>
+      <tr><td><code>STRATEGY_BLOCK_PRODUCER</code></td><td>Blocks camera frame production until analyzer is done</td><td>Never recommended — causes preview stutter and ANR risk</td></tr>
+    </table>
+    </div>
+
+    <h3>Thread Considerations</h3>
+    <ul>
+      <li>The <code>analyze()</code> callback runs on the executor you pass to <code>setAnalyzer()</code>. Use a background executor, not the main thread.</li>
+      <li>ML Kit's <code>process()</code> is asynchronous — <strong>never</strong> close <code>ImageProxy</code> before the ML Kit task completes. Close it in <code>addOnCompleteListener</code>.</li>
+      <li>If you forget to call <code>imageProxy.close()</code>, CameraX will never deliver the next frame. The camera appears frozen.</li>
+    </ul>
+
+    <h3>Face Detection Pipeline (Simplified)</h3>
+<pre><code><span class="kw">import</span> com.google.mlkit.vision.face.FaceDetection
+<span class="kw">import</span> com.google.mlkit.vision.face.FaceDetectorOptions
+
+<span class="kw">class</span> <span class="cl">FaceAnalyzer</span>(
+    <span class="kw">private val</span> onFacesDetected: (<span class="cl">List</span>&lt;<span class="cl">Face</span>&gt;) -> <span class="cl">Unit</span>
+) : <span class="cl">ImageAnalysis</span>.<span class="cl">Analyzer</span> {
+
+    <span class="kw">private val</span> options = <span class="cl">FaceDetectorOptions</span>.<span class="cl">Builder</span>()
+        .<span class="fn">setPerformanceMode</span>(<span class="cl">FaceDetectorOptions</span>.PERFORMANCE_MODE_FAST)
+        .<span class="fn">build</span>()
+    <span class="kw">private val</span> detector = <span class="cl">FaceDetection</span>.<span class="fn">getClient</span>(options)
+
+    <span class="kw">override fun</span> <span class="fn">analyze</span>(imageProxy: <span class="cl">ImageProxy</span>) {
+        <span class="kw">val</span> mediaImage = imageProxy.image ?: <span class="kw">run</span> { imageProxy.<span class="fn">close</span>(); <span class="kw">return</span> }
+        <span class="kw">val</span> inputImage = <span class="cl">InputImage</span>.<span class="fn">fromMediaImage</span>(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        detector.<span class="fn">process</span>(inputImage)
+            .<span class="fn">addOnSuccessListener</span> { faces -> <span class="fn">onFacesDetected</span>(faces) }
+            .<span class="fn">addOnCompleteListener</span> { imageProxy.<span class="fn">close</span>() }  <span class="cm">// ✅ always close here</span>
+    }
+}</code></pre>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">Expert Note</div>
+      Shut down the ML Kit detector and the camera executor when done to avoid resource leaks: <code>detector.close()</code> in <code>onDestroy()</code>, and <code>cameraExecutor.shutdown()</code> similarly. CameraX does not own these resources.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 7: PITFALLS & PRODUCTION BUGS           -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#9888;</div> 7. Pitfalls &amp; Production Bugs</div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Bug 1 — Leaking ImageProxy (Frozen Camera)</div>
+      <strong>Symptom:</strong> Camera preview freezes after first frame is analyzed. ML Kit callbacks never fire again.<br>
+      <strong>Cause:</strong> <code>imageProxy.close()</code> was not called after analysis. CameraX holds the next frame until the current one is closed.<br>
+      <strong>Fix:</strong> Always close in <code>addOnCompleteListener</code>, not <code>addOnSuccessListener</code>. The complete listener fires regardless of success or failure.<br>
+<pre style="margin-top:8px"><code><span class="cm">// ❌ Wrong — not closed on failure</span>
+scanner.<span class="fn">process</span>(image).<span class="fn">addOnSuccessListener</span> { imageProxy.<span class="fn">close</span>() }
+
+<span class="cm">// ✅ Correct — always closed</span>
+scanner.<span class="fn">process</span>(image).<span class="fn">addOnCompleteListener</span> { imageProxy.<span class="fn">close</span>() }</code></pre>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Bug 2 — Wrong LifecycleOwner in Fragments</div>
+      <strong>Symptom:</strong> Camera binds successfully once, but after navigating away and back, the camera stream is black or never starts again.<br>
+      <strong>Cause:</strong> Using <code>this</code> (the Fragment itself) as the lifecycle owner instead of <code>viewLifecycleOwner</code>. The Fragment instance can outlive its view, and CameraX's binding becomes inconsistent.<br>
+      <strong>Fix:</strong>
+<pre style="margin-top:8px"><code><span class="cm">// ❌ Wrong — Fragment lifecycle, not View lifecycle</span>
+cameraProvider.<span class="fn">bindToLifecycle</span>(<span class="kw">this</span>, cameraSelector, preview)
+
+<span class="cm">// ✅ Correct — View lifecycle tears down cleanly with the view</span>
+cameraProvider.<span class="fn">bindToLifecycle</span>(viewLifecycleOwner, cameraSelector, preview)</code></pre>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Bug 3 — Requesting CAMERA Permission After CameraX Starts</div>
+      <strong>Symptom:</strong> <code>CameraAccessException: CAMERA_DISABLED</code> or camera never opens on first launch.<br>
+      <strong>Fix:</strong> Always check and request <code>CAMERA</code> permission <em>before</em> calling <code>ProcessCameraProvider.getInstance()</code>. Gate the entire CameraX initialization behind permission grant.
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Bug 4 — Photo Picker Returns Null URI</div>
+      <strong>Symptom:</strong> The picker callback fires with <code>null</code>.<br>
+      <strong>Cause:</strong> User pressed "Back" or cancelled the picker. This is normal behavior, not an error.<br>
+      <strong>Fix:</strong> Always null-check the result URI. Do not show an error toast on null — the user simply cancelled.
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">Bug 5 — MediaStore URI Invalid After Process Death</div>
+      <strong>Symptom:</strong> App is killed by the system, restored from background, and previously stored MediaStore URIs throw <code>FileNotFoundException</code>.<br>
+      <strong>Cause:</strong> Temporary URIs obtained from <code>ContentResolver.insert()</code> with <code>IS_PENDING=1</code> are not persistent across process death.<br>
+      <strong>Fix:</strong> Clear <code>IS_PENDING</code> immediately after writing. For URIs received from Photo Picker that must persist, call <code>contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)</code>.
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Bug 6 — READ_MEDIA_IMAGES vs READ_EXTERNAL_STORAGE Confusion</div>
+      <strong>Symptom:</strong> MediaStore queries return zero results on Android 13+ despite permission being granted at runtime.<br>
+      <strong>Cause:</strong> App requests <code>READ_EXTERNAL_STORAGE</code> on API 33+, which is no longer granted for media access. The system silently ignores it or shows a one-time dialog that doesn't actually gate media access.<br>
+      <strong>Fix:</strong> Use version-gated permission requests. On API 33+, request <code>READ_MEDIA_IMAGES</code>/<code>READ_MEDIA_VIDEO</code>. On API 34+, also handle <code>READ_MEDIA_VISUAL_USER_SELECTED</code> for partial access gracefully.
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Bug 7 — Using File Paths Directly on Android 10+</div>
+      <strong>Symptom:</strong> <code>FileNotFoundException</code> or permission denied when accessing absolute file paths from MediaStore on Android 10+ in scoped storage.<br>
+      <strong>Cause:</strong> <code>cursor.getString(DATA_COL)</code> returns a path that your app cannot access under scoped storage.<br>
+      <strong>Fix:</strong> Never use the <code>DATA</code> column path directly. Use <code>ContentUris.withAppendedId()</code> to build a content URI and open it through <code>ContentResolver.openInputStream()</code>.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 8: INTERVIEW FRAMEWORK                  -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#127891;</div> 8. Interview Framework</div>
+
+    <h3>What Interviewers Are Testing</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Permission model evolution:</strong> Know exactly which permission changed at API 29, 33, and 34. Be able to write the version-gated request code from memory.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Lifecycle integration:</strong> <code>viewLifecycleOwner</code> in Fragments vs. <code>this</code>. Why binding to the wrong owner causes camera leaks.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Privacy compliance:</strong> Photo Picker vs. READ_EXTERNAL_STORAGE — why one is the modern approach and when you'd still need direct storage access.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Resource management:</strong> ImageProxy must be closed. Where and why (addOnCompleteListener, not addOnSuccessListener).</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Scoped storage:</strong> Why you don't need WRITE_EXTERNAL_STORAGE on API 29+ for MediaStore writes. The IS_PENDING pattern.</div></div>
+    </div>
+
+    <h3>30-Second Answer</h3>
+    <div class="answer-box">
+      "CameraX is a lifecycle-aware camera library built on Camera2. It uses a use-case based API — Preview, ImageCapture, ImageAnalysis, VideoCapture — bound to a LifecycleOwner so the camera is automatically released. For media access, Android 13 introduced the Photo Picker as a privacy-preserving replacement for READ_EXTERNAL_STORAGE: the user picks items and the app gets only those URIs with no storage permission needed. For writing media, scoped storage on Android 10+ means we use MediaStore.insert() with IS_PENDING to write atomically, no storage permission required."
+    </div>
+
+    <h3>2-Minute Answer</h3>
+    <div class="answer-box">
+      "CameraX replaced Camera2 for most use cases because it handles the lifecycle complexity — you bind use cases to a LifecycleOwner and the framework manages start/stop. The three main use cases are Preview, which renders to a PreviewView surface; ImageCapture for stills; and ImageAnalysis for real-time frame processing, which is where ML Kit integrates. VideoCapture handles recording with pause/resume through the Recorder API.<br><br>
+      For media access, the permission model changed significantly across Android versions. Below API 29, you needed READ and WRITE_EXTERNAL_STORAGE. API 29 introduced scoped storage — apps can write to MediaStore without WRITE_EXTERNAL_STORAGE. API 33 deprecated READ_EXTERNAL_STORAGE for media entirely, replacing it with granular READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO permissions. API 34 added partial access with READ_MEDIA_VISUAL_USER_SELECTED.<br><br>
+      The best modern approach is the Photo Picker introduced in API 33 — it requires zero permissions, is backported to earlier APIs via Jetpack, and preserves user privacy by never granting the app broad storage access. For production camera apps, the key pitfalls are: not closing ImageProxy in addOnCompleteListener (causes a frozen camera), using 'this' instead of viewLifecycleOwner in Fragments, and using raw File paths instead of content URIs on Android 10+."
+    </div>
+
+    <h3>Expert Take</h3>
+    <div class="callout callout-purple">
+      <div class="callout-label">Senior Engineer's Perspective</div>
+      "Every team that interviewed me for a role involving camera assumed I knew the Photo Picker migration. READ_EXTERNAL_STORAGE was effectively deprecated at Android 13 for media access — know the Photo Picker API cold. The ImageProxy leak is also a near-universal interview trap: it's the kind of silent bug that causes a camera freeze only under specific timing conditions and is brutal to reproduce in QA. Know exactly where to close it and why."
+    </div>
+
+    <h3>Key Phrases That Signal Seniority</h3>
+    <ul>
+      <li>"I gate CameraX initialization behind permission checks — never start the camera before CAMERA permission is granted."</li>
+      <li>"In Fragments I always bind to <code>viewLifecycleOwner</code>, not <code>this</code>, to prevent camera leaks across navigation."</li>
+      <li>"For Photo Picker, I use the Jetpack <code>PickVisualMedia</code> contract — it's backported to API 19 and falls back gracefully without requiring me to handle the fallback manually."</li>
+      <li>"For real-time ML Kit analysis I always use <code>STRATEGY_KEEP_ONLY_LATEST</code> and close ImageProxy in <code>addOnCompleteListener</code> — not success listener — to prevent frame queuing."</li>
+      <li>"On API 29+ I use <code>IS_PENDING</code> as an atomic write guard in MediaStore so a crash mid-write doesn't corrupt the gallery."</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 9: FLASH CARDS                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#9889;</div> 9. Flash Cards</div>
+
+    <div class="flash-grid">
+      <div class="flash-card">
+        <div class="flash-q">CameraX 3 core use cases?</div>
+        <div class="flash-a">Preview (surface render), ImageCapture (still photo), ImageAnalysis (frame processing). VideoCapture is the 4th for recording.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">Photo Picker contract name?</div>
+        <div class="flash-a"><code>ActivityResultContracts.PickVisualMedia</code> (single) or <code>PickMultipleVisualMedia(max)</code>. Available via Jetpack, backported to API 19.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">Permission to request on API 33+ for media access?</div>
+        <div class="flash-a"><code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_AUDIO</code>. NOT <code>READ_EXTERNAL_STORAGE</code> (deprecated for media at API 33).</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">ImageProxy leak — what happens &amp; fix?</div>
+        <div class="flash-a">Camera freezes — no more frames delivered. Fix: call <code>imageProxy.close()</code> in <code>addOnCompleteListener</code> (not just success listener) so it always executes.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">viewLifecycleOwner rule in Fragments?</div>
+        <div class="flash-a">Always use <code>viewLifecycleOwner</code> (not <code>this</code>) when binding CameraX. Fragment lifecycle outlives the View; using <code>this</code> causes camera stream inconsistencies after navigation.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">Scoped storage: write photo on API 29+ — permission needed?</div>
+        <div class="flash-a">No. Use <code>ContentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</code>. No WRITE_EXTERNAL_STORAGE needed on API 29+.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">MediaStore vs raw File path on Android 10+?</div>
+        <div class="flash-a">Never use the <code>DATA</code> column absolute path — inaccessible under scoped storage. Build a content URI with <code>ContentUris.withAppendedId()</code> and open via <code>ContentResolver</code>.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">ML Kit integration point in CameraX?</div>
+        <div class="flash-a"><code>ImageAnalysis</code> use case with a custom <code>Analyzer</code>. Feed each <code>ImageProxy</code> to <code>InputImage.fromMediaImage()</code>, then pass to <code>BarcodeScanning.getClient().process()</code>.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">VideoCapture pause/resume API?</div>
+        <div class="flash-a">Call <code>prepareRecording(...).start(executor, listener)</code> → returns a <code>Recording</code>. Then <code>recording.pause()</code> / <code>recording.resume()</code> / <code>recording.stop()</code>.</div>
+      </div>
+      <div class="flash-card">
+        <div class="flash-q">FileProvider — why needed &amp; when?</div>
+        <div class="flash-a">Sharing a File with another app via Intent on Android 7+ requires a <code>content://</code> URI. Passing a <code>file://</code> URI throws <code>FileUriExposedException</code>. Use <code>FileProvider.getUriForFile()</code> + <code>FLAG_GRANT_READ_URI_PERMISSION</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SECTION 10: INTERVIEW QUESTIONS                 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="section" id="s10">
+    <div class="section-title"><div class="section-icon">&#127358;</div> 10. Interview Questions</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q1 — What are the main advantages of CameraX over Camera2, and when would you still use Camera2 directly?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>CameraX advantages:</strong><br>
+        1. <strong>Lifecycle-aware:</strong> Binds to a LifecycleOwner — no manual start/stop in onResume/onPause, no resource leaks.<br>
+        2. <strong>Use-case based API:</strong> Declare what you need (Preview, ImageCapture, ImageAnalysis, VideoCapture); CameraX handles device-specific wiring.<br>
+        3. <strong>Cross-device consistency:</strong> Abstracts OEM-specific Camera2 quirks through the camera-camera2 layer. Samsung, Xiaomi, Pixel all behave consistently.<br>
+        4. <strong>Jetpack integration:</strong> Works naturally with Compose, Hilt, and coroutines.<br>
+        5. <strong>Extensions:</strong> Night mode, Portrait, HDR via the Extensions API — same code across OEMs that support them.<br><br>
+        <strong>When to use Camera2 directly:</strong><br>
+        — Ultra-low-level control (specific sensor modes, RAW capture pipelines, manual sensor exposure/focus bracketing for professional camera apps).<br>
+        — When the CameraX compatibility layer introduces unacceptable latency for a specific device or use case.<br>
+        — Legacy code that can't be migrated without significant risk.<br><br>
+        <strong>In practice:</strong> CameraX uses Camera2 internally via the <code>camera-camera2</code> dependency. 99% of apps should use CameraX. Only go to Camera2 directly if a CameraX use case doesn't expose the hardware control you need.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q2 — Explain the security model behind Android's Photo Picker. Why is it more secure than requesting READ_EXTERNAL_STORAGE?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Security model:</strong><br>
+        The Photo Picker runs as a <strong>system-owned process</strong>. The system UI displays the user's media library, the user selects items, and the system returns content URIs scoped only to those selected items. The app process never receives the storage permission — it just gets URIs.<br><br>
+        <strong>Why it's more secure than READ_EXTERNAL_STORAGE:</strong><br>
+        — <code>READ_EXTERNAL_STORAGE</code> granted an app access to <em>everything</em> in the shared storage: all photos, videos, and audio from all apps. A malicious or compromised app could exfiltrate the user's entire camera roll.<br>
+        — Photo Picker is permission-less from the app's perspective. No permission dialog is shown. The user is never tricked into granting broad access.<br>
+        — The selected URIs are only valid for the current app session unless the app explicitly calls <code>takePersistableUriPermission()</code>.<br><br>
+        <strong>From an interview standpoint:</strong> This is a "principle of least privilege" answer — the app gets the minimum data access it needs to complete its task.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q3 — Your camera screen uses ImageAnalysis with ML Kit. After shipping, users report the camera freezes after a few seconds. What is the most likely cause and fix?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Root cause:</strong> <code>ImageProxy.close()</code> is not being called after the ML Kit task completes. CameraX holds a buffer slot open for each unprocessed frame. When all buffer slots are exhausted (typically after 3–4 frames depending on hardware), CameraX stops delivering new frames — the camera appears frozen.<br><br>
+        <strong>Why it's subtle:</strong> If you placed <code>imageProxy.close()</code> in <code>addOnSuccessListener</code> instead of <code>addOnCompleteListener</code>, it works fine under normal conditions but silently leaks on ML Kit failures (network errors, unsupported input, etc.).<br><br>
+        <strong>Fix:</strong>
+<pre><code>scanner.<span class="fn">process</span>(image)
+    .<span class="fn">addOnSuccessListener</span> { barcodes -> <span class="fn">handleBarcodes</span>(barcodes) }
+    .<span class="fn">addOnFailureListener</span>  { err -> <span class="cm">/* log */</span> }
+    .<span class="fn">addOnCompleteListener</span> { imageProxy.<span class="fn">close</span>() }  <span class="cm">// ✅ always runs</span></code></pre>
+        <strong>Additional fix:</strong> Ensure backpressure strategy is <code>STRATEGY_KEEP_ONLY_LATEST</code> so that if analysis is slow, frames are dropped rather than queued.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q4 — Walk me through the permission decision tree for accessing photos on a device running each of Android 9, 11, 13, and 14. What do you request in each case?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Android 9 (API 28) and below:</strong><br>
+        Request <code>READ_EXTERNAL_STORAGE</code> + <code>WRITE_EXTERNAL_STORAGE</code>. Both needed for full media read/write.<br><br>
+        <strong>Android 11 (API 30):</strong><br>
+        Request <code>READ_EXTERNAL_STORAGE</code> only — WRITE_EXTERNAL_STORAGE does nothing on API 29+ for shared media (scoped storage). Write via MediaStore.insert() without permission.<br><br>
+        <strong>Android 13 (API 33):</strong><br>
+        Do NOT request <code>READ_EXTERNAL_STORAGE</code> — it's ignored for media. Instead:<br>
+        — <code>READ_MEDIA_IMAGES</code> for photos<br>
+        — <code>READ_MEDIA_VIDEO</code> for videos<br>
+        — <code>READ_MEDIA_AUDIO</code> for music<br>
+        OR: Use the Photo Picker (zero permissions needed).<br><br>
+        <strong>Android 14 (API 34):</strong><br>
+        Same as API 33 + add <code>READ_MEDIA_VISUAL_USER_SELECTED</code> for partial access. When the user grants partial access, you only see the photos they chose. Handle this gracefully — re-request access when needed, don't assume full library access.<br><br>
+        <strong>Key takeaway:</strong> Always check <code>Build.VERSION.SDK_INT</code> and request the appropriate permission for the running version. Never hard-code a single permission for all API levels.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q5 — How do you query MediaStore to get a list of recent photos, and what is the correct way to build the content URI for each photo?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Correct approach:</strong><br>
+        1. Query with <code>ContentResolver.query()</code> against <code>MediaStore.Images.Media.EXTERNAL_CONTENT_URI</code>.<br>
+        2. Project only the columns you need: <code>_ID</code>, <code>DISPLAY_NAME</code>, <code>DATE_ADDED</code>.<br>
+        3. Build each photo's URI using: <code>ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)</code><br><br>
+        <strong>Critical mistake to avoid:</strong> Do NOT use the <code>DATA</code> column (<code>MediaStore.Images.Media.DATA</code>) to get an absolute file path on Android 10+. The path may be inaccessible under scoped storage. Always build and use a content URI.<br><br>
+        <strong>Load via:</strong> <code>contentResolver.openInputStream(uri)</code> or pass the URI to Coil/Glide for async loading — they handle content URIs natively.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q6 — What is scoped storage? A junior dev says "I'll just add WRITE_EXTERNAL_STORAGE to save photos to the gallery." What do you tell them?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Medium</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>What is scoped storage:</strong><br>
+        Scoped storage (introduced in Android 10, enforced in Android 11) means each app has isolated access to storage. Apps can freely read/write their own app-specific directories. To contribute media to shared collections (Gallery, Music), they use MediaStore — a content-addressed API — rather than raw file system paths.<br><br>
+        <strong>What to tell the junior dev:</strong><br>
+        "On Android 10+, <code>WRITE_EXTERNAL_STORAGE</code> is a no-op for shared media — granting it doesn't give you any additional file access. To save a photo to the gallery, use <code>ContentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</code>. You don't need any write permission. The MediaStore API is the correct — and only reliable — way to add photos to the shared gallery on modern Android."<br><br>
+        <strong>Key scoped storage facts:</strong><br>
+        — App-specific directories (<code>getExternalFilesDir()</code>): zero permissions needed to read/write.<br>
+        — Shared MediaStore collections: use ContentResolver.insert() to write, no WRITE_EXTERNAL_STORAGE needed.<br>
+        — Use <code>IS_PENDING = 1</code> while writing, set to 0 when done (prevents partial files appearing in gallery).
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q7 — How do you switch between front and back camera in a CameraX-based app? What is the correct way to do it without leaking resources?</div>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Easy</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Correct approach:</strong><br>
+        1. Keep a reference to the <code>ProcessCameraProvider</code>.<br>
+        2. Call <code>cameraProvider.unbindAll()</code> to release the current camera.<br>
+        3. Create a new <code>CameraSelector</code> with the desired lens facing.<br>
+        4. Call <code>cameraProvider.bindToLifecycle()</code> with the new selector and same use cases.<br>
+<pre><code><span class="kw">var</span> lensFacing = <span class="cl">CameraSelector</span>.LENS_FACING_BACK
+
+<span class="kw">fun</span> <span class="fn">flipCamera</span>() {
+    lensFacing = <span class="kw">if</span> (lensFacing == <span class="cl">CameraSelector</span>.LENS_FACING_BACK)
+        <span class="cl">CameraSelector</span>.LENS_FACING_FRONT
+    <span class="kw">else</span>
+        <span class="cl">CameraSelector</span>.LENS_FACING_BACK
+
+    cameraProvider.<span class="fn">unbindAll</span>()  <span class="cm">// ✅ must unbind before rebinding</span>
+    <span class="kw">val</span> newSelector = <span class="cl">CameraSelector</span>.<span class="cl">Builder</span>()
+        .<span class="fn">requireLensFacing</span>(lensFacing).<span class="fn">build</span>()
+    cameraProvider.<span class="fn">bindToLifecycle</span>(lifecycleOwner, newSelector, preview, imageCapture)
+}</code></pre>
+        <strong>Common mistake:</strong> Forgetting to call <code>unbindAll()</code> before rebinding. This can cause both cameras to be bound simultaneously, leading to a <code>CameraState.ERROR_CAMERA_IN_USE</code> error.
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q8 — Describe the end-to-end pipeline for real-time barcode scanning using CameraX + ML Kit. Include the key threading and resource management considerations.</div>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Hard</span><span class="toggle-icon">&#9660;</span></div>
+      </div>
+      <div class="quiz-a">
+        <strong>Pipeline:</strong><br>
+        1. <strong>Setup:</strong> Create <code>ImageAnalysis</code> with <code>STRATEGY_KEEP_ONLY_LATEST</code> backpressure. Create a single-thread background executor.<br>
+        2. <strong>Analyzer:</strong> Implement <code>ImageAnalysis.Analyzer</code>. In <code>analyze(imageProxy)</code>: get <code>imageProxy.image</code> (YUV_420_888), wrap in <code>InputImage.fromMediaImage()</code> with rotation degrees.<br>
+        3. <strong>ML Kit:</strong> Call <code>BarcodeScanning.getClient().process(inputImage)</code>. Handle success in <code>addOnSuccessListener</code>; close ImageProxy in <code>addOnCompleteListener</code>.<br>
+        4. <strong>UI update:</strong> Post barcode result to the main thread via <code>Handler(Looper.getMainLooper()).post()</code> or a <code>Channel</code>/<code>StateFlow</code>.<br>
+        5. <strong>Binding:</strong> Bind <code>imageAnalysis</code> alongside <code>preview</code> to <code>viewLifecycleOwner</code>.<br><br>
+        <strong>Key resource management:</strong><br>
+        — <code>imageProxy.close()</code> MUST be called in <code>addOnCompleteListener</code>, not just success.<br>
+        — Shutdown the executor in <code>onDestroyView()</code>: <code>cameraExecutor.shutdown()</code>.<br>
+        — Close the ML Kit client: <code>scanner.close()</code> when done.<br>
+        — Use <code>STRATEGY_KEEP_ONLY_LATEST</code> — if ML Kit takes 100ms per frame and the camera delivers at 30fps, without this strategy you'd build a 3-second backlog in 1 second, causing severe latency.
+      </div>
+    </div>
+
+  </div>
+
+</main>
+</div>
+
+<script>
+/* Page-level JS */
+(function () {
+  /* Sidebar nav click → smooth scroll */
+  document.querySelectorAll('.nav-item[data-section]').forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb  = document.getElementById('aip-topbar');
+      var off = (tb ? tb.offsetHeight : 52) + 16;
+      var y   = target.getBoundingClientRect().top + window.scrollY - off;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+  /* Section fade-in on scroll into view */
+  if ('IntersectionObserver' in window) {
+    var fadeObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('section-visible');
+          fadeObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.section[id], section[id]').forEach(function (s) {
+      fadeObs.observe(s);
+    });
+  }
+}());
+
+/* Quiz accordion */
+function toggleQuiz(el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

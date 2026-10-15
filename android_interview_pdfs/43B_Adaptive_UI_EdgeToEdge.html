@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>43B — Adaptive UI, Edge-to-Edge &amp; Foldables | Android Interview Prep</title>
+<style>
+  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2e3149;--text:#e2e4f0;--muted:#8b90b8;--accent:#7c6af7;--accent2:#56cfb2;--green:#3ecf8e;--red:#ff6b6b;--yellow:#f5c842;--code-bg:#13151f;--radius:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+  .layout{display:flex;min-height: 100vh;}
+  .sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;display:flex;flex-direction:column;gap:4px;}
+  .sidebar-header{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
+  .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
+  .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
+  .main { margin-left: 260px; overflow: visible; min-width: 0; }
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1a1f35 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .hero h1 span{color:var(--accent);}
+  .hero-desc{color:var(--muted);font-size:15px;max-width:640px;}
+  .hero-meta{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px;}
+  .badge-tier1{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25);}
+  .badge-id{background:rgba(86,207,178,.12);color:var(--accent2);border:1px solid rgba(86,207,178,.25);}
+  .badge-hot{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25);}
+  .badge-tier2{background:rgba(86,207,178,.12);color:#56cfb2;border:1px solid rgba(86,207,178,.25);}
+  .section{display:none;padding:40px 48px;max-width:920px;animation:fadeIn .2s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-size:20px;font-weight:800;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(124,106,247,.15);}
+  h3{font-size:15px;font-weight:700;color:var(--accent2);margin:24px 0 10px;}
+  h4{font-size:14px;font-weight:600;color:var(--yellow);margin:18px 0 8px;}
+  p{color:var(--muted);margin-bottom:14px;line-height:1.7;}
+  p strong{color:var(--text);}
+  li{color:var(--muted);margin-bottom:6px;}
+  li strong{color:var(--text);}
+  ul,ol{padding-left:20px;margin-bottom:14px;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:14px 0 20px;}
+  code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:13px;line-height:1.6;color:#c9d1d9;}
+  p code,li code,td code{background:rgba(124,106,247,.12);color:#b8b0ff;padding:2px 6px;border-radius:4px;font-size:12.5px;}
+  .kw{color:#c084fc;}.fn{color:#7dd3fc;}.str{color:#86efac;}.cm{color:#6b7280;font-style:italic;}.cl{color:#fbbf24;}.nu{color:#f9a8d4;}.an{color:#fb923c;}
+  .table-wrap{overflow-x:auto;margin:14px 0 20px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{background:var(--surface2);color:var(--text);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  td:first-child{color:var(--text);font-weight:600;}
+  td strong{color:var(--text);}
+  .callout{border-left:3px solid;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;}
+  .callout-green{border-color:var(--green);background:rgba(62,207,142,.06);}
+  .callout-red{border-color:var(--red);background:rgba(255,107,107,.06);}
+  .callout-yellow{border-color:var(--yellow);background:rgba(245,200,66,.06);}
+  .callout-blue{border-color:var(--accent2);background:rgba(86,207,178,.06);}
+  .callout-purple{border-color:var(--accent);background:rgba(124,106,247,.06);}
+  .callout-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .callout-green .callout-label{color:var(--green);}
+  .callout-red .callout-label{color:var(--red);}
+  .callout-yellow .callout-label{color:var(--yellow);}
+  .callout-blue .callout-label{color:var(--accent2);}
+  .callout-purple .callout-label{color:var(--accent);}
+  .quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  .quiz-q{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;user-select:none;}
+  .quiz-q:hover{background:rgba(255,255,255,.02);}
+  .quiz-q-text{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .quiz-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .diff-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;}
+  .diff-easy{background:rgba(62,207,142,.15);color:var(--green);}
+  .diff-medium{background:rgba(245,200,66,.15);color:var(--yellow);}
+  .diff-hard{background:rgba(255,107,107,.15);color:var(--red);}
+  .toggle-icon{color:var(--muted);font-size:18px;transition:transform .2s;}
+  .quiz-a{display:none;padding:16px 18px;border-top:1px solid var(--border);background:rgba(124,106,247,.04);font-size:13.5px;color:var(--muted);}
+  .quiz-a.open{display:block;}
+  .toggle-icon.open{transform:rotate(180deg);}
+  .answer-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin:12px 0;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7;}
+  .must-mention{display:grid;gap:10px;margin:14px 0;}
+  .must-item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13.5px;}
+  .must-num{background:rgba(124,106,247,.2);color:var(--accent);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .cheat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .cheat-card h4{margin-top:0;margin-bottom:10px;font-size:12px;}
+  .cheat-card pre{margin:0;padding:12px;font-size:11.5px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease;}
+  .nav-buttons{display:flex;gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#6b5ce7;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{background:var(--border);}
+  @media(max-width:768px){.sidebar{display:none;}.section{padding:24px 20px;}.hero{padding:28px 20px 24px;}.hero h1{font-size:22px;}.cheat-grid{grid-template-columns:1fr;}}
+  ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media(max-width:768px){ .section { padding: 24px 16px !important; } }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Scroll-mode: all sections always visible ── */
+  .section { display: block !important; opacity: 1 !important; animation: none !important;
+             padding: 40px 48px; max-width: 920px;
+             border-bottom: 1px solid var(--border); }
+  .section:last-of-type { border-bottom: none; }
+  section[id] { display: block !important; padding: 40px 48px;
+                border-bottom: 1px solid var(--border); }
+  section[id]:last-of-type { border-bottom: none; }
+  .nav-buttons { display: none !important; }
+  /* Both .active (ours) and .aip-nav-active (shared.js) highlight the sidebar item */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.15) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.25) !important;
+    color: var(--accent, #7c6af7) !important;
+  }
+  @media(max-width:768px){
+    .section, section[id] { padding: 24px 16px !important; }
+    .sidebar { display: none !important; }
+  }
+  /* ── Dashboard back link ── */
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border, #2e3149);
+    text-decoration: none;
+    color: var(--muted, #8b90b8);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color .15s;
+    letter-spacing: 0.02em;
+  }
+  .sidebar-back:hover { color: var(--accent, #7c6af7); }
+  .sidebar-back svg { width:14px; height:14px; flex-shrink:0; fill:currentColor; }
+  .hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted, #8b90b8);
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: color .15s;
+    font-weight: 500;
+  }
+  .hero-back:hover { color: var(--accent, #7c6af7); }
+  .hero-back svg { width:12px; height:12px; fill:currentColor; }
+  .checklist-table td:nth-child(3) { font-size: 12.5px; }
+  .step-list { counter-reset: step; list-style: none; padding-left: 0; }
+  .step-list li { counter-increment: step; display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .step-list li::before { content: counter(step); background: rgba(124,106,247,.2); color: var(--accent); font-size: 11px; font-weight: 800; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+
+  
+
+  /* ═══════════════════════════════════════════════════
+     STUDY-FRIENDLY DESIGN ENHANCEMENTS
+  ═══════════════════════════════════════════════════ */
+
+  /* Better section titles */
+  .section-title {
+    font-size: 21px; font-weight: 800;
+    margin-bottom: 28px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    letter-spacing: -0.3px;
+  }
+
+  /* Sidebar — active item highlight: left accent bar */
+  .nav-item.active,
+  .nav-item.aip-nav-active {
+    background: rgba(124,106,247,.13) !important;
+    color: var(--accent) !important;
+    border-left: 3px solid var(--accent);
+    padding-left: 9px !important;
+  }
+  .nav-item.active .nav-num,
+  .nav-item.aip-nav-active .nav-num {
+    background: rgba(124,106,247,.28) !important;
+    color: var(--accent) !important;
+  }
+  /* Default nav items: no left border */
+  .nav-item { border-left: 3px solid transparent; }
+
+  /* Section entry fade-in as user scrolls */
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-visible { animation: sectionIn 0.35s ease forwards; }
+
+  /* Code blocks: better readability */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    overflow-x: auto;
+    margin: 16px 0 22px;
+    font-size: 13px;
+    line-height: 1.65;
+    position: relative;
+  }
+
+  /* Callout improvements */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 18px 0;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* Quiz cards: cleaner */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .quiz-card:hover { border-color: rgba(124,106,247,.4); }
+
+  /* Smooth scroll offset for topbar */
+  .section[id]::before, section[id]::before {
+    content: '';
+    display: block;
+    height: 60px;
+    margin-top: -60px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* Keyboard hint in sidebar */
+  .nav-hint {
+    font-size: 10px; color: var(--muted); text-align: center;
+    padding: 10px 0 4px; margin-top: auto; opacity: .5;
+    letter-spacing: .05em;
+  }
+
+  /* Hide old nav buttons */
+  .nav-buttons { display: none !important; }
+
+  /* Hide old progress bar (shared.js adds its own) */
+  .progress-bar { display: none !important; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .section, section[id] { padding: 28px 18px !important; }
+    .hero { padding: 28px 18px 24px !important; }
+    .hero h1 { font-size: 22px !important; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Reading progress per-section: thin colored bar at section top */
+  .section-read-bar {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 1px;
+    margin-bottom: 20px;
+  }
+  .section.read .section-read-bar { width: 100%; }
+
+</style>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FIXED SIDEBAR — injected by fix_sidebar_fixed.py
+       Sidebar is locked to viewport. Only content scrolls.
+  ═══════════════════════════════════════════════════════════════ -->
+  <style id="aip-fixed-sidebar">
+    /* 1. Body: natural document scroll — no flex, no height constraint */
+    html { min-height: 100%; }
+    body {
+      display: block !important;
+      height: auto !important;
+      min-height: 100vh;
+      overflow-y: auto !important;
+      overflow-x: hidden;
+    }
+
+    /* 2. Layout wrapper: simple block container */
+    .layout { display: block !important; min-height: 100vh; }
+
+    /* 3. SIDEBAR — fixed to viewport, never scrolls with page */
+    .sidebar,
+    nav.sidebar {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;            /* shared.js overrides to 52px after topbar injects */
+      width: 260px !important;
+      min-width: 260px !important;
+      height: 100vh !important;     /* shared.js overrides to calc(100vh - 52px) */
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      z-index: 200 !important;
+      background: var(--surface, #1a1d27) !important;
+      border-right: 1px solid var(--border, #2e3148) !important;
+    }
+
+    /* 4. Main content: pushed right to clear the 260px fixed sidebar */
+    .main,
+    main#mainScroll,
+    main {
+      display: block !important;
+      margin-left: 260px !important;   /* shared.js keeps this in sync */
+      width: auto !important;
+      max-width: none !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+
+    /* 5. Active sidebar highlight */
+    .nav-item.aip-nav-active,
+    nav a.aip-nav-active {
+      background: rgba(124,106,247,0.18) !important;
+      color: #7c6af7 !important;
+      border-left-color: #7c6af7 !important;
+    }
+    .nav-item.aip-nav-active .nav-num {
+      background: rgba(124,106,247,0.28) !important;
+      color: #7c6af7 !important;
+    }
+
+    /* 6. Mobile: sidebar becomes off-canvas drawer */
+    @media (max-width: 768px) {
+      .sidebar, nav.sidebar {
+        left: -280px !important;
+        top: 0 !important;
+        height: 100vh !important;
+        z-index: 9000 !important;
+        transition: left 0.28s cubic-bezier(0.4,0,0.2,1) !important;
+        box-shadow: 4px 0 32px rgba(0,0,0,0.7) !important;
+      }
+      .sidebar.aip-open, nav.sidebar.aip-open {
+        left: 0 !important;
+      }
+      .main, main#mainScroll, main {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">43B · Adaptive UI &amp; Edge-to-Edge</div>
+  <a class="sidebar-back" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item" href="#s1" data-section="s1"><span class="nav-num">1</span> Overview &amp; Why It Matters</a>
+  <a class="nav-item" href="#s2" data-section="s2"><span class="nav-num">2</span> Edge-to-Edge &amp; Insets</a>
+  <a class="nav-item" href="#s3" data-section="s3"><span class="nav-num">3</span> WindowSizeClass</a>
+  <a class="nav-item" href="#s4" data-section="s4"><span class="nav-num">4</span> SupportingPane &amp; Foldables</a>
+  <a class="nav-item" href="#s5" data-section="s5"><span class="nav-num">5</span> Predictive Back</a>
+  <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Canonical Layouts</a>
+  <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Pitfalls &amp; Production Bugs</a>
+  <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Interview Framework</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Flash Cards</a>
+  <a class="nav-item" href="#s10" data-section="s10"><span class="nav-num">10</span> Interview Questions</a>
+</nav>
+
+<main class="main" id="mainScroll">
+  <!-- HERO -->
+  <div class="hero">
+    <a class="hero-back" href="index.html">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      &#8592; Back to Dashboard
+    </a>
+    <div class="hero-tag">&#9679; Android Interview Prep</div>
+    <h1><span>43B</span> — Adaptive UI, Edge-to-Edge &amp; Foldables</h1>
+    <p class="hero-desc">Edge-to-edge enforcement (mandatory from API 35), WindowInsets handling, WindowSizeClass for adaptive layouts, SupportingPaneScaffold for foldables/tablets, predictive back gesture, and canonical layout patterns.</p>
+    <div class="hero-meta">
+      <span class="badge badge-id">ID: 43B</span>
+      <span class="badge badge-tier2">&#9672; Tier 2</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S1 — OVERVIEW & WHY IT MATTERS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-title"><div class="section-icon">&#128161;</div>1. Overview &amp; Why It Matters</div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">&#127775; In Plain Words</div>
+      <p style="margin:0;">"With Android 15 making edge-to-edge mandatory, and with foldables + tablets having 20%+ of screen time, adaptive UI is no longer optional." Your app will be drawn behind the status bar and navigation bar whether you like it or not, and it will be opened in windows you never designed for: a 7.6" unfolded screen, a split-screen window, a ChromeOS desktop window, a tablet in landscape.</p>
+    </div>
+
+    <h3>The Three Forces</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Force</th><th>What changed</th><th>What breaks if ignored</th></tr></thead>
+        <tbody>
+          <tr><td>1. Edge-to-edge enforcement</td><td>Apps <strong>targeting API 35</strong> running on Android 15 are drawn edge-to-edge by default. The system bars are transparent/translucent and your window extends behind them.</td><td>Toolbars under the status bar, buttons under the gesture/3-button nav bar, input fields under the keyboard.</td></tr>
+          <tr><td>2. Foldable &amp; large-screen guidelines</td><td>Google Play large-screen quality tiers, Android 16 ignoring orientation / resizability restrictions on large screens for apps targeting API 36, and a growing share of tablets, foldables and ChromeOS devices.</td><td>Stretched phone UIs, letterboxing, a 10" screen showing one narrow column, poor Play store ranking on large-screen devices.</td></tr>
+          <tr><td>3. Predictive back gesture</td><td>The user can peek at the destination (home screen, previous activity, previous screen) while swiping back, before committing.</td><td>Overridden <code>onBackPressed()</code> / key handling disables the animation; custom back logic feels broken next to system apps.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; Be Precise About the Trigger</div>
+      <p style="margin:0;">Enforcement is tied to <code>targetSdkVersion = 35</code> <em>and</em> a device running Android 15+. An app targeting 34 on an Android 15 device is not forced edge-to-edge. The temporary opt-out attribute (<code>android:windowOptOutEdgeToEdgeEnforcement</code>) is deprecated and is not honoured once you target API 36. Saying "it's a trap on target-SDK bump day" is a good senior-level framing.</p>
+    </div>
+
+    <h3>One Mental Model for All Three</h3>
+    <p>Edge-to-edge, adaptive layouts and predictive back are all the same discipline: <strong>stop assuming the window is a fixed, fully-owned rectangle</strong>. The system tells you (1) how much of the window is obscured (insets), (2) how big the window is (window size class), (3) whether the window is folded (FoldingFeature), and (4) whether the user is mid-gesture (back progress). A good app reacts to those signals instead of hardcoding assumptions.</p>
+
+    <h3>What Senior Interviewers Ask</h3>
+    <div class="answer-box">"How do you make your app work on a foldable without duplicating layouts?"</div>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>One UI, many windows.</strong> Compose the screen from panes/slots; the <em>window size class</em> decides how many panes show at once. No <code>layout-sw600dp</code>-style duplication of logic.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>State outside the layout.</strong> Selected item, scroll position and filters live in a ViewModel / saved state so folding, rotating or resizing doesn't reset them.</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Fold-awareness only where it matters.</strong> Use <code>WindowInfoTracker</code> / <code>FoldingFeature</code> for tabletop and book postures, and let the adaptive scaffolds avoid the hinge.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Test across window sizes</strong> using the Resizable emulator, <code>@PreviewScreenSizes</code>, and UI tests with overridden window sizes.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S2 — EDGE-TO-EDGE
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-title"><div class="section-icon">&#128241;</div>2. Edge-to-Edge &amp; WindowInsets</div>
+
+    <h3>How It Works</h3>
+    <p>Historically the decor view <em>fit</em> system windows: the framework padded your content so it never touched the status bar or nav bar. Edge-to-edge flips this: you tell the window <strong>not</strong> to fit system windows, your content draws under the bars, and <strong>you</strong> receive <em>insets</em> describing what is covered, then pad accordingly.</p>
+
+    <pre><code><span class="cm">// Classic API (still valid, works on any AndroidX-supported API level)</span>
+<span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+    <span class="cl">WindowCompat</span>.<span class="fn">setDecorFitsSystemWindows</span>(window, <span class="kw">false</span>)
+    <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+    <span class="fn">setContent</span> { <span class="cl">AppRoot</span>() }
+}</code></pre>
+
+    <p>In practice prefer <code>enableEdgeToEdge()</code> from <code>androidx.activity</code> (1.8+). It calls the above, makes the bars transparent, picks icon colors from the theme (light/dark), and applies the correct 3-button-nav scrim. Call it <strong>before</strong> <code>super.onCreate()</code>.</p>
+
+    <pre><code><span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="fn">enableEdgeToEdge</span>(
+            statusBarStyle = <span class="cl">SystemBarStyle</span>.<span class="fn">auto</span>(
+                lightScrim = android.graphics.<span class="cl">Color</span>.<span class="cl">TRANSPARENT</span>,
+                darkScrim  = android.graphics.<span class="cl">Color</span>.<span class="cl">TRANSPARENT</span>
+            ),
+            navigationBarStyle = <span class="cl">SystemBarStyle</span>.<span class="fn">auto</span>(
+                lightScrim = android.graphics.<span class="cl">Color</span>.<span class="fn">argb</span>(<span class="nu">0xE6</span>, <span class="nu">0xFF</span>, <span class="nu">0xFF</span>, <span class="nu">0xFF</span>),
+                darkScrim  = android.graphics.<span class="cl">Color</span>.<span class="fn">argb</span>(<span class="nu">0x80</span>, <span class="nu">0x1B</span>, <span class="nu">0x1B</span>, <span class="nu">0x1B</span>)
+            )
+        )
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> { <span class="cl">AppTheme</span> { <span class="cl">AppRoot</span>() } }
+    }
+}</code></pre>
+
+    <h3>WindowInsets Types</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Insets</th><th>Contains</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><code>statusBars</code></td><td>Status bar area</td><td>Top app bars, hero images that should stop below the clock</td></tr>
+          <tr><td><code>navigationBars</code></td><td>3-button or gesture nav bar</td><td>Bottom bars, FABs, last list item</td></tr>
+          <tr><td><code>systemBars</code></td><td>statusBars + navigationBars + captionBar</td><td>Default <code>Scaffold</code> content insets</td></tr>
+          <tr><td><code>displayCutout</code></td><td>Notch / punch-hole / fold hinge cutout</td><td>Landscape: keep content out of the cutout</td></tr>
+          <tr><td><code>ime</code></td><td>On-screen keyboard (animated)</td><td>Text fields, chat inputs, bottom sheets with inputs</td></tr>
+          <tr><td><code>safeDrawing</code></td><td>systemBars + ime + displayCutout</td><td>"Nothing that I draw must be hidden" — the safe default for interactive content</td></tr>
+          <tr><td><code>safeGestures</code></td><td>System gesture areas (edge swipes)</td><td>Avoid placing swipe-sensitive widgets (sliders, carousels) at screen edges</td></tr>
+          <tr><td><code>safeContent</code></td><td>safeDrawing + safeGestures</td><td>Strictest: content that is both fully visible and gesture-safe</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Handling Insets in Compose</h3>
+    <p>Compose exposes insets as <code>WindowInsets</code>. <code>Modifier.windowInsetsPadding(...)</code> pads by the insets <strong>and marks them as consumed</strong> for descendants, which is what prevents double padding. <code>consumeWindowInsets(paddingValues)</code> tells children "this much has already been padded" without adding padding itself. That is the pattern needed when padding came from somewhere else (e.g. <code>Scaffold</code>'s <code>innerPadding</code>).</p>
+
+    <pre><code><span class="cm">// 1. Simple screen without Scaffold: pad by everything that could hide content</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">SettingsScreen</span>() {
+    <span class="cl">Column</span>(
+        <span class="cl">Modifier</span>
+            .<span class="fn">fillMaxSize</span>()
+            .<span class="fn">windowInsetsPadding</span>(<span class="cl">WindowInsets</span>.safeDrawing)
+            .<span class="fn">padding</span>(<span class="nu">16</span>.dp)
+    ) { <span class="cm">/* content */</span> }
+}
+
+<span class="cm">// 2. Scaffold + IME: consume what Scaffold already padded, then add the IME on top</span>
+<span class="an">@OptIn</span>(<span class="cl">ExperimentalMaterial3Api</span>::<span class="kw">class</span>)
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ChatScreen</span>(messages: <span class="cl">List</span>&lt;<span class="cl">Message</span>&gt;, onSend: (<span class="cl">String</span>) -&gt; <span class="cl">Unit</span>) {
+    <span class="cl">Scaffold</span>(
+        topBar = { <span class="cl">TopAppBar</span>(title = { <span class="cl">Text</span>(<span class="str">"Chat"</span>) }) }  <span class="cm">// M3 bar pads for the status bar itself</span>
+    ) { innerPadding -&gt;
+        <span class="cl">Column</span>(
+            <span class="cl">Modifier</span>
+                .<span class="fn">fillMaxSize</span>()
+                .<span class="fn">padding</span>(innerPadding)               <span class="cm">// systemBars from Scaffold</span>
+                .<span class="fn">consumeWindowInsets</span>(innerPadding)   <span class="cm">// tell children it's handled</span>
+                .<span class="fn">imePadding</span>()                        <span class="cm">// only the part of the IME above the nav bar</span>
+        ) {
+            <span class="cl">LazyColumn</span>(
+                <span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>),
+                contentPadding = <span class="cl">PaddingValues</span>(<span class="nu">16</span>.dp),
+                reverseLayout = <span class="kw">true</span>
+            ) { items(messages, key = { it.id }) { <span class="cl">MessageRow</span>(it) } }
+
+            <span class="cl">MessageInput</span>(onSend)
+        }
+    }
+}
+
+<span class="cm">// 3. Scrolling content that should scroll UNDER the bars but stop clear of them at rest</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">FeedList</span>(items: <span class="cl">List</span>&lt;<span class="cl">Post</span>&gt;) {
+    <span class="cl">LazyColumn</span>(
+        <span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>(),
+        contentPadding = <span class="cl">WindowInsets</span>.safeDrawing.<span class="fn">asPaddingValues</span>()
+    ) { items(items, key = { it.id }) { <span class="cl">PostCard</span>(it) } }
+}</code></pre>
+
+    <h3>Handling Insets in Views</h3>
+    <pre><code><span class="cl">ViewCompat</span>.<span class="fn">setOnApplyWindowInsetsListener</span>(binding.root) { view, insets -&gt;
+    <span class="kw">val</span> bars = insets.<span class="fn">getInsets</span>(
+        <span class="cl">WindowInsetsCompat</span>.<span class="cl">Type</span>.<span class="fn">systemBars</span>() <span class="kw">or</span> <span class="cl">WindowInsetsCompat</span>.<span class="cl">Type</span>.<span class="fn">displayCutout</span>()
+    )
+    <span class="kw">val</span> ime = insets.<span class="fn">getInsets</span>(<span class="cl">WindowInsetsCompat</span>.<span class="cl">Type</span>.<span class="fn">ime</span>())
+    view.<span class="fn">updatePadding</span>(
+        left = bars.left, top = bars.top, right = bars.right,
+        bottom = <span class="fn">maxOf</span>(bars.bottom, ime.bottom)   <span class="cm">// IME already includes the nav bar height</span>
+    )
+    <span class="cl">WindowInsetsCompat</span>.<span class="cl">CONSUMED</span>
+}</code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">&#128221; Manifest Detail</div>
+      <p style="margin:0;">Keep <code>android:windowSoftInputMode="adjustResize"</code> on activities with text input. Mixing <code>adjustPan</code> with <code>imePadding()</code> makes the framework pan <em>and</em> your layout pad, so content jumps twice.</p>
+    </div>
+
+    <h3>What Breaks If You Don't Handle Insets</h3>
+    <ul>
+      <li><strong>Content hidden behind the keyboard</strong> — the focused text field is below the IME because nobody applied <code>ime</code> insets.</li>
+      <li><strong>Content hidden behind the nav bar</strong> — a bottom button is untappable because the gesture/3-button bar sits on top of it.</li>
+      <li><strong>Top bar under the status bar</strong> — title overlaps the clock/battery icons.</li>
+      <li><strong>Landscape cutout overlap</strong> — text clipped by a notch because <code>displayCutout</code> was ignored.</li>
+      <li><strong>Unreadable system icons</strong> — dark icons on a dark app bar because the bar style wasn't configured for your theme.</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S3 — WINDOW SIZE CLASS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-title"><div class="section-icon">&#128208;</div>3. WindowSizeClass</div>
+
+    <h3>The Breakpoints</h3>
+    <p>A <code>WindowSizeClass</code> buckets the <strong>current window</strong> (not the physical screen) into coarse categories, independently for width and height. It updates when the window is resized: split-screen, fold/unfold, desktop windowing, rotation.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Class</th><th>Width</th><th>Height</th><th>Typical device</th></tr></thead>
+        <tbody>
+          <tr><td>Compact</td><td>&lt; 600dp</td><td>&lt; 480dp</td><td>Phone portrait / phone landscape (height)</td></tr>
+          <tr><td>Medium</td><td>600dp – &lt; 840dp</td><td>480dp – &lt; 900dp</td><td>Small tablet portrait, unfolded foldable portrait</td></tr>
+          <tr><td>Expanded</td><td>&ge; 840dp</td><td>&ge; 900dp</td><td>Tablet landscape, large unfolded foldable, desktop window</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; Newer Breakpoints</div>
+      <p style="margin:0;">Recent Material 3 adaptive / WindowManager releases add <code>Large</code> (&ge; 1200dp) and <code>ExtraLarge</code> (&ge; 1600dp) width breakpoints for desktop-class windows. The three above are the core ones every interview expects. Width is what most layout decisions key off; height matters for landscape phones and tabletop mode.</p>
+    </div>
+
+    <h3>Dependencies &amp; API</h3>
+    <pre><code><span class="cm">// build.gradle.kts</span>
+implementation(<span class="str">"androidx.compose.material3:material3-window-size-class"</span>)   <span class="cm">// calculateWindowSizeClass(activity)</span>
+implementation(<span class="str">"androidx.compose.material3.adaptive:adaptive"</span>)               <span class="cm">// currentWindowAdaptiveInfo()</span>
+implementation(<span class="str">"androidx.compose.material3.adaptive:adaptive-layout"</span>)        <span class="cm">// ListDetail / SupportingPane scaffolds</span>
+implementation(<span class="str">"androidx.compose.material3.adaptive:adaptive-navigation"</span>)    <span class="cm">// pane navigators</span>
+implementation(<span class="str">"androidx.window:window"</span>)                                       <span class="cm">// WindowInfoTracker, FoldingFeature</span></code></pre>
+
+    <p><code>calculateWindowSizeClass(activity)</code> ships in <code>material3-window-size-class</code>; the adaptive library offers <code>currentWindowAdaptiveInfo().windowSizeClass</code>, which is the same idea and does not require an <code>Activity</code> reference (better for previews and tests).</p>
+
+    <h3>Single-Pane vs Two-Pane + Adaptive Navigation</h3>
+    <p>Rule of thumb: <strong>Compact → bottom navigation bar + single pane. Medium → navigation rail + single (or two) pane. Expanded → navigation rail (or drawer) + two panes.</strong></p>
+
+    <pre><code><span class="kw">enum class</span> <span class="cl">HomeDestination</span>(<span class="kw">val</span> label: <span class="cl">String</span>, <span class="kw">val</span> icon: <span class="cl">ImageVector</span>) {
+    <span class="cl">Catalog</span>(<span class="str">"Catalog"</span>, <span class="cl">Icons</span>.<span class="cl">Default</span>.<span class="cl">Storefront</span>),
+    <span class="cl">Favorites</span>(<span class="str">"Favorites"</span>, <span class="cl">Icons</span>.<span class="cl">Default</span>.<span class="cl">Favorite</span>),
+    <span class="cl">Profile</span>(<span class="str">"Profile"</span>, <span class="cl">Icons</span>.<span class="cl">Default</span>.<span class="cl">Person</span>)
+}
+
+<span class="kw">class</span> <span class="cl">MainActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="an">@OptIn</span>(<span class="cl">ExperimentalMaterial3WindowSizeClassApi</span>::<span class="kw">class</span>)
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="fn">enableEdgeToEdge</span>()
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="cl">AppTheme</span> {
+                <span class="kw">val</span> sizeClass = <span class="fn">calculateWindowSizeClass</span>(<span class="kw">this</span>)   <span class="cm">// recomposes on resize / fold</span>
+                <span class="cl">HomeScreen</span>(widthClass = sizeClass.widthSizeClass)
+            }
+        }
+    }
+}
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">HomeScreen</span>(widthClass: <span class="cl">WindowWidthSizeClass</span>) {
+    <span class="kw">var</span> selected <span class="kw">by</span> <span class="fn">rememberSaveable</span> { <span class="fn">mutableStateOf</span>(<span class="cl">HomeDestination</span>.<span class="cl">Catalog</span>) }
+    <span class="kw">val</span> useRail = widthClass != <span class="cl">WindowWidthSizeClass</span>.<span class="cl">Compact</span>
+
+    <span class="kw">if</span> (!useRail) {
+        <span class="cm">// COMPACT: bottom bar + single pane</span>
+        <span class="cl">Scaffold</span>(
+            bottomBar = {
+                <span class="cl">NavigationBar</span> {                         <span class="cm">// pads for the nav bar inset itself</span>
+                    <span class="cl">HomeDestination</span>.entries.<span class="fn">forEach</span> { dest -&gt;
+                        <span class="cl">NavigationBarItem</span>(
+                            selected = dest == selected,
+                            onClick = { selected = dest },
+                            icon = { <span class="cl">Icon</span>(dest.icon, contentDescription = <span class="kw">null</span>) },
+                            label = { <span class="cl">Text</span>(dest.label) }
+                        )
+                    }
+                }
+            }
+        ) { inner -&gt;
+            <span class="cl">Box</span>(<span class="cl">Modifier</span>.<span class="fn">padding</span>(inner).<span class="fn">consumeWindowInsets</span>(inner)) {
+                <span class="cl">DestinationContent</span>(selected, twoPane = <span class="kw">false</span>)
+            }
+        }
+    } <span class="kw">else</span> {
+        <span class="cm">// MEDIUM / EXPANDED: rail on the start edge, content fills the rest</span>
+        <span class="cl">Row</span>(<span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()) {
+            <span class="cl">NavigationRail</span> {                           <span class="cm">// pads for status/nav/cutout inset itself</span>
+                <span class="cl">Spacer</span>(<span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>))
+                <span class="cl">HomeDestination</span>.entries.<span class="fn">forEach</span> { dest -&gt;
+                    <span class="cl">NavigationRailItem</span>(
+                        selected = dest == selected,
+                        onClick = { selected = dest },
+                        icon = { <span class="cl">Icon</span>(dest.icon, contentDescription = <span class="kw">null</span>) },
+                        label = { <span class="cl">Text</span>(dest.label) }
+                    )
+                }
+                <span class="cl">Spacer</span>(<span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>))
+            }
+            <span class="cl">Box</span>(
+                <span class="cl">Modifier</span>
+                    .<span class="fn">weight</span>(<span class="nu">1f</span>)
+                    .<span class="fn">fillMaxHeight</span>()
+                    .<span class="fn">windowInsetsPadding</span>(
+                        <span class="cl">WindowInsets</span>.safeDrawing.<span class="fn">only</span>(<span class="cl">WindowInsetsSides</span>.<span class="cl">End</span> + <span class="cl">WindowInsetsSides</span>.<span class="cl">Vertical</span>)
+                    )
+            ) {
+                <span class="cl">DestinationContent</span>(selected, twoPane = widthClass == <span class="cl">WindowWidthSizeClass</span>.<span class="cl">Expanded</span>)
+            }
+        }
+    }
+}
+
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">DestinationContent</span>(dest: <span class="cl">HomeDestination</span>, twoPane: <span class="cl">Boolean</span>) {
+    <span class="kw">when</span> (dest) {
+        <span class="cl">HomeDestination</span>.<span class="cl">Catalog</span> -&gt; <span class="kw">if</span> (twoPane) <span class="cl">CatalogTwoPane</span>() <span class="kw">else</span> <span class="cl">CatalogList</span>()
+        <span class="cl">HomeDestination</span>.<span class="cl">Favorites</span> -&gt; <span class="cl">FavoritesScreen</span>()
+        <span class="cl">HomeDestination</span>.<span class="cl">Profile</span> -&gt; <span class="cl">ProfileScreen</span>()
+    }
+}</code></pre>
+
+    <h4>The Shortcut: NavigationSuiteScaffold</h4>
+    <p>Material 3 adaptive ships a scaffold that makes exactly this switch for you (bottom bar, rail, or drawer based on window size / posture):</p>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">HomeScreenSuite</span>() {
+    <span class="kw">var</span> selected <span class="kw">by</span> <span class="fn">rememberSaveable</span> { <span class="fn">mutableStateOf</span>(<span class="cl">HomeDestination</span>.<span class="cl">Catalog</span>) }
+    <span class="cl">NavigationSuiteScaffold</span>(
+        navigationSuiteItems = {
+            <span class="cl">HomeDestination</span>.entries.<span class="fn">forEach</span> { dest -&gt;
+                <span class="fn">item</span>(
+                    selected = dest == selected,
+                    onClick = { selected = dest },
+                    icon = { <span class="cl">Icon</span>(dest.icon, contentDescription = <span class="kw">null</span>) },
+                    label = { <span class="cl">Text</span>(dest.label) }
+                )
+            }
+        }
+    ) { <span class="cl">DestinationContent</span>(selected, twoPane = <span class="kw">false</span>) }
+}</code></pre>
+
+    <div class="callout callout-green">
+      <div class="callout-label">&#9989; Key Rules</div>
+      <ul style="margin:0;">
+        <li>Branch on <strong>size class</strong>, not on "is tablet" or device model.</li>
+        <li>Hoist state (<code>selected</code>) above the branch so switching layouts on fold/rotate preserves it.</li>
+        <li>Don't read <code>LocalConfiguration.current.screenWidthDp</code> for layout decisions: it describes the configuration, not necessarily the current window in multi-window mode.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S4 — SUPPORTING PANE & FOLDABLES
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-title"><div class="section-icon">&#128214;</div>4. SupportingPaneScaffold &amp; Foldables</div>
+
+    <h3>The Scaffold Family</h3>
+    <ul>
+      <li><strong><code>ThreePaneScaffold</code></strong> — the low-level building block: up to three panes (Primary, Secondary, Tertiary) with an <em>adapt strategy</em> for each (show, hide, reflow into a sheet / levitated).</li>
+      <li><strong><code>ListDetailPaneScaffold</code></strong> — list + detail (+ optional extra) built on it.</li>
+      <li><strong><code>SupportingPaneScaffold</code></strong> — one <em>main</em> pane plus a <em>supporting</em> pane (filters, related items, notes, a chat sidebar) and an optional extra pane.</li>
+    </ul>
+    <p>These scaffolds come from <code>androidx.compose.material3.adaptive</code> and are the supported successor to the older <strong>Accompanist adaptive</strong> utilities (<code>TwoPane</code>, <code>DisplayFeature</code> helpers). They are fold-aware by default: the pane directive they derive from <code>currentWindowAdaptiveInfo()</code> avoids placing content across a hinge that separates the screen.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scaffold</th><th>Panes</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td>ListDetailPaneScaffold</td><td>List · Detail · (Extra)</td><td>Selecting an item <em>changes what you're looking at</em> (email, product, chat)</td></tr>
+          <tr><td>SupportingPaneScaffold</td><td>Main · Supporting · (Extra)</td><td>Secondary content <em>supports</em> a primary task (document + comments, product + recommendations)</td></tr>
+          <tr><td>ThreePaneScaffold</td><td>Custom roles</td><td>You need a custom arrangement or custom adapt strategies</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Detecting the Hinge: WindowInfoTracker &amp; FoldingFeature</h3>
+    <p><code>WindowInfoTracker</code> (Jetpack WindowManager) emits a <code>WindowLayoutInfo</code> flow containing a list of <code>DisplayFeature</code>s; the one you care about is <code>FoldingFeature</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Property</th><th>Values</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>state</code></td><td><code>FLAT</code> / <code>HALF_OPENED</code></td><td>Fully open vs. partially folded (laptop-like angle)</td></tr>
+          <tr><td><code>orientation</code></td><td><code>HORIZONTAL</code> / <code>VERTICAL</code></td><td>Direction of the hinge line</td></tr>
+          <tr><td><code>isSeparating</code></td><td>Boolean</td><td>Whether the fold splits the window into two logical areas</td></tr>
+          <tr><td><code>occlusionType</code></td><td><code>NONE</code> / <code>FULL</code></td><td>Whether the hinge hides pixels</td></tr>
+          <tr><td><code>bounds</code></td><td><code>Rect</code></td><td>Hinge rectangle in window coordinates</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Postures</h4>
+    <ul>
+      <li><strong>Tabletop</strong> = <code>HALF_OPENED</code> + <code>HORIZONTAL</code> hinge. Device is like a tiny laptop: put media / viewport on the top half, controls on the bottom half.</li>
+      <li><strong>Book</strong> = <code>HALF_OPENED</code> + <code>VERTICAL</code> hinge. Device is like a book: two side-by-side pages — list on the left, detail on the right, never straddling the hinge.</li>
+      <li><strong>Flat</strong> = <code>FLAT</code>: treat as a normal large (Medium/Expanded) window.</li>
+    </ul>
+
+    <h3>Product Catalog Adapted for Foldables</h3>
+    <pre><code><span class="cm">// ---- Posture model (the only fold-aware code in the app) ----</span>
+<span class="kw">sealed interface</span> <span class="cl">FoldPosture</span> {
+    <span class="kw">data object</span> <span class="cl">Flat</span> : <span class="cl">FoldPosture</span>
+    <span class="kw">data class</span> <span class="cl">TableTop</span>(<span class="kw">val</span> hingeTopPx: <span class="cl">Int</span>) : <span class="cl">FoldPosture</span>
+    <span class="kw">data class</span> <span class="cl">Book</span>(<span class="kw">val</span> hingeLeftPx: <span class="cl">Int</span>) : <span class="cl">FoldPosture</span>
+}
+
+<span class="kw">fun</span> <span class="cl">WindowLayoutInfo</span>.<span class="fn">toPosture</span>(): <span class="cl">FoldPosture</span> {
+    <span class="kw">val</span> fold = displayFeatures.<span class="fn">filterIsInstance</span>&lt;<span class="cl">FoldingFeature</span>&gt;().<span class="fn">firstOrNull</span>()
+        ?: <span class="kw">return</span> <span class="cl">FoldPosture</span>.<span class="cl">Flat</span>
+    <span class="kw">return when</span> {
+        fold.state == <span class="cl">FoldingFeature</span>.<span class="cl">State</span>.<span class="cl">HALF_OPENED</span> &amp;&amp;
+            fold.orientation == <span class="cl">FoldingFeature</span>.<span class="cl">Orientation</span>.<span class="cl">HORIZONTAL</span> -&gt; <span class="cl">FoldPosture</span>.<span class="cl">TableTop</span>(fold.bounds.top)
+        fold.state == <span class="cl">FoldingFeature</span>.<span class="cl">State</span>.<span class="cl">HALF_OPENED</span> &amp;&amp;
+            fold.orientation == <span class="cl">FoldingFeature</span>.<span class="cl">Orientation</span>.<span class="cl">VERTICAL</span> -&gt; <span class="cl">FoldPosture</span>.<span class="cl">Book</span>(fold.bounds.left)
+        <span class="kw">else</span> -&gt; <span class="cl">FoldPosture</span>.<span class="cl">Flat</span>
+    }
+}
+
+<span class="cm">// ---- Activity: observe the hinge via WindowInfoTracker ----</span>
+<span class="kw">class</span> <span class="cl">CatalogActivity</span> : <span class="cl">ComponentActivity</span>() {
+
+    <span class="kw">private val</span> posture: <span class="cl">StateFlow</span>&lt;<span class="cl">FoldPosture</span>&gt; <span class="kw">by</span> <span class="fn">lazy</span> {
+        <span class="cl">WindowInfoTracker</span>.<span class="fn">getOrCreate</span>(<span class="kw">this</span>)
+            .<span class="fn">windowLayoutInfo</span>(<span class="kw">this</span>)
+            .<span class="fn">map</span> { it.<span class="fn">toPosture</span>() }
+            .<span class="fn">stateIn</span>(lifecycleScope, <span class="cl">SharingStarted</span>.<span class="fn">WhileSubscribed</span>(<span class="nu">5_000</span>), <span class="cl">FoldPosture</span>.<span class="cl">Flat</span>)
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="fn">enableEdgeToEdge</span>()
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContent</span> {
+            <span class="cl">AppTheme</span> {
+                <span class="kw">val</span> currentPosture <span class="kw">by</span> posture.<span class="fn">collectAsStateWithLifecycle</span>()
+                <span class="cl">ProductCatalogScreen</span>(currentPosture)
+            }
+        }
+    }
+}
+
+<span class="cm">// ---- UI: one screen, three arrangements ----</span>
+<span class="an">@OptIn</span>(<span class="cl">ExperimentalMaterial3AdaptiveApi</span>::<span class="kw">class</span>)
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ProductCatalogScreen</span>(
+    posture: <span class="cl">FoldPosture</span>,
+    viewModel: <span class="cl">CatalogViewModel</span> = <span class="fn">viewModel</span>()
+) {
+    <span class="kw">val</span> state <span class="kw">by</span> viewModel.uiState.<span class="fn">collectAsStateWithLifecycle</span>()
+
+    <span class="kw">when</span> (posture) {
+        <span class="cm">// Tabletop: product hero on the top half, controls on the bottom half</span>
+        <span class="kw">is</span> <span class="cl">FoldPosture</span>.<span class="cl">TableTop</span> -&gt; <span class="cl">Column</span>(<span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>().<span class="fn">safeDrawingPadding</span>()) {
+            <span class="cl">ProductHero</span>(state.selected, <span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>))
+            <span class="cl">ProductControls</span>(state.selected, <span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>))
+        }
+
+        <span class="cm">// Flat or Book: the scaffold picks 1 or 2 panes and avoids the hinge itself</span>
+        <span class="kw">else</span> -&gt; {
+            <span class="kw">val</span> navigator = <span class="fn">rememberSupportingPaneScaffoldNavigator</span>&lt;<span class="cl">Any</span>&gt;()
+            <span class="cl">SupportingPaneScaffold</span>(
+                directive = navigator.scaffoldDirective,   <span class="cm">// derived from window size + posture</span>
+                value = navigator.scaffoldValue,
+                mainPane = {
+                    <span class="cl">AnimatedPane</span> {
+                        <span class="cl">ProductGrid</span>(
+                            products = state.products,
+                            onSelect = viewModel::<span class="fn">select</span>
+                        )
+                    }
+                },
+                supportingPane = {
+                    <span class="cl">AnimatedPane</span> {
+                        <span class="cl">FiltersAndRecommendations</span>(
+                            filters = state.filters,
+                            recommended = state.recommended,
+                            onFilterChange = viewModel::<span class="fn">updateFilter</span>
+                        )
+                    }
+                }
+            )
+        }
+    }
+}</code></pre>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">&#127775; Senior Insight</div>
+      <p style="margin:0;">Notice what is <em>not</em> in the code: no device checks, no <code>if (isFoldable)</code>. The selected product, filters and recommendations live in the <code>ViewModel</code>; the composable only decides how to <em>arrange</em> them. On a plain phone the same scaffold collapses to a single pane.</p>
+    </div>
+
+    <p>Also available in the adaptive library: <code>currentWindowAdaptiveInfo().windowPosture</code> exposes <code>isTabletop</code> and the separating hinge bounds without handwriting the <code>toPosture()</code> mapping. Use <code>window-testing</code>'s <code>WindowLayoutInfoPublisherRule</code> / <code>TestWindowLayoutInfo</code> to fake folds in tests.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S5 — PREDICTIVE BACK
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-title"><div class="section-icon">&#8592;</div>5. Predictive Back Gesture</div>
+
+    <h3>What It Is</h3>
+    <p>With the back gesture, the user can drag from the screen edge and see an <strong>animated preview of the destination</strong> (the home screen, the previous activity, the previous screen) <em>before</em> they release. Releasing past the threshold commits; releasing before it cancels and the UI snaps back. This requires the system to know — <strong>before</strong> the gesture finishes — what back will do. That is why it needs an explicit opt-in and a callback-based model instead of "intercept <code>onBackPressed()</code> and decide at the last moment".</p>
+
+    <h3>How to Opt In</h3>
+    <pre><code><span class="cm">&lt;!-- AndroidManifest.xml: application-wide (or per-activity) --&gt;</span>
+&lt;application
+    android:enableOnBackInvokedCallback=<span class="str">"true"</span>
+    ... &gt;</code></pre>
+
+    <ul>
+      <li>Android 13 (API 33): available behind a developer option; opt-in flag introduced.</li>
+      <li>Android 14–15: system animations (back-to-home, cross-activity, cross-task) for opted-in apps; in-app custom animations via the new callback APIs.</li>
+      <li>Targeting Android 16 (API 36): predictive back is enabled by default; you can still set the flag to <code>false</code> to opt out while you migrate.</li>
+    </ul>
+
+    <h3>The Callback Model</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>API</th><th>Status</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>Activity.onBackPressed()</code> / <code>KEYCODE_BACK</code> handling</td><td>Deprecated; <strong>not called</strong> when predictive back is enabled</td><td>Overriding it silently breaks the gesture and your custom logic</td></tr>
+          <tr><td><code>OnBackInvokedDispatcher</code> (platform, API 33+)</td><td>Platform API</td><td><code>registerOnBackInvokedCallback(priority, callback)</code>; <code>OnBackAnimationCallback</code> on API 34+ receives start/progress/cancel/invoke</td></tr>
+          <tr><td><code>OnBackPressedCallback</code> (androidx.activity)</td><td>Supported; the recommended bridge</td><td>Backed by the platform dispatcher; in 1.8+ also has <code>handleOnBackStarted/Progressed/Cancelled</code></td></tr>
+          <tr><td>Compose <code>BackHandler</code></td><td>Works</td><td>Intercepts back; the system shows <strong>no animated preview</strong> while a handler is enabled because the app owns the outcome</td></tr>
+          <tr><td>Compose <code>PredictiveBackHandler</code></td><td>Supported (activity-compose 1.8+)</td><td>Gives you a <code>Flow&lt;BackEventCompat&gt;</code> of gesture progress for custom animations</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-yellow">
+      <div class="callout-label">&#9888; Terminology Trap</div>
+      <p style="margin:0;">It is the <em>old</em> patterns — overriding <code>onBackPressed()</code>, intercepting <code>KEYCODE_BACK</code> — that conflict with predictive back. <code>OnBackPressedCallback</code> itself is not deprecated; it is the AndroidX way to hook into <code>OnBackInvokedDispatcher</code>. The thing to avoid is an <em>always-enabled</em> callback that swallows back (disabling the system animation) when it has nothing meaningful to intercept. Enable callbacks only while you really have state to unwind.</p>
+    </div>
+
+    <h3>Code</h3>
+    <pre><code><span class="cm">// ❌ Legacy — breaks predictive back (never invoked when the flag is on)</span>
+<span class="kw">override fun</span> <span class="fn">onBackPressed</span>() {
+    <span class="kw">if</span> (viewModel.hasUnsavedChanges) <span class="fn">showDiscardDialog</span>() <span class="kw">else</span> <span class="kw">super</span>.<span class="fn">onBackPressed</span>()
+}
+
+<span class="cm">// ✅ AndroidX: callback is enabled ONLY while there is something to intercept</span>
+<span class="kw">class</span> <span class="cl">EditorActivity</span> : <span class="cl">ComponentActivity</span>() {
+    <span class="kw">private val</span> discardGuard = <span class="kw">object</span> : <span class="cl">OnBackPressedCallback</span>(<span class="kw">false</span>) {
+        <span class="kw">override fun</span> <span class="fn">handleOnBackPressed</span>() { <span class="fn">showDiscardDialog</span>() }
+    }
+
+    <span class="kw">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="cl">Bundle</span>?) {
+        <span class="kw">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        onBackPressedDispatcher.<span class="fn">addCallback</span>(<span class="kw">this</span>, discardGuard)
+        lifecycleScope.<span class="fn">launch</span> {
+            repeatOnLifecycle(<span class="cl">Lifecycle</span>.<span class="cl">State</span>.<span class="cl">STARTED</span>) {
+                viewModel.hasUnsavedChanges.<span class="fn">collect</span> { discardGuard.isEnabled = it }
+            }
+        }
+    }
+}
+
+<span class="cm">// ✅ Custom in-app animation with the platform API (API 34+)</span>
+<span class="kw">if</span> (<span class="cl">Build</span>.<span class="cl">VERSION</span>.<span class="cl">SDK_INT</span> &gt;= <span class="nu">34</span>) {
+    onBackInvokedDispatcher.<span class="fn">registerOnBackInvokedCallback</span>(
+        <span class="cl">OnBackInvokedDispatcher</span>.<span class="cl">PRIORITY_DEFAULT</span>,
+        <span class="kw">object</span> : <span class="cl">OnBackAnimationCallback</span> {
+            <span class="kw">override fun</span> <span class="fn">onBackStarted</span>(backEvent: <span class="cl">BackEvent</span>) { sheet.<span class="fn">prepareDismiss</span>() }
+            <span class="kw">override fun</span> <span class="fn">onBackProgressed</span>(backEvent: <span class="cl">BackEvent</span>) { sheet.<span class="fn">scaleTo</span>(<span class="nu">1f</span> - <span class="nu">0.1f</span> * backEvent.progress) }
+            <span class="kw">override fun</span> <span class="fn">onBackInvoked</span>() { sheet.<span class="fn">dismiss</span>() }
+            <span class="kw">override fun</span> <span class="fn">onBackCancelled</span>() { sheet.<span class="fn">reset</span>() }
+        }
+    )
+}
+
+<span class="cm">// ✅ Compose: BackHandler = works, no preview. PredictiveBackHandler = progress + preview.</span>
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">DetailOverlay</span>(onClose: () -&gt; <span class="cl">Unit</span>) {
+    <span class="kw">var</span> scale <span class="kw">by</span> <span class="fn">remember</span> { <span class="fn">mutableFloatStateOf</span>(<span class="nu">1f</span>) }
+
+    <span class="cl">PredictiveBackHandler</span>(enabled = <span class="kw">true</span>) { progress: <span class="cl">Flow</span>&lt;<span class="cl">BackEventCompat</span>&gt; -&gt;
+        <span class="kw">try</span> {
+            progress.<span class="fn">collect</span> { event -&gt; scale = <span class="nu">1f</span> - <span class="nu">0.1f</span> * event.progress }
+            <span class="fn">onClose</span>()                                    <span class="cm">// gesture committed</span>
+        } <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) {
+            scale = <span class="nu">1f</span>                                   <span class="cm">// gesture cancelled: snap back</span>
+        }
+    }
+
+    <span class="cl">Box</span>(<span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>().<span class="fn">graphicsLayer</span> { scaleX = scale; scaleY = scale }) { <span class="cm">/* content */</span> }
+}</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">&#128683; Production Pitfall</div>
+      <p style="margin:0;">Apps that override <code>onBackPressed()</code>, or register an <em>always-enabled</em> <code>OnBackPressedCallback</code> / <code>BackHandler(true)</code> at the root, break the system animation for the whole app — typically unnoticed until QA tests on Android 14+ with the developer option on. Audit every <code>BackHandler</code>: <code>enabled</code> must reflect real state (open drawer, unsaved edits, multi-select), not <code>true</code>.</p>
+    </div>
+
+    <h4>Related Library Support</h4>
+    <ul>
+      <li>Navigation Compose 2.8+ animates destination transitions with the back gesture.</li>
+      <li>Fragment 1.7+ supports predictive back with Animator/AndroidX Transition (not legacy <code>Animation</code> resources).</li>
+      <li>Material Components provide back-aware behaviors for bottom sheets, side sheets, search bar and navigation drawer.</li>
+      <li>In multi-pane scaffolds, the adaptive navigator exposes <code>canNavigateBack()</code>/<code>navigateBack()</code>; hook them to back, so back means "close detail" on Compact but "leave screen" on Expanded.</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S6 — CANONICAL LAYOUTS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-title"><div class="section-icon">&#9638;</div>6. Canonical Layouts</div>
+
+    <p>Google's canonical layouts are three proven starting points so you don't invent a bespoke layout for each screen:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layout</th><th>Structure</th><th>Use when</th><th>Compose building block</th></tr></thead>
+        <tbody>
+          <tr><td>List-Detail</td><td>List of items + detail of the selected one</td><td>Browsing a collection and drilling in: email, messaging, products, settings</td><td><code>ListDetailPaneScaffold</code></td></tr>
+          <tr><td>Supporting Pane</td><td>Main content + related secondary content</td><td>A primary task with helpful context: document + comments, video + related</td><td><code>SupportingPaneScaffold</code></td></tr>
+          <tr><td>Feed</td><td>Grid of cards of varying size</td><td>Content discovery: news, social, shopping home, galleries</td><td><code>LazyVerticalGrid</code> with <code>GridCells.Adaptive</code> / <code>LazyVerticalStaggeredGrid</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>List-Detail with Navigation</h3>
+    <pre><code><span class="an">@OptIn</span>(<span class="cl">ExperimentalMaterial3AdaptiveApi</span>::<span class="kw">class</span>)
+<span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">CatalogRoute</span>(
+    products: <span class="cl">List</span>&lt;<span class="cl">Product</span>&gt;,
+    initialProductId: <span class="cl">String</span>?        <span class="cm">// from a deep link like app://catalog/product/42</span>
+) {
+    <span class="kw">val</span> scope = <span class="fn">rememberCoroutineScope</span>()
+
+    <span class="cm">// Selected id is the nav "content key": survives resize, fold and rotation</span>
+    <span class="kw">val</span> navigator = <span class="fn">rememberListDetailPaneScaffoldNavigator</span>&lt;<span class="cl">String</span>&gt;(
+        initialDestinationHistory = <span class="fn">listOfNotNull</span>(
+            <span class="cl">ThreePaneScaffoldDestinationItem</span>(<span class="cl">ListDetailPaneScaffoldRole</span>.<span class="cl">List</span>),
+            initialProductId?.<span class="fn">let</span> { <span class="cl">ThreePaneScaffoldDestinationItem</span>(<span class="cl">ListDetailPaneScaffoldRole</span>.<span class="cl">Detail</span>, it) }
+        )
+    )
+
+    <span class="cm">// Back: close the detail pane first (Compact), only then leave the screen</span>
+    <span class="cl">BackHandler</span>(enabled = navigator.<span class="fn">canNavigateBack</span>()) {
+        scope.<span class="fn">launch</span> { navigator.<span class="fn">navigateBack</span>() }
+    }
+
+    <span class="cl">ListDetailPaneScaffold</span>(
+        directive = navigator.scaffoldDirective,
+        value = navigator.scaffoldValue,
+        listPane = {
+            <span class="cl">AnimatedPane</span> {
+                <span class="cl">ProductList</span>(products) { product -&gt;
+                    scope.<span class="fn">launch</span> {
+                        navigator.<span class="fn">navigateTo</span>(<span class="cl">ListDetailPaneScaffoldRole</span>.<span class="cl">Detail</span>, product.id)
+                    }
+                }
+            }
+        },
+        detailPane = {
+            <span class="cl">AnimatedPane</span> {
+                <span class="kw">val</span> id = navigator.currentDestination?.contentKey
+                <span class="kw">if</span> (id != <span class="kw">null</span>) <span class="cl">ProductDetail</span>(id) <span class="kw">else</span> <span class="cl">SelectProductPlaceholder</span>()
+            }
+        }
+    )
+}</code></pre>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">&#128221; Version Note</div>
+      <p style="margin:0;"><code>navigateTo</code>/<code>navigateBack</code> are suspend functions in newer adaptive releases (hence the <code>scope.launch</code>); <code>contentKey</code> was previously named <code>content</code>. Newer releases also provide <code>NavigableListDetailPaneScaffold</code> / <code>NavigableSupportingPaneScaffold</code>, which wire up (predictive) back handling for you. Check the version in your project.</p>
+    </div>
+
+    <h3>Feed Layout</h3>
+    <pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">FeedGrid</span>(posts: <span class="cl">List</span>&lt;<span class="cl">Post</span>&gt;, onOpen: (<span class="cl">Post</span>) -&gt; <span class="cl">Unit</span>) {
+    <span class="cm">// Column count grows with window width: 1-2 on phone, 3-5 on tablet. No size-class branching needed.</span>
+    <span class="cl">LazyVerticalGrid</span>(
+        columns = <span class="cl">GridCells</span>.<span class="fn">Adaptive</span>(minSize = <span class="nu">180</span>.dp),
+        contentPadding = <span class="cl">WindowInsets</span>.safeDrawing.<span class="fn">asPaddingValues</span>() + <span class="cl">PaddingValues</span>(<span class="nu">12</span>.dp),
+        horizontalArrangement = <span class="cl">Arrangement</span>.<span class="fn">spacedBy</span>(<span class="nu">12</span>.dp),
+        verticalArrangement = <span class="cl">Arrangement</span>.<span class="fn">spacedBy</span>(<span class="nu">12</span>.dp)
+    ) {
+        items(posts, key = { it.id }) { post -&gt; <span class="cl">PostCard</span>(post, onClick = { <span class="fn">onOpen</span>(post) }) }
+    }
+}
+
+<span class="kw">operator fun</span> <span class="cl">PaddingValues</span>.<span class="fn">plus</span>(other: <span class="cl">PaddingValues</span>): <span class="cl">PaddingValues</span> {
+    <span class="kw">val</span> dir = <span class="cl">LayoutDirection</span>.<span class="cl">Ltr</span>
+    <span class="kw">return</span> <span class="cl">PaddingValues</span>(
+        start = <span class="fn">calculateStartPadding</span>(dir) + other.<span class="fn">calculateStartPadding</span>(dir),
+        top = <span class="fn">calculateTopPadding</span>() + other.<span class="fn">calculateTopPadding</span>(),
+        end = <span class="fn">calculateEndPadding</span>(dir) + other.<span class="fn">calculateEndPadding</span>(dir),
+        bottom = <span class="fn">calculateBottomPadding</span>() + other.<span class="fn">calculateBottomPadding</span>()
+    )
+}</code></pre>
+
+    <h3>Navigation in Multi-Pane: Deep Links &amp; State</h3>
+    <ul>
+      <li><strong>Selection is navigation state, not UI state.</strong> Store the selected id in the nav back stack / saved state / ViewModel. Panes are a <em>presentation</em> of it.</li>
+      <li><strong>A deep link to "detail" must work in both shapes.</strong> Compact: show detail with back returning to the list. Expanded: show list <em>and</em> detail. Seed the navigator's history with <code>[List, Detail(id)]</code> as shown above.</li>
+      <li><strong>Resize while in detail.</strong> Fold/unfold or split-screen resize must keep the selection. Compact→Expanded reveals the list beside the same detail; Expanded→Compact keeps the detail on top.</li>
+      <li><strong>Back semantics change by size.</strong> On Compact, back closes detail → list. On Expanded, list and detail are both visible so back leaves the screen.</li>
+      <li><strong>Don't restart the Activity</strong> on size changes. Declare <code>screenSize|smallestScreenSize|screenLayout|orientation</code> in <code>configChanges</code> only if you actually handle them in Compose; otherwise keep default recreation but preserve state.</li>
+    </ul>
+
+    <h3>How to Test</h3>
+    <ul>
+      <li><strong>Android Studio Resizable emulator</strong> — one AVD that switches between Phone, Unfolded foldable, Tablet and Desktop at runtime. Fastest way to see size-class transitions.</li>
+      <li><strong>Layout Inspector</strong> — inspect the composition/view hierarchy at each size to see what padding/insets were actually applied and which panes are present.</li>
+      <li><strong><code>@PreviewScreenSizes</code></strong> and <code>@Preview(device = "spec:width=1280dp,height=800dp,dpi=240")</code> for quick Compose preview coverage.</li>
+      <li><strong>Automated tests</strong> — Compose UI tests with explicit window sizes; <code>androidx.window:window-testing</code> to publish fake <code>FoldingFeature</code>s; Firebase Test Lab for tablet / foldable devices.</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S7 — PITFALLS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-title"><div class="section-icon">&#128027;</div>7. Pitfalls &amp; Production Bugs</div>
+
+    <h3>1. Hardcoding dp widths instead of using WindowSizeClass</h3>
+    <p>A 360.dp-wide card or <code>if (screenWidthDp &gt; 600)</code> scattered through UI code works on the test phone and fails in split-screen, on foldables (inner and outer displays differ) and in ChromeOS windows.</p>
+    <pre><code><span class="cm">// ❌ Magic numbers, tied to configuration, not to the actual window</span>
+<span class="kw">val</span> isTablet = <span class="cl">LocalConfiguration</span>.current.screenWidthDp &gt; <span class="nu">600</span>
+<span class="cl">Box</span>(<span class="cl">Modifier</span>.<span class="fn">width</span>(<span class="nu">360</span>.dp)) { <span class="cl">Details</span>() }
+
+<span class="cm">// ✅ Window-driven, with a max width so content never stretches absurdly</span>
+<span class="kw">val</span> widthClass = <span class="fn">currentWindowAdaptiveInfo</span>().windowSizeClass.windowWidthSizeClass
+<span class="cl">Box</span>(<span class="cl">Modifier</span>.<span class="fn">widthIn</span>(max = <span class="nu">640</span>.dp).<span class="fn">fillMaxWidth</span>()) { <span class="cl">Details</span>(twoColumn = widthClass == <span class="cl">WindowWidthSizeClass</span>.<span class="cl">EXPANDED</span>) }</code></pre>
+
+    <h3>2. Not handling IME insets</h3>
+    <p>Symptom: user taps a field, keyboard opens, the field and the Send button are hidden. Fix: <code>imePadding()</code> (after consuming Scaffold padding), <code>adjustResize</code>, and make sure scrollable forms use <code>verticalScroll</code>/<code>LazyColumn</code>. Use <code>WindowInsets.isImeVisible</code> to react.</p>
+
+    <h3>3. Wrong window-info API</h3>
+    <p>Use <code>WindowInfoTracker</code> for <strong>fold state and hinge bounds</strong>; <code>WindowMetricsCalculator</code> / <code>currentWindowAdaptiveInfo()</code> for window <strong>size</strong>. Do not use <code>Display.getSize()</code>, <code>getRealMetrics()</code> or <code>Resources.displayMetrics</code> for layout: they describe the display, not the window, and many are deprecated. Also remember <code>WindowMetricsCalculator</code> is a one-shot measurement, not a fold source; it won't tell you the posture.</p>
+
+    <h3>4. OnBackPressedCallback / onBackPressed conflicts with predictive back</h3>
+    <p>Overridden <code>onBackPressed()</code> never fires with the flag on; always-enabled callbacks disable system animations. Move to scoped, state-driven callbacks (see section 5).</p>
+
+    <h3>5. Navigation bar color doesn't match on edge-to-edge</h3>
+    <p>With 3-button navigation the system draws a translucent scrim; on gesture navigation it's transparent. Mismatch usually shows as a solid white/black strip under a dark/light app, or low-contrast icons. Use <code>enableEdgeToEdge()</code> with a matching <code>SystemBarStyle</code>, draw your own background under the bar (don't pad it away), and if the scrim looks wrong for your design set <code>window.isNavigationBarContrastEnforced = false</code> (only when your background guarantees contrast).</p>
+
+    <h3>6. Testing only on phones</h3>
+    <p>Layout works on a Pixel, ships, then crashes or looks broken on a tablet: stretched buttons, lists centered with huge gaps, dialogs wider than the screen, portrait-locked activity letterboxed. Add tablet/foldable/desktop AVDs to CI and to the manual release checklist.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Symptom</th><th>Root cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Tablet shows a single stretched column</td><td>No size-class branching, hardcoded widths</td><td>WindowSizeClass + <code>widthIn(max=)</code> + adaptive scaffolds</td></tr>
+          <tr><td>2</td><td>Send button hidden by keyboard</td><td>No <code>imePadding()</code></td><td><code>imePadding()</code> after <code>consumeWindowInsets</code></td></tr>
+          <tr><td>3</td><td>Hinge cuts through a pane</td><td>Layout ignores <code>FoldingFeature</code></td><td>Use adaptive scaffolds / <code>WindowInfoTracker</code></td></tr>
+          <tr><td>4</td><td>No back preview animation</td><td><code>onBackPressed()</code> override or always-on callback</td><td>Opt in + scoped <code>OnBackPressedCallback</code></td></tr>
+          <tr><td>5</td><td>Odd nav bar strip after target-SDK 35</td><td>Bar style not configured</td><td><code>enableEdgeToEdge(navigationBarStyle=…)</code></td></tr>
+          <tr><td>6</td><td>Play large-screen warnings</td><td>No tablet/foldable testing</td><td>Resizable emulator + CI device matrix</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S8 — INTERVIEW FRAMEWORK
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-title"><div class="section-icon">&#127919;</div>8. Interview Framework</div>
+
+    <h3>The 30-Second Answer</h3>
+    <div class="answer-box">"Edge-to-edge is mandatory from API 35 — handle WindowInsets. For adaptive layouts, use WindowSizeClass: Compact=single pane, Expanded=two panes. For foldables, detect FoldingFeature with WindowInfoTracker."</div>
+
+    <h3>The 2-Minute Expansion</h3>
+    <div class="must-mention">
+      <div class="must-item"><div class="must-num">1</div><div><strong>Edge-to-edge:</strong> <code>enableEdgeToEdge()</code> before <code>super.onCreate</code>; use <code>safeDrawing</code> / Scaffold padding / <code>imePadding()</code>; consume insets once to avoid double padding.</div></div>
+      <div class="must-item"><div class="must-num">2</div><div><strong>Adaptive:</strong> branch on <code>WindowSizeClass</code> (600 / 840 dp), not on devices. Bottom bar on Compact, rail on Medium/Expanded (or <code>NavigationSuiteScaffold</code>).</div></div>
+      <div class="must-item"><div class="must-num">3</div><div><strong>Foldables:</strong> adaptive scaffolds (<code>ListDetailPaneScaffold</code>, <code>SupportingPaneScaffold</code>) are hinge-aware; use <code>WindowInfoTracker</code> + <code>FoldingFeature</code> for tabletop/book specifics.</div></div>
+      <div class="must-item"><div class="must-num">4</div><div><strong>Predictive back:</strong> <code>enableOnBackInvokedCallback</code>, no <code>onBackPressed()</code>, scoped callbacks, <code>PredictiveBackHandler</code> for custom animations.</div></div>
+      <div class="must-item"><div class="must-num">5</div><div><strong>Testing:</strong> Resizable emulator, <code>@PreviewScreenSizes</code>, window-testing, Test Lab.</div></div>
+    </div>
+
+    <div class="callout callout-purple">
+      <div class="callout-label">&#127775; Expert Take</div>
+      <p style="margin:0;">"The biggest gap I see in senior candidates: they know Compose well but have never touched WindowSizeClass or SupportingPaneScaffold. These are the differentiators in 2024-25 Android interviews."</p>
+    </div>
+
+    <h3>Answer Patterns That Score</h3>
+    <ul>
+      <li><strong>State before layout.</strong> "The selected product lives in the ViewModel, so folding the device doesn't reset anything."</li>
+      <li><strong>Name the trade-off.</strong> "<code>NavigationSuiteScaffold</code> gets me 90% for free; I'd drop to manual <code>NavigationBar</code>/<code>NavigationRail</code> only if design needs a custom variant."</li>
+      <li><strong>Mention the target-SDK trigger.</strong> Edge-to-edge enforcement happens on bumping <code>targetSdk</code> to 35; plan it as a migration, not an afterthought.</li>
+      <li><strong>Verify, don't assume.</strong> "I'd verify on the Resizable emulator in Phone, Foldable and Tablet modes before shipping."</li>
+    </ul>
+
+    <div class="callout callout-red">
+      <div class="callout-label">&#128683; Avoid Saying</div>
+      <ul style="margin:0;">
+        <li>"I'd make a separate tablet layout XML / separate screens." (duplication)</li>
+        <li>"I check <code>isTablet</code> via screen inches." (wrong abstraction)</li>
+        <li>"I override <code>onBackPressed()</code> for custom back." (breaks predictive back)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S9 — FLASH CARDS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-title"><div class="section-icon">&#127183;</div>9. Flash Cards</div>
+    <p>Read the question, answer out loud, then check the card.</p>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>1 · Edge-to-edge mandatory from?</h4>
+        <p style="margin:0;">Apps <strong>targeting API 35</strong> on Android 15+. Opt-out attribute is temporary/deprecated. Use <code>enableEdgeToEdge()</code> and handle insets.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>2 · safeDrawing vs safeContent vs navigationBars?</h4>
+        <p style="margin:0;"><code>navigationBars</code> = nav bar only. <code>safeDrawing</code> = systemBars + ime + displayCutout (nothing visible is hidden). <code>safeContent</code> = safeDrawing + safeGestures (also avoids gesture-conflict zones).</p>
+      </div>
+      <div class="cheat-card">
+        <h4>3 · WindowSizeClass breakpoints?</h4>
+        <p style="margin:0;">Width: Compact &lt;600, Medium 600–839, Expanded &ge;840dp. Height: Compact &lt;480, Medium 480–899, Expanded &ge;900dp.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>4 · SupportingPaneScaffold vs ListDetailPaneScaffold?</h4>
+        <p style="margin:0;">ListDetail: selecting a list item <em>changes</em> the detail. SupportingPane: a main pane plus supporting content (filters, related, comments). Both build on <code>ThreePaneScaffold</code>.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>5 · Predictive back opt-in flag?</h4>
+        <p style="margin:0;"><code>android:enableOnBackInvokedCallback="true"</code> on <code>&lt;application&gt;</code> or <code>&lt;activity&gt;</code>. Default-on when targeting API 36.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>6 · FoldingFeature states?</h4>
+        <p style="margin:0;"><code>FLAT</code> and <code>HALF_OPENED</code>; orientation <code>HORIZONTAL</code> (tabletop) or <code>VERTICAL</code> (book). Also <code>isSeparating</code> and <code>occlusionType</code>.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>7 · The canonical layouts?</h4>
+        <p style="margin:0;">List-Detail, Supporting Pane, Feed.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>8 · How do you handle IME insets?</h4>
+        <p style="margin:0;"><code>Modifier.imePadding()</code> after <code>consumeWindowInsets(scaffoldPadding)</code>; keep <code>adjustResize</code>; not <code>adjustPan</code>.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>9 · OnBackInvokedDispatcher?</h4>
+        <p style="margin:0;">Platform (API 33+) back dispatcher. <code>registerOnBackInvokedCallback(priority, cb)</code>; <code>OnBackAnimationCallback</code> (API 34+) gives progress events. AndroidX <code>OnBackPressedCallback</code> sits on top of it.</p>
+      </div>
+      <div class="cheat-card">
+        <h4>10 · How to test adaptive UI?</h4>
+        <p style="margin:0;">Resizable emulator (phone / foldable / tablet / desktop), <code>@PreviewScreenSizes</code>, Layout Inspector, window-testing fake folds, Firebase Test Lab.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       S10 — INTERVIEW QUESTIONS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s10">
+    <div class="section-title"><div class="section-icon">&#10067;</div>10. Interview Questions</div>
+
+    <!-- Q1 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q1. Your team bumps <code>targetSdk</code> to 35. What changes about the UI and what do you do?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>On Android 15+, apps targeting API 35 are laid out edge-to-edge: the window extends behind the transparent status bar and the (gesture or translucent 3-button) navigation bar. Content that used to be auto-padded is now overlapped.</p>
+        <p><strong>Plan:</strong></p>
+        <ul>
+          <li>Call <code>enableEdgeToEdge()</code> in every activity (before <code>super.onCreate</code>) with proper <code>SystemBarStyle</code>.</li>
+          <li>Audit top bars, bottom bars, FABs, dialogs and bottom sheets for insets. Use <code>Scaffold</code> inner padding, <code>safeDrawing</code>, <code>imePadding()</code>.</li>
+          <li>Check landscape for <code>displayCutout</code>.</li>
+          <li>Don't rely on <code>windowOptOutEdgeToEdgeEnforcement</code>: it's a temporary escape hatch that stops working when you target API 36.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q2. Name the WindowSizeClass width breakpoints and what you'd change in navigation at each.</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-easy">Easy</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p><strong>Compact</strong> (&lt;600dp): bottom <code>NavigationBar</code>, single pane. <strong>Medium</strong> (600–839dp): <code>NavigationRail</code>, usually still single pane, optionally two. <strong>Expanded</strong> (&ge;840dp): rail (or permanent drawer on very wide windows), list + detail side by side.</p>
+        <p>Height has its own breakpoints (480dp / 900dp) and matters mainly for landscape phones and tabletop mode. The size class belongs to the <em>window</em>, so split-screen on a tablet can yield Compact. <code>NavigationSuiteScaffold</code> automates this switch.</p>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q3. How do you detect that a foldable is in tabletop posture, and what would you do with that information?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>Collect <code>WindowInfoTracker.getOrCreate(activity).windowLayoutInfo(activity)</code>, find the <code>FoldingFeature</code> in <code>displayFeatures</code>, and check <code>state == HALF_OPENED &amp;&amp; orientation == HORIZONTAL</code>. (Book posture is the same with <code>VERTICAL</code>.)</p>
+<pre><code><span class="kw">val</span> fold = info.displayFeatures.<span class="fn">filterIsInstance</span>&lt;<span class="cl">FoldingFeature</span>&gt;().<span class="fn">firstOrNull</span>()
+<span class="kw">val</span> isTabletop = fold?.state == <span class="cl">FoldingFeature</span>.<span class="cl">State</span>.<span class="cl">HALF_OPENED</span> &amp;&amp;
+                  fold.orientation == <span class="cl">FoldingFeature</span>.<span class="cl">Orientation</span>.<span class="cl">HORIZONTAL</span></code></pre>
+        <p>In tabletop, put the viewport (video, camera preview, product 3D view) on the top half and controls on the bottom half, aligned to <code>fold.bounds.top</code>. Keep the collection lifecycle-aware (<code>collectAsStateWithLifecycle</code>) and keep state in the ViewModel.</p>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q4. An app overrides <code>onBackPressed()</code> everywhere. How do you migrate to predictive back?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <ol>
+          <li>Inventory every <code>onBackPressed()</code> override, <code>KEYCODE_BACK</code> handler, and root-level <code>BackHandler</code>.</li>
+          <li>Replace with <code>OnBackPressedCallback</code> (or <code>BackHandler</code> in Compose) whose <code>isEnabled</code> mirrors actual state — dialog open, unsaved edits, drawer open.</li>
+          <li>Where the in-app UI should animate with the gesture (bottom sheet, search, drawer), use <code>PredictiveBackHandler</code> / <code>handleOnBackProgressed</code> or Material components that support it.</li>
+          <li>Upgrade Navigation (2.8+) and Fragment (1.7+) so screen transitions follow the gesture.</li>
+          <li>Set <code>android:enableOnBackInvokedCallback="true"</code> and test with the "Predictive back animations" developer option on Android 14/15.</li>
+        </ol>
+        <p>Tip: do the migration before targeting API 36, where the behaviour is on by default.</p>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q5. Spot the bug: on a phone, tapping the message field hides the field and the Send button behind the keyboard.</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+<pre><code><span class="an">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ChatScreen</span>(messages: <span class="cl">List</span>&lt;<span class="cl">Message</span>&gt;, onSend: (<span class="cl">String</span>) -&gt; <span class="cl">Unit</span>) {
+    <span class="cl">Scaffold</span> { _ -&gt;
+        <span class="cl">Column</span>(<span class="cl">Modifier</span>.<span class="fn">fillMaxSize</span>()) {
+            <span class="cl">LazyColumn</span>(<span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>)) { items(messages) { <span class="cl">MessageRow</span>(it) } }
+            <span class="cl">MessageInput</span>(onSend)
+        }
+    }
+}</code></pre>
+        <p><strong>Bugs:</strong></p>
+        <ul>
+          <li>The Scaffold <code>innerPadding</code> is discarded (<code>_</code>), so the input sits under the navigation bar, and the top bar inset is ignored.</li>
+          <li>There is no <code>imePadding()</code>, so nothing lifts the input above the keyboard. With edge-to-edge the window no longer resizes the content for you.</li>
+          <li>(Also check the manifest isn't using <code>adjustPan</code>.)</li>
+        </ul>
+        <p><strong>Fix:</strong></p>
+<pre><code><span class="cl">Scaffold</span> { inner -&gt;
+    <span class="cl">Column</span>(
+        <span class="cl">Modifier</span>
+            .<span class="fn">fillMaxSize</span>()
+            .<span class="fn">padding</span>(inner)
+            .<span class="fn">consumeWindowInsets</span>(inner)
+            .<span class="fn">imePadding</span>()
+    ) {
+        <span class="cl">LazyColumn</span>(<span class="cl">Modifier</span>.<span class="fn">weight</span>(<span class="nu">1f</span>)) { items(messages, key = { it.id }) { <span class="cl">MessageRow</span>(it) } }
+        <span class="cl">MessageInput</span>(onSend)
+    }
+}</code></pre>
+        <p><code>consumeWindowInsets(inner)</code> prevents the nav bar height from being added twice (once from the Scaffold, once inside the IME inset).</p>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q6. Design the navigation for a shopping app that must work on phones, foldables and tablets. What do you build?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <p>One navigation graph, one set of screens, with a presentation layer that adapts:</p>
+        <ul>
+          <li>Top-level destinations in <code>NavigationSuiteScaffold</code> (bottom bar → rail by window size).</li>
+          <li>Catalog uses <code>ListDetailPaneScaffold</code>; the selected product id is nav state, so deep links work and the selection survives fold/rotate.</li>
+          <li>Product detail uses <code>SupportingPaneScaffold</code> (reviews / recommendations as supporting pane).</li>
+          <li>Home feed uses <code>LazyVerticalGrid(GridCells.Adaptive(...))</code>.</li>
+          <li>Fold-specific tweaks (tabletop media viewer) isolated behind a posture model from <code>WindowInfoTracker</code>.</li>
+          <li>Back: closes detail first on Compact; predictive back opted in.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q7. When would you choose each canonical layout: List-Detail, Supporting Pane, Feed?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-medium">Medium</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <ul>
+          <li><strong>List-Detail:</strong> the user picks an item from a collection and the rest of the screen shows <em>that item</em> — email, chat, orders, settings. Selection drives content.</li>
+          <li><strong>Supporting Pane:</strong> there's one primary task and the secondary content aids it — document + comments, video + related videos, product + recommendations. The supporting pane is optional context.</li>
+          <li><strong>Feed:</strong> many equal-weight cards the user browses and scans — news, social, discovery, home screens. Use adaptive grid columns, not panes.</li>
+        </ul>
+        <p>Test: "If I remove the right pane, can the user still do the task?" Yes → Supporting Pane. No (they can't see the item) → List-Detail.</p>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <div class="quiz-q-text">Q8. How do you test that an adaptive UI actually works before you ship?</div>
+        <div class="quiz-meta">
+          <span class="diff-badge diff-hard">Hard</span>
+          <span class="toggle-icon">&#8964;</span>
+        </div>
+      </div>
+      <div class="quiz-a">
+        <ul>
+          <li><strong>Manual:</strong> Android Studio <em>Resizable emulator</em> (phone / unfolded / tablet / desktop), plus split-screen and window resizing. Use Layout Inspector to inspect the actual composition and padding at each size.</li>
+          <li><strong>Previews:</strong> <code>@PreviewScreenSizes</code> and custom <code>@Preview(device=…)</code> specs for Compact/Medium/Expanded and landscape.</li>
+          <li><strong>Automated:</strong> Compose UI tests parameterised by window size; <code>androidx.window:window-testing</code> (<code>WindowLayoutInfoPublisherRule</code>, <code>TestWindowLayoutInfo</code>) to fake <code>FoldingFeature</code> states; screenshot tests per size class.</li>
+          <li><strong>Behavioural:</strong> rotate/fold/resize mid-flow to verify selection, scroll position and text input are preserved; IME open at each size; back gesture on Compact vs Expanded.</li>
+          <li><strong>Device farm:</strong> Firebase Test Lab with tablets and foldables; check Play Console's large-screen quality reports.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- end s10 -->
+
+</main>
+</div><!-- end layout -->
+
+<script>
+/* Page-level JS — minimal, no duplicate scroll-spy (shared.js owns that) */
+(function () {
+
+  /* ── Sidebar nav click → smooth scroll ── */
+  document.querySelectorAll('.nav-item[data-section]').forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = document.getElementById(item.dataset.section);
+      if (!target) return;
+      var tb  = document.getElementById('aip-topbar');
+      var off = (tb ? tb.offsetHeight : 52) + 16;
+      var y   = target.getBoundingClientRect().top + window.scrollY - off;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+  /* ── Section fade-in on first scroll into view ── */
+  if ('IntersectionObserver' in window) {
+    var fadeObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('section-visible');
+          fadeObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05 });
+
+    document.querySelectorAll('.section[id], section[id]').forEach(function (s) {
+      fadeObs.observe(s);
+    });
+  }
+
+}());
+
+/* ── Quiz accordion ── */
+function toggleQuiz(el) {
+  var ans  = el.nextElementSibling;
+  var icon = el.querySelector('.toggle-icon');
+  if (ans)  ans.classList.toggle('open');
+  if (icon) icon.classList.toggle('open');
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

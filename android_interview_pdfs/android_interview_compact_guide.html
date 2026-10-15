@@ -461,7 +461,7 @@
 
 <!-- TABLE OF CONTENTS -->
 <div class="compact-toc-page">
-  <h2>Table of Contents (97 Topics)</h2>
+  <h2>Table of Contents (105 Topics)</h2>
   <div class="compact-toc-grid">
     
         <div class="compact-toc-group">
@@ -821,6 +821,11 @@
               <span class="compact-toc-name">Other Storage</span>
               <span class='compact-toc-tier tier-tier1'>Tier 1</span>
             </a>
+            <a href="#topic-13D" class="compact-toc-link">
+              <span class="compact-toc-code">13D</span>
+              <span class="compact-toc-name">DataStore: Preferences &amp; Proto</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
             </div></div>
         <div class="compact-toc-group">
           <div class="compact-toc-mod-title">Module 14: Background Processing & Task Scheduling</div>
@@ -893,6 +898,11 @@
               <span class="compact-toc-name">App Hardening &amp; Auth</span>
               <span class='compact-toc-tier tier-tier2'>Tier 2</span>
             </a>
+            <a href="#topic-19C" class="compact-toc-link">
+              <span class="compact-toc-code">19C</span>
+              <span class="compact-toc-name">Secrets &amp; API Key Security</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
             </div></div>
         <div class="compact-toc-group">
           <div class="compact-toc-mod-title">Module 20: Automated Testing (Unit, Coroutines, UI)</div>
@@ -915,6 +925,12 @@
               <span class="compact-toc-name">UI &amp; Network Testing</span>
               <span class='compact-toc-tier tier-tier2'>Tier 2</span>
             </a>
+            <a href="#topic-20D" class="compact-toc-link">
+              <span class="compact-toc-code">20D</span>
+              <span class="compact-toc-name">Compose UI Testing</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
+
             </div></div>
         <div class="compact-toc-group">
           <div class="compact-toc-mod-title">Module 21: Android Performance & Profiling</div>
@@ -925,6 +941,17 @@
               <span class="compact-toc-name">Android Performance</span>
               <span class='compact-toc-tier tier-tier2'>Tier 2</span>
             </a>
+            <a href="#topic-21B" class="compact-toc-link">
+              <span class="compact-toc-code">21B</span>
+              <span class="compact-toc-name">Baseline Profiles &amp; Macrobenchmark</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
+            <a href="#topic-21C" class="compact-toc-link">
+              <span class="compact-toc-code">21C</span>
+              <span class="compact-toc-name">App Startup Performance</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
+
             </div></div>
         <div class="compact-toc-group">
           <div class="compact-toc-mod-title">Module 22: Memory Management & Leak Detection</div>
@@ -1219,6 +1246,17 @@
               <span class="compact-toc-name">Compose Design System &amp; Multi-Brand Theming</span>
               <span class='compact-toc-tier tier-tier1'>Tier 1</span>
             </a>
+            <a href="#topic-42B" class="compact-toc-link">
+              <span class="compact-toc-code">42B</span>
+              <span class="compact-toc-name">Trustworthy AI</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
+            <a href="#topic-42C" class="compact-toc-link">
+              <span class="compact-toc-code">42C</span>
+              <span class="compact-toc-name">Advanced App Security: FLAG_SECURE &amp; App Hardening</span>
+              <span class='compact-toc-tier tier-tier1'>Tier 1</span>
+            </a>
+
             </div></div>
   </div>
 </div>
@@ -11022,6 +11060,85 @@ Crypto keys        → Android Keystore</code></pre>
           </div>
         </section>
         
+        <section class="compact-topic" id="topic-13D">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">13D</span>
+              <h2 class="compact-title">DataStore: Preferences &amp; Proto</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 13</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> Jetpack DataStore replaces SharedPreferences with a coroutine-based, type-safe, non-blocking storage API. Covers Preferences DataStore, Proto DataStore, migration strategy, ViewModel integration, and testing.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Elevator Pitch</h3>
+                <div class="answer-box">"Jetpack DataStore is Google's modern replacement for SharedPreferences, engineered with Kotlin Coroutines and Flow. It solves all legacy SharedPreferences pitfalls: eliminates UI thread blocking on init and commit, avoids hidden ANRs during Activity.onStop() caused by apply(), provides atomic single-writer transactions, and propagates I/O errors explicitly through Flow. It comes in two variants: Preferences DataStore for typed key-value pairs and Proto DataStore for schema-enforced, type-safe protobuf models."</div>
+                <h3>Must-Mention Points</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>Non-blocking Asynchronous I/O:</strong> Built on Coroutines &amp; Flow; no UI thread blocking or ANRs on <code>Activity.onStop()</code>.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>Preferences vs Proto:</strong> Preferences for schemaless key-value; Proto for compile-time typed schema with Protocol Buffers.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>Transactional Atomic Writes:</strong> Write-to-temp then atomic rename ensures zero partial writes or disk corruption.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>Explicit Error Propagation:</strong> Throws <code>IOException</code> and <code>CorruptionException</code>; allows graceful fallback to default state.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Strict Singleton Requirement:</strong> Must use a single instance per file to prevent caching bugs and concurrency collisions.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>Safe Migration Pipeline:</strong> Turnkey <code>SharedPreferencesMigration</code> executes an atomic, one-time transfer.</div></div>
+                </div>
+                <div class="table-wrap"><table>
+                  <tr><th>Follow-up Question</th><th>Key Takeaway</th></tr>
+                  <tr><td>"Why does SharedPreferences.apply() cause ANRs?"</td><td>Framework calls <code>QueuedWork.waitToFinish()</code> on UI thread during <code>Activity.onStop()</code>, blocking until all disk writes finish.</td></tr>
+                  <tr><td>"How does DataStore handle concurrent writes?"</td><td>Writes serialized through an actor channel and Mutex; each transaction receives the latest state snapshot.</td></tr>
+                  <tr><td>"Can DataStore be used across multiple processes?"</td><td><code>MultiProcessDataStore</code> is available; uses file locks for inter-process synchronization.</td></tr>
+                </table></div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Traps &amp; Production Gotchas</div>
+              <div class="compact-section-body">
+                <h3>Testing DataStore</h3>
+                <ul>
+                  <li>Use <code>PreferenceDataStoreFactory.create()</code> instead of the property delegate.</li>
+                  <li>Pass <code>TestScope(testScheduler)</code> to the <code>scope</code> parameter.</li>
+                  <li>Use JUnit's <code>@TempDir</code> for an isolated scratch file per test.</li>
+                  <li>Use <strong>Turbine</strong> or <code>first()</code> to assert emissions under <code>runTest</code>.</li>
+                </ul>
+                <pre><code>val testDataStore = PreferenceDataStoreFactory.create(
+    scope = TestScope(testScheduler),
+    produceFile = { File(tempFolder, "test.preferences_pb") }
+)
+// Use Turbine to verify Flow emissions:
+repository.flow.test {
+    assertEquals(AppTheme.SYSTEM, awaitItem().theme)
+    cancelAndIgnoreRemainingEvents()
+}</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> What architectural and threading issues in SharedPreferences prompted Google to create Jetpack DataStore?</div>
+                <div class="compact-qa-a">Four major flaws: (1) UI thread disk I/O on <code>getSharedPreferences()</code>. (2) Hidden ANRs — <code>apply()</code> queues work that blocks the UI thread in <code>onStop()</code>. (3) No error signaling — disk errors fail silently. (4) No transactional guarantees — concurrent edits overwrite each other. DataStore replaces this with Coroutines, Flow, non-blocking I/O, and atomic writes.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> What is the difference between Preferences DataStore and Proto DataStore?</div>
+                <div class="compact-qa-a"><strong>Preferences:</strong> key-value pairs using typed keys (<code>stringPreferencesKey</code>); no schema or Protobuf compiler needed; best for simple UI flags. <strong>Proto:</strong> stores a custom typed object from a <code>.proto</code> schema; compile-time type safety, nested models, strong versioning; best for structured user settings.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> How does DataStore achieve transactional write safety under the hood?</div>
+                <div class="compact-qa-a">Writes queue through an actor channel. DataStore writes to a temp file (<code>filename.tmp</code>), then performs an atomic OS rename to replace the target. If power is lost mid-write, the original file remains intact and the temp file is discarded on next init. Only after the rename succeeds is the in-memory cache updated and emitted to collectors.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="compact-topic" id="topic-14A">
           <!-- TOPIC HEADER -->
           <div class="compact-header">
@@ -12473,6 +12590,66 @@ WebView -> Disable file access &amp; validate URLs</code></pre>
           </div>
         </section>
         
+        <section class="compact-topic" id="topic-19C">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">19C</span>
+              <h2 class="compact-title">Secrets &amp; API Key Security</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 19</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> How to protect API keys, secrets, and credentials in Android apps — local.properties, BuildConfig fields, secrets-gradle-plugin, server-side proxying, and why no client-side approach is truly secure.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Elevator Pitch</h3>
+                <div class="answer-box">"In Android, no client-side secret is ever truly secure against reverse engineering. For client-required keys like Google Maps, we keep keys out of Git using <code>local.properties</code> and <code>secrets-gradle-plugin</code>, while restricting the key in Google Cloud Console using the app's Package Name and SHA-1 certificate fingerprint. For high-value APIs — Stripe, OpenAI, private databases — the gold standard is Server-Side Key Proxying combined with Play Integrity API attestation so the Android device never holds the secret key."</div>
+                <h3>Must-Mention Points</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>Zero Client-Side Secrecy:</strong> Decompilation (<code>jadx</code>, <code>apktool</code>) and memory hooking (<code>Frida</code>) make client secrets discoverable.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>Server-Side Key Proxying:</strong> The only 100% secure architecture for billed and sensitive third-party services.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>Git Safety with local.properties:</strong> Keeps developer credentials out of version control. Solves Git leaks, not APK reverse engineering.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>Provider Restrictions (SHA-1 + Package Name):</strong> Limits blast radius of client-embedded Google Cloud API keys.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Play Integrity API:</strong> Gates backend API proxy access to verified, non-rooted, untampered app instances.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>Incident Response:</strong> Immediate key revocation and rotation upon leak, followed by Git history scrubbing with <code>git-filter-repo</code>.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Traps &amp; Attack Vectors</div>
+              <div class="compact-section-body">
+                <div class="callout callout-red"><div class="callout-label">Git History Leaks</div>Removing a committed secret in the next commit leaves it permanently in git history. Remediation: immediately revoke/rotate, then run <code>git-filter-repo --invert-paths --path secret_file --force</code> and force-push.</div>
+                <div class="callout callout-yellow"><div class="callout-label">Logcat Leakage</div><code>Log.d(TAG, "auth: $apiKey")</code> or <code>HttpLoggingInterceptor.Level.BODY</code> in production leaks keys. Strip all logging in release via ProGuard <code>-assumenosideeffects</code>.</div>
+                <div class="callout callout-blue"><div class="callout-label">Unrestricted Cloud API Keys</div>An unrestricted key extracted from your APK lets attackers query any Google Cloud API on your billing account. Always add Package Name + SHA-1 Application Restriction, plus API Restriction to the specific API needed.</div>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> Why is hardcoding API keys dangerous even with ProGuard/R8 obfuscation?</div>
+                <div class="compact-qa-a">R8 obfuscates class/field names but does NOT encrypt string literals. Strings remain as cleartext UTF-8 in the compiled <code>classes.dex</code> string pool. Running <code>strings classes.dex</code> or <code>jadx</code> extracts the key in seconds. Hardcoding also commits keys to version control history.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> What is Server-Side Key Proxying and why is it the gold standard?</div>
+                <div class="compact-qa-a">Routes all API calls through your backend. Secret keys live in a secure vault (AWS Secrets Manager, GCP Secret Manager) and never touch the mobile device. Benefits: zero secret exposure in APK, instant key rotation without an app release, backend can enforce per-user rate limits and validate Play Integrity tokens before calling expensive third-party APIs.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> An API key was accidentally committed to a public Git repo. Immediate steps?</div>
+                <div class="compact-qa-a">(1) Immediately revoke and rotate the key — deleting the file in a new commit does NOT revoke it. (2) Audit usage logs for unauthorized calls. (3) Scrub history with <code>git-filter-repo --invert-paths --path secret.properties --force</code>. (4) Force-push and request GitHub cache purge. (5) Add pre-commit hooks with <code>detect-secrets</code> or <code>trufflehog</code>.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="compact-topic" id="topic-20A">
           <!-- TOPIC HEADER -->
           <div class="compact-header">
@@ -13053,6 +13230,80 @@ btn.click()</code></pre>
           </div>
         </section>
         
+        <section class="compact-topic" id="topic-20D">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">20D</span>
+              <h2 class="compact-title">Compose UI Testing</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 20</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> ComposeTestRule, semantic finders, performClick/performTextInput, assertIsDisplayed, screenshot testing, accessibility semantics, and testing stateful composables with full Kotlin examples.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Answer</h3>
+                <div class="answer-box">"Compose UI testing uses the <strong>semantics tree</strong>, not the View hierarchy. You write tests using <strong>ComposeTestRule</strong> — set content with <code>setContent{}</code>, find nodes with <code>onNodeWithTag()</code> or <code>onNodeWithText()</code>, interact with <code>performClick()</code>, and assert with <code>assertIsDisplayed()</code>. For async content I use <code>waitUntil{}</code>. I prefer <code>testTag</code> over text finders for stability across locales."</div>
+                <h3>Must-Mention Checklist</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>ComposeTestRule:</strong> <code>createComposeRule()</code> for isolated tests; <code>createAndroidComposeRule&lt;Activity&gt;()</code> for navigation/Activity-level tests.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>Semantic finders:</strong> <code>onNodeWithTag()</code> preferred over <code>onNodeWithText()</code> for locale stability.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>Interactions:</strong> <code>performClick()</code>, <code>performTextInput()</code>, <code>performScrollTo()</code>, <code>performTouchInput{}</code>.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>Assertions:</strong> <code>assertIsDisplayed()</code>, <code>assertTextEquals()</code>, <code>assertDoesNotExist()</code>, <code>assertIsEnabled()</code>.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Async handling:</strong> <code>waitUntil{}</code> with timeout. Never <code>Thread.sleep()</code>. For clock control: <code>mainClock.autoAdvance = false</code>.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>ui-test-manifest:</strong> <code>debugImplementation("androidx.compose.ui:ui-test-manifest")</code> required — without it createComposeRule() crashes.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Testing Patterns</div>
+              <div class="compact-section-body">
+                <h3>Pattern: Integration Test with Real ViewModel + Fake Repo</h3>
+                <pre><code>val fakeRepo = FakeProductRepository(listOf(
+    Product("1", "Espresso Machine", "$299")
+))
+val viewModel = ProductListViewModel(GetProductsUseCase(fakeRepo))
+composeTestRule.setContent {
+    AppTheme { ProductListScreen(viewModel = viewModel) }
+}
+composeTestRule.waitUntil(3_000) {
+    composeTestRule.onAllNodesWithTag("product_item")
+        .fetchSemanticsNodes().isNotEmpty()
+}
+composeTestRule.onNodeWithText("Espresso Machine").assertIsDisplayed()</code></pre>
+                <h3>Why testTag over text?</h3>
+                <p>Text finders break when copy changes or on different locales. Tags are developer-controlled and locale-independent. Add via <code>Modifier.testTag("login_button")</code>.</p>
+                <h3>Screenshot Testing (Paparazzi)</h3>
+                <p>Renders composables on the JVM — no emulator needed. Run <code>./gradlew recordPaparazziDebug</code> to capture goldens; <code>./gradlew verifyPaparazziDebug</code> to check diffs in CI.</p>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> What is the semantics tree and why does Compose use it instead of the View hierarchy?</div>
+                <div class="compact-qa-a">The semantics tree is a parallel tree built alongside composition. It contains metadata — text, role, state, actions — for accessibility and testing. There is no View hierarchy in Compose; there are no R.id identifiers. Tests are decoupled from implementation: refactoring composable structure doesn't break tests as long as semantic meaning is preserved. It's also a signal the UI is accessible, since the same tree is read by TalkBack.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> Your test fails with "No matching node found". How do you debug?</div>
+                <div class="compact-qa-a">(1) Print the semantics tree: <code>composeTestRule.onRoot().printToLog("DEBUG")</code>. (2) Check for async issues — add <code>waitUntil{}</code> if content is loading. (3) Check for merged semantics — use <code>useUnmergedTree = true</code>. (4) Check if item is off-screen in a LazyColumn — use <code>performScrollToIndex()</code> first. (5) Verify the <code>testTag</code> is set in the code path being executed.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> Your Compose test is flaky. What are the likely causes?</div>
+                <div class="compact-qa-a">Almost always one of: (1) Race condition — asserting before async state settles, fix with <code>waitUntil{}</code>. (2) Animation not complete — use <code>mainClock.autoAdvance = false</code> and <code>advanceTimeBy()</code>. (3) Shared mutable state between tests — reset in <code>@Before/@After</code>. (4) Test-order dependency — each test must call <code>setContent{}</code> independently. (5) <code>waitUntil</code> timeout too short on slow CI machines.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="compact-topic" id="topic-21A">
           <!-- TOPIC HEADER -->
           <div class="compact-header">
@@ -13230,6 +13481,148 @@ remember { } for expensive allocations</code></pre>
           </div>
         </section>
         
+        <section class="compact-topic" id="topic-21B">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">21B</span>
+              <h2 class="compact-title">Baseline Profiles &amp; Macrobenchmark</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 21</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> Profile-guided optimisation for Android apps — writing Baseline Profiles, measuring startup and scrolling with Macrobenchmark, automatic profiles via Play Store, and CI integration for performance regression detection.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Answer</h3>
+                <div class="answer-box">"Baseline Profiles are a text file listing class and method signatures that ART should AOT-compile on device install. Without them, code starts interpreted on first launch. Adding a Baseline Profile typically improves cold start by 20–40%. I use <code>BaselineProfileRule</code> to auto-generate them from real app flows, and Macrobenchmark to measure the improvement. Profiles are included in the AAB and applied by ProfileInstaller on install."</div>
+                <h3>Must-Mention Points</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>AOT compilation:</strong> Methods listed in profile are compiled to native code on device install, eliminating interpretation overhead on first launch.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>ProfileInstaller library:</strong> Converts the text profile to binary format and triggers ART compilation; works without Play Store.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>BaselineProfileRule generator:</strong> UI automation test records real code paths; run with <code>generateBaselineProfile</code> Gradle task on physical device.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>Macrobenchmark:</strong> Separate test module running against real app binary with <code>StartupTimingMetric</code>; requires physical device for valid results.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>TTID / TTFD metrics:</strong> Time to Initial Display (first frame) and Time to Full Display (all content loaded).</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>Cloud Profiles via Play Store:</strong> Aggregated real-user profiles deliver pre-compiled code even before first launch on new installs.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Profile Layers &amp; Traps</div>
+              <div class="compact-section-body">
+                <div class="table-wrap"><table>
+                  <thead><tr><th>Profile Type</th><th>When Applied</th><th>Covers</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Baseline Profile</strong></td><td>On install (ProfileInstaller)</td><td>Day-0 first launch</td></tr>
+                    <tr><td><strong>Cloud Profile</strong></td><td>Before first launch (Play)</td><td>Day-0 + common paths</td></tr>
+                    <tr><td><strong>Automatic Profile</strong></td><td>Night 1–3 (ART device)</td><td>This user's usage</td></tr>
+                  </tbody>
+                </table></div>
+                <h3>If Macrobenchmark Shows No Improvement</h3>
+                <ul>
+                  <li>Profile not applied: run <code>adb shell cmd package compile -m speed-profile com.app</code></li>
+                  <li>Generated from debug build — regenerate from <code>benchmarkRelease</code></li>
+                  <li>Running on emulator — must use physical device</li>
+                  <li>Profile is stale after refactoring — method names no longer exist in binary</li>
+                  <li>Startup bottleneck is I/O, not JIT — check Perfetto for disk read spans</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> What is a Baseline Profile and what problem does it solve?</div>
+                <div class="compact-qa-a">A text file listing class/method signatures for ART to AOT-compile on install. Solves: without profiles, ART starts by interpreting bytecode on first launch and only JIT-compiles "hot" methods after many calls. First launches are slow. ProfileInstaller converts the profile to binary at install time; ART pre-compiles listed methods to native code. On next cold start, those methods execute at native speed — 20–40% faster.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> How do you generate a Baseline Profile automatically?</div>
+                <div class="compact-qa-a">(1) Create a <code>:baseline-profile</code> module with <code>com.android.test</code> + <code>androidx.baselineprofile</code> plugins. (2) Write a test with <code>BaselineProfileRule</code> navigating critical user journeys with UiAutomator. (3) Apply <code>androidx.baselineprofile</code> in the app module with a dependency. (4) Run <code>./gradlew :baseline-profile:generateBaselineProfile</code> on a physical device. (5) Plugin auto-generates <code>baseline-prof.txt</code> packaged into the next release AAB.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> When should you regenerate your Baseline Profile?</div>
+                <div class="compact-qa-a">After major refactoring (renamed classes/methods invalidate profile rules), when new code is added to the startup path, on each release branch (best practice: automate in CI), and after upgrading major dependencies whose method signatures changed. Best practice: run <code>generateBaselineProfile</code> as a CI step on release branches and commit the updated <code>baseline-prof.txt</code>.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="compact-topic" id="topic-21C">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">21C</span>
+              <h2 class="compact-title">App Startup Performance</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 21</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> Cold, warm, and hot start mechanics. The full startup timeline from zygote fork to first frame. App Startup library for initialiser ordering. Lazy loading, tracing with Perfetto, and measuring TTID/TTFD.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Answer</h3>
+                <div class="answer-box">"Cold start is the full path: Zygote fork → ContentProviders init → Application onCreate → Activity created → first frame drawn. The two main levers: (1) <strong>Baseline Profiles</strong> for AOT — 20–40% faster without code changes. (2) Moving heavy work out of Application.onCreate() — use the <strong>App Startup library</strong> to merge ContentProviders and enable lazy initialisation. I measure with <code>adb am start -W</code> and Macrobenchmark's <code>StartupTimingMetric</code>, and always call <code>reportFullyDrawn()</code> for accurate TTFD."</div>
+                <h3>Must-Mention Points</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>Cold / Warm / Hot start definitions:</strong> Different optimisation levers. Cold = full process creation; Warm = Activity recreated; Hot = resume.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>TTID vs TTFD:</strong> TTID = first frame rendered (automatic). TTFD = content actually useful — requires <code>reportFullyDrawn()</code>.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>ContentProvider as hidden startup cost:</strong> N SDKs = N ContentProviders, each blocking the main thread 5–20ms before Application.onCreate().</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>App Startup library:</strong> Replaces N ContentProviders with 1 <code>InitializationProvider</code>; ordered Initializer dependencies; supports lazy init.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Baseline Profiles:</strong> AOT-compile startup-critical methods; shipped in AAB; the highest-impact single optimisation.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>reportFullyDrawn():</strong> Marks TTFD; required for accurate Macrobenchmark measurement; Compose variants: <code>ReportDrawn</code>/<code>ReportDrawnWhen</code>.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Tracing &amp; Profiling</div>
+              <div class="compact-section-body">
+                <h3>What to look for in a Perfetto startup trace</h3>
+                <ul>
+                  <li><strong>Main thread blocking work:</strong> Any long span before first frame. Should be &lt;16ms each.</li>
+                  <li><strong>ContentProvider init time:</strong> <code>bindApplication</code> → <code>ContentProvider: [name]</code> spans. Identify slowest SDKs.</li>
+                  <li><strong>Large class loads:</strong> <code>ClassLoad</code> events — classes not in Baseline Profile being JIT-compiled for first time.</li>
+                  <li><strong>Synchronous I/O:</strong> Disk read/write on main thread. Even small SharedPreferences reads can block 5–20ms.</li>
+                </ul>
+                <h3>Quick Measurement</h3>
+                <pre><code># Force-stop then measure TTID
+adb shell am force-stop com.example.app
+adb shell am start -W -n com.example.app/.MainActivity
+# Returns: ThisTime (TTID), TotalTime, WaitTime</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> Why are ContentProviders a startup bottleneck, and how does App Startup solve this?</div>
+                <div class="compact-qa-a">Android initialises all registered ContentProviders on the main thread <em>before</em> Application.onCreate(). Many SDKs use a ContentProvider for auto-init. With 5–8 SDKs, you have 50–150ms hidden startup cost. App Startup replaces all SDK ContentProviders with a single <code>InitializationProvider</code>. SDKs implement <code>Initializer&lt;T&gt;</code> instead. Initializers declare dependencies — App Startup topologically sorts and runs them. Net result: 1 ContentProvider instead of N.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> What is the difference between TTID and TTFD?</div>
+                <div class="compact-qa-a">TTID (Time to Initial Display) = time to first frame rendered, even a blank/skeleton. Measured automatically. TTFD (Time to Full Display) = time until content is actually useful. You must signal it via <code>reportFullyDrawn()</code>. Without this, Macrobenchmark cannot measure TTFD. An app can have great TTID (fast skeleton) but terrible TTFD (slow data loading). Optimise and monitor both.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> A Perfetto trace shows 400ms of main thread blocking before first frame. How do you diagnose and fix?</div>
+                <div class="compact-qa-a">(1) Identify blocking sections: look for ContentProvider spans, Application.onCreate() children, disk I/O on main thread, and class loading events. (2) Fix by category: ContentProvider bottleneck → migrate to App Startup library. Application.onCreate() heavy work → move to background coroutines. Disk I/O → replace SharedPreferences with DataStore. Class loading → add Baseline Profile. (3) Verify: add <code>Trace.beginSection()</code> around each fixed section, re-capture Perfetto, confirm each span is now &lt;16ms or off-thread.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="compact-topic" id="topic-22A">
           <!-- TOPIC HEADER -->
           <div class="compact-header">
@@ -19814,6 +20207,146 @@ debugImplementation(<span class="str">"com.squareup.leakcanary:leakcanary-androi
           </div>
         </section>
         
+
+        <section class="compact-topic" id="topic-42B">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">42B</span>
+              <h2 class="compact-title">Trustworthy AI</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 42</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> The 6 universal principles of trustworthy AI — explainability, fairness, robustness, transparency, privacy, and accountability — with concrete Android examples, interview answers, and developer responsibilities.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Answer</h3>
+                <div class="answer-box">"Trustworthy AI rests on 6 principles: <strong>explainability</strong> — users understand decisions; <strong>fairness</strong> — equitable performance across demographic groups; <strong>robustness</strong> — correct behaviour on adversarial and edge-case inputs; <strong>transparency</strong> — capabilities and limitations are documented; <strong>privacy</strong> — minimal data collection and user rights respected; and <strong>accountability</strong> — humans remain responsible for outcomes. As the developer integrating AI, I own validation before shipping, confidence-threshold gating in code, monitoring in production, and the feature-flag kill switch."</div>
+                <h3>Must-Mention Checklist</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div>The 6 principles by name: <strong>Explainability, Fairness, Robustness, Transparency, Privacy, Accountability</strong></div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>Developer as last line of defense</strong> — validate output before shipping; you own the integration.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>On-device inference</strong> as privacy-preserving default — ML Kit, TFLite, Gemini Nano never send data off-device.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>Slice-based fairness evaluation</strong> — never rely on aggregate accuracy; test per demographic group.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Feature flag kill switch</strong> — every AI feature must be disableable instantly without an app release.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>Model cards</strong> — document intended use, performance metrics, known limitations for every AI feature shipped.</div></div>
+                  <div class="must-item"><div class="must-num">7</div><div><strong>EU AI Act</strong> — high-risk AI (biometrics, credit, medical) legally requires human-in-the-loop oversight.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Privacy &amp; Data Governance</div>
+              <div class="compact-section-body">
+                <div class="table-wrap"><table>
+                  <thead><tr><th>Factor</th><th>On-device (ML Kit, TFLite, Gemini Nano)</th><th>Cloud (Gemini API)</th></tr></thead>
+                  <tbody>
+                    <tr><td>Privacy</td><td>✅ Data never leaves device</td><td>❌ Requires consent + DPA</td></tr>
+                    <tr><td>Latency</td><td>✅ No network; offline works</td><td>❌ Network-dependent</td></tr>
+                    <tr><td>Model freshness</td><td>❌ Needs app update</td><td>✅ Update without release</td></tr>
+                    <tr><td>GDPR</td><td>✅ Straightforward</td><td>❌ Data residency, consent</td></tr>
+                  </tbody>
+                </table></div>
+                <h3>Signal Phrases Interviewers Want</h3>
+                <div class="table-wrap"><table>
+                  <tr><th>Weak</th><th>Strong</th></tr>
+                  <tr><td>"We test the model for accuracy"</td><td>"We evaluate per demographic slice — aggregate accuracy hides fairness failures"</td></tr>
+                  <tr><td>"We monitor the app"</td><td>"We log confidence distributions and alert on distribution shift — the first signal of model drift"</td></tr>
+                </table></div>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> Name the 6 principles of trustworthy AI and give one Android example for each.</div>
+                <div class="compact-qa-a"><strong>Explainability:</strong> Show confidence % next to a classification result. <strong>Fairness:</strong> Test face unlock accuracy per skin tone / lighting / age group. <strong>Robustness:</strong> Validate model output against a whitelist before acting — never pass raw LLM output as a SQL query. <strong>Transparency:</strong> Ship a model card documenting training data, known failure modes, and demographics tested. <strong>Privacy:</strong> Use Gemini Nano on-device so user text never leaves the phone. <strong>Accountability:</strong> Gate high-impact AI decisions (loan, diagnosis) with human review; log all decisions for audit.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> Why should on-device inference be preferred for privacy, and when is cloud inference justified?</div>
+                <div class="compact-qa-a">On-device: data never leaves the device — GDPR compliance is straightforward, no consent needed for inference inputs, works offline. Cloud is justified when the model is too large for device hardware (&gt;few hundred MB), when model needs to be updated instantly without a release, or when server-side compute is genuinely needed (multi-modal, latest Gemini Ultra). For cloud, require explicit consent, sign a DPA, enforce data minimisation — send only what's needed, not the full user profile.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> You're adding a third-party AI SDK to a fintech app. What trustworthy AI checks do you perform before shipping?</div>
+                <div class="compact-qa-a">(1) Request the vendor's model card — check training data sources, demographics tested, accuracy per slice. (2) Audit what data the SDK collects and where it sends it — check for GDPR compliance, data minimisation. (3) Test the feature on demographic slices present in your user base — don't rely on aggregate accuracy. (4) Add a feature-flag kill switch wrapping the entire SDK call. (5) Define a confidence threshold below which the app falls back to a non-AI path. (6) Set up production monitoring: log confidence distributions, alert if distribution shifts by &gt;10%.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="compact-topic" id="topic-42C">
+          <!-- TOPIC HEADER -->
+          <div class="compact-header">
+            <div class="compact-header-left">
+              <span class="compact-code">42C</span>
+              <h2 class="compact-title">Advanced App Security: FLAG_SECURE &amp; App Hardening</h2>
+            </div>
+            <div class="compact-header-right">
+              <span class="badge badge-tier1">Tier 1</span>
+              <span class="compact-mod-badge">Mod 42</span>
+            </div>
+          </div>
+          <div class="compact-desc">
+            <strong>Key Concept:</strong> FLAG_SECURE, excludeFromRecents, task hijacking prevention, screen capture defense, exported components, and runtime self-protection — the full security hardening layer for production Android apps.
+          </div>
+          <div class="compact-grid">
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚡ Quick Revision &amp; Mechanics</div>
+              <div class="compact-section-body">
+                <h3>30-Second Answer</h3>
+                <div class="answer-box">"For a banking or payment app, I apply security in layers. At the window level, I set FLAG_SECURE — before setContentView — to prevent screenshots and mask the task switcher thumbnail. For payment/auth activities, I set excludeFromRecents and noHistory. I set taskAffinity to an empty string to isolate the task and prevent StrandHogg task hijacking. All components are android:exported=false unless explicitly public, and deep links are validated against whitelist patterns. At runtime, I use Play Integrity API — server-verified, nonce-based — to confirm device integrity before allowing sensitive operations."</div>
+                <h3>Must-Mention Checklist</h3>
+                <div class="must-mention">
+                  <div class="must-item"><div class="must-num">1</div><div><strong>FLAG_SECURE before setContentView</strong> — not after; window must not be created yet when the flag is set.</div></div>
+                  <div class="must-item"><div class="must-num">2</div><div><strong>excludeFromRecents + noHistory</strong> for payment/auth screens — prevents task switcher leakage and back-navigation post-logout.</div></div>
+                  <div class="must-item"><div class="must-num">3</div><div><strong>taskAffinity="" to prevent StrandHogg task hijacking</strong> — isolates sensitive activities into their own task.</div></div>
+                  <div class="must-item"><div class="must-num">4</div><div><strong>android:exported="false" as default</strong> for all components — explicit, not relying on defaults.</div></div>
+                  <div class="must-item"><div class="must-num">5</div><div><strong>Deep link input validation</strong> — host + path + parameter whitelist. App Links (https://) preferred over custom URI schemes.</div></div>
+                  <div class="must-item"><div class="must-num">6</div><div><strong>Play Integrity API for sensitive operations</strong> — server-verified, nonce-based, not called on every screen.</div></div>
+                  <div class="must-item"><div class="must-num">7</div><div><strong>Defense in depth — server-side validation, not client-only</strong> — RASP raises attack cost; server makes the final security decision.</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="compact-col">
+              <div class="compact-section-hdr">⚠️ Runtime Self-Protection (RASP)</div>
+              <div class="compact-section-body">
+                <div class="table-wrap"><table>
+                  <thead><tr><th>Integrity Verdict</th><th>Meaning</th><th>Action</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>MEETS_BASIC_INTEGRITY</code></td><td>Not obviously tampered</td><td>Allow normal operations</td></tr>
+                    <tr><td><code>MEETS_DEVICE_INTEGRITY</code></td><td>GMS-certified, no known exploits</td><td>Required for payment operations</td></tr>
+                    <tr><td><code>MEETS_STRONG_INTEGRITY</code></td><td>Bootloader locked, all checks pass</td><td>Required for highest-risk operations</td></tr>
+                  </tbody>
+                </table></div>
+                <div class="callout callout-yellow"><div class="callout-label">⚠️ RASP is Defense in Depth, Not a Guarantee</div>Determined attackers with Magisk + Frida can bypass individual checks. The goal is to raise the cost of attack. Never trust client-side security alone — always combine RASP with server-side Play Integrity token validation, rate limiting, and anomaly detection.</div>
+              </div>
+            </div>
+          </div>
+          <div class="compact-qa-section">
+            <div class="compact-section-hdr">🎯 High-Yield Interview Q&amp;As</div>
+            <div class="compact-qa-list">
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q1:</strong> What is FLAG_SECURE and when do you use it?</div>
+                <div class="compact-qa-a"><code>WindowManager.LayoutParams.FLAG_SECURE</code> marks the window as secure, preventing the system from including it in screenshots, screen recordings, or task-switcher thumbnails. Use it on all screens containing sensitive data: authentication screens, payment pages, account details, session tokens. Set it BEFORE <code>setContentView()</code>: <code>window.setFlags(FLAG_SECURE, FLAG_SECURE)</code>. If set after, the window may already be created without the protection flag.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q2:</strong> What is the StrandHogg vulnerability and how do you prevent it?</div>
+                <div class="compact-qa-a">StrandHogg is a task hijacking attack where a malicious app exploits <code>taskAffinity</code> to inject its Activity into another app's task. When the user launches the legitimate app, the malicious Activity appears on top — capturing credentials. Prevention: set <code>android:taskAffinity=""</code> on all sensitive activities to isolate them in their own dedicated task. Also set <code>android:allowTaskReparenting="false"</code>. This prevents any external app from inserting its Activity into your task stack.</div>
+              </div>
+              <div class="compact-qa-box">
+                <div class="compact-qa-q"><strong>Q3:</strong> How do you use Play Integrity API to protect a payment initiation endpoint?</div>
+                <div class="compact-qa-a">(1) Before payment: request a nonce from your backend. (2) Call <code>IntegrityManager.requestIntegrityToken()</code> with the nonce + project number. (3) Submit the encrypted integrity token alongside the payment request. (4) Backend decrypts via Google's API and verifies: <code>MEETS_DEVICE_INTEGRITY</code>, <code>PLAY_RECOGNIZED</code>, correct package + cert SHA256, and nonce matches (prevents replay). (5) Only if all checks pass, the backend executes the payment. Client-side integrity checks are advisory only; the server makes the binding decision.</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
 </body>
 </html>

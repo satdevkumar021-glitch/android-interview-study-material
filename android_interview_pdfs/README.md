@@ -31,10 +31,12 @@ open http://localhost:8080
 |---|---|
 | `index.html` | Master dashboard — search, filter, progress tracking across all 105 topics |
 | `shared.js` | Injected on every page — top navbar, prev/next, progress, score modal, quiz |
-| `shared.css` | Dark-theme styles for topbar, flip cards, score modal |
+| `shared.css` | Dark-theme styles + self-hosted `@font-face` declarations for Inter & JetBrains Mono |
+| `fonts/` | Self-hosted woff2 font files (Inter, JetBrains Mono) — no external CDN requests |
 | `topics_manifest.json` | Metadata for all 105 topics (used by index.html and shared.js) |
 | `build_portal.py` | Regenerates `index.html` and `all_topics_combined.html` from manifest |
 | `all_topics_combined.html` | Single-file reference with all 105 topics concatenated |
+| `.github/workflows/ci.yml` | GitHub Actions CI — runs link checker + TOPICS array order validation on every push |
 
 ### Topic Pages (105 total)
 
@@ -145,10 +147,13 @@ python3 build_portal.py
 android-interview-study-material/
 ├── index.html                   # Master dashboard
 ├── shared.js                    # Shared JS (topbar, quiz, progress, nav)
-├── shared.css                   # Shared CSS (topbar, flip cards, modals)
+├── shared.css                   # Shared CSS (topbar, flip cards, modals, @font-face)
+├── fonts/                       # Self-hosted woff2 fonts (Inter, JetBrains Mono)
 ├── topics_manifest.json         # All 105 topic metadata
 ├── all_topics_combined.html     # Single-file reference (all 105 topics)
 ├── build_portal.py              # Portal regeneration script
+├── topic_pdfs/                  # 105 individual topic PDFs
+├── .github/workflows/ci.yml     # CI — link checker + TOPICS order validation
 ├── [1A-42C]_*.html              # 105 individual topic pages
 └── README.md                    # This file
 ```
@@ -160,8 +165,16 @@ android-interview-study-material/
 To add a new topic page:
 1. Create `NN_Topic_Name.html` following the 9-section structure
 2. Add entry to `topics_manifest.json`
-3. Add entry to `shared.js` TOPICS array
+3. Add entry to `shared.js` TOPICS array **at the correct numeric position** (not appended at the end)
 4. Run `python3 build_portal.py` to update `index.html`
+5. Generate the topic's PDF: `python3 generate_all_topic_pdfs.py` (or run Chrome headless for just that file)
+6. Run `python3 run_full_website_tests.py` — all 47 tests must pass before committing
+
+> **Note on fonts:** The portal uses self-hosted Inter and JetBrains Mono from the `fonts/` directory. No external CDN calls are made. The portal works fully offline.
+
+> **Note on progress:** Study progress is stored in `localStorage` under the key `aip_v2_progress`. Both the dashboard (`index.html`) and individual topic pages (`shared.js`) read/write the same key, so progress syncs correctly across both views.
+
+> **Note on PDFs:** `topic_pdfs/` and `*.zip` are listed in `.gitignore` (large binary files, ~54 MB total). After cloning, run `python3 generate_all_topic_pdfs.py` to regenerate all 105 per-topic PDFs and then re-build the ZIP. The test suite checks that the ZIP and a sample PDF are served correctly — run the generator before running the tests.
 
 ---
 

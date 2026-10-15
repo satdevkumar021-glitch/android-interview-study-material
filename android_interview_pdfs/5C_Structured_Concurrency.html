@@ -16,7 +16,7 @@
   .nav-item.active{background:rgba(124,106,247,.15);color:var(--accent);}
   .nav-num{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:22px;text-align:center;}
   .nav-item.active .nav-num{background:rgba(124,106,247,.25);color:var(--accent);}
-  .main { flex: 1; overflow: visible; min-width: 0; }
+  .main { margin-left: 260px; overflow: visible; min-width: 0; }
   .hero{background:linear-gradient(135deg,#1a1d27 0%,#1d1538 100%);border-bottom:1px solid var(--border);padding:40px 48px 36px;}
   .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.3);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px;}
   .hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;}
@@ -152,48 +152,7 @@
   .hero-back:hover { color: var(--accent, #7c6af7); }
   .hero-back svg { width:12px; height:12px; fill:currentColor; }
 
-  /* ═══════════════════════════════════════════════════
-     LAYOUT FIX — window scrolls, sidebar stays sticky
-     Works perfectly with shared.js patchScrollMode()
-  ═══════════════════════════════════════════════════ */
-
-  /* 1. Root layout: flex row, full viewport height */
-  html, body { height: 100%; }
-  body { overflow-y: scroll; }          /* body = scroll container */
-  .layout { display: flex; align-items: flex-start; min-height: 100vh; }
-
-  /* 2. Sidebar: sticky to top, scrolls internally — shared.js sets top:52px */
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    flex-shrink: 0;
-    width: 260px; min-width: 260px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
-  /* 3. Main: fills remaining width, NOT a scroll container */
-  .main { flex: 1; overflow: visible; min-width: 0; }
-
-  /* 4. All sections always visible, stacked vertically */
-  .section {
-    display: block !important;
-    opacity: 1 !important;
-    animation: none !important;
-    border-bottom: 1px solid var(--border);
-    padding: 44px 52px;
-    max-width: 900px;
-  }
-  .section:last-of-type { border-bottom: none; padding-bottom: 80px; }
-  section[id] {
-    display: block !important;
-    border-bottom: 1px solid var(--border);
-    padding: 44px 52px;
-    max-width: 900px;
-  }
-  section[id]:last-of-type { border-bottom: none; padding-bottom: 80px; }
+  
 
   /* ═══════════════════════════════════════════════════
      STUDY-FRIENDLY DESIGN ENHANCEMENTS
@@ -313,6 +272,83 @@
   .section.read .section-read-bar { width: 100%; }
 
 </style>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FIXED SIDEBAR — injected by fix_sidebar_fixed.py
+       Sidebar is locked to viewport. Only content scrolls.
+  ═══════════════════════════════════════════════════════════════ -->
+  <style id="aip-fixed-sidebar">
+    /* 1. Body: natural document scroll — no flex, no height constraint */
+    html { min-height: 100%; }
+    body {
+      display: block !important;
+      height: auto !important;
+      min-height: 100vh;
+      overflow-y: auto !important;
+      overflow-x: hidden;
+    }
+
+    /* 2. Layout wrapper: simple block container */
+    .layout { display: block !important; min-height: 100vh; }
+
+    /* 3. SIDEBAR — fixed to viewport, never scrolls with page */
+    .sidebar,
+    nav.sidebar {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;            /* shared.js overrides to 52px after topbar injects */
+      width: 260px !important;
+      min-width: 260px !important;
+      height: 100vh !important;     /* shared.js overrides to calc(100vh - 52px) */
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      z-index: 200 !important;
+      background: var(--surface, #1a1d27) !important;
+      border-right: 1px solid var(--border, #2e3148) !important;
+    }
+
+    /* 4. Main content: pushed right to clear the 260px fixed sidebar */
+    .main,
+    main#mainScroll,
+    main {
+      display: block !important;
+      margin-left: 260px !important;   /* shared.js keeps this in sync */
+      width: auto !important;
+      max-width: none !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+
+    /* 5. Active sidebar highlight */
+    .nav-item.aip-nav-active,
+    nav a.aip-nav-active {
+      background: rgba(124,106,247,0.18) !important;
+      color: #7c6af7 !important;
+      border-left-color: #7c6af7 !important;
+    }
+    .nav-item.aip-nav-active .nav-num {
+      background: rgba(124,106,247,0.28) !important;
+      color: #7c6af7 !important;
+    }
+
+    /* 6. Mobile: sidebar becomes off-canvas drawer */
+    @media (max-width: 768px) {
+      .sidebar, nav.sidebar {
+        left: -280px !important;
+        top: 0 !important;
+        height: 100vh !important;
+        z-index: 9000 !important;
+        transition: left 0.28s cubic-bezier(0.4,0,0.2,1) !important;
+        box-shadow: 4px 0 32px rgba(0,0,0,0.7) !important;
+      }
+      .sidebar.aip-open, nav.sidebar.aip-open {
+        left: 0 !important;
+      }
+      .main, main#mainScroll, main {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
@@ -332,7 +368,10 @@
   <a class="nav-item" href="#s6" data-section="s6"><span class="nav-num">6</span> Pitfalls &amp; Best Practices</a>
   <a class="nav-item" href="#s7" data-section="s7"><span class="nav-num">7</span> Interview Framework</a>
   <a class="nav-item" href="#s8" data-section="s8"><span class="nav-num">8</span> Quick Revision Sheet</a>
-  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Interview Questions</a>
+  <a class="nav-item" href="#s9" data-section="s9"><span class="nav-num">9</span> Flash Cards</a>
+  <a class="nav-item" href="#s10" data-section="s10"><span class="nav-num">10</span> Testing</a>
+  <a class="nav-item" href="#s11" data-section="s11"><span class="nav-num">11</span> Interview Questions</a>
+  <a class="nav-item" href="#s12" data-section="s12"><span class="nav-num">12</span> Hands-On Task</a>
 </nav>
 <main class="main" id="mainScroll">
   <div class="hero">
@@ -350,29 +389,37 @@
   <!-- S1 -->
   <div class="section" id="s1">
     <div class="section-title"><div class="section-icon">&#128269;</div>1. Overview</div>
+
+    <h3>In Plain Words</h3>
+    <p>Think of coroutines like <strong>employees in a company with a strict org chart</strong>. Every employee (coroutine) reports to a manager (scope). When the manager leaves (scope is cancelled), every direct report is let go too — automatically, with no manual cleanup. No one can "go rogue" and keep working after their manager is gone.</p>
+    <p>Before structured concurrency this was like hiring freelancers with no manager: you'd launch work in an Activity, the Activity would be destroyed, but the coroutine kept billing — holding a reference to the dead Activity, causing NPEs and memory leaks. Structured concurrency makes orphan coroutines <em>architecturally impossible</em>.</p>
+
     <h3>The hierarchy</h3>
     <p>Structured concurrency is the guarantee that <strong>every coroutine belongs to a scope, and no coroutine outlives its scope</strong>. The hierarchy is:</p>
     <pre><code>CoroutineScope
-  └─ CoroutineContext (immutable set of elements)
-       ├─ Dispatcher    (which thread)
-       ├─ Job           (lifecycle + parent-child links)
-       ├─ CoroutineName (debug only)
-       └─ ExceptionHandler (uncaught errors)
+  └─ CoroutineContext  <span class="cm">// type-indexed immutable map of Element subtypes (Key → Element)</span>
+       ├─ Dispatcher    <span class="cm">// which thread pool</span>
+       ├─ Job           <span class="cm">// lifecycle + parent-child links  ← this is the heart of SC</span>
+       ├─ CoroutineName <span class="cm">// debug only</span>
+       └─ ExceptionHandler <span class="cm">// uncaught-error last resort</span>
 
+<span class="cm">// CoroutineContext is NOT a tree — it is a flat map keyed by element type.</span>
+<span class="cm">// The TREE is formed by the Job hierarchy inside that context.</span>
 <span class="cm">// When you launch a child coroutine:</span>
-<span class="cm">// - Child gets a NEW Job that is a child of the parent Job</span>
-<span class="cm">// - Child INHERITS everything else (Dispatcher, name, handler)</span>
-<span class="cm">// - Cancelling the parent cancels ALL children</span>
-<span class="cm">// - Parent waits for ALL children to complete before completing itself</span></code></pre>
+<span class="cm">// - Child gets a NEW Job registered as a child of the parent Job</span>
+<span class="cm">// - Child INHERITS everything else (Dispatcher, name, handler) from the parent context</span>
+<span class="cm">// - Cancelling the parent Job → sends CancellationException DOWN to all children</span>
+<span class="cm">// - Parent Job only completes after ALL child Jobs complete</span></code></pre>
+
     <h3>Three guarantees of structured concurrency</h3>
     <ul>
-      <li><strong>No leaks</strong> — coroutines auto-cancel when their scope is cancelled</li>
-      <li><strong>Error propagation</strong> — child failures propagate to parent (unless SupervisorJob)</li>
-      <li><strong>Completion guarantee</strong> — parent doesn't complete until all children complete</li>
+      <li><strong>No leaks</strong> — coroutines auto-cancel when their scope is cancelled; no coroutine outlives its parent</li>
+      <li><strong>Error propagation</strong> — child failures propagate UP to parent (unless the parent has a SupervisorJob)</li>
+      <li><strong>Completion guarantee</strong> — a parent waits for ALL children before it completes; a suspend function that launches coroutines inside <code>coroutineScope { }</code> won't return until all of them are done</li>
     </ul>
     <div class="callout callout-purple">
-      <div class="callout-label">Why It Matters</div>
-      Before structured concurrency, async frameworks had "fire and forget" leaks. You'd launch a coroutine in an Activity, the Activity would be destroyed, but the coroutine kept running — holding a reference to the destroyed Activity, causing NPEs and memory leaks. Structured concurrency makes this architecturally impossible.
+      <div class="callout-label">Why It Matters for Senior Interviews</div>
+      Interviewers test whether you know the <em>mechanism</em>, not just the rule. The key mechanism: when you call <code>launch { }</code>, the new <code>Job</code> object is attached to the parent's Job via <code>Job.attachChild()</code>. Cancellation is cooperative — the child must call <code>isActive</code>, <code>ensureActive()</code>, or hit a suspension point for the <code>CancellationException</code> to actually terminate the coroutine.
     </div>
   </div>
 
@@ -407,12 +454,59 @@
     <div class="table-wrap">
     <table>
       <tr><th>Feature</th><th>Job</th><th>SupervisorJob</th></tr>
-      <tr><td>Child failure propagation</td><td>Cancels all siblings + parent</td><td>Isolated to that child only</td></tr>
-      <tr><td>Used in</td><td>coroutineScope { }</td><td>supervisorScope { }, viewModelScope, lifecycleScope</td></tr>
-      <tr><td>Exception handling</td><td>Exception bubbles up</td><td>Exception needs CoroutineExceptionHandler per-child</td></tr>
-      <tr><td>Use case</td><td>All-or-nothing operations (checkout, transaction)</td><td>Independent parallel loading (dashboard widgets)</td></tr>
+      <tr><td>Child failure propagation</td><td>Cancels all siblings + propagates up to parent</td><td>Isolated — only the failed child is cancelled</td></tr>
+      <tr><td>Created by</td><td><code>coroutineScope { }</code> creates a child Job of the parent</td><td><code>supervisorScope { }</code>, <code>viewModelScope</code>, <code>lifecycleScope</code></td></tr>
+      <tr><td>Exception handling</td><td>Exception bubbles up automatically</td><td>Each child must handle its own exceptions (try/catch or CoroutineExceptionHandler)</td></tr>
+      <tr><td>Use case</td><td>All-or-nothing operations (checkout, multi-step upload)</td><td>Independent parallel loading (dashboard widgets, A/B test variants)</td></tr>
     </table>
     </div>
+
+    <h3>Cooperative cancellation — how it actually works</h3>
+    <p>Cancellation in coroutines is <strong>cooperative</strong>, not preemptive. Sending a cancel signal does not immediately stop the coroutine — the coroutine must reach a <em>cancellation checkpoint</em>. Three ways to cooperate:</p>
+    <pre><code><span class="kw">suspend fun</span> <span class="fn">heavyWork</span>() {
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">1</span>..<span class="nu">1_000_000</span>) {
+        <span class="cm">// Option 1: ensureActive() — throws CancellationException if cancelled</span>
+        <span class="fn">ensureActive</span>()
+        <span class="fn">doUnitOfWork</span>(i)
+    }
+}
+
+<span class="kw">suspend fun</span> <span class="fn">heavyWorkYield</span>() {
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="nu">1</span>..<span class="nu">1_000_000</span>) {
+        <span class="cm">// Option 2: yield() — checks cancellation AND gives up the thread</span>
+        <span class="fn">yield</span>()
+        <span class="fn">doUnitOfWork</span>(i)
+    }
+}
+
+<span class="kw">fun</span> <span class="fn">checkActiveManually</span>(scope: <span class="cl">CoroutineScope</span>) {
+    <span class="cm">// Option 3: isActive — for non-suspend contexts (callbacks, loops)</span>
+    <span class="kw">while</span> (scope.isActive) {
+        <span class="fn">doUnitOfWork</span>()
+    }
+}
+
+<span class="cm">// ⚠️ A CPU-bound loop with NO checkpoint will NOT cancel:</span>
+<span class="kw">suspend fun</span> <span class="fn">uncancellable</span>() {            <span class="cm">// ❌ BAD</span>
+    <span class="kw">var</span> i = <span class="nu">0</span>
+    <span class="kw">while</span> (i++ < <span class="nu">1_000_000</span>) { <span class="fn">doWork</span>() }  <span class="cm">// cancel() has no effect here</span>
+}</code></pre>
+
+    <h3>withContext(NonCancellable) — cleanup that must not be interrupted</h3>
+    <pre><code><span class="kw">suspend fun</span> <span class="fn">uploadWithCleanup</span>() {
+    <span class="kw">try</span> {
+        <span class="fn">uploadFile</span>()
+    } <span class="kw">finally</span> {
+        <span class="cm">// If we're here because of cancellation, this coroutine is already in</span>
+        <span class="cm">// "cancelling" state — calling a suspend function would throw immediately.</span>
+        <span class="cm">// Wrap cleanup in NonCancellable to allow suspending in finally:</span>
+        <span class="fn">withContext</span>(<span class="cl">NonCancellable</span>) {
+            uploadRepo.<span class="fn">markUploadFailed</span>()   <span class="cm">// suspend call safe here</span>
+            tempFileRepo.<span class="fn">deleteTempFile</span>()   <span class="cm">// suspend call safe here</span>
+        }
+    }
+}
+<span class="cm">// ⚠️ Only use NonCancellable in finally blocks — never as a scope for entire operations.</span></code></pre>
   </div>
 
   <!-- S3 Key Differences -->
@@ -455,56 +549,148 @@
 <span class="kw">val</span> orders = ordersDef.<span class="fn">await</span>()
 <span class="cm">// Both fetched simultaneously!</span></code></pre>
 
-    <h3>launch vs async — exception handling</h3>
+    <h3>launch vs async — exception handling (CRITICAL INTERVIEW TRAP)</h3>
     <pre><code><span class="cm">// launch: exception immediately propagates to parent Job</span>
 viewModelScope.<span class="fn">launch</span> {
     <span class="kw">throw</span> <span class="cl">IOException</span>(<span class="str">"network error"</span>)
-    <span class="cm">// Crashes the parent scope unless CoroutineExceptionHandler set</span>
+    <span class="cm">// Reaches CoroutineExceptionHandler (if set), then crashes the app</span>
 }
 
-<span class="cm">// async: exception stored in Deferred, thrown only on await()</span>
+<span class="cm">// async under SupervisorJob (viewModelScope): exception STORED in Deferred</span>
+<span class="cm">// Only thrown when you call .await()</span>
 <span class="kw">val</span> deferred = viewModelScope.<span class="fn">async</span> {
     <span class="kw">throw</span> <span class="cl">IOException</span>(<span class="str">"network error"</span>)
 }
-<span class="kw">try</span> { deferred.<span class="fn">await</span>() }          <span class="cm">// exception thrown here</span>
+<span class="kw">try</span> { deferred.<span class="fn">await</span>() }          <span class="cm">// ✅ exception thrown here — catchable</span>
 <span class="kw">catch</span> (e: <span class="cl">IOException</span>) { <span class="cm">/* handled */</span> }</code></pre>
+
+    <div class="callout callout-red">
+      <div class="callout-label">⚠️ Critical Difference: async inside coroutineScope vs supervisorScope</div>
+      <p>The try/catch on <code>await()</code> above works because <code>viewModelScope</code> uses <strong>SupervisorJob</strong>. Inside a regular <code>coroutineScope { }</code>, async exceptions behave differently:</p>
+    </div>
+    <pre><code><span class="cm">// ❌ TRAP: async inside coroutineScope — exception does NOT wait for await()</span>
+coroutineScope {
+    <span class="kw">val</span> d = <span class="fn">async</span> { <span class="kw">throw</span> <span class="cl">IOException</span>() }
+    <span class="cm">// IOException propagates IMMEDIATELY to the coroutineScope</span>
+    <span class="cm">// The scope is cancelled. When you call d.await(), the scope</span>
+    <span class="cm">// is already done — your try/catch may NEVER execute.</span>
+    <span class="kw">try</span> { d.<span class="fn">await</span>() } <span class="kw">catch</span> (e: <span class="cl">IOException</span>) { }  <span class="cm">// ← may miss the exception</span>
+}
+
+<span class="cm">// ✅ CORRECT: use supervisorScope when you want async exceptions on await() only</span>
+supervisorScope {
+    <span class="kw">val</span> d = <span class="fn">async</span> { <span class="kw">throw</span> <span class="cl">IOException</span>() }
+    <span class="kw">try</span> { d.<span class="fn">await</span>() } <span class="kw">catch</span> (e: <span class="cl">IOException</span>) { }  <span class="cm">// ✅ reliably caught here</span>
+}
+
+<span class="cm">// Senior rule: async exception behaviour depends on the PARENT's Job type.</span>
+<span class="cm">// Under SupervisorJob → stored until await().</span>
+<span class="cm">// Under regular Job   → propagates immediately (even before await()).</span></code></pre>
+
+    <h3>CancellationException — the rule you must know</h3>
+    <pre><code><span class="cm">// CancellationException is special. Rules:</span>
+<span class="cm">// 1. It extends IllegalStateException (not RuntimeException)</span>
+<span class="cm">// 2. It is used as the cooperative cancellation signal</span>
+<span class="cm">// 3. NEVER swallow it — always re-throw:</span>
+
+<span class="kw">suspend fun</span> <span class="fn">bad</span>() {
+    <span class="kw">try</span> { <span class="fn">delay</span>(<span class="nu">1000</span>) }
+    <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="cm">/* ❌ swallows CancellationException! */</span> }
+}
+
+<span class="kw">suspend fun</span> <span class="fn">good</span>() {
+    <span class="kw">try</span> { <span class="fn">delay</span>(<span class="nu">1000</span>) }
+    <span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) { <span class="kw">throw</span> e }  <span class="cm">// ✅ always re-throw CE</span>
+    <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="cm">/* handle other errors */</span> }
+}
+
+<span class="cm">// runCatching ALSO swallows CancellationException — use safeRunCatching:</span>
+<span class="kw">suspend fun</span> &lt;<span class="cl">T</span>&gt; <span class="fn">safeRunCatching</span>(block: <span class="kw">suspend</span> () -> <span class="cl">T</span>): <span class="cl">Result</span>&lt;<span class="cl">T</span>&gt; =
+    <span class="kw">runCatching</span> { <span class="fn">block</span>() }
+        .<span class="fn">onFailure</span> { <span class="kw">if</span> (it <span class="kw">is</span> <span class="cl">CancellationException</span>) <span class="kw">throw</span> it }</code></pre>
   </div>
 
   <!-- S4 -->
   <div class="section" id="s4">
     <div class="section-title"><div class="section-icon">&#127981;</div>4. Production Example</div>
     <h3>Banking: funds transfer — all-or-nothing (coroutineScope)</h3>
-    <pre><code><span class="cm">// All steps must succeed together — use coroutineScope (Job semantics)</span>
+    <p>Two real-world patterns side by side: a funds transfer (all-or-nothing) and a dashboard (partial results ok).</p>
+    <pre><code><span class="cm">// ═══ PATTERN 1: All-or-nothing — use coroutineScope ═══</span>
+<span class="cm">// coroutineScope is a CONCURRENCY boundary, NOT a transaction boundary.</span>
+<span class="cm">// For true atomicity you still need a database transaction around the ledger ops.</span>
 <span class="kw">suspend fun</span> <span class="cl">TransferService</span>.<span class="fn">transfer</span>(
     from: <span class="cl">Account</span>, to: <span class="cl">Account</span>, amount: <span class="cl">BigDecimal</span>
 ): <span class="cl">TransferResult</span> = coroutineScope {
-    <span class="cm">// Step 1 + 2 can be parallel: validate both accounts simultaneously</span>
+    <span class="cm">// Parallel validation — if EITHER throws, the other is cancelled too</span>
     <span class="kw">val</span> fromOk = <span class="fn">async</span> { accountRepo.<span class="fn">validateSufficientFunds</span>(from, amount) }
-    <span class="kw">val</span> toOk = <span class="fn">async</span> { accountRepo.<span class="fn">validateAccountActive</span>(to) }
+    <span class="kw">val</span> toOk   = <span class="fn">async</span> { accountRepo.<span class="fn">validateAccountActive</span>(to) }
 
     <span class="kw">if</span> (!fromOk.<span class="fn">await</span>() || !toOk.<span class="fn">await</span>()) {
         <span class="kw">return</span>@coroutineScope <span class="cl">TransferResult</span>.<span class="cl">Rejected</span>
     }
 
-    <span class="cm">// Step 3+4 must be sequential — debit before credit</span>
+    <span class="cm">// Sequential — debit must happen before credit.</span>
+    <span class="cm">// ⚠️ If process dies between debit and credit, coroutineScope won't roll it back.</span>
+    <span class="cm">// In production: wrap in a database transaction or use outbox/saga pattern.</span>
     <span class="fn">withContext</span>(<span class="cl">Dispatchers</span>.IO) {
         ledgerRepo.<span class="fn">debit</span>(from, amount)   <span class="cm">// if this throws, credit never runs</span>
-        ledgerRepo.<span class="fn">credit</span>(to, amount)    <span class="cm">// safe: debit confirmed</span>
+        ledgerRepo.<span class="fn">credit</span>(to, amount)
     }
     <span class="cl">TransferResult</span>.<span class="cl">Success</span>
 }
 
-<span class="cm">// Dashboard loading — partial failure acceptable (supervisorScope)</span>
+<span class="cm">// ═══ PATTERN 2: Partial results OK — use supervisorScope ═══</span>
+<span class="cm">// Note: use safeRunCatching (re-throws CancellationException).</span>
+<span class="cm">// Plain runCatching would swallow CE and break cooperative cancellation.</span>
 <span class="kw">suspend fun</span> <span class="fn">loadDashboard</span>(): <span class="cl">DashboardState</span> = supervisorScope {
-    <span class="kw">val</span> balanceDef = <span class="fn">async</span> { <span class="kw">runCatching</span> { accountRepo.<span class="fn">getBalance</span>() } }
-    <span class="kw">val</span> txnsDef    = <span class="fn">async</span> { <span class="kw">runCatching</span> { txnRepo.<span class="fn">getRecent</span>() } }
-    <span class="kw">val</span> offersDef  = <span class="fn">async</span> { <span class="kw">runCatching</span> { offersRepo.<span class="fn">getOffers</span>() } }
+    <span class="kw">val</span> balanceDef = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { accountRepo.<span class="fn">getBalance</span>() } }
+    <span class="kw">val</span> txnsDef    = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { txnRepo.<span class="fn">getRecent</span>() } }
+    <span class="kw">val</span> offersDef  = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { offersRepo.<span class="fn">getOffers</span>() } }
 
     <span class="cl">DashboardState</span>(
-        balance = balanceDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>(),
+        balance      = balanceDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>(),      <span class="cm">// null = show error widget</span>
         transactions = txnsDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>(),
-        offers = offersDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>()
+        offers       = offersDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>()
     )
+}
+
+<span class="cm">// ═══ PATTERN 3: Full-stack ViewModel → UseCase → Repository ═══</span>
+<span class="cm">// How structured concurrency flows through Clean Architecture layers</span>
+<span class="kw">class</span> <span class="cl">DashboardViewModel</span>(
+    <span class="kw">private val</span> loadDashboard: <span class="cl">LoadDashboardUseCase</span>
+) : <span class="cl">ViewModel</span>() {
+
+    <span class="kw">private val</span> _uiState = <span class="cl">MutableStateFlow</span>&lt;<span class="cl">DashboardUiState</span>&gt;(<span class="cl">DashboardUiState</span>.<span class="cl">Loading</span>)
+    <span class="kw">val</span> uiState: <span class="cl">StateFlow</span>&lt;<span class="cl">DashboardUiState</span>&gt; = _uiState.<span class="fn">asStateFlow</span>()
+
+    <span class="kw">fun</span> <span class="fn">load</span>() {
+        viewModelScope.<span class="fn">launch</span> {
+            _uiState.<span class="fn">emit</span>(<span class="cl">DashboardUiState</span>.<span class="cl">Loading</span>)
+            _uiState.<span class="fn">emit</span>(<span class="fn">loadDashboard</span>())
+        }
+    }
+}
+
+<span class="cm">// Domain layer — no Android imports, pure Kotlin</span>
+<span class="kw">class</span> <span class="cl">LoadDashboardUseCase</span>(
+    <span class="kw">private val</span> accountRepo: <span class="cl">AccountRepository</span>,
+    <span class="kw">private val</span> txnRepo: <span class="cl">TransactionRepository</span>,
+    <span class="kw">private val</span> offersRepo: <span class="cl">OffersRepository</span>
+) {
+    <span class="kw">suspend operator fun</span> <span class="fn">invoke</span>(): <span class="cl">DashboardUiState</span> = supervisorScope {
+        <span class="kw">val</span> balanceDef = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { accountRepo.<span class="fn">getBalance</span>() } }
+        <span class="kw">val</span> txnsDef    = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { txnRepo.<span class="fn">getRecent</span>() } }
+        <span class="kw">val</span> offersDef  = <span class="fn">async</span> { <span class="fn">safeRunCatching</span> { offersRepo.<span class="fn">getOffers</span>() } }
+
+        <span class="kw">val</span> balance = balanceDef.<span class="fn">await</span>()
+        <span class="kw">if</span> (balance.<span class="fn">isFailure</span>) <span class="kw">return</span>@supervisorScope <span class="cl">DashboardUiState</span>.<span class="cl">Error</span>(<span class="str">"Balance unavailable"</span>)
+
+        <span class="cl">DashboardUiState</span>.<span class="cl">Success</span>(
+            balance      = balance.<span class="fn">getOrThrow</span>(),
+            transactions = txnsDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>(),
+            offers       = offersDef.<span class="fn">await</span>().<span class="fn">getOrNull</span>() ?: <span class="fn">emptyList</span>()
+        )
+    }
 }</code></pre>
   </div>
 
@@ -543,17 +729,65 @@ viewModelScope.<span class="fn">launch</span> {
   <!-- S6 -->
   <div class="section" id="s6">
     <div class="section-title"><div class="section-icon">&#9888;</div>6. Pitfalls &amp; Best Practices</div>
+
     <div class="callout callout-red">
-      <div class="callout-label">Pitfall 1 — Breaking hierarchy with a new Job</div>
-      <code>launch(Job()) { }</code> — adding a new Job as the coroutine context disconnects the child from the parent's job. Cancelling the parent won't cancel this child. Never pass a raw <code>Job()</code> to <code>launch</code> or <code>async</code>.
+      <div class="callout-label">Pitfall 1 — Breaking hierarchy with a new Job()</div>
+      <p><code>launch(Job()) { }</code> — adding a raw <code>Job()</code> to the context replaces the parent Job, disconnecting this coroutine from the parent scope. Cancelling the scope will NOT cancel this child — it becomes an orphan coroutine. Production symptom: coroutines survive Activity/ViewModel destruction, causing memory leaks and stale callbacks.</p>
+      <p><strong>Fix:</strong> Never pass a raw <code>Job()</code> or <code>SupervisorJob()</code> to a builder. Use <code>supervisorScope { }</code> instead.</p>
     </div>
+
     <div class="callout callout-red">
-      <div class="callout-label">Pitfall 2 — SupervisorJob in the wrong place</div>
-      <code>launch(SupervisorJob()) { child1; child2 }</code> — the SupervisorJob here is the parent of the launched coroutine, not of child1/child2. Use <code>supervisorScope { }</code> inside to get the supervisor semantics for children.
+      <div class="callout-label">Pitfall 2 — launch(SupervisorJob()) creates an orphan too</div>
+      <p><code>viewModelScope.launch(SupervisorJob()) { }</code> is just as dangerous as <code>launch(Job())</code>. The SupervisorJob replaces the parent job, creating an orphan that survives <code>viewModelScope.cancel()</code>. Developers write this thinking it gives child-isolation — it doesn't; it gives orphan coroutines.</p>
+      <pre><code><span class="cm">// ❌ ORPHAN — survives viewModelScope.cancel()</span>
+viewModelScope.<span class="fn">launch</span>(<span class="cl">SupervisorJob</span>()) { <span class="cm">/* still running after VM cleared */</span> }
+
+<span class="cm">// ✅ CORRECT — child isolation without orphaning</span>
+viewModelScope.<span class="fn">launch</span> {
+    supervisorScope {
+        <span class="fn">launch</span> { <span class="fn">fetchA</span>() }  <span class="cm">// isolated from each other</span>
+        <span class="fn">launch</span> { <span class="fn">fetchB</span>() }  <span class="cm">// but both still scoped to viewModelScope</span>
+    }
+}</code></pre>
     </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 3 — Swallowing CancellationException</div>
+      <p>Catching <code>Exception</code> or using <code>runCatching { }</code> without re-throwing <code>CancellationException</code> breaks cooperative cancellation. The scope appears to cancel but the coroutine keeps running.</p>
+      <pre><code><span class="cm">// ❌ Breaks cancellation:</span>
+<span class="kw">try</span> { <span class="fn">doWork</span>() } <span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="fn">log</span>(e) }
+
+<span class="cm">// ❌ runCatching also catches CE silently:</span>
+<span class="kw">runCatching</span> { <span class="fn">doWork</span>() }
+
+<span class="cm">// ✅ Always re-throw CE:</span>
+<span class="kw">try</span> { <span class="fn">doWork</span>() }
+<span class="kw">catch</span> (e: <span class="cl">CancellationException</span>) { <span class="kw">throw</span> e }  <span class="cm">// must come first</span>
+<span class="kw">catch</span> (e: <span class="cl">Exception</span>) { <span class="fn">log</span>(e) }</code></pre>
+    </div>
+
+    <div class="callout callout-red">
+      <div class="callout-label">Pitfall 4 — Silent exception swallowing with un-awaited async</div>
+      <p>If you use <code>async { }</code> inside a <code>supervisorScope</code> and <strong>never call <code>.await()</code></strong>, the exception is silently discarded — no crash, no log, no indication anything failed. This is especially dangerous for fire-and-forget analytics or event tracking.</p>
+      <pre><code><span class="cm">// ❌ SILENT FAILURE — exception disappears forever</span>
+supervisorScope {
+    <span class="fn">async</span> { <span class="fn">analyticsRepo</span>.<span class="fn">track</span>(<span class="str">"event"</span>) }  <span class="cm">// never awaited = exception gone</span>
+}
+
+<span class="cm">// ✅ Use launch instead if you don't need the return value:</span>
+supervisorScope {
+    <span class="fn">launch</span> { <span class="fn">analyticsRepo</span>.<span class="fn">track</span>(<span class="str">"event"</span>) }  <span class="cm">// exception goes to CEH or crashes</span>
+}</code></pre>
+    </div>
+
     <div class="callout callout-yellow">
-      <div class="callout-label">Best Practice — coroutineScope for suspend functions</div>
-      Any <code>suspend fun</code> that launches multiple coroutines should use <code>coroutineScope { }</code> or <code>supervisorScope { }</code> to define a proper boundary. This makes the function's concurrency observable and its lifecycle tied to the call site.
+      <div class="callout-label">Best Practice — coroutineScope for all suspend functions with concurrency</div>
+      <p>Any <code>suspend fun</code> that launches multiple coroutines should use <code>coroutineScope { }</code> or <code>supervisorScope { }</code> as its boundary. This makes the function's concurrency visible, safe, and lifecycle-aware. A caller can cancel the enclosing scope and know that all work inside the function stops.</p>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-label">Best Practice — Default to coroutineScope, not supervisorScope</div>
+      <p><code>supervisorScope</code> is not the "safe default." Use <code>coroutineScope</code> by default (fail-fast, catch bugs early). Upgrade to <code>supervisorScope</code> only when you have a conscious architectural decision that partial results are acceptable for the user.</p>
     </div>
   </div>
 
@@ -576,20 +810,32 @@ viewModelScope.<span class="fn">launch</span> {
       <div class="must-item"><div class="must-num">4</div><div><strong>Cancellation is downward only</strong>; exceptions propagate upward and cancel siblings</div></div>
       <div class="must-item"><div class="must-num">5</div><div><strong>viewModelScope = SupervisorJob + Main</strong> — that's why one failed launch doesn't crash others</div></div>
     </div>
-    <h3>Do NOT go deeper than</h3>
-    <ul>
-      <li>CoroutineScope interface implementation details</li>
-      <li>The exact CancellationException hierarchy unless asked specifically</li>
-    </ul>
-    <h3>Follow-up Q&amp;A</h3>
-    <h4>Q: "Why does viewModelScope use SupervisorJob?"</h4>
-    <p>A: ViewModels orchestrate multiple parallel UI operations (load user, load orders, load ads). If one fails, the others should still complete. Using a regular Job would mean a single failed network call crashes all coroutines in the ViewModel — terrible UX. SupervisorJob isolates failures so each <code>launch</code> is independent.</p>
-    <h4>Q: "What happens when a supervisorScope child throws?"</h4>
-    <p>A: The exception is NOT propagated to siblings or the parent scope. But it's also not silently swallowed — it must be handled either by a try/catch inside the async block, or via a CoroutineExceptionHandler in the child's context. If unhandled, it may crash the app.</p>
-    <h3>Senior insight</h3>
+    <h3>Level 1–3 Follow-up Q&amp;A (what the interviewer asks next)</h3>
+    <h4>Level 1 — "Why does viewModelScope use SupervisorJob?"</h4>
+    <p>ViewModels orchestrate multiple parallel UI operations (user profile, orders, recommendations). A regular Job would mean one failed network call crashes all coroutines in the ViewModel. SupervisorJob isolates failures — each <code>launch { }</code> is independent. This matches the UX expectation: a failed ads call should not blank out the user's order history.</p>
+    <h4>Level 2 — "What happens when a supervisorScope child throws with no handler?"</h4>
+    <p>The exception is not propagated to siblings or the parent scope's Job. With <code>launch</code>: the exception goes to a <code>CoroutineExceptionHandler</code> if one is in the child's context, otherwise to <code>Thread.defaultUncaughtExceptionHandler</code> — crash on Android. With <code>async</code>: the exception is stored in the <code>Deferred</code> until <code>.await()</code> is called. If <code>.await()</code> is never called, the exception is silently discarded — this is a production silent failure pattern.</p>
+    <h4>Level 2 — "What is CancellationException and why must you never swallow it?"</h4>
+    <p>CancellationException is the cooperative signal that tells a coroutine to stop. It extends <code>IllegalStateException</code> (not <code>RuntimeException</code>). When you catch <code>Exception</code> broadly, you intercept it too, breaking cooperative cancellation — the scope believes it cancelled, but the coroutine's work keeps running, causing leaks and stale state. Always re-throw it, or catch it separately before other exceptions.</p>
+    <h4>Level 3 — "How does async exception behavior differ under Job vs SupervisorJob parent?"</h4>
+    <p>Under a regular <code>Job</code> parent (e.g., inside <code>coroutineScope { }</code>): an <code>async</code> exception propagates immediately when the async block throws — it cancels the scope before you even call <code>.await()</code>. Under a <code>SupervisorJob</code> parent: the exception is stored in the <code>Deferred</code> and only surfaces when you call <code>.await()</code>. The senior answer: <em>"async exception behavior is determined by the parent's Job type, not by async itself."</em></p>
+    <h4>Level 3 — "Walk me through what happens internally when job.cancel() is called"</h4>
+    <p>1. The Job transitions to CANCELLING state. 2. A <code>CancellationException</code> is delivered to the coroutine at its next suspension point (or immediately if it checks <code>ensureActive()</code>/<code>isActive</code>). 3. The cancellation propagates downward to all child Jobs. 4. When all children finish their cancellation (including any <code>finally</code> blocks), the Job transitions to CANCELLED state. The parent is only notified (and itself transitions) after all children are done. This is the "completion guarantee" in action.</p>
+
+    <h3>Expert Take</h3>
     <div class="callout callout-purple">
-      <div class="callout-label">Senior Insight</div>
-      In e-commerce checkout, structured concurrency is your transaction boundary. Wrap all payment steps in <code>coroutineScope</code> — if any step fails, all in-flight work cancels. But wrap the dashboard load in <code>supervisorScope</code> — partial data is better than no data. Choosing correctly between these two scopes is a senior-level architectural decision.
+      <div class="callout-label">Expert Take — Chief Editor</div>
+      <p>The most common mistake I see in senior interviews: treating <code>supervisorScope</code> as the "safe default" and sprinkling it everywhere. It's not safe — it hides failures. Use <code>coroutineScope</code> by default; it's the one that surfaces bugs early. Upgrade to <code>supervisorScope</code> only with a deliberate architectural decision that partial results are acceptable to the user.</p>
+      <p>The second mistake: confusing structured concurrency's concurrency boundary with a transaction boundary. <code>coroutineScope</code> ensures all concurrent work is completed or cancelled together. It does NOT roll back database writes. For true atomicity, you still need a database transaction or a saga pattern around your use case.</p>
+      <p>What's changing: the Kotlin coroutines team continues to add tooling around structured concurrency — <code>Flow.cancellable()</code>, improvements to <code>runTest</code>, and structured concurrency in KMP. The concepts in this topic are the most stable part of the coroutines API; they won't change. Master the <em>reasoning</em>, not the syntax.</p>
+    </div>
+
+    <h3>Architectural Senior Insight</h3>
+    <div class="callout callout-green">
+      <div class="callout-label">Production Decision Framework</div>
+      <p><strong>Choose coroutineScope when:</strong> all operations must succeed together (checkout, upload pipeline, multi-step form submit), or when a partial result is undefined or dangerous (e.g., debit without credit).</p>
+      <p><strong>Choose supervisorScope when:</strong> you're composing independent data sources for a single screen, failures in one source have a sensible fallback (empty list, cached value, hidden widget), and showing partial data is strictly better than showing nothing.</p>
+      <p><strong>Never use GlobalScope in Android apps.</strong> It has no parent, ignores lifecycle, and is effectively "unstructured concurrency" — the exact problem structured concurrency was designed to eliminate.</p>
     </div>
   </div>
 
@@ -629,9 +875,200 @@ async(IO) { }.await()  // concurrent
     </div>
   </div>
 
-  <!-- S9 -->
+  <!-- S9: Flash Cards -->
   <div class="section" id="s9">
-    <div class="section-title"><div class="section-icon">&#10067;</div>9. Interview Questions</div>
+    <div class="section-title"><div class="section-icon">&#127183;</div>9. Flash Cards</div>
+    <p style="color:var(--muted);margin-bottom:20px;">Click each card to reveal the answer. Study these until you can answer without hesitation.</p>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC1 — What are the 3 guarantees of structured concurrency?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Core</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><strong>(1) No leaks</strong> — no coroutine outlives its scope. <strong>(2) Error propagation</strong> — child failures propagate to parent (unless SupervisorJob). <strong>(3) Completion guarantee</strong> — parent waits for all children before completing.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC2 — What is a CoroutineContext?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Core</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">A <strong>type-indexed immutable map</strong> of Element subtypes. Each element type (Dispatcher, Job, CoroutineName, ExceptionHandler) has a unique Key. You access elements by key: <code>coroutineContext[Job]</code>, <code>coroutineContext[CoroutineDispatcher.Key]</code>. You combine contexts with <code>+</code>: later entries override earlier ones.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC3 — coroutineScope vs supervisorScope: one-line answer</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Core</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>coroutineScope</code>: one child fails → all siblings cancelled, exception propagates to caller. <code>supervisorScope</code>: one child fails → siblings unaffected, you handle failure per-child.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC4 — delay() vs Thread.sleep(): two key differences</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Core</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><strong>1. Thread blocking:</strong> <code>delay()</code> suspends the coroutine and frees the thread; <code>Thread.sleep()</code> blocks the OS thread. <strong>2. Cancellation:</strong> <code>delay()</code> throws CancellationException if the coroutine is cancelled; <code>Thread.sleep()</code> ignores cancellation entirely.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC5 — What does viewModelScope use internally?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-easy">Core</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>SupervisorJob() + Dispatchers.Main.immediate</code>. This means: (1) independent failures per launch, (2) coroutines start on the Main thread immediately if already on Main, (3) the scope is cancelled when <code>ViewModel.onCleared()</code> is called.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC6 — Why must you NEVER pass Job() or SupervisorJob() to launch/async?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Critical</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Passing a Job to a builder replaces the parent Job in the context, disconnecting the new coroutine from the parent scope. Cancelling the scope will NOT cancel this orphan. Both <code>launch(Job())</code> and <code>launch(SupervisorJob())</code> create orphan coroutines — use <code>supervisorScope { }</code> inside a launch instead.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC7 — Cancellation direction: which way does cancel() flow? Which way do exceptions flow?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Critical</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><strong>cancel() (CancellationException):</strong> flows DOWN to children only — parent continues. <strong>Non-cancellation exceptions:</strong> flow UP to parent and cancel ALL siblings. This asymmetry is intentional — cancellation is a normal lifecycle event; exceptions are unexpected failures.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC8 — async exception behavior under SupervisorJob vs regular Job</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Under <strong>SupervisorJob</strong> (viewModelScope): exception stored in Deferred, surfaces only on <code>.await()</code> — catchable with try/catch. Under <strong>regular Job</strong> (coroutineScope): exception propagates immediately and cancels the scope — your try/catch on <code>.await()</code> may never execute because the scope is already cancelled.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC9 — What is cooperative cancellation and what three APIs provide cancellation checkpoints?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-medium">Critical</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">Cancellation is cooperative — the coroutine must reach a checkpoint. Three checkpoints: <strong>(1) ensureActive()</strong> — throws CancellationException if cancelled (suspension point in coroutine). <strong>(2) yield()</strong> — checks cancellation AND gives up the thread temporarily. <strong>(3) isActive</strong> — boolean check for non-suspend contexts (loops, callbacks). All suspension points (delay, withContext, await) are also implicit checkpoints.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC10 — When and why do you use withContext(NonCancellable)?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">In a <code>finally</code> block when the coroutine is already in CANCELLING state. In that state, any suspension call would throw CancellationException immediately, aborting your cleanup. Wrapping cleanup in <code>withContext(NonCancellable)</code> allows suspension during the cleanup. Rule: only use it in finally blocks — never as a scope for normal operations.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC11 — Why does runCatching break cooperative cancellation, and what is the fix?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><code>runCatching</code> catches ALL throwables including <code>CancellationException</code>, wrapping it in a <code>Result.failure()</code>. The coroutine then continues past the cancellation signal as if nothing happened, breaking cooperative cancellation. Fix: use a <code>safeRunCatching</code> wrapper that re-throws CancellationException: <code>.onFailure { if (it is CancellationException) throw it }</code>.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">FC12 — coroutineScope is a "concurrency boundary." What is it NOT?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">It is NOT a transaction boundary. <code>coroutineScope</code> ensures that all concurrent work inside it either completes or is cancelled together. It does NOT provide atomicity — if the process dies between a debit and a credit, the coroutine scope will not roll back the debit. For true atomicity, you need a database transaction (Room's <code>@Transaction</code>, SQLiteDatabase transaction) or a saga/outbox pattern.</div>
+    </div>
+  </div>
+
+  <!-- S10: Testing -->
+  <div class="section" id="s10">
+    <div class="section-title"><div class="section-icon">&#9989;</div>10. Testing Structured Concurrency</div>
+    <h3>runTest and TestScope</h3>
+    <p><code>runTest</code> (kotlinx-coroutines-test) runs your suspending test body in a <code>TestScope</code> with a virtual clock — <code>delay()</code> calls advance the virtual time instantly, so tests with delays don't take real time.</p>
+    <pre><code><span class="kw">import</span> kotlinx.coroutines.test.*
+<span class="kw">import</span> kotlinx.coroutines.test.runTest
+
+<span class="kw">class</span> <span class="cl">DashboardViewModelTest</span> {
+
+    <span class="kw">private val</span> fakeAccountRepo = <span class="cl">FakeAccountRepository</span>()
+    <span class="kw">private val</span> fakeTxnRepo     = <span class="cl">FakeTransactionRepository</span>()
+    <span class="kw">private val</span> fakeOffersRepo  = <span class="cl">FakeOffersRepository</span>()
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">`loads all sources in parallel`</span>() = <span class="fn">runTest</span> {
+        <span class="cm">// Fake repos add artificial delay to verify parallelism</span>
+        fakeAccountRepo.delay = <span class="nu">300</span>
+        fakeTxnRepo.delay     = <span class="nu">200</span>
+        fakeOffersRepo.delay  = <span class="nu">250</span>
+
+        <span class="kw">val</span> useCase = <span class="cl">LoadDashboardUseCase</span>(fakeAccountRepo, fakeTxnRepo, fakeOffersRepo)
+
+        <span class="kw">val</span> startTime = currentTime
+        useCase.<span class="fn">invoke</span>()
+        <span class="kw">val</span> elapsed = currentTime - startTime
+
+        <span class="cm">// Sequential would take 300+200+250 = 750ms.</span>
+        <span class="cm">// Parallel takes max(300, 200, 250) = 300ms.</span>
+        assertTrue(elapsed <= <span class="nu">350</span>, <span class="str">"Expected parallel execution, got ${elapsed}ms"</span>)
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">`balance failure returns error state`</span>() = <span class="fn">runTest</span> {
+        fakeAccountRepo.throwError = <span class="cl">IOException</span>(<span class="str">"Network error"</span>)
+
+        <span class="kw">val</span> useCase = <span class="cl">LoadDashboardUseCase</span>(fakeAccountRepo, fakeTxnRepo, fakeOffersRepo)
+        <span class="kw">val</span> result = useCase.<span class="fn">invoke</span>()
+
+        assertIs&lt;<span class="cl">DashboardUiState</span>.<span class="cl">Error</span>&gt;(result)
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">`offers failure still shows balance and transactions`</span>() = <span class="fn">runTest</span> {
+        fakeOffersRepo.throwError = <span class="cl">IOException</span>(<span class="str">"Offers unavailable"</span>)
+
+        <span class="kw">val</span> useCase = <span class="cl">LoadDashboardUseCase</span>(fakeAccountRepo, fakeTxnRepo, fakeOffersRepo)
+        <span class="kw">val</span> result = useCase.<span class="fn">invoke</span>()
+
+        assertIs&lt;<span class="cl">DashboardUiState</span>.<span class="cl">Success</span>&gt;(result)
+        assertTrue((result <span class="kw">as</span> <span class="cl">DashboardUiState</span>.<span class="cl">Success</span>).offers.<span class="fn">isEmpty</span>())
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">fun</span> <span class="fn">`cancellation stops all in-flight work`</span>() = <span class="fn">runTest</span> {
+        <span class="kw">val</span> scope = <span class="cl">TestScope</span>()
+        <span class="kw">var</span> fetchCalled = <span class="kw">false</span>
+        fakeAccountRepo.onFetch = { fetchCalled = <span class="kw">true</span> }
+        fakeAccountRepo.delay = <span class="nu">1000</span>
+
+        <span class="kw">val</span> job = scope.<span class="fn">launch</span> {
+            <span class="cl">LoadDashboardUseCase</span>(fakeAccountRepo, fakeTxnRepo, fakeOffersRepo).<span class="fn">invoke</span>()
+        }
+        scope.<span class="fn">advanceTimeBy</span>(<span class="nu">100</span>)  <span class="cm">// start the coroutines</span>
+        job.<span class="fn">cancel</span>()              <span class="cm">// cancel before they finish</span>
+        scope.<span class="fn">runCurrent</span>()
+
+        assertTrue(job.<span class="fn">isCancelled</span>)
+    }
+}</code></pre>
+
+    <h3>Testing cancellation with ensureActive</h3>
+    <pre><code><span class="an">@Test</span>
+<span class="kw">fun</span> <span class="fn">`CPU-bound work respects cancellation`</span>() = <span class="fn">runTest</span> {
+    <span class="kw">var</span> iterationsRun = <span class="nu">0</span>
+    <span class="kw">val</span> job = <span class="fn">launch</span> {
+        <span class="kw">repeat</span>(<span class="nu">1_000_000</span>) {
+            <span class="fn">ensureActive</span>()  <span class="cm">// without this, cancel() would have no effect</span>
+            iterationsRun++
+        }
+    }
+    <span class="fn">advanceTimeBy</span>(<span class="nu">1</span>)
+    job.<span class="fn">cancel</span>()
+    job.<span class="fn">join</span>()
+
+    assertTrue(iterationsRun < <span class="nu">1_000_000</span>, <span class="str">"Loop did not respect cancellation"</span>)
+}</code></pre>
+  </div>
+
+  <!-- S11: Interview Questions (was S9) -->
+  <div class="section" id="s11">
+    <div class="section-title"><div class="section-icon">&#10067;</div>11. Interview Questions</div>
 
     <div class="quiz-card">
       <div class="quiz-q" onclick="toggleQuiz(this)">
@@ -710,8 +1147,76 @@ async(IO) { }.await()  // concurrent
         <span class="quiz-q-text">Design the concurrency model for a banking dashboard that must show balance (critical), recent transactions (important), and promotional offers (optional). Handle failures gracefully.</span>
         <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
       </div>
-      <div class="quiz-a">Use <code>supervisorScope</code> for isolation, <code>async</code> with <code>runCatching</code> for each source: <code>val balance = async { runCatching { balanceRepo.get() } }</code> (critical — show error state if fails), <code>val txns = async { runCatching { txnRepo.get() } }</code> (show empty state if fails), <code>val offers = async { runCatching { offerRepo.get() } }</code> (silently omit if fails). All run in parallel. Compose the UI state from the three Results, using fallbacks for non-critical failures. Total latency = max(each call's latency) instead of sum.</div>
+      <div class="quiz-a">Use <code>supervisorScope</code> for isolation with <code>safeRunCatching</code> (re-throws CancellationException) per source. Balance is critical — return an error state if it fails. Transactions show an empty list on failure. Offers are silently omitted. All three run in parallel: total latency = max(individual latencies) instead of sum. Critically: use <code>safeRunCatching</code>, not plain <code>runCatching</code>, to avoid swallowing CancellationException on scope cancel.</div>
     </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">What are the three cooperative cancellation checkpoints in Kotlin coroutines? When would you choose each?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a"><strong>ensureActive()</strong>: throws CancellationException immediately if cancelled — best for tight CPU loops where you want the coroutine to stop ASAP. <strong>yield()</strong>: checks cancellation AND gives up the current thread to let other coroutines run — best when your loop is both CPU-intensive and should share the dispatcher fairly. <strong>isActive</strong>: boolean check — best in non-suspending callbacks or JNI callbacks where you can't throw, only return early. Note: all standard suspension points (delay, withContext, await) are also implicit checkpoints.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q" onclick="toggleQuiz(this)">
+        <span class="quiz-q-text">Spot the bug: Why does this code silently fail to handle errors?</span>
+        <div class="quiz-meta"><span class="diff-badge diff-hard">Senior — Spot the Bug</span><span class="toggle-icon">&#8964;</span></div>
+      </div>
+      <div class="quiz-a">
+        <pre style="margin:8px 0"><code>supervisorScope {
+    async { analyticsRepo.track("purchase") }  // no await
+    async { experimentRepo.log("variant_b") }  // no await
+}</code></pre>
+        <strong>Bug:</strong> Both <code>async</code> calls are never awaited. If either throws, the exception is stored in the Deferred but never retrieved — it is silently discarded. No crash, no log. <strong>Fix:</strong> Use <code>launch { }</code> instead of <code>async { }</code> when you don't need the return value. With <code>launch</code>, an unhandled exception goes to a CoroutineExceptionHandler or crashes — giving you visibility into the failure.
+      </div>
+    </div>
+  </div>
+
+  <!-- S12: Hands-On Task -->
+  <div class="section" id="s12">
+    <div class="section-title"><div class="section-icon">&#128187;</div>12. Hands-On Task</div>
+    <div class="callout callout-green">
+      <div class="callout-label">Build It From Scratch</div>
+      <p>The best way to cement structured concurrency is to write it under constraints. This task takes 30–45 minutes.</p>
+    </div>
+
+    <h3>Task: DashboardViewModel with Structured Concurrency</h3>
+    <p>Build a <code>DashboardViewModel</code> that loads three data sources in parallel with proper structured concurrency, error handling, and a test suite.</p>
+
+    <h4>Requirements</h4>
+    <ol>
+      <li>Load <strong>balance</strong> (critical), <strong>recent transactions</strong> (important), and <strong>promotional offers</strong> (optional) in parallel.</li>
+      <li><strong>Balance failure</strong> → show a full-screen error state. Transactions and offers should not even be waited on.</li>
+      <li><strong>Transactions failure</strong> → show an empty list. Balance and offers unaffected.</li>
+      <li><strong>Offers failure</strong> → silently omit offers widget. Balance and transactions unaffected.</li>
+      <li>All three sources should load in parallel. Total time should equal <code>max(individual times)</code>, not their sum.</li>
+      <li>If the ViewModel is cleared while loading, all in-flight network calls should be cancelled within 100ms.</li>
+      <li>No <code>GlobalScope</code>. No <code>launch(SupervisorJob())</code>. No plain <code>runCatching</code>.</li>
+    </ol>
+
+    <h4>Acceptance Criteria (write these tests)</h4>
+    <pre><code><span class="cm">// Test 1: Parallelism — total time ≤ 350ms when sources take 300, 200, 250ms</span>
+<span class="cm">// Test 2: Balance failure → DashboardUiState.Error returned</span>
+<span class="cm">// Test 3: Transactions failure → DashboardUiState.Success with empty transactions</span>
+<span class="cm">// Test 4: Offers failure → DashboardUiState.Success with empty offers, balance still present</span>
+<span class="cm">// Test 5: ViewModel.onCleared() cancels all in-flight coroutines</span>
+<span class="cm">// Test 6: CancellationException from scope cancel does NOT appear as an error state</span></code></pre>
+
+    <h4>Architecture Constraints</h4>
+    <ul>
+      <li>Pure domain <code>LoadDashboardUseCase</code> — no Android imports</li>
+      <li><code>DashboardViewModel</code> calls the use case via <code>viewModelScope.launch</code></li>
+      <li>UI state modeled as a sealed class: <code>Loading | Success(balance, transactions, offers) | Error(message)</code></li>
+      <li>Use Fakes (not mocks) for repositories — implement the same interface with in-memory data + configurable delays and errors</li>
+    </ul>
+
+    <h4>Stretch Goals</h4>
+    <ul>
+      <li>Add a retry mechanism: if balance fails, retry once after 2 seconds before returning Error</li>
+      <li>Add a loading timeout: if all three sources take more than 5 seconds combined, cancel and return a Timeout error state</li>
+      <li>Expose <code>loadingProgress</code> as a <code>StateFlow&lt;Int&gt;</code> that emits 33% each time a source completes</li>
+    </ul>
   </div>
 </main>
 </div>

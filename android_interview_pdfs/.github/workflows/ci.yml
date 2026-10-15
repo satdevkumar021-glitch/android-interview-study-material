@@ -1,0 +1,79 @@
+name: CI — Link Checker & Validation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run link checker & validation tests
+        run: python3 run_full_website_tests.py
+
+      - name: Check TOPICS array order in shared.js
+        run: |
+          python3 - <<'EOF'
+          import re, sys
+
+          with open('shared.js', 'r') as f:
+              content = f.read()
+
+          # Extract all id values from TOPICS array in order
+          ids = re.findall(r"\{id:'([^']+)'", content)
+
+          def topic_sort_key(tid):
+              # Split e.g. "13D" -> (13, "D")
+              m = re.match(r'^(\d+)([A-Za-z]*)$', tid)
+              if m:
+                  return (int(m.group(1)), m.group(2).upper())
+              return (9999, tid)
+
+          sorted_ids = sorted(ids, key=topic_sort_key)
+          if ids != sorted_ids:
+              out_of_order = [(i, ids[i], sorted_ids[i]) for i in range(len(ids)) if ids[i] != sorted_ids[i]]
+              print("ERROR: TOPICS array in shared.js is not in numeric order!")
+              for pos, actual, expected in out_of_order[:10]:
+                  print(f"  Position {pos}: found '{actual}', expected '{expected}'")
+              sys.exit(1)
+          else:
+              print(f"OK: TOPICS array order is correct ({len(ids)} entries)")
+          EOF
+
+      - name: Check topics_manifest.json count matches HTML files
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, glob
+
+          with open('topics_manifest.json') as f:
+              manifest = json.load(f)
+
+          # Count topic HTML files (exclude index.html, all_topics_combined.html)
+          exclude = {'index.html', 'all_topics_combined.html', 'android_interview_compact_guide.html'}
+          html_files = {os.path.basename(p) for p in glob.glob('*.html')} - exclude
+
+          manifest_files = {e['file'] for e in manifest}
+          missing_from_manifest = html_files - manifest_files
+          missing_from_disk    = manifest_files - html_files
+
+          ok = True
+          if missing_from_manifest:
+              print(f"WARNING: {len(missing_from_manifest)} HTML files not in manifest: {sorted(missing_from_manifest)[:5]}")
+          if missing_from_disk:
+              print(f"ERROR: {len(missing_from_disk)} manifest entries missing from disk: {sorted(missing_from_disk)[:5]}")
+              ok = False
+          if ok:
+              print(f"OK: manifest and disk are in sync ({len(manifest_files)} topics)")
+          else:
+              sys.exit(1)
+          EOF

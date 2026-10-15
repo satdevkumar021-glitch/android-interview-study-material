@@ -345,8 +345,8 @@
     "raw_title": "5C \u2014 Structured Concurrency &amp; Key Differences | Android Interview Prep",
     "desc": "The hierarchy: CoroutineScope \u2192 CoroutineContext \u2192 Job \u2192 children. Plus the most-asked comparison questions: launch vs async, coroutineScope vs supervisorScope, Job vs SupervisorJob, delay vs Thread.sleep.",
     "tier": "Tier 1",
-    "quizzes": 10,
-    "sections": 9,
+    "quizzes": 24,
+    "sections": 12,
     "style_type": "Tabbed"
   },
   {
@@ -1316,6 +1316,20 @@
     "style_type": "Tabbed"
   },
   {
+    "file": "34F_Advanced_DSA.html",
+    "code": "34F",
+    "mod_num": 34,
+    "mod_sub": "F",
+    "slug": "Advanced_DSA",
+    "clean_title": "Advanced DSA: Graphs, DP & Monotonic Structures",
+    "raw_title": "34F \u2014 Advanced DSA: Graphs, DP & Monotonic Structures | Android Interview Prep",
+    "desc": "The three pattern families that separate L4 from L5 in coding rounds: graph algorithms (BFS/DFS, topological sort, Dijkstra), dynamic programming (state machines, LIS, edit distance), and monotonic stack/deque \u2014 all in producti...",
+    "tier": "Tier 2",
+    "quizzes": 18,
+    "sections": 10,
+    "style_type": "Tabbed"
+  },
+  {
     "file": "35A_Behavioral_Senior_Leadership.html",
     "code": "35A",
     "mod_num": 35,
@@ -1467,6 +1481,48 @@
     "tier": "Tier 1",
     "quizzes": 8,
     "sections": 9,
+    "style_type": "Tabbed"
+  },
+  {
+    "file": "43A_CameraX_Media.html",
+    "code": "43A",
+    "mod_num": 43,
+    "mod_sub": "A",
+    "slug": "CameraX_Media",
+    "clean_title": "CameraX, Photo Picker & Media",
+    "raw_title": "43A \u2014 CameraX, Photo Picker &amp; Media | Android Interview Prep",
+    "desc": "CameraX lifecycle-aware camera, Android 13+ Photo Picker (replaces READ_EXTERNAL_STORAGE), MediaStore, video recording, image analysis with ML Kit integration, and media permission changes across Android versions.",
+    "tier": "Tier 2",
+    "quizzes": 8,
+    "sections": 10,
+    "style_type": "Tabbed"
+  },
+  {
+    "file": "43B_Adaptive_UI_EdgeToEdge.html",
+    "code": "43B",
+    "mod_num": 43,
+    "mod_sub": "B",
+    "slug": "Adaptive_UI_EdgeToEdge",
+    "clean_title": "Adaptive UI, Edge-to-Edge & Foldables",
+    "raw_title": "43B \u2014 Adaptive UI, Edge-to-Edge &amp; Foldables | Android Interview Prep",
+    "desc": "Edge-to-edge enforcement (mandatory from API 35), WindowInsets handling, WindowSizeClass for adaptive layouts, SupportingPaneScaffold for foldables/tablets, predictive back gesture, and canonical layout patterns.",
+    "tier": "Tier 2",
+    "quizzes": 8,
+    "sections": 10,
+    "style_type": "Tabbed"
+  },
+  {
+    "file": "43C_Passkeys_CredentialManager.html",
+    "code": "43C",
+    "mod_num": 43,
+    "mod_sub": "C",
+    "slug": "Passkeys_CredentialManager",
+    "clean_title": "Passkeys & Credential Manager",
+    "raw_title": "43C \u2014 Passkeys &amp; Credential Manager | Android Interview Prep",
+    "desc": "FIDO2/WebAuthn passkeys replacing passwords, CredentialManager API (unifies passwords + passkeys + federated sign-in), biometric integration, and the security model that makes passkeys phishing-resistant.",
+    "tier": "Tier 1",
+    "quizzes": 8,
+    "sections": 10,
     "style_type": "Tabbed"
   }
 ]

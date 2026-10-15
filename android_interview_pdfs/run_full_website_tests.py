@@ -53,7 +53,7 @@ def run_tests():
     print("\n--- SUITE 1: Files & Asset Inventory Integrity ---")
     
     html_files = sorted([f for f in glob.glob('*.html') if re.match(r'^\d+[A-Z]_.*\.html$', f)])
-    tr.log("Inventory", "Topic HTML files count is 98", len(html_files) == 98, f"Found {len(html_files)} files")
+    tr.log("Inventory", "Topic HTML files count is 105", len(html_files) == 105, f"Found {len(html_files)} files")
 
     small_files = []
     missing_title = []
@@ -74,7 +74,7 @@ def run_tests():
     tr.log("Quality", "All topic HTML files have <main> tag", len(missing_main) == 0, f"Missing in: {missing_main}")
 
     pdf_files = glob.glob('topic_pdfs/*.pdf')
-    tr.log("PDFs", "Topic PDFs count in topic_pdfs/ is 98", len(pdf_files) == 98, f"Found {len(pdf_files)} PDFs")
+    tr.log("PDFs", "Topic PDFs count in topic_pdfs/ is 105", len(pdf_files) == 105, f"Found {len(pdf_files)} PDFs")
     
     missing_pdfs = []
     for f in html_files:
@@ -103,7 +103,7 @@ def run_tests():
             with zipfile.ZipFile(zip_path, 'r') as zf:
                 zip_names = zf.namelist()
                 test_zip = zf.testzip()
-                tr.log("ZIP", "ZIP bundle contains exactly 98 PDFs", len(zip_names) == 98, f"Found {len(zip_names)} files")
+                tr.log("ZIP", "ZIP bundle contains exactly 105 PDFs", len(zip_names) == 105, f"Found {len(zip_names)} files")
                 tr.log("ZIP", "ZIP bundle has no corrupt files", test_zip is None, f"First corrupt file: {test_zip}")
         except Exception as e:
             tr.log("ZIP", "ZIP bundle integrity check", False, str(e))
@@ -128,10 +128,10 @@ def run_tests():
     tr.log("Links", "All static file links in index.html resolve to disk", len(broken_hrefs) == 0, f"Broken: {broken_hrefs}")
 
     card_links = re.findall(r'<a\s+href=[\"\']([^\"\']+)[\"\']\s+class=[\"\']topic-card[\"\']\s+id=[\"\']card-([^\"\']+)[\"\']', index_content)
-    tr.log("Cards", "Total topic cards in index.html is 98", len(card_links) == 98, f"Found {len(card_links)} cards")
+    tr.log("Cards", "Total topic cards in index.html is 105", len(card_links) == 105, f"Found {len(card_links)} cards")
 
     pdf_btns = re.findall(r'href=[\"\']topic_pdfs/([^\"\']+\.pdf)[\"\']', index_content)
-    tr.log("PDF Links", "Every card has a valid PDF download link", len(pdf_btns) == 98, f"Found {len(pdf_btns)} PDF buttons")
+    tr.log("PDF Links", "Every card has a valid PDF download link", len(pdf_btns) == 105, f"Found {len(pdf_btns)} PDF buttons")
 
     # -------------------------------------------------------------
     # SUITE 3: ANCHOR & NAVIGATION INTEGRITY ON COMPENDIUMS
@@ -144,7 +144,7 @@ def run_tests():
     combined_targets = set(re.findall(r'<article[^>]+id=[\"\']([0-9]+[A-Z])[\"\']', combined_content))
     missing_targets = [code for code in combined_toc_links if code not in combined_targets]
     tr.log("Anchors", "All TOC links in all_topics_combined.html match section IDs", len(missing_targets) == 0, f"Missing: {missing_targets[:5]}")
-    tr.log("Chapters", "All 98 topics present in combined compendium", len(combined_targets) == 98, f"Found {len(combined_targets)}")
+    tr.log("Chapters", "All 105 topics present in combined compendium", len(combined_targets) == 105, f"Found {len(combined_targets)}")
 
     with open('android_interview_compact_guide.html', 'r', encoding='utf-8') as f:
         compact_content = f.read()
@@ -163,7 +163,7 @@ def run_tests():
     
     if m_topics:
         topics_data = json.loads(m_topics.group(1))
-        tr.log("JS Data", "ALL_TOPICS array length equals 98", len(topics_data) == 98, f"Count: {len(topics_data)}")
+        tr.log("JS Data", "ALL_TOPICS array length equals 105", len(topics_data) == 105, f"Count: {len(topics_data)}")
         
         tier1_items = [t for t in topics_data if t['tier'] == 'Tier 1']
         tier2_items = [t for t in topics_data if t['tier'] == 'Tier 2']
@@ -177,7 +177,7 @@ def run_tests():
         tr.log("Filters", f"Tier 3 filter returns correct count ({len(tier3_items)})", len(tier3_items) > 8)
         tr.log("Filters", f"System Design filter matches Modules 8 & 30 ({len(sysdesign_items)} topics)", len(sysdesign_items) == 9)
         tr.log("Filters", f"Coding filter matches Module 34 ({len(coding_items)} topics)", len(coding_items) == 5)
-        tr.log("Filters", f"AI & Modern filter matches Modules 36-42 ({len(aimodern_items)} topics)", len(aimodern_items) == 8)
+        tr.log("Filters", f"AI & Modern filter matches Modules 36-42 ({len(aimodern_items)} topics)", len(aimodern_items) == 10)
 
         def simulate_search(query):
             q = query.lower()
